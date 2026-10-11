@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "1.0.0",
+  "catalogueStatus": "initial recovery",
+  "importantNotice": "This catalogue records recovered claims and their authority. It is not a complete machine-executable semantic model. A canonical source label does not imply that every related implementation rule has been specified.",
+  "statusDefinitions": {
+    "canonical": "Explicitly present in supplied v3.0 or v3.0-L canonical specification.",
+    "provisional": "Explicitly marked provisional, or an audit proposal not promoted to canon.",
+    "open": "Named or implied by the sources but not sufficiently specified to implement safely.",
+    "unverified": "A claim about implementation or validation for which no execution evidence exists."
+  },
+  "rules": [
+    {"id":"MAG-001","domain":"ontology","statement":"Information, mana, energy, force, coupling, and effect are distinct concepts.","status":"canonical","source":"docs/canon/magic-system-v3.0.md#1-the-fundamental-separation","tests":["MAG-T-001"]},
+    {"id":"MAG-002","domain":"ontology","statement":"Mana is a physical field and does not understand meaning or intent.","status":"canonical","source":"docs/canon/magic-system-v3.0.md#2-mana;#3-mana-is-not-consciousness","tests":[]},
+    {"id":"MAG-003","domain":"causality","statement":"A desired effect is not itself a physical mechanism; state transitions require a defined mechanism.","status":"canonical","source":"docs/canon/magic-system-v3.0.md#12-mechanism-completeness;#13-desired-state-mechanism","tests":["MAG-T-002"]},
+    {"id":"MAG-004","domain":"conservation","statement":"Magic does not provide free energy, matter, momentum, or information; closed-system conservation and valid conversion mechanisms apply.","status":"canonical","source":"docs/canon/magic-system-v3.0.md#9-mana-energy;#10-matter;#11-conservation","tests":["MAG-T-003"]},
+    {"id":"MAG-005","domain":"feasibility","statement":"Spell feasibility considers mana, coupling, energy, information, control, time/causality, stability, and material constraints.","status":"canonical","source":"docs/canon/magic-system-v3.0.md#61-the-master-feasibility-condition","tests":[]},
+    {"id":"MAG-006","domain":"classification","statement":"NULL is a failure of conventional affinity classification, not zero mana, anti-magic, hidden infinite affinity, immunity, or omnipotence.","status":"canonical","source":"docs/canon/magic-system-v3.0.md#16-null","tests":[]},
+    {"id":"MAG-007","domain":"language-interface","statement":"Arcane is a human-designed control language; language, spell, and mana are distinct.","status":"canonical","source":"docs/canon/arcane-language-v3.0-L.md#1-what-arcane-actually-is;#2-three-different-things","tests":[]},
+    {"id":"LAN-001","domain":"syntax","statement":"Arcane's intended surface structure is HEAD + ARGUMENTS + MODIFIERS; precise grouping and scope are not fully recovered.","status":"canonical","source":"docs/canon/arcane-language-v3.0-L.md#5-basic-syntax; docs/audits/continuity-recovery-and-test-register.md#continuity-gaps-to-resolve","tests":["LAN-T-001","LAN-T-002"]},
+    {"id":"LAN-002","domain":"syntax","statement":"Every executable expression must have exactly one recoverable interpretation; unresolved ambiguity must fail rather than guess.","status":"canonical","source":"docs/canon/arcane-language-v3.0-L.md#33-language-ambiguity","tests":["LAN-T-003"]},
+    {"id":"LAN-003","domain":"typing","statement":"Formal expressions are intended to be typed; incompatible operands must not be silently accepted.","status":"canonical","source":"docs/canon/arcane-language-v3.0-L.md#6-typed-expressions; docs/audits/phase-2-formal-syntax.md#4-important-typing-safeguards","tests":["LAN-T-004"]},
+    {"id":"LAN-004","domain":"operators","statement":"FRAPA, FRATA, FRAKA, FRALA, FRASHA, DRAN, DREM, DRIM and DRAL are recovered mathematical operators.","status":"canonical","source":"docs/canon/arcane-language-v3.0-L.md#15-mathematical-vocabulary","tests":[]},
+    {"id":"LAN-005","domain":"operators","statement":"The Phase 2 operator signatures and OPERATOR⟨arguments⟩ notation are provisional audit proposals, not established surface grammar.","status":"provisional","source":"docs/audits/phase-2-formal-syntax.md#1-scope;#2-proposed-expression-representation;#3-core-signature-register","tests":["LAN-T-001","LAN-T-002","LAN-T-005"]},
+    {"id":"LAN-006","domain":"operators","statement":"FRAPA has a proposed binary signature; dimensional and quantity compatibility remain unresolved.","status":"provisional","source":"docs/audits/phase-2-formal-syntax.md#3-core-signature-register;#4-important-typing-safeguards","tests":["LAN-T-001","LAN-T-002","LAN-T-004"]},
+    {"id":"LAN-007","domain":"binding","statement":"KWAM creates a binding, KWAT references a binding, and KWAK denotes live evaluation; exact representation and timing semantics remain incomplete.","status":"canonical","source":"docs/canon/arcane-language-v3.0-L.md#17-binding; docs/audits/phase-2-formal-syntax.md#3-core-signature-register","tests":["LAN-T-006"]},
+    {"id":"LAN-008","domain":"source-recovery","statement":"v2.0 frame-vowel-coda morphology, h coupling, MEL anchoring, and KAN/KEN/KAS are not sufficiently recovered to implement.","status":"open","source":"docs/audits/continuity-recovery-and-test-register.md#continuity-gaps-to-resolve","tests":[]},
+    {"id":"LAN-009","domain":"inventory-reconciliation","statement":"KREN, TRAK, FREM, SHREN, BRAN, and VARE appear in the magic-system operator inventory but are absent from the supplied v3.0-L core inventory; reconcile by evidence, not assumption.","status":"open","source":"docs/canon/magic-system-v3.0.md#26-canonical-operators; docs/audits/continuity-recovery-and-test-register.md#continuity-gaps-to-resolve","tests":[]},
+    {"id":"QA-001","domain":"validation","statement":"A test definition is not a test execution, and no test may be labelled passed without recorded execution evidence.","status":"canonical-process-rule","source":"docs/audits/continuity-recovery-and-test-register.md#grammar-and-consistency-test-register","tests":[]},
+    {"id":"QA-002","domain":"change-control","statement":"Changes must state the existing rule/source, concrete defect, alternatives, tests/results, decision status, date, and rationale.","status":"canonical-process-rule","source":"docs/audits/continuity-recovery-and-test-register.md#change-control-rules","tests":[]}
+  ],
+  "tests": [
+    {"id":"LAN-T-001","description":"Binary arity: FRAPA has exactly two arguments in Phase 2 audit notation.","status":"defined-not-executed","source":"docs/audits/phase-2-formal-syntax.md#5-unique-parse-tests"},
+    {"id":"LAN-T-002","description":"Missing or extra FRAPA arguments are rejected in the provisional audit parser.","status":"defined-not-executed","source":"docs/audits/phase-2-formal-syntax.md#5-unique-parse-tests"},
+    {"id":"LAN-T-003","description":"Nested expressions produce a single explicit parse tree; malformed grouping is rejected.","status":"defined-not-executed","source":"docs/audits/phase-2-formal-syntax.md#5-unique-parse-tests"},
+    {"id":"LAN-T-004","description":"Dimensional type mismatch is rejected only after the relevant type and dimension rules are specified.","status":"blocked-by-open-specification","source":"docs/audits/phase-2-formal-syntax.md#4-important-typing-safeguards"},
+    {"id":"LAN-T-005","description":"Operand order is preserved for order-sensitive operators such as FRATA.","status":"defined-not-executed","source":"docs/audits/phase-2-formal-syntax.md#5-unique-parse-tests"},
+    {"id":"LAN-T-006","description":"KWAM/KWAT/KWAK binding and evaluation semantics require separate tests once representation and timing are defined.","status":"blocked-by-open-specification","source":"docs/audits/phase-2-formal-syntax.md#3-core-signature-register"},
+    {"id":"MAG-T-001","description":"Concepts such as mana, energy, coupling and effect remain distinct in the rule model.","status":"planned","source":"docs/canon/magic-system-v3.0.md#1-the-fundamental-separation"},
+    {"id":"MAG-T-002","description":"An effect specification without a physical mechanism is incomplete.","status":"planned","source":"docs/canon/magic-system-v3.0.md#12-mechanism-completeness"},
+    {"id":"MAG-T-003","description":"Energy and matter changes require a source or a valid conversion mechanism.","status":"planned","source":"docs/canon/magic-system-v3.0.md#9-mana-energy;#10-matter;#11-conservation"}
+  ]
+}
