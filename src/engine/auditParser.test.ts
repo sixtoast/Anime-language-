@@ -71,4 +71,45 @@ describe("Phase 2 provisional audit notation parser", () => {
     expect(result.ok).toBe(false);
     expect(result.diagnostics[0]?.code).toBe("EMPTY_INPUT");
   });
+
+  it("[PARSE-010] accepts unary and ternary operators at their provisional arities", () => {
+    expect(parseAuditExpression("FRASHA⟨KI⟩").ok).toBe(true);
+    expect(parseAuditExpression("DRAL⟨KI, TO, MU⟩").ok).toBe(true);
+    expect(parseAuditExpression("DRAL⟨KI, TO⟩").diagnostics.some((d) => d.code === "ARITY_MISMATCH")).toBe(true);
+  });
+
+  it("[PARSE-011] normalizes operator and symbol case consistently", () => {
+    const result = parseAuditExpression("frapa⟨ki, to⟩");
+    expect(result.ok).toBe(true);
+    expect(result.ast).toEqual({
+      kind: "call",
+      operator: "FRAPA",
+      args: [{ kind: "symbol", value: "KI" }, { kind: "symbol", value: "TO" }]
+    });
+  });
+
+  it("[PARSE-012] rejects a trailing comma instead of accepting an incomplete call", () => {
+    const result = parseAuditExpression("FRAPA⟨KI,⟩");
+    expect(result.ok).toBe(false);
+    expect(result.diagnostics.length).toBeGreaterThan(0);
+  });
+
+  it("[PARSE-013] rejects an unclosed call", () => {
+    const result = parseAuditExpression("FRAPA⟨KI, TO");
+    expect(result.ok).toBe(false);
+    expect(result.diagnostics.length).toBeGreaterThan(0);
+  });
+
+  it("[PARSE-014] rejects unsupported punctuation rather than silently discarding it", () => {
+    const result = parseAuditExpression("FRAPA⟨KI; TO⟩");
+    expect(result.ok).toBe(false);
+    expect(result.diagnostics.some((d) => d.code === "EXPECTED_ARGUMENT")).toBe(true);
+  });
+
+  it("[PARSE-015] rejects an invalid nested expression without returning a partial AST", () => {
+    const result = parseAuditExpression("FRAPA⟨KI, DRAL⟨TO, MU⟩⟩");
+    expect(result.ok).toBe(false);
+    expect(result.ast).toBeUndefined();
+    expect(result.diagnostics.some((d) => d.code === "ARITY_MISMATCH")).toBe(true);
+  });
 });
