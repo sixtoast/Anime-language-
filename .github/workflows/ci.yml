@@ -36,6 +36,9 @@ jobs:
           path: test-results/
           if-no-files-found: warn
           retention-days: 30
+      - name: Type-check and build
+        if: ${{ always() }}
+        run: npm run build
       - name: Publish latest results for the public workbench
         if: ${{ always() && github.event_name == 'push' && github.ref == 'refs/heads/main' && hashFiles('test-results/registry-results.json') != '' }}
         env:
@@ -50,6 +53,3 @@ jobs:
           git add latest.json
           git commit -m "Publish CI test results for ${GITHUB_SHA:0:7}"
           git push --force "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:ci-results
-      - name: Type-check and build
-        if: ${{ always() }}
-        run: npm run build
