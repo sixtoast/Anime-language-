@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Activity, BookOpen, Braces, CheckCircle2, ChevronDown, CircleHelp,
   Command, FileText, FlaskConical, GitBranch, Layers3, Menu,
@@ -44,6 +44,19 @@ function StatusPill({ status }: { status: Status }) {
   return <span className={"status status-" + status.toLowerCase().replaceAll(" ", "-")}>{status}</span>;
 }
 
+type WorkflowStep = { name: string; status: string; conclusion: string | null; number: number };
+type WorkflowJob = { id: number; name: string; status: string; conclusion: string | null; html_url: string; steps?: WorkflowStep[] };
+type WorkflowRun = { id: number; name: string; run_number: number; status: string; conclusion: string | null; html_url: string; created_at: string; updated_at: string; head_sha: string; head_commit?: { message?: string }; event: string };
+type WorkflowData = { workflow_runs: WorkflowRun[] };
+
+function formatRunStatus(status: string, conclusion: string | null) {
+  if (status !== "completed") return status.replaceAll("_", " ");
+  return conclusion ?? "completed";
+}
+function prettyDate(value: string) {
+  return new Date(value).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+}
+
 function App() {
   const [section, setSection] = useState<Section>("Overview");
   const [query, setQuery] = useState("");
@@ -53,6 +66,44 @@ function App() {
   const [selectedDoc, setSelectedDoc] = useState(docs[0].title);
   const [testQuery, setTestQuery] = useState("");
   const [testGroup, setTestGroup] = useState<"All" | "Parser" | "Dimensions">("All");
+  const [workflowRuns, setWorkflowRuns] = useState<WorkflowRun[]>([]);
+  const [workflowJobs, setWorkflowJobs] = useState<WorkflowJob[]>([]);
+  const [workflowLoading, setWorkflowLoading] = useState(true);
+  const [workflowError, setWorkflowError] = useState<string | null>(null);
+  const [workflowUpdatedAt, setWorkflowUpdatedAt] = useState<string | null>(null);
+
+  const refreshWorkflow = async () => {
+    setWorkflowLoading(true);
+    setWorkflowError(null);
+    try {
+      const runsResponse = await fetch("https://api.github.com/repos/sixtoast/Anime-language-/actions/runs?branch=main&per_page=10", {
+        headers: { Accept: "application/vnd.github+json" }
+      });
+      if (!runsResponse.ok) throw new Error(`GitHub returned HTTP ${runsResponse.status} while loading workflow runs.`);
+      const runData = await runsResponse.json() as WorkflowData;
+      setWorkflowRuns(runData.workflow_runs ?? []);
+      const latest = (runData.workflow_runs ?? []).find((run) => run.name === "CI") ?? (runData.workflow_runs ?? [])[0];
+      if (latest) {
+        const jobsResponse = await fetch(`https://api.github.com/repos/sixtoast/Anime-language-/actions/runs/${latest.id}/jobs?per_page=100`, {
+          headers: { Accept: "application/vnd.github+json" }
+        });
+        if (!jobsResponse.ok) throw new Error(`GitHub returned HTTP ${jobsResponse.status} while loading job details.`);
+        const jobData = await jobsResponse.json() as { jobs: WorkflowJob[] };
+        setWorkflowJobs(jobData.jobs ?? []);
+      } else {
+        setWorkflowJobs([]);
+      }
+      setWorkflowUpdatedAt(new Date().toISOString());
+    } catch (error) {
+      setWorkflowError(error instanceof Error ? error.message : "Could not load GitHub Actions results.");
+    } finally {
+      setWorkflowLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void refreshWorkflow();
+  }, []);
 
   const filteredDocs = useMemo(() => docs.filter((doc) =>
     (doc.title + " " + doc.category + " " + doc.description + " " + doc.status).toLowerCase().includes(query.toLowerCase())
@@ -139,11 +190,38 @@ function App() {
 
         {section === "Test suite" && <section className="page-content">
           <div className="eyebrow"><span className="eyebrow-line"/> QUALITY & REGRESSION</div><h1 className="page-title">Test suite<span>.</span></h1>
-          <p className="page-intro">A traceable explorer for the 19 test cases currently authored in the parser and dimensional primitive test files. The repository interface does not execute Vitest in the browser; all cases remain marked unverified until CI or a reproducible test run supplies evidence.</p>
+          <p className="page-intro">A traceable explorer for the authored parser and dimensional test cases, paired with live GitHub Actions run and job-step results for the repository. CI status is fetched from GitHub; this page does not execute tests in the browser.</p>
           <div className="test-summary">
             <div><span>AUTHORED CASES</span><strong>{workbenchTests.length}</strong><small>9 parser · 10 dimensional</small></div>
-            <div><span>EXECUTION VERIFIED</span><strong>0</strong><small>No run evidence attached yet</small></div>
+            <div><span>LATEST CI RESULT</span><strong className={workflowRuns[0]?.conclusion === "success" ? "ci-success-text" : workflowRuns[0]?.conclusion === "failure" ? "ci-failure-text" : "amber-text"}>{workflowLoading ? "Loading…" : workflowRuns[0] ? formatRunStatus(workflowRuns[0].status, workflowRuns[0].conclusion) : "Unavailable"}</strong><small>{workflowRuns[0] ? `Run #${workflowRuns[0].run_number}` : "No run loaded"}</small></div>
             <div><span>SPECIFICATION STATUS</span><strong className="amber-text">Prototype</strong><small>Provisional parser and dimensions</small></div>
+          </div>
+          <div className="ci-panel">
+            <div className="ci-panel-header">
+              <div><div className="ci-kicker"><Activity size={14}/> LIVE REPOSITORY CI</div><h2>GitHub Actions</h2><p>Read-only status from the public repository’s CI workflow.</p></div>
+              <button className="secondary-button" onClick={() => void refreshWorkflow()} disabled={workflowLoading}>{workflowLoading ? "Refreshing…" : "Refresh status ↻"}</button>
+            </div>
+            {workflowError && <div className="ci-error"><AlertTriangle size={16}/><span>{workflowError} Check the workflow directly on GitHub if the API is rate-limited.</span></div>}
+            {!workflowError && workflowLoading && workflowRuns.length === 0 && <div className="ci-empty">Loading recent workflow runs from GitHub…</div>}
+            {!workflowLoading && !workflowError && workflowRuns.length === 0 && <div className="ci-empty">No workflow runs were returned for the main branch.</div>}
+            {workflowRuns.slice(0, 5).map((run) => {
+              const jobs = workflowJobs.filter((job) => job.id && run.id === workflowRuns.find((item) => item.id === run.id)?.id);
+              const isLatest = run.id === workflowRuns[0]?.id;
+              return <article className="ci-run" key={run.id}>
+                <div className="ci-run-top">
+                  <div><a href={run.html_url} target="_blank" rel="noreferrer" className="ci-run-link">{run.name || "Workflow"} · Run #{run.run_number} ↗</a><p>{(run.head_commit?.message ?? "Commit message unavailable").split("\n")[0]}</p></div>
+                  <span className={"ci-badge ci-" + (run.status !== "completed" ? "pending" : run.conclusion === "success" ? "success" : run.conclusion === "failure" ? "failure" : "neutral")}>{formatRunStatus(run.status, run.conclusion)}</span>
+                </div>
+                <div className="ci-run-meta"><span>Commit <a href={`https://github.com/sixtoast/Anime-language-/commit/${run.head_sha}`} target="_blank" rel="noreferrer"><code>{run.head_sha.slice(0, 7)}</code></a></span><span>Started {prettyDate(run.created_at)}</span><span>Event {run.event}</span></div>
+                {isLatest && workflowJobs.length > 0 && <div className="ci-jobs">
+                  {workflowJobs.map((job) => <div className="ci-job" key={job.id}>
+                    <div className="ci-job-heading"><strong>{job.name}</strong><span className={"ci-step-state ci-" + (job.status !== "completed" ? "pending" : job.conclusion === "success" ? "success" : job.conclusion === "failure" ? "failure" : "neutral")}>{formatRunStatus(job.status, job.conclusion)}</span></div>
+                    {job.steps?.filter((step) => /test|build|type-check|install dependencies/i.test(step.name)).map((step) => <div className="ci-step" key={step.number}><span>{step.name}</span><span className={"ci-step-state ci-" + (step.status !== "completed" ? "pending" : step.conclusion === "success" ? "success" : step.conclusion === "failure" ? "failure" : "neutral")}>{formatRunStatus(step.status, step.conclusion)}</span></div>)}
+                  </div>)}
+                </div>}
+              </article>;
+            })}
+            {workflowUpdatedAt && <div className="ci-updated">Fetched {prettyDate(workflowUpdatedAt)} · API results may be delayed by GitHub.</div>}
           </div>
           <div className="test-explorer">
             <div className="test-explorer-toolbar">
@@ -152,17 +230,17 @@ function App() {
                 {(["All", "Parser", "Dimensions"] as const).map((group) => <button key={group} className={testGroup === group ? "test-filter active" : "test-filter"} onClick={() => setTestGroup(group)}>{group}</button>)}
               </div>
             </div>
-            <div className="test-explorer-meta"><span>{workbenchTests.filter((test) => (testGroup === "All" || test.group === testGroup) && (test.id + " " + test.title + " " + test.description + " " + test.sourceRule).toLowerCase().includes(testQuery.toLowerCase())).length} cases shown</span><span><span className="status-dot status-dot-pending"/> Authored · execution unverified</span></div>
+            <div className="test-explorer-meta"><span>{workbenchTests.filter((test) => (testGroup === "All" || test.group === testGroup) && (test.id + " " + test.title + " " + test.description + " " + test.sourceRule).toLowerCase().includes(testQuery.toLowerCase())).length} cases shown</span><span><span className="status-dot status-dot-pending"/> Authored cases · individual mapping not yet exported by CI</span></div>
             <div className="test-case-list">
               {workbenchTests.filter((test) => (testGroup === "All" || test.group === testGroup) && (test.id + " " + test.title + " " + test.description + " " + test.sourceRule).toLowerCase().includes(testQuery.toLowerCase())).map((test) => <article className="test-case" key={test.id}>
                 <div className="test-case-main"><div className="test-case-title"><code>{test.id}</code><strong>{test.title}</strong></div><p>{test.description}</p><div className="test-case-meta"><span>Rules: {test.sourceRule}</span><a href={"https://github.com/sixtoast/Anime-language-/blob/main/" + test.file} target="_blank" rel="noreferrer">Open test source ↗</a></div></div>
-                <div className="test-case-status"><span className="test-status-chip">UNVERIFIED</span><small>{test.group}</small></div>
+                <div className="test-case-status"><span className="test-status-chip">SOURCE CASE</span><small>{test.group}</small></div>
               </article>)}
               {workbenchTests.filter((test) => (testGroup === "All" || test.group === testGroup) && (test.id + " " + test.title + " " + test.description + " " + test.sourceRule).toLowerCase().includes(testQuery.toLowerCase())).length === 0 && <div className="empty-state">No test cases match those filters.</div>}
             </div>
           </div>
           <div className="notice"><div className="notice-icon"><ShieldCheck size={18}/></div><div><strong>What this status means</strong><p>“Authored · execution unverified” means a corresponding assertion exists in the source test file, but this UI has no attached execution record. It is not a pass or a failure. Dimensional tests validate the current implementation convention only; they do not finalise Arcane unit semantics or operator typing.</p></div></div>
-          <div className="next-step"><Sparkles size={17}/><p><strong>Next engineering step</strong><br/>Attach GitHub Actions run metadata to this registry so the interface can report a specific commit, run time, total passed/failed tests and per-test results without inventing execution status.</p></div>
+          <div className="next-step"><Sparkles size={17}/><p><strong>Result granularity</strong><br/>The live panel reports the actual CI run, commit, timestamps, job outcomes and test/build step outcomes. Individual case rows remain source references until CI publishes a structured per-test report; a passing suite is not presented as proof for every registry description.</p></div>
         </section>}
 
         {section === "Research & review" && <section className="page-content">
