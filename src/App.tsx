@@ -5,6 +5,7 @@ import {
   Search, ShieldCheck, Sparkles, TestTube2, X, Play, AlertTriangle
 } from "lucide-react";
 import { parseAuditExpression, type AuditParseResult } from "./engine/auditParser";
+import { workbenchTests } from "./engine/testRegistry";
 
 type Section = "Overview" | "Documentation" | "Playground" | "Test suite" | "Research & review";
 type Status = "Canonical" | "Provisional" | "Open question" | "Deprecated";
@@ -50,6 +51,8 @@ function App() {
   const [analysis, setAnalysis] = useState<AuditParseResult | null>(null);
   const [mobileNav, setMobileNav] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState(docs[0].title);
+  const [testQuery, setTestQuery] = useState("");
+  const [testGroup, setTestGroup] = useState<"All" | "Parser" | "Dimensions">("All");
 
   const filteredDocs = useMemo(() => docs.filter((doc) =>
     (doc.title + " " + doc.category + " " + doc.description + " " + doc.status).toLowerCase().includes(query.toLowerCase())
@@ -135,10 +138,31 @@ function App() {
         </section>}
 
         {section === "Test suite" && <section className="page-content">
-          <div className="eyebrow"><span className="eyebrow-line"/> QUALITY & REGRESSION</div><h1 className="page-title">Test suite<span>.</span></h1><p className="page-intro">The recovery register defines 16 design-level cases. Nine focused parser tests have now been authored for the provisional Phase 2 notation; execution and build status remain unverified until CI reports results.</p>
-          <div className="test-summary"><div><span>REGISTER CASES</span><strong>16</strong><small>Design-level test proposals</small></div><div><span>PARSER TESTS</span><strong>9</strong><small>Authored · run status unverified</small></div><div><span>ENGINE</span><strong className="amber-text">Prototype</strong><small>Phase 2 syntax only</small></div></div>
-          <div className="test-table"><div className="test-table-head"><span>TEST GROUP</span><span>EXPECTED COVERAGE</span><span>STATUS</span></div>{[{name:"Lexical analysis",desc:"Token boundaries, symbols, invalid characters",icon:Braces},{name:"Syntax & arity",desc:"Structure, required arguments, incomplete input",icon:Layers3},{name:"Semantic consistency",desc:"Meaning, constraints and rule conflicts",icon:ShieldCheck},{name:"Ambiguity handling",desc:"Unique interpretation or safe rejection",icon:CircleHelp},{name:"Regression",desc:"Previously approved examples remain stable",icon:History}].map(({name,desc,icon:Icon}) => <div className="test-row" key={name}><div className="test-name"><Icon size={17}/><strong>{name}</strong></div><span>{desc}</span><span className="pending-label">Planned</span></div>)}</div>
-          <div className="notice"><div className="notice-icon"><CheckCircle2 size={18}/></div><div><strong>Expected behaviour must be explicit</strong><p>The first parser fixtures cover nested grouping, arity, operand order, malformed separators, unknown arity, trailing input and empty input. Dimensional and physical-feasibility checks remain blocked by missing formal rules.</p></div></div>
+          <div className="eyebrow"><span className="eyebrow-line"/> QUALITY & REGRESSION</div><h1 className="page-title">Test suite<span>.</span></h1>
+          <p className="page-intro">A traceable explorer for the 19 test cases currently authored in the parser and dimensional primitive test files. The repository interface does not execute Vitest in the browser; all cases remain marked unverified until CI or a reproducible test run supplies evidence.</p>
+          <div className="test-summary">
+            <div><span>AUTHORED CASES</span><strong>{workbenchTests.length}</strong><small>9 parser · 10 dimensional</small></div>
+            <div><span>EXECUTION VERIFIED</span><strong>0</strong><small>No run evidence attached yet</small></div>
+            <div><span>SPECIFICATION STATUS</span><strong className="amber-text">Prototype</strong><small>Provisional parser and dimensions</small></div>
+          </div>
+          <div className="test-explorer">
+            <div className="test-explorer-toolbar">
+              <div className="test-search"><Search size={16}/><input value={testQuery} onChange={(e) => setTestQuery(e.target.value)} placeholder="Filter by ID, title, rule or description…" aria-label="Filter test cases"/></div>
+              <div className="test-filters" aria-label="Filter test group">
+                {(["All", "Parser", "Dimensions"] as const).map((group) => <button key={group} className={testGroup === group ? "test-filter active" : "test-filter"} onClick={() => setTestGroup(group)}>{group}</button>)}
+              </div>
+            </div>
+            <div className="test-explorer-meta"><span>{workbenchTests.filter((test) => (testGroup === "All" || test.group === testGroup) && (test.id + " " + test.title + " " + test.description + " " + test.sourceRule).toLowerCase().includes(testQuery.toLowerCase())).length} cases shown</span><span><span className="status-dot status-dot-pending"/> Authored · execution unverified</span></div>
+            <div className="test-case-list">
+              {workbenchTests.filter((test) => (testGroup === "All" || test.group === testGroup) && (test.id + " " + test.title + " " + test.description + " " + test.sourceRule).toLowerCase().includes(testQuery.toLowerCase())).map((test) => <article className="test-case" key={test.id}>
+                <div className="test-case-main"><div className="test-case-title"><code>{test.id}</code><strong>{test.title}</strong></div><p>{test.description}</p><div className="test-case-meta"><span>Rules: {test.sourceRule}</span><a href={"https://github.com/sixtoast/Anime-language-/blob/main/" + test.file} target="_blank" rel="noreferrer">Open test source ↗</a></div></div>
+                <div className="test-case-status"><span className="test-status-chip">UNVERIFIED</span><small>{test.group}</small></div>
+              </article>)}
+              {workbenchTests.filter((test) => (testGroup === "All" || test.group === testGroup) && (test.id + " " + test.title + " " + test.description + " " + test.sourceRule).toLowerCase().includes(testQuery.toLowerCase())).length === 0 && <div className="empty-state">No test cases match those filters.</div>}
+            </div>
+          </div>
+          <div className="notice"><div className="notice-icon"><ShieldCheck size={18}/></div><div><strong>What this status means</strong><p>“Authored · execution unverified” means a corresponding assertion exists in the source test file, but this UI has no attached execution record. It is not a pass or a failure. Dimensional tests validate the current implementation convention only; they do not finalise Arcane unit semantics or operator typing.</p></div></div>
+          <div className="next-step"><Sparkles size={17}/><p><strong>Next engineering step</strong><br/>Attach GitHub Actions run metadata to this registry so the interface can report a specific commit, run time, total passed/failed tests and per-test results without inventing execution status.</p></div>
         </section>}
 
         {section === "Research & review" && <section className="page-content">
