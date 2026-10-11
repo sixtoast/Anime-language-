@@ -25,10 +25,11 @@
 - [ ] Resolve grouping, nesting, modifier scope, and explicit relation encoding using source-backed decisions.
 - [ ] Implement token and syntax-tree data types.
 - [ ] Implement a lexer with tests.
-- [ ] Implement a parser for the explicitly provisional Phase 2 audit notation.
+- [x] Implement a small parser for the explicitly provisional Phase 2 audit notation.
 - [ ] Implement safe rejection for missing/extra arguments and ambiguous input.
 - [ ] Implement semantic validation only where rules are sufficiently specified.
-- [ ] Connect the playground to real analysis output and show the notation mode being parsed.
+- [x] Connect the playground to parse trees and diagnostics, with the audit-notation mode clearly labelled.
+- [x] Add nine focused parser test cases; their execution still needs CI/local evidence.
 
 ## Phase 3 — quality and research
 
