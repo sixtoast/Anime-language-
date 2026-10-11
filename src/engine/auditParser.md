@@ -27,3 +27,7 @@ FRAPA⟨KI, FRAPA⟨TO, MU⟩⟩
 ```
 
 The AST nests the inner FRAPA as the second argument of the outer FRAPA. This parser does not infer what units KI, TO, or MU represent.
+
+## Related module: dimension algebra
+
+A separate implementation support layer is available at `src/engine/dimensions.ts`. It is intentionally not connected to this parser because the canonical dimensional and operator semantics are incomplete. See `src/engine/dimensions.md` for its explicit limits and test coverage.
