@@ -40,7 +40,7 @@ jobs:
         if: ${{ always() }}
         run: npm run build
       - name: Publish latest results for the public workbench
-        if: ${{ always() && github.event_name == 'push' && github.ref == 'refs/heads/main' && hashFiles('test-results/registry-results.json') != '' }}
+        if: ${{ success() && github.event_name == 'push' && github.ref == 'refs/heads/main' && hashFiles('test-results/registry-results.json') != '' }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
