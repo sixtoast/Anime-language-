@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import {
   Activity, BookOpen, Braces, CheckCircle2, ChevronDown, CircleHelp,
-  Command, FileText, FlaskConical, GitBranch, History, Layers3, Menu,
+  Command, FileText, FlaskConical, GitBranch, Layers3, Menu,
   Search, ShieldCheck, Sparkles, TestTube2, X, Play, AlertTriangle
 } from "lucide-react";
 import { parseAuditExpression, type AuditParseResult } from "./engine/auditParser";
