@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   verify:
@@ -36,5 +36,20 @@ jobs:
           path: test-results/
           if-no-files-found: warn
           retention-days: 30
+      - name: Publish latest results for the public workbench
+        if: ${{ always() && github.event_name == 'push' && github.ref == 'refs/heads/main' && hashFiles('test-results/registry-results.json') != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp test-results/registry-results.json /tmp/registry-results.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout --orphan ci-results
+          git rm -rf . >/dev/null 2>&1 || true
+          cp /tmp/registry-results.json latest.json
+          git add latest.json
+          git commit -m "Publish CI test results for ${GITHUB_SHA:0:7}"
+          git push --force "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:ci-results
       - name: Type-check and build
+        if: ${{ always() }}
         run: npm run build
