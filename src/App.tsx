@@ -2,8 +2,9 @@ import { useMemo, useState } from "react";
 import {
   Activity, BookOpen, Braces, CheckCircle2, ChevronDown, CircleHelp,
   Command, FileText, FlaskConical, GitBranch, History, Layers3, Menu,
-  Search, ShieldCheck, Sparkles, TestTube2, X
+  Search, ShieldCheck, Sparkles, TestTube2, X, Play, AlertTriangle
 } from "lucide-react";
+import { parseAuditExpression, type AuditParseResult } from "./engine/auditParser";
 
 type Section = "Overview" | "Documentation" | "Playground" | "Test suite" | "Research & review";
 type Status = "Canonical" | "Provisional" | "Open question" | "Deprecated";
@@ -28,6 +29,8 @@ const docs = [
   { title: "Arcane language v3.0-L", category: "Canonical language specification", status: "Canonical" as Status, sourcePath: "docs/canon/arcane-language-v3.0-L.md", description: "Language architecture, phonology, operators, references, spatial terms, numbers, units, registers and known continuity gaps." },
   { title: "Phase 2 — formal syntax audit", category: "Audit", status: "Provisional" as Status, sourcePath: "docs/audits/phase-2-formal-syntax.md", description: "Proposed audit notation, provisional operator signatures, typing safeguards and eight unique-parse test proposals." },
   { title: "Continuity recovery & test register", category: "Governance", status: "Provisional" as Status, sourcePath: "docs/audits/continuity-recovery-and-test-register.md", description: "Decision ledger, unresolved gaps, change-control rules and sixteen defined tests that have not yet been executed." },
+  { title: "Source-traceable rule catalogue", category: "Rule catalogue", status: "Provisional" as Status, sourcePath: "docs/rules/rule-catalogue.json", description: "Recovered rule IDs, source anchors, status definitions and linked test proposals in machine-readable form." },
+  { title: "Phase 2 parser contract", category: "Implementation", status: "Provisional" as Status, sourcePath: "src/engine/auditParser.md", description: "Exact limits and supported behaviour of the first provisional audit-notation parser." },
   { title: "Grammar & syntax", category: "Language reference", status: "Open question" as Status, description: "A formal surface grammar must be derived from the source; audit notation is not assumed to be spoken Arcane." },
   { title: "Operator reference", category: "Language reference", status: "Provisional" as Status, description: "The operator vocabulary is recovered, but full signatures, dimensions and evaluation semantics remain incomplete." },
   { title: "Phase 4 — ambiguity audit", category: "Audit", status: "Provisional" as Status, description: "Syntax and ambiguity testing. Provisional audit material; not a replacement for canonical specifications." },
@@ -43,6 +46,7 @@ function App() {
   const [section, setSection] = useState<Section>("Overview");
   const [query, setQuery] = useState("");
   const [editor, setEditor] = useState("");
+  const [analysis, setAnalysis] = useState<AuditParseResult | null>(null);
   const [mobileNav, setMobileNav] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState(docs[0].title);
 
@@ -121,11 +125,12 @@ function App() {
         </section>}
 
         {section === "Playground" && <section className="page-content">
-          <div className="eyebrow"><span className="eyebrow-line"/> EXPRESSION WORKSPACE</div><h1 className="page-title">Playground<span>.</span></h1><p className="page-intro">Draft an expression and prepare it for analysis. This initial interface does not yet parse, validate or execute Anime language syntax.</p>
-          <div className="engine-banner"><Activity size={18}/><div><strong>Language engine not connected</strong><p>Input is not being evaluated. No syntax is assumed to be valid.</p></div><span className="engine-status">NOT RUNNABLE</span></div>
-          <div className="editor-card"><div className="editor-toolbar"><div><span className="editor-dot"/><span className="editor-file">untitled.anime</span><span className="editor-language">ANIME LANGUAGE</span></div><button className="secondary-button" onClick={() => setEditor("")}>Clear editor</button></div><div className="editor-body"><div className="line-number">1<br/>2<br/>3<br/>4<br/>5<br/>6<br/>7<br/>8</div><textarea spellCheck={false} value={editor} onChange={(e) => setEditor(e.target.value)} placeholder={"Write a language expression here…\n\nNo example syntax is pre-filled until the canonical grammar is imported."} aria-label="Anime language expression editor"/></div><div className="editor-footer"><span>{editor.length} characters</span><span>Plain text · no evaluation</span></div></div>
-          <div className="result-panel"><div className="result-heading"><Command size={17}/><strong>Analysis output</strong><span>WAITING</span></div><div className="result-empty"><Braces size={27}/><strong>No analysis has been run</strong><p>Once the verified grammar and parser are implemented, this panel will show tokens, parse structure and diagnostics.</p></div></div>
-          <div className="next-step"><Sparkles size={17}/><p><strong>Next implementation step</strong><br/>Import the authoritative grammar and build tests before connecting this editor to a parser.</p></div>
+          <div className="eyebrow"><span className="eyebrow-line"/> EXPRESSION WORKSPACE</div><h1 className="page-title">Playground<span>.</span></h1><p className="page-intro">Parse the provisional Phase 2 audit notation. This does not parse spoken Arcane, validate physical feasibility, or execute a spell.</p>
+          <div className="engine-banner"><Activity size={18}/><div><strong>Phase 2 audit parser connected</strong><p>Only explicit audit notation is supported. Operator arities are provisional and dimensional typing is not implemented.</p></div><span className="engine-status">SYNTAX ONLY</span></div>
+          <div className="editor-card"><div className="editor-toolbar"><div><span className="editor-dot"/><span className="editor-file">untitled.phase2</span><span className="editor-language">PROVISIONAL AUDIT NOTATION</span></div><button className="secondary-button" onClick={() => { setEditor(""); setAnalysis(null); }}>Clear editor</button></div><div className="editor-body"><div className="line-number">1<br/>2<br/>3<br/>4<br/>5<br/>6<br/>7<br/>8</div><textarea spellCheck={false} value={editor} onChange={(e) => { setEditor(e.target.value); setAnalysis(null); }} placeholder={"Try: FRAPA⟨KI, TO⟩\nNested: FRAPA⟨KI, FRAPA⟨TO, MU⟩⟩"} aria-label="Phase 2 audit expression editor"/></div><div className="editor-footer"><span>{editor.length} characters</span><span>Audit syntax only · no semantic execution</span></div></div>
+          <div className="playground-actions"><button className="secondary-button run-button" onClick={() => setAnalysis(parseAuditExpression(editor))}><Play size={14}/> Parse audit notation</button><span>Supported arities: FRAPA, FRATA, FRAKA, FRALA, FRASHA, DRAN, DREM, DRIM, DRAL</span></div>
+          <div className="result-panel"><div className="result-heading"><Command size={17}/><strong>Analysis output</strong><span>{analysis ? (analysis.ok ? "PARSE OK" : "DIAGNOSTICS") : "WAITING"}</span></div>{!analysis ? <div className="result-empty"><Braces size={27}/><strong>No analysis has been run</strong><p>Enter a Phase 2 audit expression and select Parse audit notation to inspect its syntax tree or diagnostics.</p></div> : <div className="analysis-output">{analysis.ok && analysis.ast ? <><div className="analysis-status success"><CheckCircle2 size={16}/> Unique structural parse produced</div><pre>{JSON.stringify(analysis.ast, null, 2)}</pre></> : <><div className="analysis-status failure"><AlertTriangle size={16}/> Expression rejected by the provisional parser</div><ul>{analysis.diagnostics.map((d, i) => <li key={d.code + d.offset + i}><code>{d.code}</code> — {d.message} <span>(offset {d.offset})</span></li>)}</ul></>}<p className="analysis-caveat">A successful parse proves only that this expression fits the implemented audit notation and registered arity. It does not prove semantic correctness, dimensional compatibility, mana feasibility, or that the form is canonical Arcane.</p></div>}</div>
+          <div className="next-step"><Sparkles size={17}/><p><strong>Scope guard</strong><br/>This parser implements a small provisional audit grammar only. The canonical surface grammar, dimensional type system and physical spell evaluator remain separate future tasks.</p></div>
         </section>}
 
         {section === "Test suite" && <section className="page-content">
