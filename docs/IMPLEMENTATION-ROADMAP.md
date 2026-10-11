@@ -4,8 +4,8 @@
 
 - [x] Establish project direction and specification-first principles.
 - [x] Create the initial React + TypeScript + Vite application shell.
-- [ ] Install dependencies and run a production build in a local environment or CI.
-- [ ] Add CI for type-checking, tests, and builds.
+- [ ] Verify a successful dependency install, test run, and production build from CI logs or a reproducible local run.
+- [x] Add CI workflow for type-checking, tests, and builds (execution status must be verified separately).
 
 ## Phase 1 — source-of-truth documentation
 
@@ -14,9 +14,9 @@
 - [x] Record the Phase 2 audit separately as provisional material.
 - [x] Add the continuity recovery, decision ledger, open gaps, and 16-test register.
 - [x] Connect the documentation catalogue to the recovered source documents.
-- [ ] Attach precise source-section references to each individual rule and build a structured rule catalogue.
+- [x] Create a structured, machine-readable rule catalogue; [ ] continue attaching precise source-section references to each individual rule.
 - [ ] Recover the exact Phase 4 source text and any available v2.0 morphology source; do not reconstruct missing rules from memory.
-- [ ] Record status, aliases, history, and approval metadata in machine-readable form.
+- [x] Record recovered rule IDs and statuses in machine-readable form; [ ] complete alias, history, and approval metadata.
 
 ## Phase 2 — language engine
 
