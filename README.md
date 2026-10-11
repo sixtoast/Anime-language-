@@ -27,7 +27,7 @@ The initial proposal is React, TypeScript, and Vite, with Vitest for automated t
 
 The initial React + TypeScript + Vite interface is in place. The supplied Magic System v3.0, Arcane v3.0-L, Phase 2 audit, and continuity/test register have been committed under `docs/`. The documentation catalogue links to those source documents.
 
-The first language-engine slice is now implemented: a provisional parser for Phase 2 audit notation, nine parser test cases, a machine-readable source-traceable rule catalogue, a connected playground with parse trees/diagnostics, and a GitHub Actions CI workflow. This is **not** a parser for canonical spoken/written Arcane, and it does not perform dimensional type checking, semantic validation, physical feasibility analysis, or spell execution. The 16 recovery-register tests remain design-level proposals. The new parser tests and production build have not yet been verified by a completed CI run.
+The first language-engine slice now includes a provisional parser for Phase 2 audit notation, nine parser test cases, isolated dimension-algebra primitives with ten test cases, a machine-readable source-traceable rule catalogue, a connected playground with parse trees/diagnostics, and a GitHub Actions CI workflow. This is **not** a parser for canonical spoken/written Arcane, and it does not perform dimensional type checking, semantic validation, physical feasibility analysis, or spell execution. The 16 recovery-register tests remain design-level proposals. The new parser tests and production build have not yet been verified by a completed CI run.
 
 ## Source of truth and audit boundaries
 
