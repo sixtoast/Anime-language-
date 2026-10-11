@@ -25,8 +25,15 @@ The initial proposal is React, TypeScript, and Vite, with Vitest for automated t
 
 ## Status
 
-Project bootstrap. The application and language engine have not yet been implemented. No claim is made that the playground can execute or validate Anime language expressions at this stage.
+The initial React + TypeScript + Vite interface is in place. The supplied Magic System v3.0, Arcane v3.0-L, Phase 2 audit, and continuity/test register have been committed under `docs/`. The documentation catalogue links to those source documents.
 
-## Specification source of truth
+The language engine is **not yet implemented**. The 16 tests in the recovery register are defined test proposals, not executable fixtures; zero are recorded as executed. The playground does not yet parse, validate, or execute Arcane expressions. A successful local build and CI run have not yet been verified.
 
-Canonical specification text and audit artefacts must be imported from verified project sources. Do not treat illustrative placeholder examples as valid language syntax.
+## Source of truth and audit boundaries
+
+- `docs/canon/magic-system-v3.0.md` — supplied canonical magic-system specification.
+- `docs/canon/arcane-language-v3.0-L.md` — supplied canonical language specification.
+- `docs/audits/phase-2-formal-syntax.md` — provisional audit notation and proposed signatures/tests.
+- `docs/audits/continuity-recovery-and-test-register.md` — continuity gaps, decision ledger, change-control principles, and test register.
+
+Do not treat Phase 2 angle brackets/commas as established spoken Arcane. Do not infer missing v2.0 morphology, h coupling, MEL anchoring, or KAN/KEN/KAS rules. Canon status, implementation status, and test evidence must remain separate.
