@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
-  addDimensions,\n  subtractDimensions,
+  addDimensions,
+  subtractDimensions,
   addQuantities,
   divideQuantities,
   DIMENSIONLESS,
