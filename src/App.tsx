@@ -205,7 +205,6 @@ function App() {
             {!workflowError && workflowLoading && workflowRuns.length === 0 && <div className="ci-empty">Loading recent workflow runs from GitHub…</div>}
             {!workflowLoading && !workflowError && workflowRuns.length === 0 && <div className="ci-empty">No workflow runs were returned for the main branch.</div>}
             {workflowRuns.slice(0, 5).map((run) => {
-              const jobs = workflowJobs.filter((job) => job.id && run.id === workflowRuns.find((item) => item.id === run.id)?.id);
               const isLatest = run.id === workflowRuns[0]?.id;
               return <article className="ci-run" key={run.id}>
                 <div className="ci-run-top">
