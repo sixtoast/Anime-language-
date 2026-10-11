@@ -48,6 +48,15 @@ type WorkflowStep = { name: string; status: string; conclusion: string | null; n
 type WorkflowJob = { id: number; name: string; status: string; conclusion: string | null; html_url: string; steps?: WorkflowStep[] };
 type WorkflowRun = { id: number; name: string; run_number: number; status: string; conclusion: string | null; html_url: string; created_at: string; updated_at: string; head_sha: string; head_commit?: { message?: string }; event: string };
 type WorkflowData = { workflow_runs: WorkflowRun[] };
+type RegistryTestResult = { id: string; title: string; status: string; durationMs: number | null; file: string };
+type RegistryResults = {
+  generatedAt: string;
+  commit: string | null;
+  runId: string | null;
+  runAttempt: string | null;
+  counts: { total: number; passed: number; failed: number; skipped: number; unmapped: number };
+  tests: RegistryTestResult[];
+};
 
 function formatRunStatus(status: string, conclusion: string | null) {
   if (status !== "completed") return status.replaceAll("_", " ");
@@ -71,6 +80,8 @@ function App() {
   const [workflowLoading, setWorkflowLoading] = useState(true);
   const [workflowError, setWorkflowError] = useState<string | null>(null);
   const [workflowUpdatedAt, setWorkflowUpdatedAt] = useState<string | null>(null);
+  const [registryResults, setRegistryResults] = useState<RegistryResults | null>(null);
+  const [registryResultsError, setRegistryResultsError] = useState<string | null>(null);
 
   const refreshWorkflow = async () => {
     setWorkflowLoading(true);
@@ -82,6 +93,18 @@ function App() {
       if (!runsResponse.ok) throw new Error(`GitHub returned HTTP ${runsResponse.status} while loading workflow runs.`);
       const runData = await runsResponse.json() as WorkflowData;
       setWorkflowRuns(runData.workflow_runs ?? []);
+      try {
+        const resultsResponse = await fetch("https://raw.githubusercontent.com/sixtoast/Anime-language-/ci-results/latest.json?cache=" + Date.now());
+        if (resultsResponse.ok) {
+          const resultsData = await resultsResponse.json() as RegistryResults;
+          setRegistryResults(resultsData);
+          setRegistryResultsError(null);
+        } else {
+          setRegistryResultsError(resultsResponse.status === 404 ? "No published per-test report yet. It will appear after the next successful report-generation step on a main-branch push." : `GitHub returned HTTP ${resultsResponse.status} while loading individual test results.`);
+        }
+      } catch {
+        setRegistryResultsError("Could not load the published per-test report. Overall CI status is still available.");
+      }
       const latest = (runData.workflow_runs ?? []).find((run) => run.name === "CI") ?? (runData.workflow_runs ?? [])[0];
       if (latest) {
         const jobsResponse = await fetch(`https://api.github.com/repos/sixtoast/Anime-language-/actions/runs/${latest.id}/jobs?per_page=100`, {
@@ -229,17 +252,19 @@ function App() {
                 {(["All", "Parser", "Dimensions"] as const).map((group) => <button key={group} className={testGroup === group ? "test-filter active" : "test-filter"} onClick={() => setTestGroup(group)}>{group}</button>)}
               </div>
             </div>
-            <div className="test-explorer-meta"><span>{workbenchTests.filter((test) => (testGroup === "All" || test.group === testGroup) && (test.id + " " + test.title + " " + test.description + " " + test.sourceRule).toLowerCase().includes(testQuery.toLowerCase())).length} cases shown</span><span><span className="status-dot status-dot-pending"/> Authored cases · individual mapping not yet exported by CI</span></div>
+            <div className="test-explorer-meta"><span>{workbenchTests.filter((test) => (testGroup === "All" || test.group === testGroup) && (test.id + " " + test.title + " " + test.description + " " + test.sourceRule).toLowerCase().includes(testQuery.toLowerCase())).length} cases shown</span><span><span className="status-dot status-dot-pending"/> {registryResults ? `Report for ${registryResults.commit?.slice(0, 7) ?? "unknown commit"} · ${registryResults.counts.passed} passed · ${registryResults.counts.failed} failed · ${registryResults.counts.skipped} skipped` : "Waiting for published per-test results"}</span></div>
+            {registryResultsError && <div className="ci-empty">{registryResultsError}</div>}
+            {registryResults && <div className="registry-results-meta">Test report commit <code>{registryResults.commit?.slice(0, 7) ?? "unknown"}</code> · generated {prettyDate(registryResults.generatedAt)} · <a href={`https://github.com/sixtoast/Anime-language-/actions/runs/${registryResults.runId}`} target="_blank" rel="noreferrer">Open matching CI run ↗</a></div>}
             <div className="test-case-list">
               {workbenchTests.filter((test) => (testGroup === "All" || test.group === testGroup) && (test.id + " " + test.title + " " + test.description + " " + test.sourceRule).toLowerCase().includes(testQuery.toLowerCase())).map((test) => <article className="test-case" key={test.id}>
                 <div className="test-case-main"><div className="test-case-title"><code>{test.id}</code><strong>{test.title}</strong></div><p>{test.description}</p><div className="test-case-meta"><span>Rules: {test.sourceRule}</span><a href={"https://github.com/sixtoast/Anime-language-/blob/main/" + test.file} target="_blank" rel="noreferrer">Open test source ↗</a></div></div>
-                <div className="test-case-status"><span className="test-status-chip">SOURCE CASE</span><small>{test.group}</small></div>
+                <div className="test-case-status"><span className={"test-status-chip " + ((registryResults?.tests.find((result) => result.id === test.id)?.status === "passed") ? "test-status-passed" : (registryResults?.tests.find((result) => result.id === test.id)?.status === "failed") ? "test-status-failed" : (registryResults?.tests.find((result) => result.id === test.id)?.status === "pending" || registryResults?.tests.find((result) => result.id === test.id)?.status === "todo") ? "test-status-skipped" : "")}>{registryResults?.tests.find((result) => result.id === test.id) ? registryResults.tests.find((result) => result.id === test.id)?.status : "NOT VERIFIED"}</span><small>{test.group}</small>{registryResults?.tests.find((result) => result.id === test.id)?.durationMs != null && <small>{registryResults.tests.find((result) => result.id === test.id)?.durationMs} ms</small>}</div>
               </article>)}
               {workbenchTests.filter((test) => (testGroup === "All" || test.group === testGroup) && (test.id + " " + test.title + " " + test.description + " " + test.sourceRule).toLowerCase().includes(testQuery.toLowerCase())).length === 0 && <div className="empty-state">No test cases match those filters.</div>}
             </div>
           </div>
-          <div className="notice"><div className="notice-icon"><ShieldCheck size={18}/></div><div><strong>What this status means</strong><p>“Authored · execution unverified” means a corresponding assertion exists in the source test file, but this UI has no attached execution record. It is not a pass or a failure. Dimensional tests validate the current implementation convention only; they do not finalise Arcane unit semantics or operator typing.</p></div></div>
-          <div className="next-step"><Sparkles size={17}/><p><strong>Result granularity</strong><br/>The live panel reports the actual CI run, commit, timestamps, job outcomes and test/build step outcomes. Individual case rows remain source references until CI publishes a structured per-test report; a passing suite is not presented as proof for every registry description.</p></div>
+          <div className="notice"><div className="notice-icon"><ShieldCheck size={18}/></div><div><strong>What this status means</strong><p>A case shows Passed, Failed or Skipped only when its stable ID appears in the published CI report for the displayed commit. Missing IDs remain Not verified, not a pass or a failure. Dimensional tests validate the current implementation convention only; they do not finalise Arcane unit semantics or operator typing.</p></div></div>
+          <div className="next-step"><Sparkles size={17}/><p><strong>Result granularity</strong><br/>The live panel reports actual workflow outcomes, and each registry row is matched by its stable test ID to the published structured report. The report commit is shown explicitly; a missing or stale result is never silently treated as a pass.</p></div>
         </section>}
 
         {section === "Research & review" && <section className="page-content">
