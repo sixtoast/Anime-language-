@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -18,7 +21,20 @@ jobs:
           node-version: 22
       - name: Install dependencies
         run: npm install
-      - name: Run parser tests
-        run: npm test
+      - name: Run tests and write machine-readable results
+        run: |
+          mkdir -p test-results
+          npm test -- --reporter=default --reporter=json --outputFile=test-results/vitest.json
+      - name: Publish test summary and registry mapping
+        if: ${{ always() && hashFiles('test-results/vitest.json') != '' }}
+        run: node scripts/publish-test-summary.mjs
+      - name: Upload structured test results
+        if: ${{ always() && hashFiles('test-results/registry-results.json') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ github.run_id }}-${{ github.run_attempt }}
+          path: test-results/
+          if-no-files-found: warn
+          retention-days: 30
       - name: Type-check and build
         run: npm run build
