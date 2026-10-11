@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  addDimensions,
+  addDimensions,\n  subtractDimensions,
   addQuantities,
   divideQuantities,
   DIMENSIONLESS,
@@ -77,5 +77,34 @@ describe("dimension algebra primitives", () => {
     expect(addDimensions(length, time)).toEqual({
       length: 1, time: 1, mass: 0, temperature: 0, angle: 0
     });
+  });
+
+  it("[DIM-011] rejects non-finite input quantities", () => {
+    expect(() => addQuantities({ value: Number.NaN, unit: "MA" }, { value: 1, unit: "MA" }))
+      .toThrowError(expect.objectContaining({ code: "NON_FINITE_VALUE" }));
+    expect(() => subtractQuantities({ value: 1, unit: "MA" }, { value: Number.POSITIVE_INFINITY, unit: "MA" }))
+      .toThrowError(expect.objectContaining({ code: "NON_FINITE_VALUE" }));
+  });
+
+  it("[DIM-012] rejects arithmetic that overflows to a non-finite result", () => {
+    expect(() => addQuantities({ value: Number.MAX_VALUE, unit: "MA" }, { value: Number.MAX_VALUE, unit: "MA" }))
+      .toThrowError(expect.objectContaining({ code: "NON_FINITE_RESULT" }));
+  });
+
+  it("[DIM-013] normalizes unit-symbol case without changing dimensions", () => {
+    expect(getUnit("ma")).toMatchObject({ symbol: "MA", dimension: getUnit("MA").dimension });
+    expect(addQuantities({ value: 2, unit: "ma" }, { value: 3, unit: "MA" }))
+      .toEqual({ value: 5, unit: "MA" });
+  });
+
+  it("[DIM-014] subtracts dimension exponents component-wise", () => {
+    expect(subtractDimensions(getUnit("MA").dimension, getUnit("SE").dimension)).toEqual({
+      length: 1, time: -1, mass: 0, temperature: 0, angle: 0
+    });
+  });
+
+  it("[DIM-015] reports non-finite multiplication results", () => {
+    expect(() => multiplyQuantities({ value: Number.MAX_VALUE, unit: "MA" }, { value: 2, unit: "MA" }))
+      .toThrowError(expect.objectContaining({ code: "NON_FINITE_RESULT" }));
   });
 });
