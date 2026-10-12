@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { parseAuditExpression, type AuditParseResult } from "./engine/auditParser";
 import { workbenchTests } from "./engine/testRegistry";
+import { canonAuditItems, auditReadinessLabels } from "./engine/canonAuditRegistry";
 
 type Section = "Overview" | "Documentation" | "Playground" | "Test suite" | "Research & review";
 type Status = "Canonical" | "Provisional" | "Open question" | "Deprecated";
@@ -271,6 +272,18 @@ function App() {
           <div className="eyebrow"><span className="eyebrow-line"/> EVIDENCE, QUESTIONS, DECISIONS</div><h1 className="page-title">Research & review<span>.</span></h1><p className="page-intro">Keep unresolved questions visible. Findings should be traceable to source material and should not become canonical by implication.</p>
           <div className="review-banner"><FlaskConical size={20}/><div><strong>Active audit context</strong><p>Phase 2 is the priority source for the semantic audit. Preserve older forms as aliases unless an inconsistency is demonstrated.</p></div><span className="review-count">3 TOPICS</span></div>
           <div className="review-cards">{[{n:"01",title:"FRAPA contract",status:"Open question" as Status,tag:"SOURCE EVIDENCE",desc:"Establish the contract only from available source evidence. Do not invent definitions to fill gaps."},{n:"02",title:"Phase 4 — syntax & ambiguity",status:"Provisional" as Status,tag:"AUDIT MATERIAL",desc:"Test unique structural interpretation, operator arity and safe handling of incomplete expressions."},{n:"03",title:"Phase 5 — semantic audit",status:"Provisional" as Status,tag:"PHASE 2 PRIORITY",desc:"Compare semantic claims against Phase 2 first. Record conflicts and retain old forms unless inconsistency is demonstrated."}].map((item) => <article className="review-card" key={item.n}><div className="review-card-top"><span className="review-number">{item.n}</span><StatusPill status={item.status}/></div><span className="detail-kicker">{item.tag}</span><h2>{item.title}</h2><p>{item.desc}</p><div className="review-card-bottom"><span>Evidence link required</span><span>↗</span></div></article>)}</div>
+          <div className="section-heading lower-heading"><div><div className="eyebrow">CANON IMPLEMENTATION AUDIT</div><h2>What is enforced, blocked, or still missing</h2></div><span className="section-caption">{canonAuditItems.length} TRACKED ITEMS</span></div>
+          <p className="page-intro">This is an evidence matrix, not a second automated test report. “Implemented · limited scope” describes only the behaviour explicitly listed below; it does not mean the wider canon rule is fully enforced.</p>
+          <div className="audit-matrix">
+            {canonAuditItems.map((item) => <article className="audit-item" key={item.id}>
+              <div className="audit-item-top"><code>{item.id}</code><span className={"audit-readiness audit-" + item.readiness}>{auditReadinessLabels[item.readiness]}</span></div>
+              <span className="detail-kicker">{item.domain.toUpperCase()}</span>
+              <h3>{item.title}</h3>
+              <p>{item.currentEvidence}</p>
+              <div className="audit-next"><strong>Next evidence required</strong><p>{item.nextRequirement}</p></div>
+              <div className="test-case-meta"><span>Source rules: {item.sourceRule}</span></div>
+            </article>)}
+          </div>
           <div className="section-heading lower-heading"><div><div className="eyebrow">REVIEW PROTOCOL</div><h2>From question to decision</h2></div></div><div className="principle-list">{[{n:"01",title:"Capture the question",detail:"State exactly what is unclear and where the uncertainty originates."},{n:"02",title:"Attach the source",detail:"Link the precise version, section, and passage; separate source text from interpretation."},{n:"03",title:"Test alternatives",detail:"Record competing readings and the evidence for or against each."},{n:"04",title:"Approve explicitly",detail:"Only an explicit decision updates canonical documentation and implementation tests."}].map((item) => <div className="principle-row" key={item.n}><div className="principle-index">{item.n}</div><div className="principle-copy"><strong>{item.title}</strong><p>{item.detail}</p></div></div>)}</div>
         </section>}
       </main>
