@@ -32,6 +32,7 @@ const docs = [
   { title: "Phase 2 — formal syntax audit", category: "Audit", status: "Provisional" as Status, sourcePath: "docs/audits/phase-2-formal-syntax.md", description: "Proposed audit notation, provisional operator signatures, typing safeguards and eight unique-parse test proposals." },
   { title: "Continuity recovery & test register", category: "Governance", status: "Provisional" as Status, sourcePath: "docs/audits/continuity-recovery-and-test-register.md", description: "Decision ledger, unresolved gaps, change-control rules and sixteen defined tests that have not yet been executed." },
   { title: "Source-traceable rule catalogue", category: "Rule catalogue", status: "Provisional" as Status, sourcePath: "docs/rules/rule-catalogue.json", description: "Recovered rule IDs, source anchors, status definitions and linked test proposals in machine-readable form." },
+  { title: "Canon implementation evidence matrix", category: "Implementation audit", status: "Provisional" as Status, sourcePath: "docs/audits/canon-implementation-evidence-matrix.md", description: "Separates limited implemented behaviour from rules blocked by missing specification, missing evaluators and design-level-only checks." },
   { title: "Phase 2 parser contract", category: "Implementation", status: "Provisional" as Status, sourcePath: "src/engine/auditParser.md", description: "Exact limits and supported behaviour of the first provisional audit-notation parser." },
   { title: "Dimension algebra primitives", category: "Implementation", status: "Provisional" as Status, sourcePath: "src/engine/dimensions.md", description: "A deliberately separate dimensional bookkeeping layer for recovered base units; not yet connected to operator evaluation." },
   { title: "Grammar & syntax", category: "Language reference", status: "Open question" as Status, description: "A formal surface grammar must be derived from the source; audit notation is not assumed to be spoken Arcane." },
@@ -216,7 +217,7 @@ function App() {
           <div className="eyebrow"><span className="eyebrow-line"/> QUALITY & REGRESSION</div><h1 className="page-title">Test suite<span>.</span></h1>
           <p className="page-intro">A traceable explorer for the authored parser and dimensional test cases, paired with live GitHub Actions run and job-step results for the repository. CI status is fetched from GitHub; this page does not execute tests in the browser.</p>
           <div className="test-summary">
-            <div><span>AUTHORED CASES</span><strong>{workbenchTests.length}</strong><small>9 parser · 10 dimensional</small></div>
+            <div><span>AUTHORED CASES</span><strong>{workbenchTests.length}</strong><small>15 parser · 15 dimensional</small></div>
             <div><span>LATEST CI RESULT</span><strong className={workflowRuns[0]?.conclusion === "success" ? "ci-success-text" : workflowRuns[0]?.conclusion === "failure" ? "ci-failure-text" : "amber-text"}>{workflowLoading ? "Loading…" : workflowRuns[0] ? formatRunStatus(workflowRuns[0].status, workflowRuns[0].conclusion) : "Unavailable"}</strong><small>{workflowRuns[0] ? `Run #${workflowRuns[0].run_number}` : "No run loaded"}</small></div>
             <div><span>SPECIFICATION STATUS</span><strong className="amber-text">Prototype</strong><small>Provisional parser and dimensions</small></div>
           </div>
