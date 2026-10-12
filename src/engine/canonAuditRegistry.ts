@@ -110,7 +110,7 @@ export const canonAuditItems: CanonAuditItem[] = [
     title: "Logos resource and substrate accounting",
     domain: "Feasibility",
     readiness: "blocked-by-specification",
-    sourceRule: "MAG-LOGOS, D-012",
+    sourceRule: "D-012, Logos section of magic-system-v3.0.md",
     currentEvidence: "Logos is described as a persistent computational agent, but substrate, memory, energy, bandwidth and interface costs are underspecified.",
     nextRequirement: "Recover or explicitly decide the missing physical resource model before asserting feasible persistent computation."
   },
