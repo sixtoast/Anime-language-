@@ -2,7 +2,7 @@ export type TestExecutionStatus = "authored-unverified" | "blocked-by-specificat
 
 export interface WorkbenchTest {
   id: string;
-  group: "Parser" | "Dimensions";
+  group: "Parser" | "Dimensions" | "Semantic types";
   title: string;
   description: string;
   status: TestExecutionStatus;
@@ -40,5 +40,13 @@ export const workbenchTests: WorkbenchTest[] = [
   { id: "DIM-012", group: "Dimensions", title: "Rejects non-finite addition results", description: "Overflow during quantity addition raises a structured error.", status: "authored-unverified", file: "src/engine/dimensions.test.ts", sourceRule: "LAN-011 implementation safety" },
   { id: "DIM-013", group: "Dimensions", title: "Normalizes unit-symbol case", description: "Unit lookup is case-insensitive and returns the canonical registered symbol.", status: "authored-unverified", file: "src/engine/dimensions.test.ts", sourceRule: "LAN-010 implementation convention" },
   { id: "DIM-014", group: "Dimensions", title: "Subtracts dimension exponents", description: "Dimension-vector subtraction derives length¹·time⁻¹ from length minus time.", status: "authored-unverified", file: "src/engine/dimensions.test.ts", sourceRule: "LAN-011" },
-  { id: "DIM-015", group: "Dimensions", title: "Rejects non-finite multiplication results", description: "Overflow during quantity multiplication raises a structured error.", status: "authored-unverified", file: "src/engine/dimensions.test.ts", sourceRule: "LAN-011 implementation safety" }
+  { id: "DIM-015", group: "Dimensions", title: "Rejects non-finite multiplication results", description: "Overflow during quantity multiplication raises a structured error.", status: "authored-unverified", file: "src/engine/dimensions.test.ts", sourceRule: "LAN-011 implementation safety" },
+  { id: "SEM-001", group: "Semantic types", title: "Rejects information-to-mana conversion", description: "Information and mana-state values remain distinct semantic kinds without an implicit conversion.", status: "authored-unverified", file: "src/engine/semanticTypes.test.ts", sourceRule: "MAG-001, LAN-001" },
+  { id: "SEM-002", group: "Semantic types", title: "Separates energy, force, coupling and effect", description: "Distinct canonical ontology categories cannot be treated as the same semantic kind.", status: "authored-unverified", file: "src/engine/semanticTypes.test.ts", sourceRule: "MAG-001" },
+  { id: "SEM-003", group: "Semantic types", title: "Accepts equal quantity dimensions", description: "The limited compatibility helper accepts quantity types with equal dimension vectors.", status: "authored-unverified", file: "src/engine/semanticTypes.test.ts", sourceRule: "LAN-010, LAN-011" },
+  { id: "SEM-004", group: "Semantic types", title: "Rejects mismatched quantity dimensions", description: "Length and time quantities are not implicitly compatible.", status: "authored-unverified", file: "src/engine/semanticTypes.test.ts", sourceRule: "LAN-010, LAN-011" },
+  { id: "SEM-005", group: "Semantic types", title: "Blocks unresolved types", description: "An unresolved semantic type fails closed rather than being assumed compatible.", status: "authored-unverified", file: "src/engine/semanticTypes.test.ts", sourceRule: "LAN-002, LAN-003" },
+  { id: "SEM-006", group: "Semantic types", title: "Checks vector component compatibility", description: "Vector values are compared using their component types in this limited compatibility check.", status: "authored-unverified", file: "src/engine/semanticTypes.test.ts", sourceRule: "LAN-003, Phase 2 typing safeguards" },
+  { id: "SEM-007", group: "Semantic types", title: "Blocks unresolved binding payload types", description: "Binding payloads with unspecified types are not considered compatible, even with each other.", status: "authored-unverified", file: "src/engine/semanticTypes.test.ts", sourceRule: "LAN-007" },
+  { id: "SEM-008", group: "Semantic types", title: "Records measurement and assignment boundaries", description: "Semantic principles explicitly preserve observation output and the distinction between assignment and causation.", status: "authored-unverified", file: "src/engine/semanticTypes.test.ts", sourceRule: "LAN-004, LAN-008, MAG-003" }
 ];
