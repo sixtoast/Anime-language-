@@ -35,6 +35,7 @@ const docs = [
   { title: "Canon implementation evidence matrix", category: "Implementation audit", status: "Provisional" as Status, sourcePath: "docs/audits/canon-implementation-evidence-matrix.md", description: "Separates limited implemented behaviour from rules blocked by missing specification, missing evaluators and design-level-only checks." },
   { title: "Phase 2 parser contract", category: "Implementation", status: "Provisional" as Status, sourcePath: "src/engine/auditParser.md", description: "Exact limits and supported behaviour of the first provisional audit-notation parser." },
   { title: "Dimension algebra primitives", category: "Implementation", status: "Provisional" as Status, sourcePath: "src/engine/dimensions.md", description: "A deliberately separate dimensional bookkeeping layer for recovered base units; not yet connected to operator evaluation." },
+  { title: "Semantic type foundations", category: "Implementation", status: "Provisional" as Status, sourcePath: "src/engine/semanticTypes.md", description: "A conservative semantic type vocabulary that preserves canonical distinctions and blocks implicit conversions without inventing operator signatures." },
   { title: "Grammar & syntax", category: "Language reference", status: "Open question" as Status, description: "A formal surface grammar must be derived from the source; audit notation is not assumed to be spoken Arcane." },
   { title: "Operator reference", category: "Language reference", status: "Provisional" as Status, description: "The operator vocabulary is recovered, but full signatures, dimensions and evaluation semantics remain incomplete." },
   { title: "Phase 4 — ambiguity audit", category: "Audit", status: "Provisional" as Status, description: "Syntax and ambiguity testing. Provisional audit material; not a replacement for canonical specifications." },
@@ -76,7 +77,7 @@ function App() {
   const [mobileNav, setMobileNav] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState(docs[0].title);
   const [testQuery, setTestQuery] = useState("");
-  const [testGroup, setTestGroup] = useState<"All" | "Parser" | "Dimensions">("All");
+  const [testGroup, setTestGroup] = useState<"All" | "Parser" | "Dimensions" | "Semantic types">("All");
   const [workflowRuns, setWorkflowRuns] = useState<WorkflowRun[]>([]);
   const [workflowJobs, setWorkflowJobs] = useState<WorkflowJob[]>([]);
   const [workflowLoading, setWorkflowLoading] = useState(true);
@@ -217,7 +218,7 @@ function App() {
           <div className="eyebrow"><span className="eyebrow-line"/> QUALITY & REGRESSION</div><h1 className="page-title">Test suite<span>.</span></h1>
           <p className="page-intro">A traceable explorer for the authored parser and dimensional test cases, paired with live GitHub Actions run and job-step results for the repository. CI status is fetched from GitHub; this page does not execute tests in the browser.</p>
           <div className="test-summary">
-            <div><span>AUTHORED CASES</span><strong>{workbenchTests.length}</strong><small>15 parser · 15 dimensional</small></div>
+            <div><span>AUTHORED CASES</span><strong>{workbenchTests.length}</strong><small>15 parser · 15 dimensional · 8 semantic</small></div>
             <div><span>LATEST CI RESULT</span><strong className={workflowRuns[0]?.conclusion === "success" ? "ci-success-text" : workflowRuns[0]?.conclusion === "failure" ? "ci-failure-text" : "amber-text"}>{workflowLoading ? "Loading…" : workflowRuns[0] ? formatRunStatus(workflowRuns[0].status, workflowRuns[0].conclusion) : "Unavailable"}</strong><small>{workflowRuns[0] ? `Run #${workflowRuns[0].run_number}` : "No run loaded"}</small></div>
             <div><span>SPECIFICATION STATUS</span><strong className="amber-text">Prototype</strong><small>Provisional parser and dimensions</small></div>
           </div>
@@ -251,7 +252,7 @@ function App() {
             <div className="test-explorer-toolbar">
               <div className="test-search"><Search size={16}/><input value={testQuery} onChange={(e) => setTestQuery(e.target.value)} placeholder="Filter by ID, title, rule or description…" aria-label="Filter test cases"/></div>
               <div className="test-filters" aria-label="Filter test group">
-                {(["All", "Parser", "Dimensions"] as const).map((group) => <button key={group} className={testGroup === group ? "test-filter active" : "test-filter"} onClick={() => setTestGroup(group)}>{group}</button>)}
+                {(["All", "Parser", "Dimensions", "Semantic types"] as const).map((group) => <button key={group} className={testGroup === group ? "test-filter active" : "test-filter"} onClick={() => setTestGroup(group)}>{group}</button>)}
               </div>
             </div>
             <div className="test-explorer-meta"><span>{workbenchTests.filter((test) => (testGroup === "All" || test.group === testGroup) && (test.id + " " + test.title + " " + test.description + " " + test.sourceRule).toLowerCase().includes(testQuery.toLowerCase())).length} cases shown</span><span><span className="status-dot status-dot-pending"/> {registryResults ? `Report for ${registryResults.commit?.slice(0, 7) ?? "unknown commit"} · ${registryResults.counts.passed} passed · ${registryResults.counts.failed} failed · ${registryResults.counts.skipped} skipped` : "Waiting for published per-test results"}</span></div>
