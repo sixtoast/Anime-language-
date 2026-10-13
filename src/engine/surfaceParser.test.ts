@@ -99,6 +99,8 @@ describe("parseSurfaceExpression — provisional Phase 6G subset", () => {
   it("fails closed on the known RE/RA homophone ambiguity", () => {
     expect(parseSurfaceExpression("re").diagnostics[0]?.code).toBe("AMBIGUOUS_HOMOPHONE");
     expect(parseSurfaceExpression("ra").diagnostics[0]?.code).toBe("AMBIGUOUS_HOMOPHONE");
+    expect(parseSurfaceExpression("re ma").diagnostics[0]?.code).toBe("AMBIGUOUS_HOMOPHONE");
+    expect(parseSurfaceExpression("ki ra").diagnostics[0]?.code).toBe("AMBIGUOUS_HOMOPHONE");
   });
 
   it("normalises documented legacy aliases by default", () => {
