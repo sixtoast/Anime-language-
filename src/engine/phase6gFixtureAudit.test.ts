@@ -46,8 +46,9 @@ describe("recovered Phase 6G fixture observations", () => {
     expect(byId("P6G-FX-006")?.errorFamilyComparison).toBe("match");
     expect(byId("P6G-FX-009")?.errorFamilyComparison).toBe("match");
     expect(byId("P6G-FX-010")?.errorFamilyComparison).toBe("match");
-    expect(byId("P6G-FX-011")?.errorFamilyComparison).toBe("match");
-    expect(byId("P6G-FX-012")?.errorFamilyComparison).toBe("match");
+    // Archived Python code accepts these numerals; prose-level homophone expectations differ.
+    expect(byId("P6G-FX-011")?.errorFamilyComparison).toBe("not-comparable");
+    expect(byId("P6G-FX-012")?.errorFamilyComparison).toBe("not-comparable");
     expect(byId("P6G-FX-013")?.errorFamilyComparison).toBe("match");
     expect(byId("P6G-FX-015")?.errorFamilyComparison).toBe("match");
     expect(byId("P6G-FX-008")?.errorFamilyComparison).toBeUndefined();
@@ -75,9 +76,9 @@ describe("recovered Phase 6G fixture observations", () => {
   });
 
   it("reports diagnostic-family comparisons separately from direct syntax comparisons", () => {
-    expect(audit.diagnosticFamilyMatches).toBe(9);
+    expect(audit.diagnosticFamilyMatches).toBe(7);
     expect(audit.diagnosticFamilyMismatches).toBe(0);
-    expect(audit.diagnosticFamiliesNotComparable).toBe(0);
+    expect(audit.diagnosticFamiliesNotComparable).toBe(2);
     expect(audit.directMatches).toBe(9);
     expect(audit.directMismatches).toBe(0);
     // Equal counts here are coincidental; they represent different comparisons.
