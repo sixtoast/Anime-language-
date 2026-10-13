@@ -42,6 +42,9 @@ export interface Phase6GFixtureAudit {
   directMatches: number;
   directMismatches: number;
   nonDirectComparisons: number;
+  diagnosticFamilyMatches: number;
+  diagnosticFamilyMismatches: number;
+  diagnosticFamiliesNotComparable: number;
   observations: Phase6GFixtureObservation[];
   status: "observations-generated-not-acceptance";
   canonEffect: "none";
@@ -197,6 +200,9 @@ export function auditPhase6GFixtures(
       item.comparison === "context-dependent" ||
       item.comparison === "scope-guardrail-confirmed"
     ).length,
+    diagnosticFamilyMatches: observations.filter((item) => item.errorFamilyComparison === "match").length,
+    diagnosticFamilyMismatches: observations.filter((item) => item.errorFamilyComparison === "mismatch").length,
+    diagnosticFamiliesNotComparable: observations.filter((item) => item.errorFamilyComparison === "not-comparable").length,
     observations,
     status: "observations-generated-not-acceptance",
     canonEffect: "none"
