@@ -32,8 +32,11 @@ The harness now records the observed root AST node kind (when a parse succeeds) 
 3. RE/RA ambiguity cases remain rejected by the current parser.
 4. The harness does not claim canon approval or fixture acceptance.
 5. The control fixture exposes its `Call-with-Block` AST shape while retaining a context-dependent comparison status.
+8. Root-node expectations are compared where the fixture is directly comparable; the note distinguishes AST-shape evidence from canonical or semantic validity.
+10. A deliberately unknown historical error-family label is not guessed; it is reported as `not-comparable`.
 6. Identifier-slot fixtures receive a separate `KWAT`-wrapped probe; accepted/rejected observations remain context-dependent and do not silently become passes.
 7. Eight explicitly mapped historical diagnostic families are compared against current diagnostic codes, including the identifier-slot diagnostic via its probe. A mapped diagnostic match is syntax evidence only, not canon or semantic acceptance.
+9. Diagnostic-family summary counters remain separate from direct syntax comparisons, and unmapped historical families are explicitly `not-comparable`.
 
 ## What remains
 
