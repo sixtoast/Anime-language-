@@ -16,6 +16,18 @@ describe("recovered Phase 6G fixture observations", () => {
     expect(new Set(audit.observations.map((item) => item.id)).size).toBe(suite.cases.length);
   });
 
+  it("checks expected root-node kinds for directly accepted fixtures", () => {
+    const cases: Phase6GFixture[] = [
+      { id: "NODE-001", category: "numeral", label: "correct quantity root", input: "ki sho", expected: "accept", expectedNode: "QuantityLiteral", canonStatus: "provisional" },
+      { id: "NODE-002", category: "numeral", label: "incorrect expected root", input: "ki sho", expected: "accept", expectedNode: "Call", canonStatus: "provisional" }
+    ];
+    const audit = auditPhase6GFixtures("ROOT-NODE-CHECK", cases);
+    expect(audit.observations[0]?.observedNode).toBe("QuantityLiteral");
+    expect(audit.observations[0]?.comparison).toBe("match");
+    expect(audit.observations[1]?.comparison).toBe("mismatch");
+    expect(audit.directMismatches).toBe(1);
+  });
+
   it("records current alias-normalisation behaviour only when explicitly enabled for the fixture", () => {
     const aliasCase = audit.observations.find((item) => item.id === "P6G-FX-014");
     expect(aliasCase?.comparison).toBe("match");
