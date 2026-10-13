@@ -17,11 +17,15 @@
 ## Initial findings
 
 - **63 files** are present directly in `sources/originals/`.
-- **1 ZIP archive** is present: `Arcana mega pack.zip` (1.83 MiB).
+- **1 ZIP archive** is present: `Arcana mega pack.zip` (1,921,727 bytes; approximately 1.83 MiB). It contains 307 non-directory entries.
 - File extensions: `zip`: 1; `csv`: 11; `docx`: 7; `txt`: 14; `json`: 4; `md`: 4; `pdf`: 3; `py`: 19.
-- **3 exact-duplicate filename groups** detected by identical Git blob SHA (details below).
+- **3 exact-duplicate filename groups** detected among loose files by identical Git blob SHA (details below). The mega-pack contains 52 internal exact-duplicate groups, 183 unique byte contents across 307 entries, and 150 archive-member entries that match loose files by SHA-256.
 - `PHASE_2_README.txt` is zero bytes.
 - A Phase 5.17 test-results file reports 13 checks: 3 PASS, 1 FAIL, 6 BLOCKED BY MISSING SPECIFICATION, and 3 NOT YET TESTED. This is a recorded historical report, not a fresh test run.
+- The mega-pack's searchable text index covers 153 unique readable text documents, including Markdown, TXT, CSV, JSON, Python, and DOCX-extracted text. PDF text extraction remains pending. 17 `__MACOSX` metadata entries and 12 `.pyc` compiled Python files are present; they were not treated as primary readable source documents.
+- The archive includes a substantial Phase 5.5–5.24 and Phase 6B–6S prototype history, including parser/runtime scripts, type/dimension models, decision records, and recorded test results. These files are source evidence, not automatically canonical language rules.
+- Phase 6S reports 68/68 combined prototype tests passed for typed expression integration. The report explicitly limits this to the provisional Phase 6P/6Q/6R/6S reference implementation; it does not establish canonical surface syntax or full language conformance.
+- Phase 5.24's ten passing tests concern a provisional KWAM/KWAT/KWAK binding prototype. Its decision record marks the dual-binding design PROVISIONAL and explicitly says it must not be treated as canon without owner approval.
 - That report specifically flags the lexicon's forms `ra` (radian vs TARGET-path) and `re` (digit 4 vs TARGET-surface) as unresolved homographs without a proven executable disambiguation grammar.
 - The Phase 5 readme describes the combined v5 lexicon as 255 rows and says its vernacular roots have not been tested with listeners. These are source claims to verify against the files and broader record.
 
@@ -114,7 +118,9 @@
 |---|---|---|
 | Repository file listing | Complete for current `main` tree | Tree response was not truncated |
 | Exact duplicates among loose repository files | Initial pass complete | Based on identical Git blob SHA |
-| ZIP archive member listing | Pending | Archive binary could not yet be extracted through the available repository-reading path |
-| Semantic near-duplicate review | Pending | Requires comparing document contents |
-| Full source content extraction | Pending | DOCX/PDF and historical code need systematic review |
+| ZIP archive member listing | Complete | GitHub Actions safely read archive members without extracting or executing them; see `sources/archive-reports/mega-pack-report.md` |
+| Exact duplicates inside archive / against loose files | Initial pass complete | SHA-256 comparison; 52 internal groups and 150 matching archive-member entries |
+| Searchable text extraction | Initial pass complete | 153 unique readable text documents indexed in `sources/archive-reports/mega-pack-text-index.md`; PDF text extraction still pending |
+| Semantic near-duplicate review | Pending | Requires comparing different hashes and version-specific content |
+| Full source content extraction | Partial | DOCX text extracted; PDF text extraction, code review, and result verification remain to do |
 | Canonical reconciliation | Not started | Do after inventory and provenance review |
