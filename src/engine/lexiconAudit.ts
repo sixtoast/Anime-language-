@@ -7,7 +7,7 @@ export interface LexiconAuditFinding {
     | "REGISTRY_FILTER"
     | "FORM_COLLISION"
     | "ALIAS_TARGET_MISSING"
-    | "ALIAS_EVIDENCE_MERGED"
+    | "ALIAS_CONFLICT"
     | "EMPTY_REGISTRY";
   message: string;
   form?: string;
