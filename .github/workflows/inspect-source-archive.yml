@@ -1,0 +1,130 @@
+name: Inspect source mega-pack archive
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "sources/originals/Arcana mega pack.zip"
+      - ".github/workflows/inspect-source-archive.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  inspect-archive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+
+      - name: Inventory archive without extracting files
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import hashlib, zipfile, pathlib, collections, datetime, json
+
+          root = pathlib.Path(".")
+          archive = root / "sources/originals/Arcana mega pack.zip"
+          out = root / "sources/archive-reports/mega-pack-report.md"
+          out.parent.mkdir(parents=True, exist_ok=True)
+
+          if not archive.exists():
+              raise SystemExit(f"Archive not found: {archive}")
+
+          def sha256_bytes(data):
+              return hashlib.sha256(data).hexdigest()
+
+          loose = {}
+          for p in (root / "sources/originals").rglob("*"):
+              if p.is_file() and p != archive and "archive-reports" not in p.parts:
+                  try:
+                      loose.setdefault(sha256_bytes(p.read_bytes()), []).append(str(p))
+                  except OSError:
+                      pass
+
+          with zipfile.ZipFile(archive) as zf:
+              infos = [i for i in zf.infolist() if not i.is_dir()]
+              rows = []
+              exact = collections.defaultdict(list)
+              loose_matches = collections.defaultdict(list)
+              unreadable = []
+              for info in infos:
+                  try:
+                      digest = sha256_bytes(zf.read(info))
+                      exact[digest].append(info.filename)
+                      if digest in loose:
+                          loose_matches[digest].append((info.filename, loose[digest]))
+                      rows.append((info.filename, info.file_size, info.compress_size, digest, info.CRC))
+                  except Exception as e:
+                      unreadable.append((info.filename, str(e)))
+                      rows.append((info.filename, info.file_size, info.compress_size, "UNREADABLE", info.CRC))
+
+          dupes = [(h, names) for h, names in exact.items() if len(names) > 1]
+          lines = [
+              "# Mega-pack Archive Inspection",
+              "",
+              f"- Inspection date (UTC): {datetime.datetime.now(datetime.timezone.utc).isoformat()}",
+              f"- Archive: `{archive}`",
+              f"- Archive bytes: {archive.stat().st_size}",
+              f"- Non-directory entries: {len(infos)}",
+              f"- Exact duplicate groups inside archive: {len(dupes)}",
+              f"- Archive entries matching loose source files by SHA-256: {sum(len(v) for v in loose_matches.values())}",
+              f"- Unreadable entries: {len(unreadable)}",
+              "",
+              "## Safety and scope",
+              "",
+              "This workflow reads archive members directly and does not extract or execute them. SHA-256 comparisons are against the bytes stored in each member. Identical content is a duplicate candidate, not permission to delete a source.",
+              "",
+              "## Exact duplicates inside the archive",
+              ""
+          ]
+          if dupes:
+              for digest, names in sorted(dupes, key=lambda x: x[1][0].lower()):
+                  lines.append(f"- SHA-256 `{digest}`")
+                  lines.extend(f"  - `{name}`" for name in names)
+          else:
+              lines.append("No byte-identical member groups found.")
+          lines += ["", "## Archive entries matching loose files", ""]
+          if loose_matches:
+              for digest, matches in sorted(loose_matches.items()):
+                  for member, paths in matches:
+                      lines.append(f"- Archive member `{member}` matches:")
+                      lines.extend(f"  - `{path}`" for path in paths)
+                      lines.append(f"  - SHA-256: `{digest}`")
+          else:
+              lines.append("No archive members matched the current loose source files by SHA-256.")
+          lines += ["", "## Full member manifest", "", "| Archive member | Uncompressed bytes | Compressed bytes | CRC32 | SHA-256 |", "|---|---:|---:|---|---|"]
+          for name, size, csize, digest, crc in sorted(rows, key=lambda r: r[0].lower()):
+              safe_name = name.replace("|", "\\|").replace("\n", " ")
+              lines.append(f"| `{safe_name}` | {size} | {csize} | `{crc:08x}` | `{digest}` |")
+          if unreadable:
+              lines += ["", "## Entries that could not be read", ""]
+              lines.extend(f"- `{name}`: {error}" for name, error in unreadable)
+
+          out.write_text("\n".join(lines) + "\n", encoding="utf-8")
+          print(json.dumps({
+              "archive": str(archive),
+              "members": len(infos),
+              "internal_duplicate_groups": len(dupes),
+              "loose_file_matches": sum(len(v) for v in loose_matches.values()),
+              "unreadable": len(unreadable),
+              "report": str(out)
+          }, indent=2))
+          PY
+
+      - name: Commit archive inspection report
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add sources/archive-reports/mega-pack-report.md
+          if git diff --cached --quiet; then
+            echo "No report changes to commit."
+          else
+            git commit -m "docs: publish mega-pack archive inventory"
+            git push origin HEAD:main
+          fi
