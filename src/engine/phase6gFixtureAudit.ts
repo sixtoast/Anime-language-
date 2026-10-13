@@ -27,6 +27,7 @@ export interface Phase6GFixtureObservation {
   diagnosticCodes: string[];
   observedOperator?: string;
   observedNode?: string;
+  observedShape?: string;
   note: string;
 }
 
@@ -52,6 +53,14 @@ function rootNodeName(result: SurfaceParseResult): string | undefined {
     case "atom": return "Atom";
     default: return undefined;
   }
+}
+
+function observedShape(result: SurfaceParseResult): string | undefined {
+  if (!result.ok || !result.ast) return undefined;
+  if (result.ast.kind === "call" && result.ast.args.some((argument) => argument.kind === "block")) {
+    return "Call-with-Block";
+  }
+  return undefined;
 }
 
 function compareFixture(fixture: Phase6GFixture, result: SurfaceParseResult): FixtureComparison {
@@ -104,6 +113,7 @@ export function auditPhase6GFixtures(
       diagnosticCodes: result.diagnostics.map((diagnostic) => diagnostic.code),
       ...(result.ast?.kind === "call" ? { observedOperator: result.ast.operator } : {}),
       ...(rootNodeName(result) ? { observedNode: rootNodeName(result) } : {}),
+      ...(observedShape(result) ? { observedShape: observedShape(result) } : {}),
       note: fixture.expectedNode === "QuantityLiteral" || fixture.expectedNode === "Identifier"
         ? "Fixture expects a particular syntactic slot/node; this generic expression audit does not certify that slot-specific contract."
         : fixture.expected.startsWith("accept-only-if") || fixture.expected.startsWith("accept-in-")
