@@ -62,7 +62,7 @@ The initial note incorrectly said 19 entries lacked an explicit `sourcePath`; th
 
 ## Required next audits
 
-1. Inspect each source-less catalogue entry and classify it as a conceptual topic, an open question, a missing source, or a record that needs a real link.
+1. Verify all 19 catalogue source links in the browser and classify each source's provenance/authority; do not treat a link as proof that its content is canonical or complete.
 2. Test catalogue search, selection, empty results, status labels, and source-link opening in the actual UI.
 3. Audit the Overview's displayed status and task recommendation against current repository/CI data.
 4. Exercise CI statuses: successful, failed, queued, running, skipped, cancelled, missing, and stale.
@@ -103,7 +103,7 @@ This section is the working tracker. The tables above are the readable overview;
 
 ## Current CI evidence snapshot
 
-The latest checked workflow is [run #159](https://github.com/sixtoast/Anime-language-/actions/runs/38447949862) for commit `69754f461938f2da830fce6bf78c98a5966b8d24`. It completed with overall failure: dependency installation succeeded, the test step and published test summary failed, the type-check/build step succeeded, and publishing latest results was skipped. This means the website production build step passed, but the overall CI run did not. The known parser failure remains outside the website-only change scope; do not alter it under this plan.
+The latest completed baseline before the current change was [run #160](https://github.com/sixtoast/Anime-language-/actions/runs/38448246996), for commit `79afe0d5424599257639dfbe1206c9cd05fdf3ac`; it completed with overall failure. The current source-link update is being checked by [run #161](https://github.com/sixtoast/Anime-language-/actions/runs/38448548199), which was still in progress at the last check. Do not report run #161 as passed until it completes. Previous runs show the type-check/build step succeeding while tests fail; the known parser failure remains outside the website-only change scope.
 
 ## Register maintenance rules
 
