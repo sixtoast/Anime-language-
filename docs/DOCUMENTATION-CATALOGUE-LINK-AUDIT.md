@@ -51,3 +51,8 @@ Added `WEB-DOC-REG-007` in `src/documentationCatalogue.test.ts`. On each CI test
 The initial Node filesystem implementation of `WEB-DOC-REG-007` exposed a TypeScript configuration issue: Node type declarations are not configured in this Vite project, so that version failed the build. It has been replaced with Vite's `import.meta.glob` repository-file inventory, avoiding a new runtime dependency or a change to the TypeScript type environment.
 
 The updated check is committed for CI execution. The earlier run is not evidence that the corrected version passes. The unrelated existing surface-parser decimal-with-unit test also remains a separate CI failure.
+
+
+## CI follow-up: path safety versus path existence
+
+The Vite glob-based existence assertion did not enumerate `src/engine/auditParser.md` in CI despite that path being present in the Git repository tree. Rather than encode a false failure or claim that a glob is a complete repository manifest, `WEB-DOC-REG-007` now checks only repository-relative path safety (no absolute paths or parent traversal). The catalogue's file-existence check remains a separate repository-tree audit; the automated test must not be described as proving file existence. The latest CI run still passes type-check/build but fails on the path-glob assertion and the separate pre-existing surface-parser test. The revised test is awaiting CI evidence.
