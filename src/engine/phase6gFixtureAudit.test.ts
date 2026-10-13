@@ -57,7 +57,7 @@ describe("recovered Phase 6G fixture observations", () => {
     const controlCase = audit.observations.find((item) => item.id === "P6G-FX-008");
     expect(controlCase?.observedShape).toBe("Call-with-Block");
     expect(controlCase?.comparison).toBe("context-dependent");
-    expect(controlCase?.note).toContain("Observation only");
+    expect(controlCase?.note).toContain("Context-dependent fixture");
     expect(audit.canonEffect).toBe("none");
   });
 
