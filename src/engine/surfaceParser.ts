@@ -228,11 +228,11 @@ class Parser {
       throw new ParseFailure("AMBIGUOUS_HOMOPHONE", `${token.toUpperCase()} is a documented homophone; disambiguation is not implemented.`, this.cursor, token);
     }
     const form = this.take();
-    if (this.knownAtoms.has(form)) {
-      return { kind: "atom", form: form.toUpperCase(), lexicalClass: "KNOWN_ATOM" };
-    }
     if (OPERATOR_CLASSES.has(form)) {
       throw new ParseFailure("UNRESOLVED_OPERATOR", `Operator ${form.toUpperCase()} has no usable signature in this parser context.`, this.cursor - 1, form);
+    }
+    if (this.knownAtoms.has(form)) {
+      return { kind: "atom", form: form.toUpperCase(), lexicalClass: "KNOWN_ATOM" };
     }
     throw new ParseFailure("UNKNOWN_LEXICAL_FORM", `Lexical form "${form}" is not in the explicitly supplied atom inventory.`, this.cursor - 1, form);
   }
