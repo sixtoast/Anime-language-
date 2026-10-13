@@ -34,6 +34,8 @@ export interface LexiconAlias {
 
 export interface LexiconRegistry {
   entries: ReadonlyMap<string, LexiconEntry>;
+  /** Source rows intentionally retained outside the single-token parser inventory. */
+  nonAtomicEntries: ReadonlyMap<string, LexiconEntry>;
   aliases: ReadonlyMap<string, LexiconAlias>;
   collisions: ReadonlyMap<string, LexiconEntry>;
   diagnostics: LexiconDiagnostic[];
@@ -42,7 +44,7 @@ export interface LexiconRegistry {
 }
 
 export interface LexiconDiagnostic {
-  code: "EMPTY_FORM" | "CONFLICTING_ALIAS_TARGETS" | "SELF_ALIAS";
+  code: "EMPTY_FORM" | "NON_ATOMIC_FORM" | "CONFLICTING_ALIAS_TARGETS" | "SELF_ALIAS";
   message: string;
   form?: string;
 }
@@ -61,36 +63,47 @@ export function buildLexiconRegistry(
   options: BuildLexiconOptions
 ): LexiconRegistry {
   const grouped = new Map<string, LexiconRow[]>();
+  const nonAtomicGrouped = new Map<string, LexiconRow[]>();
   const diagnostics: LexiconDiagnostic[] = [];
 
   for (const row of rows) {
     const form = (row.form ?? "").trim().toLowerCase();
-    if (!form || form.includes(" ") || form.endsWith("-") || form.startsWith("(")) {
+    if (!form) {
       diagnostics.push({
         code: "EMPTY_FORM",
-        message: "Ignored an empty, multiword, or editorial placeholder form.",
-        form: form || undefined
+        message: "Ignored a source row with an empty lexical form."
       });
       continue;
     }
-    const existing = grouped.get(form) ?? [];
+    const target = form.includes(" ") || form.endsWith("-") || form.startsWith("(")
+      ? nonAtomicGrouped
+      : grouped;
+    const existing = target.get(form) ?? [];
     existing.push({ ...row, form });
-    grouped.set(form, existing);
+    target.set(form, existing);
+    if (target === nonAtomicGrouped) {
+      diagnostics.push({
+        code: "NON_ATOMIC_FORM",
+        message: "Preserved a multiword, clitic, or editorial form outside the single-token parser inventory.",
+        form
+      });
+    }
   }
 
+  const toEntry = (form: string, records: LexiconRow[]): LexiconEntry => ({
+    form,
+    glosses: unique(records.map((r) => (r.gloss ?? "").trim())),
+    classes: unique(records.map((r) => (r.cls ?? "").trim().toUpperCase())),
+    registers: unique(records.map((r) => (r.register ?? "").trim())),
+    statuses: unique(records.map((r) => (r.status ?? "").trim())),
+    sources: unique(records.map((r) => (r.source ?? "").trim())),
+    notes: unique(records.map((r) => (r.note ?? "").trim())),
+    rowCount: records.length
+  });
   const entries = new Map<string, LexiconEntry>();
-  for (const [form, records] of grouped) {
-    entries.set(form, {
-      form,
-      glosses: unique(records.map((r) => (r.gloss ?? "").trim())),
-      classes: unique(records.map((r) => (r.cls ?? "").trim().toUpperCase())),
-      registers: unique(records.map((r) => (r.register ?? "").trim())),
-      statuses: unique(records.map((r) => (r.status ?? "").trim())),
-      sources: unique(records.map((r) => (r.source ?? "").trim())),
-      notes: unique(records.map((r) => (r.note ?? "").trim())),
-      rowCount: records.length
-    });
-  }
+  for (const [form, records] of grouped) entries.set(form, toEntry(form, records));
+  const nonAtomicEntries = new Map<string, LexiconEntry>();
+  for (const [form, records] of nonAtomicGrouped) nonAtomicEntries.set(form, toEntry(form, records));
 
   const aliasCandidates = new Map<string, { preferredForm: string; evidence: string; sourceForm: string }[]>();
   const addAlias = (aliasRaw: string, preferredRaw: string, evidence: string, sourceForm: string) => {
@@ -144,6 +157,7 @@ export function buildLexiconRegistry(
 
   return {
     entries,
+    nonAtomicEntries,
     aliases,
     collisions,
     diagnostics,
