@@ -10,7 +10,10 @@ describe("source lexicon audit report", () => {
     expect(report.acceptedLexicalRows).toBe(249);
     expect(report.retainedNonAtomicRows).toBe(6);
     expect(report.retainedNonAtomicForms).toBe(6);
-    expect(report.acceptedForms).toBeGreaterThan(0);
+    expect(report.acceptedForms).toBe(247);
+    expect(report.registeredAliases).toBe(7);
+    expect(report.aliasRows).toBe(7);
+    expect(report.findings.filter((finding) => finding.severity === "error")).toEqual([]);
     expect(report.collisionForms).toContain("re");
     expect(report.collisionForms).toContain("ra");
     expect(report.canonEffect).toBe("none");
