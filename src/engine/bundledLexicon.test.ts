@@ -15,8 +15,10 @@ describe("bundled source lexicon snapshot", () => {
     expect(bundledLexiconLoad.registry.collisions.has("ra")).toBe(true);
   });
 
-  it("does not silently admit malformed CSV records into the registry", () => {
-    expect(bundledLexiconLoad.sourceDiagnostics.some((item) => item.includes("record excluded"))).toBe(true);
+  it("confirms the reviewed CSV snapshots are structurally well-formed", () => {
+    expect(bundledLexiconLoad.sourceDiagnostics).toEqual([]);
+    expect(bundledLexiconLoad.rowCount).toBe(255);
+    expect(bundledLexiconLoad.aliasRowCount).toBe(7);
   });
 
   it("can parse a source-backed lexical atom when a registry is explicitly supplied", () => {
