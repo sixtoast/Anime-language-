@@ -144,6 +144,9 @@ function App() {
   }, []);
 
   const latestCiRun = workflowRuns.find((run) => run.name === "CI") ?? workflowRuns[0];
+  const latestBuildStep = workflowJobs
+    .flatMap((job) => job.steps ?? [])
+    .find((step) => /type-check and build/i.test(step.name));
 
   const filteredDocs = useMemo(() => docs.filter((doc) =>
     (doc.title + " " + doc.category + " " + doc.description + " " + doc.status).toLowerCase().includes(query.toLowerCase())
@@ -234,6 +237,7 @@ function App() {
           <div className="test-summary">
             <div><span>AUTHORED CASES</span><strong>{workbenchTests.length}</strong><small>15 parser · 15 dimensional · 8 semantic · 8 operator-contract</small></div>
             <div><span>LATEST CI RESULT</span><strong className={latestCiRun?.conclusion === "success" ? "ci-success-text" : latestCiRun?.conclusion === "failure" ? "ci-failure-text" : "amber-text"}>{workflowLoading ? "Loading…" : latestCiRun ? formatRunStatus(latestCiRun.status, latestCiRun.conclusion) : "Unavailable"}</strong><small>{latestCiRun ? `Run #${latestCiRun.run_number}` : "No run loaded"}</small></div>
+            <div><span>WEBSITE BUILD</span><strong className={latestBuildStep?.status === "completed" && latestBuildStep.conclusion === "success" ? "ci-success-text" : latestBuildStep?.status === "completed" && latestBuildStep.conclusion === "failure" ? "ci-failure-text" : "amber-text"}>{workflowLoading ? "Loading…" : workflowError ? "Unavailable" : latestBuildStep ? formatRunStatus(latestBuildStep.status, latestBuildStep.conclusion) : "Unavailable"}</strong><small>{latestCiRun ? `Run #${latestCiRun.run_number} · Type-check and build` : "Build step unavailable"}</small></div>
             <div><span>SPECIFICATION STATUS</span><strong className="amber-text">Prototype</strong><small>Provisional parser and dimensions</small></div>
           </div>
           <div className="ci-panel">
