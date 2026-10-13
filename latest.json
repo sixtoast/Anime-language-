@@ -1,0 +1,337 @@
+{
+  "generatedAt": "2026-10-13T16:16:43.718Z",
+  "commit": "f610c7ea8c0f046bd6e0d76239a2dc7302293c90",
+  "runId": "38429121185",
+  "runAttempt": "1",
+  "counts": {
+    "total": 46,
+    "passed": 46,
+    "failed": 0,
+    "skipped": 0,
+    "unmapped": 0
+  },
+  "tests": [
+    {
+      "id": "PARSE-001",
+      "title": "Phase 2 provisional audit notation parser [PARSE-001] parses a binary operator with two arguments",
+      "status": "passed",
+      "durationMs": 4.517480999999975,
+      "file": "src/engine/auditParser.test.ts"
+    },
+    {
+      "id": "PARSE-002",
+      "title": "Phase 2 provisional audit notation parser [PARSE-002] preserves the nesting of a nested expression",
+      "status": "passed",
+      "durationMs": 0.8950110000000109,
+      "file": "src/engine/auditParser.test.ts"
+    },
+    {
+      "id": "PARSE-003",
+      "title": "Phase 2 provisional audit notation parser [PARSE-003] rejects missing arguments",
+      "status": "passed",
+      "durationMs": 0.37991699999997763,
+      "file": "src/engine/auditParser.test.ts"
+    },
+    {
+      "id": "PARSE-004",
+      "title": "Phase 2 provisional audit notation parser [PARSE-004] rejects extra arguments",
+      "status": "passed",
+      "durationMs": 0.5865980000000377,
+      "file": "src/engine/auditParser.test.ts"
+    },
+    {
+      "id": "PARSE-005",
+      "title": "Phase 2 provisional audit notation parser [PARSE-005] preserves order-sensitive operand order",
+      "status": "passed",
+      "durationMs": 0.5014770000000226,
+      "file": "src/engine/auditParser.test.ts"
+    },
+    {
+      "id": "PARSE-006",
+      "title": "Phase 2 provisional audit notation parser [PARSE-006] rejects malformed separators instead of guessing",
+      "status": "passed",
+      "durationMs": 0.4832630000000222,
+      "file": "src/engine/auditParser.test.ts"
+    },
+    {
+      "id": "PARSE-007",
+      "title": "Phase 2 provisional audit notation parser [PARSE-007] rejects unknown operator arity rather than guessing",
+      "status": "passed",
+      "durationMs": 0.45170300000000907,
+      "file": "src/engine/auditParser.test.ts"
+    },
+    {
+      "id": "PARSE-008",
+      "title": "Phase 2 provisional audit notation parser [PARSE-008] rejects trailing input",
+      "status": "passed",
+      "durationMs": 0.4340599999999881,
+      "file": "src/engine/auditParser.test.ts"
+    },
+    {
+      "id": "PARSE-009",
+      "title": "Phase 2 provisional audit notation parser [PARSE-009] reports empty input",
+      "status": "passed",
+      "durationMs": 0.8993189999999913,
+      "file": "src/engine/auditParser.test.ts"
+    },
+    {
+      "id": "PARSE-010",
+      "title": "Phase 2 provisional audit notation parser [PARSE-010] accepts unary and ternary operators at their provisional arities",
+      "status": "passed",
+      "durationMs": 0.5589250000000447,
+      "file": "src/engine/auditParser.test.ts"
+    },
+    {
+      "id": "PARSE-011",
+      "title": "Phase 2 provisional audit notation parser [PARSE-011] normalizes operator and symbol case consistently",
+      "status": "passed",
+      "durationMs": 0.4309039999999982,
+      "file": "src/engine/auditParser.test.ts"
+    },
+    {
+      "id": "PARSE-012",
+      "title": "Phase 2 provisional audit notation parser [PARSE-012] rejects a trailing comma instead of accepting an incomplete call",
+      "status": "passed",
+      "durationMs": 0.25554299999998875,
+      "file": "src/engine/auditParser.test.ts"
+    },
+    {
+      "id": "PARSE-013",
+      "title": "Phase 2 provisional audit notation parser [PARSE-013] rejects an unclosed call",
+      "status": "passed",
+      "durationMs": 0.19562000000001944,
+      "file": "src/engine/auditParser.test.ts"
+    },
+    {
+      "id": "PARSE-014",
+      "title": "Phase 2 provisional audit notation parser [PARSE-014] rejects unsupported punctuation rather than silently discarding it",
+      "status": "passed",
+      "durationMs": 0.21012699999999995,
+      "file": "src/engine/auditParser.test.ts"
+    },
+    {
+      "id": "PARSE-015",
+      "title": "Phase 2 provisional audit notation parser [PARSE-015] rejects an invalid nested expression without returning a partial AST",
+      "status": "passed",
+      "durationMs": 0.2796289999999999,
+      "file": "src/engine/auditParser.test.ts"
+    },
+    {
+      "id": "DIM-001",
+      "title": "dimension algebra primitives [DIM-001] registers the canonical base-unit symbols from Arcane v3.0-L",
+      "status": "passed",
+      "durationMs": 3.0558320000000094,
+      "file": "src/engine/dimensions.test.ts"
+    },
+    {
+      "id": "DIM-002",
+      "title": "dimension algebra primitives [DIM-002] adds compatible quantities and preserves the left unit",
+      "status": "passed",
+      "durationMs": 1.6626609999999857,
+      "file": "src/engine/dimensions.test.ts"
+    },
+    {
+      "id": "DIM-003",
+      "title": "dimension algebra primitives [DIM-003] rejects addition across incompatible dimensions",
+      "status": "passed",
+      "durationMs": 1.2351830000000064,
+      "file": "src/engine/dimensions.test.ts"
+    },
+    {
+      "id": "DIM-004",
+      "title": "dimension algebra primitives [DIM-004] subtracts compatible quantities without reordering operands",
+      "status": "passed",
+      "durationMs": 0.6023079999999936,
+      "file": "src/engine/dimensions.test.ts"
+    },
+    {
+      "id": "DIM-005",
+      "title": "dimension algebra primitives [DIM-005] multiplies dimensions algebraically without inventing a derived unit",
+      "status": "passed",
+      "durationMs": 0.5446390000000179,
+      "file": "src/engine/dimensions.test.ts"
+    },
+    {
+      "id": "DIM-006",
+      "title": "dimension algebra primitives [DIM-006] derives velocity dimensions from length divided by time",
+      "status": "passed",
+      "durationMs": 0.5447690000000023,
+      "file": "src/engine/dimensions.test.ts"
+    },
+    {
+      "id": "DIM-007",
+      "title": "dimension algebra primitives [DIM-007] rejects division by zero",
+      "status": "passed",
+      "durationMs": 0.581828999999999,
+      "file": "src/engine/dimensions.test.ts"
+    },
+    {
+      "id": "DIM-008",
+      "title": "dimension algebra primitives [DIM-008] does not treat an unknown unit as a known quantity",
+      "status": "passed",
+      "durationMs": 0.36073100000001546,
+      "file": "src/engine/dimensions.test.ts"
+    },
+    {
+      "id": "DIM-009",
+      "title": "dimension algebra primitives [DIM-009] keeps radian dimensionless for dimensional algebra",
+      "status": "passed",
+      "durationMs": 0.7977360000000147,
+      "file": "src/engine/dimensions.test.ts"
+    },
+    {
+      "id": "DIM-010",
+      "title": "dimension algebra primitives [DIM-010] supports pure dimension exponent operations",
+      "status": "passed",
+      "durationMs": 0.4333289999999863,
+      "file": "src/engine/dimensions.test.ts"
+    },
+    {
+      "id": "DIM-011",
+      "title": "dimension algebra primitives [DIM-011] rejects non-finite input quantities",
+      "status": "passed",
+      "durationMs": 0.4975589999999954,
+      "file": "src/engine/dimensions.test.ts"
+    },
+    {
+      "id": "DIM-012",
+      "title": "dimension algebra primitives [DIM-012] rejects arithmetic that overflows to a non-finite result",
+      "status": "passed",
+      "durationMs": 0.23744800000000055,
+      "file": "src/engine/dimensions.test.ts"
+    },
+    {
+      "id": "DIM-013",
+      "title": "dimension algebra primitives [DIM-013] normalizes unit-symbol case without changing dimensions",
+      "status": "passed",
+      "durationMs": 0.3626549999999895,
+      "file": "src/engine/dimensions.test.ts"
+    },
+    {
+      "id": "DIM-014",
+      "title": "dimension algebra primitives [DIM-014] subtracts dimension exponents component-wise",
+      "status": "passed",
+      "durationMs": 0.20494799999997326,
+      "file": "src/engine/dimensions.test.ts"
+    },
+    {
+      "id": "DIM-015",
+      "title": "dimension algebra primitives [DIM-015] reports non-finite multiplication results",
+      "status": "passed",
+      "durationMs": 0.20998600000001488,
+      "file": "src/engine/dimensions.test.ts"
+    },
+    {
+      "id": "OPC-001",
+      "title": "Source-traceable operator contract registry [OPC-001] records only the nine provisional Phase 2 arities",
+      "status": "passed",
+      "durationMs": 2.494080999999994,
+      "file": "src/engine/operatorContracts.test.ts"
+    },
+    {
+      "id": "OPC-002",
+      "title": "Source-traceable operator contract registry [OPC-002] does not invent executable input or output types",
+      "status": "passed",
+      "durationMs": 0.7316330000000164,
+      "file": "src/engine/operatorContracts.test.ts"
+    },
+    {
+      "id": "OPC-003",
+      "title": "Source-traceable operator contract registry [OPC-003] marks SIMA's observation result while keeping its signature incomplete",
+      "status": "passed",
+      "durationMs": 0.25813700000000495,
+      "file": "src/engine/operatorContracts.test.ts"
+    },
+    {
+      "id": "OPC-004",
+      "title": "Source-traceable operator contract registry [OPC-004] leaves conceptual operators unresolved when arity is not established",
+      "status": "passed",
+      "durationMs": 0.5989509999999996,
+      "file": "src/engine/operatorContracts.test.ts"
+    },
+    {
+      "id": "OPC-005",
+      "title": "Source-traceable operator contract registry [OPC-005] records source anchors and open questions for every contract",
+      "status": "passed",
+      "durationMs": 0.895120999999989,
+      "file": "src/engine/operatorContracts.test.ts"
+    },
+    {
+      "id": "OPC-006",
+      "title": "Source-traceable operator contract registry [OPC-006] lookup normalizes case and surrounding whitespace",
+      "status": "passed",
+      "durationMs": 0.21822199999999725,
+      "file": "src/engine/operatorContracts.test.ts"
+    },
+    {
+      "id": "OPC-007",
+      "title": "Source-traceable operator contract registry [OPC-007] exposes safeguards against inferred signatures and conflated concepts",
+      "status": "passed",
+      "durationMs": 0.3161169999999913,
+      "file": "src/engine/operatorContracts.test.ts"
+    },
+    {
+      "id": "OPC-008",
+      "title": "Source-traceable operator contract registry [OPC-008] keeps dimensional and evaluation rules explicitly non-executable",
+      "status": "passed",
+      "durationMs": 0.7844729999999913,
+      "file": "src/engine/operatorContracts.test.ts"
+    },
+    {
+      "id": "SEM-001",
+      "title": "conservative semantic type foundations [SEM-001] rejects implicit conversion between information and mana state",
+      "status": "passed",
+      "durationMs": 3.9334610000000225,
+      "file": "src/engine/semanticTypes.test.ts"
+    },
+    {
+      "id": "SEM-002",
+      "title": "conservative semantic type foundations [SEM-002] keeps energy, force, coupling and effect as distinct kinds",
+      "status": "passed",
+      "durationMs": 0.5649070000000052,
+      "file": "src/engine/semanticTypes.test.ts"
+    },
+    {
+      "id": "SEM-003",
+      "title": "conservative semantic type foundations [SEM-003] accepts quantities with the same dimension vector for limited compatibility",
+      "status": "passed",
+      "durationMs": 0.26992000000001326,
+      "file": "src/engine/semanticTypes.test.ts"
+    },
+    {
+      "id": "SEM-004",
+      "title": "conservative semantic type foundations [SEM-004] rejects quantities with different dimension vectors",
+      "status": "passed",
+      "durationMs": 0.3857889999999884,
+      "file": "src/engine/semanticTypes.test.ts"
+    },
+    {
+      "id": "SEM-005",
+      "title": "conservative semantic type foundations [SEM-005] rejects unresolved types instead of assuming compatibility",
+      "status": "passed",
+      "durationMs": 0.23527400000000398,
+      "file": "src/engine/semanticTypes.test.ts"
+    },
+    {
+      "id": "SEM-006",
+      "title": "conservative semantic type foundations [SEM-006] checks component types for vector compatibility",
+      "status": "passed",
+      "durationMs": 0.3918579999999565,
+      "file": "src/engine/semanticTypes.test.ts"
+    },
+    {
+      "id": "SEM-007",
+      "title": "conservative semantic type foundations [SEM-007] keeps unresolved binding payload types blocked",
+      "status": "passed",
+      "durationMs": 0.38612000000000535,
+      "file": "src/engine/semanticTypes.test.ts"
+    },
+    {
+      "id": "SEM-008",
+      "title": "conservative semantic type foundations [SEM-008] records measurement and assignment boundaries as principles",
+      "status": "passed",
+      "durationMs": 0.4803679999999986,
+      "file": "src/engine/semanticTypes.test.ts"
+    }
+  ]
+}
