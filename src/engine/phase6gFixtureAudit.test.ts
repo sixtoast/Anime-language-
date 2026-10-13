@@ -28,6 +28,14 @@ describe("recovered Phase 6G fixture observations", () => {
     expect(audit.directMismatches).toBe(1);
   });
 
+  it("records a control call containing a block without treating its signature as approved", () => {
+    const controlCase = audit.observations.find((item) => item.id === "P6G-FX-008");
+    expect(controlCase?.observedShape).toBe("Call-with-Block");
+    expect(controlCase?.comparison).toBe("context-dependent");
+    expect(controlCase?.note).toContain("Observation only");
+    expect(audit.canonEffect).toBe("none");
+  });
+
   it("records current alias-normalisation behaviour only when explicitly enabled for the fixture", () => {
     const aliasCase = audit.observations.find((item) => item.id === "P6G-FX-014");
     expect(aliasCase?.comparison).toBe("match");
