@@ -241,3 +241,10 @@ The website may document, display, link, and report evidence about these subject
 - `docs/DEVELOPMENT-STUDIO-PLAN.md` remains the broader product vision and capability reference.
 - `docs/IMPLEMENTATION-ROADMAP.md` is a historical mixed roadmap; its language-engine phases are not active website tasks. Do not use it to override the explicit scope boundary in this file.
 - `sources/SOURCE-INVENTORY.md` remains an initial structural inventory, not a complete content audit.
+
+
+## Website implementation note — source recovery visibility (2026-10-13)
+
+The Overview now has an initial source-recovery panel based on `sources/SOURCE-INVENTORY.md`. It surfaces the dated structural counts (63 loose files, 307 archive entries, 52 exact-duplicate groups inside the archive, and 150 archive members matching loose files by SHA-256), plus the pending PDF extraction, zero-byte `PHASE_2_README.txt`, and the warning that byte-identical files are not automatically semantically redundant. The panel links to the inventory, catalogue, and review section.
+
+This is a visibility improvement, not a completed source audit. It does not claim that all archive content has been read, reconciled, or approved. WEB-DOC-04 remains Implemented — unverified until CI and browser/responsive acceptance checks pass.

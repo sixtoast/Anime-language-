@@ -173,7 +173,7 @@ function App() {
       <main className="main-area">
         <header className="topbar">
           <div className="breadcrumbs"><button className="icon-button mobile-menu" onClick={() => setMobileNav(true)} aria-label="Open navigation"><Menu size={19}/></button><span>Anime Language</span><span className="crumb-slash">/</span><strong>{section}</strong></div>
-          <div className="topbar-actions"><span className="version-chip"><span className="pulse-dot"/> SPEC v3.0 · SOURCES RECOVERED</span><button className="icon-button" title="Search documentation" onClick={() => { changeSection("Documentation"); document.getElementById("global-search")?.focus(); }}><Search size={18}/></button></div>
+          <div className="topbar-actions"><span className="version-chip"><span className="pulse-dot"/> SPEC v3.0 · SOURCE INVENTORY INITIAL</span><button className="icon-button" title="Search documentation" onClick={() => { changeSection("Documentation"); document.getElementById("global-search")?.focus(); }}><Search size={18}/></button></div>
         </header>
 
         {section === "Overview" && <section className="page-content">
@@ -186,6 +186,29 @@ function App() {
             <button className="feature-card" onClick={() => changeSection("Playground")}><div className="feature-icon icon-blue"><Braces size={20}/></div><div className="feature-title">Expression playground <span>↗</span></div><p>Parse provisional Phase 2 audit expressions and inspect syntax trees or diagnostics.</p><div className="feature-foot"><span>Open playground</span><span>02</span></div></button>
             <button className="feature-card" onClick={() => changeSection("Test suite")}><div className="feature-icon icon-green"><TestTube2 size={20}/></div><div className="feature-title">Test & validate <span>↗</span></div><p>Build a regression suite for accepted forms, rejected forms and ambiguous expressions.</p><div className="feature-foot"><span>Review test plan</span><span>03</span></div></button>
             <button className="feature-card" onClick={() => changeSection("Research & review")}><div className="feature-icon icon-amber"><FlaskConical size={20}/></div><div className="feature-title">Research & review <span>↗</span></div><p>Track evidence, open questions, competing interpretations and proposed changes.</p><div className="feature-foot"><span>Review open work</span><span>04</span></div></button>
+          </div>
+          <div className="source-recovery-panel">
+            <div className="source-recovery-heading">
+              <div><div className="eyebrow">SOURCE RECOVERY · INVENTORY SNAPSHOT</div><h2>Known sources, visible gaps</h2></div>
+              <span className="source-audit-state">STRUCTURAL ONLY · 13 OCT 2026</span>
+            </div>
+            <p className="source-recovery-intro">The repository inventory is an initial structural scan, not a completed content audit. These counts describe what has been inventoried; they do not mean every source has been read, reconciled, or approved.</p>
+            <div className="source-recovery-metrics">
+              <div><strong>63</strong><span>Loose files in <code>sources/originals/</code></span></div>
+              <div><strong>307</strong><span>Non-directory entries in the ZIP archive</span></div>
+              <div><strong>52</strong><span>Exact-duplicate content groups inside the archive</span></div>
+              <div><strong>150</strong><span>Archive entries matching loose files by SHA-256</span></div>
+            </div>
+            <div className="source-gap-list">
+              <div><span className="source-gap-marker" /><p><strong>PDF extraction pending.</strong> PDF content has not yet been fully extracted into the searchable text inventory.</p></div>
+              <div><span className="source-gap-marker" /><p><strong>Empty source file recorded.</strong> <code>PHASE_2_README.txt</code> is zero bytes in the current inventory.</p></div>
+              <div><span className="source-gap-marker" /><p><strong>Duplicates require interpretation.</strong> Byte-identical files are recorded for traceability; duplicates are not automatically deleted or treated as semantically redundant.</p></div>
+            </div>
+            <div className="source-recovery-actions">
+              <a className="secondary-button" href="https://github.com/sixtoast/Anime-language-/blob/main/sources/SOURCE-INVENTORY.md" target="_blank" rel="noreferrer">Open full source inventory <span aria-hidden="true">↗</span></a>
+              <button className="secondary-button" onClick={() => changeSection("Documentation")}>Browse source catalogue <span>→</span></button>
+              <button className="secondary-button" onClick={() => changeSection("Research & review")}>Review open evidence gaps <span>→</span></button>
+            </div>
           </div>
           <div className="section-heading lower-heading"><div><div className="eyebrow">GOVERNANCE</div><h2>Rules need evidence</h2></div><span className="section-caption">NO SILENT CHANGES</span></div>
           <div className="principle-list">{principles.map((item, i) => <div className="principle-row" key={item.status}><div className="principle-index">{String(i + 1).padStart(2, "0")}</div><div className="principle-copy"><strong>{item.title}</strong><p>{item.detail}</p></div><StatusPill status={item.status}/></div>)}</div>
