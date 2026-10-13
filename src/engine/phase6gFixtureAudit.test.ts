@@ -39,6 +39,20 @@ describe("recovered Phase 6G fixture observations", () => {
     expect(rejectedIdentifier?.comparison).toBe("context-dependent");
   });
 
+  it("compares only explicitly mapped historical diagnostic families", () => {
+    const byId = (id: string) => audit.observations.find((item) => item.id === id);
+    expect(byId("P6G-FX-003")?.errorFamilyComparison).toBe("match");
+    expect(byId("P6G-FX-004")?.errorFamilyComparison).toBe("match");
+    expect(byId("P6G-FX-006")?.errorFamilyComparison).toBe("match");
+    expect(byId("P6G-FX-009")?.errorFamilyComparison).toBe("match");
+    expect(byId("P6G-FX-010")?.errorFamilyComparison).toBe("match");
+    expect(byId("P6G-FX-011")?.errorFamilyComparison).toBe("match");
+    expect(byId("P6G-FX-012")?.errorFamilyComparison).toBe("match");
+    expect(byId("P6G-FX-013")?.errorFamilyComparison).toBe("match");
+    expect(byId("P6G-FX-015")?.errorFamilyComparison).toBe("match");
+    expect(byId("P6G-FX-008")?.errorFamilyComparison).toBeUndefined();
+  });
+
   it("records a control call containing a block without treating its signature as approved", () => {
     const controlCase = audit.observations.find((item) => item.id === "P6G-FX-008");
     expect(controlCase?.observedShape).toBe("Call-with-Block");
