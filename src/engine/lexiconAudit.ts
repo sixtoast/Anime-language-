@@ -16,7 +16,8 @@ export interface LexiconAuditFinding {
 export interface LexiconAuditReport {
   sourceLabel: string;
   sourceVersion: string;
-  acceptedRows: number;
+  structurallyValidRows: number;
+  acceptedLexicalRows: number;
   acceptedForms: number;
   aliasRows: number;
   registeredAliases: number;
@@ -80,7 +81,8 @@ export function auditLoadedLexicon(loaded: LoadedLexiconText): LexiconAuditRepor
   return {
     sourceLabel: loaded.registry.sourceLabel,
     sourceVersion: loaded.registry.sourceVersion,
-    acceptedRows: loaded.rowCount,
+    structurallyValidRows: loaded.rowCount,
+    acceptedLexicalRows: [...loaded.registry.entries.values()].reduce((sum, entry) => sum + entry.rowCount, 0),
     acceptedForms: loaded.registry.entries.size,
     aliasRows: loaded.aliasRowCount,
     registeredAliases: loaded.registry.aliases.size,
