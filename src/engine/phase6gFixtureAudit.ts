@@ -35,7 +35,7 @@ export interface Phase6GFixtureAudit {
   directlyComparable: number;
   directMatches: number;
   directMismatches: number;
-  unresolvedOrContextual: number;
+  nonDirectComparisons: number;
   observations: Phase6GFixtureObservation[];
   status: "observations-generated-not-acceptance";
   canonEffect: "none";
@@ -102,7 +102,7 @@ export function auditPhase6GFixtures(
     directlyComparable: direct.length,
     directMatches: direct.filter((item) => item.comparison === "match").length,
     directMismatches: direct.filter((item) => item.comparison === "mismatch").length,
-    unresolvedOrContextual: observations.filter((item) =>
+    nonDirectComparisons: observations.filter((item) =>
       item.comparison === "conditional-unresolved" ||
       item.comparison === "context-dependent" ||
       item.comparison === "scope-guardrail-confirmed"
