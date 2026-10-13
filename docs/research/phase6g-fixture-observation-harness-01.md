@@ -19,6 +19,10 @@ The recovered fixture file contains 16 source-derived cases. Several are direct 
 
 The audit summary deliberately uses the status `observations-generated-not-acceptance`. It is not a green/red release gate and does not claim every fixture passes.
 
+## Root-node checks
+
+The harness now records the observed root AST node kind (when a parse succeeds) and compares it to `expectedNode` for directly comparable positive fixtures. This avoids counting a parse as a match when the parser accepts the text but returns the wrong top-level node kind. Slot-specific expectations such as an identifier embedded in a binding still remain context-dependent until the harness can compare the exact child slot safely.
+
 ## Tests authored
 
 `src/engine/phase6gFixtureAudit.test.ts` checks:
