@@ -113,3 +113,8 @@ Catalogue regression tests and the extracted search helper are in commit `515adf
 - Update status only when evidence justifies it. Use commit SHAs and CI run links rather than “works” or “done” alone.
 - If an acceptance criterion is blocked by an out-of-scope engine failure, keep that dependency explicit and continue unrelated website work where safe.
 - The register tracks features across phases; phases do not replace the feature IDs.
+
+
+### CI correction note (2026-10-13)
+
+The first implementation of `WEB-DOC-REG-007` caused TypeScript build errors by importing Node filesystem modules without Node type declarations. The check has been rewritten to use Vite's repository file glob and does not add a dependency or modify engine files. Await CI results on the corrected commit before marking it passed.

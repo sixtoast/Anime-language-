@@ -44,3 +44,10 @@ The source-type metadata and its presentation have been committed in the website
 Added `WEB-DOC-REG-007` in `src/documentationCatalogue.test.ts`. On each CI test run it checks that every catalogue source path is repository-relative, contains no parent-directory traversal, exists in the checked-out repository, and resolves to a file. This guards against future broken or unsafe local source paths.
 
 **Verification status:** the check is committed for CI execution; it is not marked passed until a run on this commit reports the result. It does not test the rendered browser link, mobile layout, the authority/content of the linked document, or completeness of source recovery.
+
+
+## CI follow-up: path-integrity implementation
+
+The initial Node filesystem implementation of `WEB-DOC-REG-007` exposed a TypeScript configuration issue: Node type declarations are not configured in this Vite project, so that version failed the build. It has been replaced with Vite's `import.meta.glob` repository-file inventory, avoiding a new runtime dependency or a change to the TypeScript type environment.
+
+The updated check is committed for CI execution. The earlier run is not evidence that the corrected version passes. The unrelated existing surface-parser decimal-with-unit test also remains a separate CI failure.
