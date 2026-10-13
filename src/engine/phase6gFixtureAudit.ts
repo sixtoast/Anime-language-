@@ -186,7 +186,9 @@ export function auditPhase6GFixtures(
       ...(slotProbe ? { slotProbeDiagnosticCodes: slotProbe.diagnosticCodes } : {}),
       ...(fixture.expectedErrorFamily ? { expectedErrorFamily: fixture.expectedErrorFamily } : {}),
       ...(errorFamilyComparison ? { errorFamilyComparison } : {}),
-      note: fixture.expected === "accept-in-identifier-slot" || fixture.expected === "reject-in-identifier-slot"
+      note: HISTORICAL_IMPLEMENTATION_DIVERGENCES[fixture.id]
+        ? HISTORICAL_IMPLEMENTATION_DIVERGENCES[fixture.id] + " The source-derived fixture is retained, but its diagnostic-family comparison is deliberately not-comparable."
+        : fixture.expected === "accept-in-identifier-slot" || fixture.expected === "reject-in-identifier-slot"
         ? "Identifier-slot probe wraps the unchanged fixture input in KWAT to inspect the identifier position. This tests current parser behaviour only; it does not establish canonical grammar."
         : fixture.expectedNode === "QuantityLiteral"
           ? "The observed root AST node is compared with expectedNode; this verifies parser shape only, not canonical syntax or semantic validity."
