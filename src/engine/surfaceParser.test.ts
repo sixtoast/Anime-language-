@@ -92,7 +92,7 @@ describe("parseSurfaceExpression — provisional Phase 6G subset", () => {
   });
 
   it("rejects unresolved operator-like forms rather than guessing their arity", () => {
-    expect(parseSurfaceExpression("nes ki sho").diagnostics[0]?.code).toBe("UNKNOWN_LEXICAL_FORM");
+    expect(parseSurfaceExpression("nes ki sho").diagnostics[0]?.code).toBe("UNRESOLVED_OPERATOR");
   });
 
   it("fails closed on the known RE/RA homophone ambiguity", () => {
