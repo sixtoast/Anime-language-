@@ -115,9 +115,10 @@ Statuses use only these meanings: **Planned** (not implemented), **Implemented**
 - [x] Identify the five existing site sections and current product/roadmap documents.
 - [x] Locate the source inventory and archive report; preserve the distinction between structural inventory and complete content audit.
 - [x] Record the current CI run for the website build-status change.
-- [ ] Produce a feature-by-feature inventory mapped to existing UI, source/data, tests, and acceptance evidence.
-- [ ] Record each feature's status and known gaps without using unverified completion percentages.
-- [ ] Reconcile duplicate/conflicting planning documents so this file is the active website roadmap.
+- [x] Produce a first-pass feature-by-feature inventory mapped to existing UI and known gaps; stable feature IDs and acceptance/verification fields are recorded in [Website Feature Register](WEBSITE-FEATURE-REGISTER.md).
+- [x] Record first-pass statuses without using unverified completion percentages; several features still require UI-level verification.
+- [x] Reconcile the active website roadmap and label the older mixed roadmap as historical.
+- [ ] Expand the register into additional atomic records whenever the detailed audits reveal subfeatures not yet tracked.
 
 **Exit:** every requested website capability is accounted for as implemented, missing, blocked, or out of scope, with evidence or an explicit evidence gap.
 
@@ -130,7 +131,7 @@ Statuses use only these meanings: **Planned** (not implemented), **Implemented**
 - [ ] Verify a successful test run and production build on a recorded commit when the existing test failure is resolved through explicitly authorised scope.
 - [ ] Ensure stale or missing CI data is visibly marked.
 
-**Current evidence:** CI run [#157](https://github.com/sixtoast/Anime-language-/actions/runs/38447298985) on commit `a352f0fe86ab36c8950ddcab18c7a7fba5df41b6` completed with overall failure. Dependency installation and the “Type-check and build” step succeeded; “Run tests and write machine-readable results” failed. Therefore, the website build step passed, but the overall commit is not fully verified. The language-parser test failure is outside this website-only scope.
+**Current evidence:** The latest checked CI run is [#159](https://github.com/sixtoast/Anime-language-/actions/runs/38447949862), commit `69754f461938f2da830fce6bf78c98a5966b8d24`. Dependency installation and “Type-check and build” succeeded; “Run tests and write machine-readable results” and the test-summary step failed; publishing latest results was skipped. The website build step passed, but the overall commit is not fully verified. The language-parser test failure is outside this website-only scope. See the [Website Feature Register](WEBSITE-FEATURE-REGISTER.md) for the current evidence snapshot.
 
 **Exit:** the UI truthfully reports step-level results and a fresh, successful website build is recorded; test failure status is accurately shown even if its cause remains outside scope.
 
