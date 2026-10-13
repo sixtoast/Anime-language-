@@ -175,8 +175,10 @@ export function auditPhase6GFixtures(
       ...(errorFamilyComparison ? { errorFamilyComparison } : {}),
       note: fixture.expected === "accept-in-identifier-slot" || fixture.expected === "reject-in-identifier-slot"
         ? "Identifier-slot probe wraps the unchanged fixture input in KWAT to inspect the identifier position. This tests current parser behaviour only; it does not establish canonical grammar."
-        : fixture.expectedNode === "QuantityLiteral" || fixture.expectedNode === "Identifier"
-          ? "Fixture expects a particular syntactic slot/node; this generic expression audit does not certify that slot-specific contract."
+        : fixture.expectedNode === "QuantityLiteral"
+          ? "The observed root AST node is compared with expectedNode; this verifies parser shape only, not canonical syntax or semantic validity."
+          : fixture.expectedNode === "Identifier"
+            ? "The fixture names an identifier node, but this generic expression audit does not certify a slot-specific identifier contract."
         : fixture.expected.startsWith("accept-only-if") || fixture.expected.startsWith("accept-in-")
           ? "Context-dependent fixture; inspect the AST and source-backed signature before treating this observation as a result."
           : fixture.expectedErrorFamily
