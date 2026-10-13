@@ -87,7 +87,7 @@ class Parser {
   private cursor = 0;
   private readonly knownAtoms: Set<string>;
 
-  constructor(input: string, private readonly options: SurfaceParserOptions) {
+  constructor(input: string, options: SurfaceParserOptions) {
     this.tokens = input.trim() ? input.trim().split(/\s+/).map((token) => {
       const lowered = token.toLowerCase();
       return options.allowLegacyAliases === false ? lowered : (LEGACY_ALIASES[lowered] ?? lowered);
