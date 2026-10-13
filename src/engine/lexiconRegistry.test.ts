@@ -39,6 +39,15 @@ describe("source-aware provisional lexicon registry", () => {
     });
   });
 
+  it("preserves multiword references and clitic forms outside the atom inventory", () => {
+    const lexicon = registry();
+    expect(lexicon.nonAtomicEntries.get("mi (formal)")?.classes).toEqual(["REF"]);
+    expect(lexicon.nonAtomicEntries.get("mi (formal)")?.glosses).toContain("SELF");
+    expect(lexicon.nonAtomicEntries.has("s-")).toBe(true);
+    expect(lexicon.entries.has("mi (formal)")).toBe(false);
+    expect(lexicon.diagnostics.some((diagnostic) => diagnostic.code === "NON_ATOMIC_FORM")).toBe(true);
+  });
+
   it("extracts only the documented 'was <form>' alias pattern", () => {
     const lexicon = registry();
     expect(lexicon.aliases.get("frata")?.preferredForm).toBe("fraja");
