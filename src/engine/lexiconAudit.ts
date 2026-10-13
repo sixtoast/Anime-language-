@@ -5,6 +5,7 @@ export interface LexiconAuditFinding {
   code:
     | "CSV_STRUCTURE"
     | "REGISTRY_FILTER"
+    | "NON_ATOMIC_FORM"
     | "FORM_COLLISION"
     | "ALIAS_TARGET_MISSING"
     | "ALIAS_CONFLICT"
@@ -18,6 +19,8 @@ export interface LexiconAuditReport {
   sourceVersion: string;
   structurallyValidRows: number;
   acceptedLexicalRows: number;
+  retainedNonAtomicRows: number;
+  retainedNonAtomicForms: number;
   acceptedForms: number;
   aliasRows: number;
   registeredAliases: number;
@@ -43,7 +46,9 @@ export function auditLoadedLexicon(loaded: LoadedLexiconText): LexiconAuditRepor
   for (const diagnostic of loaded.registry.diagnostics) {
     findings.push({
       severity: diagnostic.code === "CONFLICTING_ALIAS_TARGETS" ? "error" : "warning",
-      code: diagnostic.code === "CONFLICTING_ALIAS_TARGETS" ? "ALIAS_CONFLICT" : "REGISTRY_FILTER",
+      code: diagnostic.code === "CONFLICTING_ALIAS_TARGETS"
+        ? "ALIAS_CONFLICT"
+        : diagnostic.code === "NON_ATOMIC_FORM" ? "NON_ATOMIC_FORM" : "REGISTRY_FILTER",
       message: diagnostic.message,
       ...(diagnostic.form ? { form: diagnostic.form } : {})
     });
@@ -83,6 +88,8 @@ export function auditLoadedLexicon(loaded: LoadedLexiconText): LexiconAuditRepor
     sourceVersion: loaded.registry.sourceVersion,
     structurallyValidRows: loaded.rowCount,
     acceptedLexicalRows: [...loaded.registry.entries.values()].reduce((sum, entry) => sum + entry.rowCount, 0),
+    retainedNonAtomicRows: [...loaded.registry.nonAtomicEntries.values()].reduce((sum, entry) => sum + entry.rowCount, 0),
+    retainedNonAtomicForms: loaded.registry.nonAtomicEntries.size,
     acceptedForms: loaded.registry.entries.size,
     aliasRows: loaded.aliasRowCount,
     registeredAliases: loaded.registry.aliases.size,
