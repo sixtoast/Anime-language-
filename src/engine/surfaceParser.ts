@@ -68,7 +68,7 @@ const LEGACY_ALIASES: Readonly<Record<string, string>> = {
   frata: "fraja", fraka: "frama", drim: "drum",
   dral: "dras", grak: "grash", kwak: "kwash"
 };
-const OPERATOR_CLASSES = new Set(["frapa", "fraja", "frama", "frala", "frasha", "dran", "drem", "drum", "dras", "gran", "grat", "grash", "kwam", "kwat", "kwash", "bek", "zet", "kole", "nes", "gama", "dave", "sima", "weki", "ruki"]);
+const OPERATOR_CLASSES = new Set(["frapa", "frata", "fraka", "frala", "frasha", "dran", "drem", "drim", "dral", "fraja", "frama", "drum", "dras", "gran", "grat", "grak", "grash", "kwam", "kwat", "kwak", "kwash", "bek", "zet", "kole", "nes", "gama", "dave", "sima", "weki", "ruki"]);
 
 class ParseFailure extends Error {
   constructor(
@@ -90,7 +90,7 @@ class Parser {
   constructor(input: string, options: SurfaceParserOptions) {
     this.tokens = input.trim() ? input.trim().split(/\s+/).map((token) => {
       const lowered = token.toLowerCase();
-      return options.allowLegacyAliases === false ? lowered : (LEGACY_ALIASES[lowered] ?? lowered);
+      return options.allowLegacyAliases === true ? (LEGACY_ALIASES[lowered] ?? lowered) : lowered;
     }) : [];
     this.knownAtoms = new Set((options.knownAtoms ?? []).map((atom) => atom.toLowerCase()));
   }
