@@ -32,6 +32,8 @@ export interface Phase6GFixtureObservation {
   slotProbeDiagnosticCodes?: string[];
   expectedErrorFamily?: string;
   errorFamilyComparison?: "match" | "mismatch" | "not-comparable";
+  historicalBehavior?: "accept" | "reject" | "not-recovered";
+  historicalEvidence?: string;
   note: string;
 }
 
@@ -97,9 +99,21 @@ function identifierSlotProbe(fixture: Phase6GFixture): {
  * reached. Keep the source-derived fixture, but do not call the TypeScript
  * diagnostic a match to historical executable behaviour.
  */
-const HISTORICAL_IMPLEMENTATION_DIVERGENCES: Readonly<Record<string, string>> = {
-  "P6G-FX-011": "Archived Python numeral() accepts RE MA as a closed numeral; prose-level homophone expectation differs.",
-  "P6G-FX-012": "Archived Python numeral() accepts KI RA as a closed numeral because RA is a registered unit; prose-level homophone expectation differs."
+const HISTORICAL_IMPLEMENTATION_DIVERGENCES: Readonly<Record<string, {
+  behavior: "accept" | "reject" | "not-recovered";
+  evidence: string;
+  explanation: string;
+}>> = {
+  "P6G-FX-011": {
+    behavior: "accept",
+    evidence: "Archived Python source: Parser.numeral() consumes RE from DIGITS, then accepts MA from UNITS.",
+    explanation: "Archived Python numeral() accepts RE MA as a closed numeral; prose-level homophone expectation differs."
+  },
+  "P6G-FX-012": {
+    behavior: "accept",
+    evidence: "Archived Python source: Parser.numeral() consumes KI from DIGITS, then accepts RA from UNITS.",
+    explanation: "Archived Python numeral() accepts KI RA as a closed numeral because RA is a registered unit; prose-level homophone expectation differs."
+  }
 };
 
 const DIRECT_ERROR_FAMILY_CODES: Readonly<Record<string, string>> = {
@@ -186,8 +200,12 @@ export function auditPhase6GFixtures(
       ...(slotProbe ? { slotProbeDiagnosticCodes: slotProbe.diagnosticCodes } : {}),
       ...(fixture.expectedErrorFamily ? { expectedErrorFamily: fixture.expectedErrorFamily } : {}),
       ...(errorFamilyComparison ? { errorFamilyComparison } : {}),
+      ...(HISTORICAL_IMPLEMENTATION_DIVERGENCES[fixture.id] ? {
+        historicalBehavior: HISTORICAL_IMPLEMENTATION_DIVERGENCES[fixture.id].behavior,
+        historicalEvidence: HISTORICAL_IMPLEMENTATION_DIVERGENCES[fixture.id].evidence
+      } : {}),
       note: HISTORICAL_IMPLEMENTATION_DIVERGENCES[fixture.id]
-        ? HISTORICAL_IMPLEMENTATION_DIVERGENCES[fixture.id] + " The source-derived fixture is retained, but its diagnostic-family comparison is deliberately not-comparable."
+        ? HISTORICAL_IMPLEMENTATION_DIVERGENCES[fixture.id].explanation + " The source-derived fixture is retained, but its diagnostic-family comparison is deliberately not-comparable."
         : fixture.expected === "accept-in-identifier-slot" || fixture.expected === "reject-in-identifier-slot"
         ? "Identifier-slot probe wraps the unchanged fixture input in KWAT to inspect the identifier position. This tests current parser behaviour only; it does not establish canonical grammar."
         : fixture.expectedNode === "QuantityLiteral"
