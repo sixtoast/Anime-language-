@@ -15,6 +15,7 @@ const rows: LexiconRow[] = [
   { form: "ra", gloss: "radian", cls: "UNIT", status: "CANON" },
   { form: "ra", gloss: "TARGET-path", cls: "REF", status: "CANON" },
   { form: "mi (formal)", gloss: "SELF", cls: "REF", status: "CANON" },
+  { form: "s-", gloss: "IF (clitic form of bek)", cls: "CLITIC", status: "CANON" },
   { form: "ben", gloss: "region", cls: "GEOM", status: "RENAMED", note: "was ren" }
 ];
 
