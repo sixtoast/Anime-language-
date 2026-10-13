@@ -2,7 +2,7 @@ export type TestExecutionStatus = "authored-unverified" | "blocked-by-specificat
 
 export interface WorkbenchTest {
   id: string;
-  group: "Parser" | "Dimensions" | "Semantic types";
+  group: "Parser" | "Dimensions" | "Semantic types" | "Operator contracts";
   title: string;
   description: string;
   status: TestExecutionStatus;
@@ -49,4 +49,12 @@ export const workbenchTests: WorkbenchTest[] = [
   { id: "SEM-006", group: "Semantic types", title: "Checks vector component compatibility", description: "Vector values are compared using their component types in this limited compatibility check.", status: "authored-unverified", file: "src/engine/semanticTypes.test.ts", sourceRule: "LAN-003, Phase 2 typing safeguards" },
   { id: "SEM-007", group: "Semantic types", title: "Blocks unresolved binding payload types", description: "Binding payloads with unspecified types are not considered compatible, even with each other.", status: "authored-unverified", file: "src/engine/semanticTypes.test.ts", sourceRule: "LAN-007" },
   { id: "SEM-008", group: "Semantic types", title: "Records measurement and assignment boundaries", description: "Semantic principles explicitly preserve observation output and the distinction between assignment and causation.", status: "authored-unverified", file: "src/engine/semanticTypes.test.ts", sourceRule: "LAN-004, LAN-008, MAG-003" }
+  { id: "OPC-001", group: "Operator contracts", title: "Registers provisional Phase 2 arities", description: "Only the nine explicitly proposed Phase 2 operators receive provisional arity metadata.", status: "authored-unverified", file: "src/engine/operatorContracts.test.ts", sourceRule: "Phase 2 §2; OPCON-001–004" },
+  { id: "OPC-002", group: "Operator contracts", title: "Does not invent executable types", description: "Provisional audit arity entries leave input and output types unresolved.", status: "authored-unverified", file: "src/engine/operatorContracts.test.ts", sourceRule: "Phase 2 §2; OPCON-001–004" },
+  { id: "OPC-003", group: "Operator contracts", title: "Preserves SIMA's limited observation claim", description: "SIMA is described as producing an observation, while arity remains unresolved.", status: "authored-unverified", file: "src/engine/operatorContracts.test.ts", sourceRule: "Phase 2 §2; OPCON-001–004" },
+  { id: "OPC-004", group: "Operator contracts", title: "Leaves conceptual signatures unresolved", description: "NES, GAMA, DAVE, binding and control operators do not receive guessed arities.", status: "authored-unverified", file: "src/engine/operatorContracts.test.ts", sourceRule: "Phase 2 §2; OPCON-001–004" },
+  { id: "OPC-005", group: "Operator contracts", title: "Requires sources and open questions", description: "Each contract entry includes source anchors and questions for future resolution.", status: "authored-unverified", file: "src/engine/operatorContracts.test.ts", sourceRule: "Phase 2 §2; OPCON-001–004" },
+  { id: "OPC-006", group: "Operator contracts", title: "Normalizes operator lookup", description: "Lookup is case-insensitive and trims surrounding whitespace.", status: "authored-unverified", file: "src/engine/operatorContracts.test.ts", sourceRule: "Phase 2 §2; OPCON-001–004" },
+  { id: "OPC-007", group: "Operator contracts", title: "Records anti-inference principles", description: "Registry principles explicitly prevent inferred signatures and conflated concepts.", status: "authored-unverified", file: "src/engine/operatorContracts.test.ts", sourceRule: "Phase 2 §2; OPCON-001–004" },
+  { id: "OPC-008", group: "Operator contracts", title: "Keeps execution rules non-executable", description: "Dimensional and evaluation descriptions are present but not presented as executable rules.", status: "authored-unverified", file: "src/engine/operatorContracts.test.ts", sourceRule: "Phase 2 §2; OPCON-001–004" }
 ];
