@@ -18,7 +18,7 @@ The seven-column lexicon CSV and six-column alias CSV have consistent row widths
 - 255 lexicon records are structurally valid.
 - 249 records are accepted as single-token lexical forms by the current registry filter.
 - 247 distinct single-token forms remain after grouping.
-- Six records are filtered because the registry currently excludes multiword/editorial forms. These are not deleted from the CSV; the registry's diagnostics should make this filtering visible.
+- Six records are preserved in a separate non-atomic inventory because they are multiword references or performed clitics. They remain available for review and are not treated as single-token parser atoms.
 - Seven explicit historical alias records are loaded.
 - All seven alias targets exist among the accepted lexical forms.
 - Two lexical collisions are detected:
@@ -43,7 +43,7 @@ These are explicit compatibility records. Their existence does not mean old spel
 
 ## Known limitations / next acceptance gates
 
-1. Registry filtering is currently simple: forms with spaces, forms ending in a hyphen, and forms starting with an opening parenthesis are excluded. Review all six excluded rows and decide whether to model them as metadata/editorial records rather than silently treating them as ordinary vocabulary.
+1. The registry keeps separate inventories for single-token atoms and non-atomic forms. The six non-atomic records are listed in the correction report and still need grammar-aware treatment before parser use.
 2. Alias evidence in the preferred lexicon rows is not currently relied upon for this snapshot; the seven explicit alias-registry rows are the authoritative alias input to this loader.
 3. The parser only uses the registry for atomic lexical lookup and explicit alias normalisation. It does not implement a full lexical-class grammar, semantic type checking, execution, or physical feasibility.
 4. The audit report's “ready for parser experiment” flag is structural only, not a language approval or production-readiness claim.
