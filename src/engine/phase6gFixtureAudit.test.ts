@@ -74,6 +74,28 @@ describe("recovered Phase 6G fixture observations", () => {
       .toBe("conditional-unresolved");
   });
 
+  it("reports diagnostic-family comparisons separately from direct syntax comparisons", () => {
+    expect(audit.diagnosticFamilyMatches).toBe(9);
+    expect(audit.diagnosticFamilyMismatches).toBe(0);
+    expect(audit.diagnosticFamiliesNotComparable).toBe(0);
+    expect(audit.diagnosticFamilyMatches).not.toBe(audit.directMatches);
+  });
+
+  it("does not guess when a historical error family has no explicit mapping", () => {
+    const unknownFamily: Phase6GFixture = {
+      id: "ERROR-FAMILY-UNKNOWN",
+      category: "diagnostic",
+      label: "unmapped historical family",
+      input: "ki to",
+      expected: "reject",
+      expectedErrorFamily: "historical-family-not-mapped",
+      canonStatus: "provisional"
+    };
+    const result = auditPhase6GFixtures("UNKNOWN-ERROR-FAMILY", [unknownFamily]);
+    expect(result.observations[0]?.errorFamilyComparison).toBe("not-comparable");
+    expect(result.diagnosticFamiliesNotComparable).toBe(1);
+  });
+
   it("does not label observational comparisons as fixture acceptance or canon approval", () => {
     expect(audit.status).toBe("observations-generated-not-acceptance");
     expect(audit.canonEffect).toBe("none");
