@@ -33,13 +33,14 @@ The harness now records the observed root AST node kind (when a parse succeeds) 
 4. The harness does not claim canon approval or fixture acceptance.
 5. The control fixture exposes its `Call-with-Block` AST shape while retaining a context-dependent comparison status.
 6. Identifier-slot fixtures receive a separate `KWAT`-wrapped probe; accepted/rejected observations remain context-dependent and do not silently become passes.
+7. Eight explicitly mapped historical diagnostic families are compared against current diagnostic codes, including the identifier-slot diagnostic via its probe. A mapped diagnostic match is syntax evidence only, not canon or semantic acceptance.
 
 ## What remains
 
 - Execute Vitest and the TypeScript/Vite build in CI.
 - Review every direct mismatch from the generated report.
 - Implement slot-aware comparison only when the recovered source defines the slot contract.
-- Compare error families to current diagnostic codes without assuming names are equivalent.
+- Compare historical error families only through an explicit, narrow mapping to current diagnostic codes; unmatched families remain not-comparable rather than guessed.
 - Keep syntax success distinct from semantic typing, mechanism validity, conservation/resource accounting, and physical feasibility.
 
 No canonical specification, lexicon entry, alias policy, or spell semantics were changed by this harness.
