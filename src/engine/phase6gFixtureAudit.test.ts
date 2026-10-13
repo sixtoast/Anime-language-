@@ -51,6 +51,10 @@ describe("recovered Phase 6G fixture observations", () => {
     expect(byId("P6G-FX-012")?.errorFamilyComparison).toBe("not-comparable");
     expect(byId("P6G-FX-011")?.note).toContain("Archived Python numeral()");
     expect(byId("P6G-FX-012")?.note).toContain("Archived Python numeral()");
+    expect(byId("P6G-FX-011")?.historicalBehavior).toBe("accept");
+    expect(byId("P6G-FX-012")?.historicalBehavior).toBe("accept");
+    expect(byId("P6G-FX-011")?.historicalEvidence).toContain("Parser.numeral()");
+    expect(byId("P6G-FX-012")?.historicalEvidence).toContain("Parser.numeral()");
     expect(byId("P6G-FX-013")?.errorFamilyComparison).toBe("match");
     expect(byId("P6G-FX-015")?.errorFamilyComparison).toBe("match");
     expect(byId("P6G-FX-008")?.errorFamilyComparison).toBeUndefined();
