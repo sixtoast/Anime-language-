@@ -1,0 +1,202 @@
+{
+  "schemaVersion": 1,
+  "suiteId": "PHASE6G-SURFACE-PARSER-RECOVERY",
+  "title": "Recovered Phase 6G surface-parser compatibility fixtures",
+  "status": "source-derived-review-fixtures-not-yet-executed",
+  "canonEffect": "none",
+  "purpose": "Preserve source-backed positive and negative cases from the archived Phase 6G prototype before any integration into the TypeScript workbench.",
+  "source": {
+    "reportPath": "sources/archive-reports/phase-audit-extracts/ARCANE_PHASE_6G_SURFACE_PARSER.md.extracted.txt",
+    "sourcePath": "sources/archive-reports/phase-audit-extracts/arcane_phase6g_surface_parser.py.extracted.txt",
+    "reportSha256": "ceb521416330a43e54972a7b2ef7da8479b71d62ae976948bf6e60e588c1b702",
+    "scriptSha256": "c703697e792129b831cea16802342eba0add75ab8fbf4abd8c68805fffcaa77e",
+    "evidenceType": "archived prototype report and source; reported test outcomes are historical, not current CI evidence"
+  },
+  "notation": {
+    "name": "phase-6g-prototype-surface-notation",
+    "description": "Whitespace-tokenised romanised tokens with fixed-arity head-initial expressions. Not the Phase 2 angle-bracket audit notation.",
+    "knownAliases": {
+      "FRATA": "FRAJA",
+      "FRAKA": "FRAMA",
+      "DRIM": "DRUM",
+      "DRAL": "DRAS",
+      "GRAK": "GRASH",
+      "KWAK": "KWASH"
+    },
+    "aliasStatus": "historically documented prototype aliases; not a global canon rewrite"
+  },
+  "cases": [
+    {
+      "id": "P6G-FX-001",
+      "category": "numeral",
+      "label": "integer numeral with explicit unit",
+      "input": "KI TO MA",
+      "expected": "accept",
+      "expectedNode": "QuantityLiteral",
+      "evidence": "Phase 6G report: numeral consists of digit tokens followed by a unit.",
+      "canonStatus": "provisional-prototype"
+    },
+    {
+      "id": "P6G-FX-002",
+      "category": "numeral",
+      "label": "decimal numeral with explicit decimal marker",
+      "input": "KI SHI TO MA",
+      "expected": "accept",
+      "expectedNode": "QuantityLiteral",
+      "evidence": "Phase 6G report: optional SHI decimal fraction precedes the unit.",
+      "canonStatus": "provisional-prototype"
+    },
+    {
+      "id": "P6G-FX-003",
+      "category": "numeral",
+      "label": "numeral missing unit closure",
+      "input": "KI TO",
+      "expected": "reject",
+      "expectedErrorFamily": "unterminated-numeral",
+      "evidence": "Phase 6G report: every numeral must end in a unit; SHO closes dimensionless numerals.",
+      "canonStatus": "provisional-prototype"
+    },
+    {
+      "id": "P6G-FX-004",
+      "category": "numeral",
+      "label": "decimal marker without following fractional digit",
+      "input": "KI SHI MA",
+      "expected": "reject",
+      "expectedErrorFamily": "malformed-decimal",
+      "evidence": "Recovered source requires at least one digit after SHI.",
+      "canonStatus": "provisional-prototype"
+    },
+    {
+      "id": "P6G-FX-005",
+      "category": "binding",
+      "label": "digit sequence closed by SHO as binding identifier",
+      "input": "KI TO SHO",
+      "expected": "accept-in-identifier-slot",
+      "expectedNode": "Identifier",
+      "evidence": "Phase 6G report: binding identifiers are numerals closed by SHO.",
+      "canonStatus": "provisional-prototype"
+    },
+    {
+      "id": "P6G-FX-006",
+      "category": "binding",
+      "label": "binding identifier without SHO closure",
+      "input": "KI TO",
+      "expected": "reject-in-identifier-slot",
+      "expectedErrorFamily": "identifier-not-closed",
+      "evidence": "Recovered source requires binding identifiers to end in SHO.",
+      "canonStatus": "provisional-prototype"
+    },
+    {
+      "id": "P6G-FX-007",
+      "category": "arithmetic",
+      "label": "nested fixed-arity arithmetic",
+      "input": "FRAPA KI SHO FRAPA TO SHO MU SHO",
+      "expected": "accept-if-all-operand-slots-are-valid",
+      "expectedNode": "Call",
+      "evidence": "Phase 6G uses head-initial fixed arity, without commas or angle brackets. Fixture is a structural target; verify exact token semantics against the source parser before execution.",
+      "canonStatus": "provisional-prototype",
+      "notes": "Do not interpret acceptance as type correctness or spell feasibility."
+    },
+    {
+      "id": "P6G-FX-008",
+      "category": "control",
+      "label": "control form with explicit block delimiters",
+      "input": "BEK GRAN ZA SHO TO SHO METO FRAPA KI SHO TO SHO DOGU",
+      "expected": "accept-only-if-source-backed-signatures-match",
+      "expectedNode": "Call-with-Block",
+      "evidence": "Phase 6G report: control forms take a condition followed by a block opened by METO and closed by DOGU.",
+      "canonStatus": "provisional-prototype",
+      "notes": "Operand spelling and operator signature are intentionally flagged for direct validation; do not use as canonical example."
+    },
+    {
+      "id": "P6G-FX-009",
+      "category": "control",
+      "label": "control form missing METO",
+      "input": "BEK GRAN ZA SHO TO SHO FRAPA KI SHO TO SHO DOGU",
+      "expected": "reject",
+      "expectedErrorFamily": "missing-block-open",
+      "evidence": "Phase 6G reported tests cover missing METO rejection.",
+      "canonStatus": "provisional-prototype"
+    },
+    {
+      "id": "P6G-FX-010",
+      "category": "control",
+      "label": "control form missing DOGU",
+      "input": "BEK GRAN ZA SHO TO SHO METO FRAPA KI SHO TO SHO",
+      "expected": "reject",
+      "expectedErrorFamily": "missing-block-close",
+      "evidence": "Phase 6G reported tests cover missing DOGU rejection.",
+      "canonStatus": "provisional-prototype"
+    },
+    {
+      "id": "P6G-FX-011",
+      "category": "lexical-ambiguity",
+      "label": "ambiguous RE in numeral context",
+      "input": "RE MA",
+      "expected": "reject-unless-context-resolves",
+      "expectedErrorFamily": "homophone-ambiguity",
+      "evidence": "Phase 6G report: RE/RA homophones across digit, unit and reference uses; fail closed when ambiguous.",
+      "canonStatus": "unresolved"
+    },
+    {
+      "id": "P6G-FX-012",
+      "category": "lexical-ambiguity",
+      "label": "ambiguous RA in numeral context",
+      "input": "KI RA",
+      "expected": "reject-unless-context-resolves",
+      "expectedErrorFamily": "homophone-ambiguity",
+      "evidence": "Phase 6G report: RA has unit/reference collision and requires slot-sensitive disambiguation.",
+      "canonStatus": "unresolved"
+    },
+    {
+      "id": "P6G-FX-013",
+      "category": "signature",
+      "label": "operator with unresolved signature",
+      "input": "NES KI SHO",
+      "expected": "reject",
+      "expectedErrorFamily": "unresolved-operator-signature",
+      "evidence": "Phase 6G report says NES and other incomplete signatures are rejected rather than guessed.",
+      "canonStatus": "unresolved"
+    },
+    {
+      "id": "P6G-FX-014",
+      "category": "alias",
+      "label": "legacy arithmetic alias normalisation",
+      "input": "FRATA KI SHO TO SHO",
+      "expected": "normalise-head-to-FRAJA",
+      "expectedErrorFamily": null,
+      "evidence": "Phase 6G report documents FRATA to FRAJA as a legacy alias.",
+      "canonStatus": "historical-alias-prototype"
+    },
+    {
+      "id": "P6G-FX-015",
+      "category": "delimiter",
+      "label": "block delimiter outside a control form",
+      "input": "METO KI SHO",
+      "expected": "reject",
+      "expectedErrorFamily": "delimiter-outside-control",
+      "evidence": "Phase 6G report records this rejection among its 19 historical tests.",
+      "canonStatus": "provisional-prototype"
+    },
+    {
+      "id": "P6G-FX-016",
+      "category": "scope-boundary",
+      "label": "syntactic acceptance does not imply semantic or physical validity",
+      "input": "FRAPA KI SHO TO MA",
+      "expected": "parse-result-must-not-claim-feasibility",
+      "expectedErrorFamily": null,
+      "evidence": "Phase 6G report explicitly states that parsed expressions may still be ill-typed, unevaluable, physically infeasible, or invalid mana constructions.",
+      "canonStatus": "canonical-guardrail"
+    }
+  ],
+  "executionPolicy": {
+    "currentStatus": "not-executed-against-current-TypeScript-workbench",
+    "mustNotClaim": [
+      "that these fixtures currently pass",
+      "that archived Python test results are current CI results",
+      "that a parsed expression is canonical Arcane",
+      "that syntax success implies type correctness, physical feasibility, or spell validity"
+    ],
+    "nextStep": "Implement a separate Phase 6G parser adapter or test harness, then execute these cases against that implementation and record per-case outputs without changing canon."
+  }
+}
