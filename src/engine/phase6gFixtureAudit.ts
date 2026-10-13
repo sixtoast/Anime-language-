@@ -30,6 +30,8 @@ export interface Phase6GFixtureObservation {
   observedShape?: string;
   observedSlotNode?: string;
   slotProbeDiagnosticCodes?: string[];
+  expectedErrorFamily?: string;
+  errorFamilyComparison?: "match" | "mismatch" | "not-comparable";
   note: string;
 }
 
@@ -85,6 +87,31 @@ function identifierSlotProbe(fixture: Phase6GFixture): {
   };
 }
 
+const DIRECT_ERROR_FAMILY_CODES: Readonly<Record<string, string>> = {
+  "unterminated-numeral": "UNTERMINATED_NUMERAL",
+  "malformed-decimal": "MALFORMED_DECIMAL",
+  "identifier-not-closed": "IDENTIFIER_NOT_CLOSED",
+  "missing-block-open": "MISSING_BLOCK_OPEN",
+  "missing-block-close": "MISSING_BLOCK_CLOSE",
+  "homophone-ambiguity": "AMBIGUOUS_HOMOPHONE",
+  "unresolved-operator-signature": "UNRESOLVED_OPERATOR",
+  "delimiter-outside-control": "BLOCK_DELIMITER_OUTSIDE_CONTROL"
+};
+
+function observedErrorFamily(
+  fixture: Phase6GFixture,
+  diagnosticCodes: readonly string[],
+  slotProbeDiagnosticCodes: readonly string[] | undefined
+): "match" | "mismatch" | "not-comparable" | undefined {
+  if (!fixture.expectedErrorFamily) return undefined;
+  const expectedCode = DIRECT_ERROR_FAMILY_CODES[fixture.expectedErrorFamily];
+  if (!expectedCode) return "not-comparable";
+  const observedCodes = fixture.expected === "reject-in-identifier-slot"
+    ? (slotProbeDiagnosticCodes ?? [])
+    : diagnosticCodes;
+  return observedCodes.includes(expectedCode) ? "match" : "mismatch";
+}
+
 function compareFixture(fixture: Phase6GFixture, result: SurfaceParseResult): FixtureComparison {
   if (fixture.expected === "accept" || fixture.expected === "reject") {
     const matchedAcceptance = (fixture.expected === "accept") === result.ok;
@@ -127,18 +154,22 @@ export function auditPhase6GFixtures(
     });
     const comparison = compareFixture(fixture, result);
     const slotProbe = identifierSlotProbe(fixture);
+    const diagnosticCodes = result.diagnostics.map((diagnostic) => diagnostic.code);
+    const errorFamilyComparison = observedErrorFamily(fixture, diagnosticCodes, slotProbe?.diagnosticCodes);
     return {
       id: fixture.id,
       input: fixture.input,
       expected: fixture.expected,
       observed: result.ok ? "accept" as const : "reject" as const,
       comparison,
-      diagnosticCodes: result.diagnostics.map((diagnostic) => diagnostic.code),
+      diagnosticCodes,
       ...(result.ast?.kind === "call" ? { observedOperator: result.ast.operator } : {}),
       ...(rootNodeName(result) ? { observedNode: rootNodeName(result) } : {}),
       ...(observedShape(result) ? { observedShape: observedShape(result) } : {}),
       ...(slotProbe?.node ? { observedSlotNode: slotProbe.node } : {}),
       ...(slotProbe ? { slotProbeDiagnosticCodes: slotProbe.diagnosticCodes } : {}),
+      ...(fixture.expectedErrorFamily ? { expectedErrorFamily: fixture.expectedErrorFamily } : {}),
+      ...(errorFamilyComparison ? { errorFamilyComparison } : {}),
       note: fixture.expected === "accept-in-identifier-slot" || fixture.expected === "reject-in-identifier-slot"
         ? "Identifier-slot probe wraps the unchanged fixture input in KWAT to inspect the identifier position. This tests current parser behaviour only; it does not establish canonical grammar."
         : fixture.expectedNode === "QuantityLiteral" || fixture.expectedNode === "Identifier"
@@ -146,7 +177,11 @@ export function auditPhase6GFixtures(
         : fixture.expected.startsWith("accept-only-if") || fixture.expected.startsWith("accept-in-")
           ? "Context-dependent fixture; inspect the AST and source-backed signature before treating this observation as a result."
           : fixture.expectedErrorFamily
-            ? "Current diagnostic codes are retained separately; historical error-family names are not assumed equivalent."
+            ? (errorFamilyComparison === "match"
+            ? "A narrowly documented historical error family maps to the observed diagnostic code; this is syntax-diagnostic evidence only."
+            : errorFamilyComparison === "mismatch"
+              ? "The observed diagnostic does not match the narrowly mapped historical error family; investigate before changing parser behaviour."
+              : "Current diagnostic codes are retained separately; no direct historical error-family mapping is asserted.")
             : "Observation only; no canon, semantic, or physical-validity claim."
     };
   });
