@@ -103,7 +103,7 @@ This section is the working tracker. The tables above are the readable overview;
 
 ## Current CI evidence snapshot
 
-The latest completed baseline before the current change was [run #160](https://github.com/sixtoast/Anime-language-/actions/runs/38448246996), for commit `79afe0d5424599257639dfbe1206c9cd05fdf3ac`; it completed with overall failure. The current source-link update is being checked by [run #161](https://github.com/sixtoast/Anime-language-/actions/runs/38448548199), which was still in progress at the last check. Do not report run #161 as passed until it completes. Previous runs show the type-check/build step succeeding while tests fail; the known parser failure remains outside the website-only change scope.
+Catalogue regression tests and extracted search helper were added in commit `2408eb52d047abafd8cc9f249614762065f425f7`; [run #165](https://github.com/sixtoast/Anime-language-/actions/runs/38449227505) is the first CI run for that change and was still in progress at the last check. Previous runs show the type-check/build step succeeding while tests fail; do not claim this change is verified until run #165 completes. The known parser failure remains outside the website-only change scope.
 
 ## Register maintenance rules
 

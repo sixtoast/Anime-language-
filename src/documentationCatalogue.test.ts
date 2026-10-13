@@ -38,6 +38,6 @@ describe("Documentation catalogue website regression checks", () => {
       "Grammar & syntax",
       "FRAPA contract"
     ]);
-    expect(filterDocuments("this term should not exist").toEqual([]);
+    expect(filterDocuments("this term should not exist")).toEqual([]);
   });
 });

@@ -17,8 +17,6 @@ const phase6gFixtureAudit = auditPhase6GFixtures(
   phase6gFixtureData.suiteId,
   phase6gFixtureData.cases as Phase6GFixture[]
 );
-type Status = "Canonical" | "Provisional" | "Open question" | "Deprecated";
-
 const navigation: { label: Section; icon: typeof Activity; group: string }[] = [
   { label: "Overview", icon: Layers3, group: "WORKSPACE" },
   { label: "Documentation", icon: BookOpen, group: "LANGUAGE" },
