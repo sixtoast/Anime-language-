@@ -14,6 +14,7 @@ export interface ParsedCsv {
 /**
  * Small RFC-4180-style CSV reader for the project's simple UTF-8 source files.
  * Handles quoted commas, doubled quotes, CRLF/LF and embedded newlines.
+ * Rows with the wrong number of cells are diagnosed and excluded.
  */
 export function parseCsvText(text: string): ParsedCsv {
   const records: string[][] = [];
@@ -64,17 +65,24 @@ export function parseCsvText(text: string): ParsedCsv {
 
   const headers = records[0].map((header) => header.trim().toLowerCase());
   const diagnostics: string[] = [];
+  if (headers.some((header) => !header)) {
+    diagnostics.push("CSV contains an empty column name.");
+    return { headers, rows: [], diagnostics };
+  }
   if (new Set(headers).size !== headers.length) {
     diagnostics.push("CSV contains duplicate column names.");
     return { headers, rows: [], diagnostics };
   }
 
-  const rows = records.slice(1).map((cells, rowIndex) => {
+  const validRecords: string[][] = [];
+  records.slice(1).forEach((cells, rowIndex) => {
     if (cells.length !== headers.length) {
-      diagnostics.push(`Row ${rowIndex + 2} has ${cells.length} cells; expected ${headers.length}.`);
+      diagnostics.push(`Record ${rowIndex + 2} has ${cells.length} cells; expected ${headers.length}; record excluded.`);
+    } else {
+      validRecords.push(cells);
     }
-    return Object.fromEntries(headers.map((header, index) => [header, cells[index] ?? ""]));
   });
+  const rows = validRecords.map((cells) => Object.fromEntries(headers.map((header, index) => [header, cells[index] ?? ""])));
   return { headers, rows, diagnostics };
 }
 
