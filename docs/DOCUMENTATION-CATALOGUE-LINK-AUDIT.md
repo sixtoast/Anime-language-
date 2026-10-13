@@ -30,3 +30,10 @@ After the update, all 19 catalogue entries have one explicit `sourcePath`, and a
 4. Continue checking that the source's status and implementation status are never conflated.
 
 See [Website Feature Register](WEBSITE-FEATURE-REGISTER.md) for the capability mapping and remaining audits.
+
+
+## Provenance display update
+
+The Documentation catalogue now stores and displays a **source type** and a **provenance note** for each of its 19 entries. Examples include canonical specification copy, provisional audit document, derived structured catalogue, implementation documentation, product plan, documentation index, and original historical source file. These are descriptive provenance labels; they do not replace the existing status labels or establish that a source is correct, canonical, or fully implemented.
+
+The source-type metadata and its presentation have been committed in the website. Browser-level review of the wording and source-link interactions remains part of WEB-DOC-03 and WEB-DOC-02.
