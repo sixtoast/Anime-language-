@@ -37,7 +37,7 @@ Do not interpret “implemented” as “verified”. A file existing or a histo
 
 ## First-pass source-link audit
 
-The documentation catalogue in `src/App.tsx` currently has **14 unique explicit `sourcePath` values**. Each of those 14 paths was compared with the current recursive repository tree on 2026-10-13; all 14 paths existed at that point.
+The documentation catalogue in `src/App.tsx` has **19 entries total**. The initial scan found 14 explicit `sourcePath` values and 5 entries without a path. The five missing paths have now been filled with grounded repository links, so all 19 entries have an explicit path; all 19 paths were checked against the current repository tree. See [Documentation Catalogue First-Pass Link Audit](DOCUMENTATION-CATALOGUE-LINK-AUDIT.md).
 
 The 14 checked paths are:
 
@@ -58,7 +58,7 @@ The 14 checked paths are:
 
 This is a path-existence check, not a browser click test and not a claim that the content of each document has been audited. The links are constructed from the repository's `main` branch, so they resolve to the current branch contents rather than pinning a specific commit.
 
-The initial code scan also found **19 catalogue entries without an explicit `sourcePath`**. Some may intentionally represent open questions or conceptual topics rather than documents. They must be classified individually; do not automatically invent a file or treat every source-less entry as a defect.
+The initial note incorrectly said 19 entries lacked an explicit `sourcePath`; that count meant total catalogue entries, not missing paths. The correct initial count was 5 missing paths out of 19 entries. Those five entries now have grounded links, with the source limitations recorded in the link audit.
 
 ## Required next audits
 
@@ -81,7 +81,7 @@ This section is the working tracker. The tables above are the readable overview;
 | WEB-OV-01 | Verified health and recent activity in Overview | Original five-section vision; product plan | High | CI status model; repository metadata | `src/App.tsx`, `src/styles.css`, CI workflow data | Commit/run links and timestamps are real; stale/missing data is labelled; no inferred green status | Not yet audited end-to-end | Implemented — unverified |
 | WEB-OV-02 | Evidence-backed next website task recommendation | Development Cockpit proposal | High | Feature register; task priorities/dependencies; source links | `src/App.tsx`, website plan/register | Exactly one useful next task includes reason, dependencies, files, acceptance criteria, and verification path; no fabricated progress | No verified recommendation workflow established in first pass | Planned / audit required |
 | WEB-DOC-01 | Searchable documentation catalogue | Existing Documentation section | High | Existing catalogue data | `src/App.tsx`, source inventory | Search/selection/status UI works; empty results are clear; existing supported entries remain reachable | Code inspected; UI tests not run | Implemented — unverified |
-| WEB-DOC-02 | Source link and path integrity | Original source-library vision | High | WEB-DOC-01 | `src/App.tsx`, repository paths, `docs/DOCUMENTATION-CATALOGUE-LINK-AUDIT.md` | Every entry is classified; each claimed file link points to an existing file; browser interaction checked; missing sources remain explicit | 14/14 explicit paths exist in tree; 19 entries lack explicit `sourcePath`; browser interaction not checked | Partially implemented |
+| WEB-DOC-02 | Source link and path integrity | Original source-library vision | High | WEB-DOC-01 | `src/App.tsx`, repository paths, `docs/DOCUMENTATION-CATALOGUE-LINK-AUDIT.md` | Every entry is classified; each claimed file link points to an existing file; browser interaction checked; missing sources remain explicit | 19/19 entries now have explicit paths that exist in the repository tree; browser interaction not checked | Partially implemented |
 | WEB-DOC-03 | Provenance, authority, version, and status metadata | Product plan and original vision | High | WEB-DOC-02; source inventory | `src/App.tsx`, source inventory and documentation | Original, transcription, summary, proposal, historical, canonical, implemented, and verified states are not conflated | Not yet systematically audited | Planned / audit required |
 | WEB-DOC-04 | Duplicate, missing-metadata, and source-recovery gap visibility | Source recovery plan | Medium | WEB-DOC-02; archive inventory | `sources/SOURCE-INVENTORY.md`, `src/App.tsx` | UI states actual known gaps and audit depth; does not claim complete recovery without evidence | Existing inventory is only an initial structural inventory | Planned |
 | WEB-PLAY-01 | Reliable existing Playground interactions and errors | Existing Playground; Interactive Language Lab vision | High | Existing supported modes | `src/App.tsx`, `src/styles.css` | Inputs and outputs remain usable; errors/empty states are clear; failure in one area does not break app | UI and error states not yet exercised systematically | Implemented — unverified |
