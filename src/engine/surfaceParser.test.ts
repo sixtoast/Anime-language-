@@ -103,15 +103,18 @@ describe("parseSurfaceExpression — provisional Phase 6G subset", () => {
     expect(parseSurfaceExpression("ki ra").diagnostics[0]?.code).toBe("AMBIGUOUS_HOMOPHONE");
   });
 
-  it("normalises documented legacy aliases by default", () => {
-    expect(parseSurfaceExpression("frata ki sho to sho")).toMatchObject({
+  it("does not rewrite canonical-looking operator forms by default", () => {
+    expect(parseSurfaceExpression("frata ki sho to sho").diagnostics[0]?.code).toBe("UNRESOLVED_OPERATOR");
+    expect(parseSurfaceExpression("fraka ki sho to sho").diagnostics[0]?.code).toBe("UNRESOLVED_OPERATOR");
+    expect(parseSurfaceExpression("drim ki sho to sho").diagnostics[0]?.code).toBe("UNRESOLVED_OPERATOR");
+    expect(parseSurfaceExpression("dral ki sho to sho mu sho").diagnostics[0]?.code).toBe("UNRESOLVED_OPERATOR");
+  });
+
+  it("normalises legacy aliases only when explicitly enabled", () => {
+    expect(parseSurfaceExpression("frata ki sho to sho", { allowLegacyAliases: true })).toMatchObject({
       ok: true,
       ast: { kind: "call", operator: "FRAJA" }
     });
-  });
-
-  it("can disable legacy alias normalisation", () => {
-    expect(parseSurfaceExpression("frata ki sho to sho", { allowLegacyAliases: false }).diagnostics[0]?.code).toBe("UNKNOWN_LEXICAL_FORM");
   });
 
   it("rejects block delimiters outside a control form", () => {
