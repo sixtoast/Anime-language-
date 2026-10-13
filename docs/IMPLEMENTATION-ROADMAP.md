@@ -1,3 +1,5 @@
+> **Scope clarification (2026-10-13):** This file is a historical mixed roadmap. Its language-engine phases are retained as project history, not as active instructions for the current website workstream. The active, authoritative website task list is [`WEBSITE-MASTER-IMPLEMENTATION-PLAN.md`](WEBSITE-MASTER-IMPLEMENTATION-PLAN.md). Current website work must not modify Arcane canon, vocabulary, grammar, parser/engine behaviour, operator semantics, or spell mechanics unless the owner explicitly changes that scope.
+
 # Implementation roadmap
 
 ## Phase 0 — project foundation
