@@ -28,6 +28,17 @@ describe("recovered Phase 6G fixture observations", () => {
     expect(audit.directMismatches).toBe(1);
   });
 
+  it("probes recovered identifier fixtures in the KWAT identifier slot without changing their input", () => {
+    const acceptedIdentifier = audit.observations.find((item) => item.id === "P6G-FX-005");
+    const rejectedIdentifier = audit.observations.find((item) => item.id === "P6G-FX-006");
+    expect(acceptedIdentifier?.input).toBe("KI TO SHO");
+    expect(acceptedIdentifier?.observedSlotNode).toBe("Identifier");
+    expect(acceptedIdentifier?.comparison).toBe("context-dependent");
+    expect(rejectedIdentifier?.input).toBe("KI TO");
+    expect(rejectedIdentifier?.slotProbeDiagnosticCodes).toContain("IDENTIFIER_NOT_CLOSED");
+    expect(rejectedIdentifier?.comparison).toBe("context-dependent");
+  });
+
   it("records a control call containing a block without treating its signature as approved", () => {
     const controlCase = audit.observations.find((item) => item.id === "P6G-FX-008");
     expect(controlCase?.observedShape).toBe("Call-with-Block");
