@@ -78,7 +78,9 @@ describe("recovered Phase 6G fixture observations", () => {
     expect(audit.diagnosticFamilyMatches).toBe(9);
     expect(audit.diagnosticFamilyMismatches).toBe(0);
     expect(audit.diagnosticFamiliesNotComparable).toBe(0);
-    expect(audit.diagnosticFamilyMatches).not.toBe(audit.directMatches);
+    expect(audit.directMatches).toBe(9);
+    expect(audit.directMismatches).toBe(0);
+    // Equal counts here are coincidental; they represent different comparisons.
   });
 
   it("does not guess when a historical error family has no explicit mapping", () => {
