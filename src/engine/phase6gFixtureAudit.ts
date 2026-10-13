@@ -26,6 +26,7 @@ export interface Phase6GFixtureObservation {
   comparison: FixtureComparison;
   diagnosticCodes: string[];
   observedOperator?: string;
+  observedNode?: string;
   note: string;
 }
 
@@ -41,10 +42,26 @@ export interface Phase6GFixtureAudit {
   canonEffect: "none";
 }
 
+function rootNodeName(result: SurfaceParseResult): string | undefined {
+  if (!result.ok || !result.ast) return undefined;
+  switch (result.ast.kind) {
+    case "quantity": return "QuantityLiteral";
+    case "identifier": return "Identifier";
+    case "call": return "Call";
+    case "block": return "Block";
+    case "atom": return "Atom";
+    default: return undefined;
+  }
+}
+
 function compareFixture(fixture: Phase6GFixture, result: SurfaceParseResult): FixtureComparison {
   if (fixture.expected === "accept" || fixture.expected === "reject") {
-    const matched = (fixture.expected === "accept") === result.ok;
-    return matched ? "match" : "mismatch";
+    const matchedAcceptance = (fixture.expected === "accept") === result.ok;
+    if (!matchedAcceptance) return "mismatch";
+    if (fixture.expected === "accept" && fixture.expectedNode) {
+      return rootNodeName(result) === fixture.expectedNode ? "match" : "mismatch";
+    }
+    return "match";
   }
   if (fixture.expected === "normalise-head-to-FRAJA") {
     return result.ok && result.ast?.kind === "call" && result.ast.operator === "FRAJA"
@@ -86,6 +103,7 @@ export function auditPhase6GFixtures(
       comparison,
       diagnosticCodes: result.diagnostics.map((diagnostic) => diagnostic.code),
       ...(result.ast?.kind === "call" ? { observedOperator: result.ast.operator } : {}),
+      ...(rootNodeName(result) ? { observedNode: rootNodeName(result) } : {}),
       note: fixture.expectedNode === "QuantityLiteral" || fixture.expectedNode === "Identifier"
         ? "Fixture expects a particular syntactic slot/node; this generic expression audit does not certify that slot-specific contract."
         : fixture.expected.startsWith("accept-only-if") || fixture.expected.startsWith("accept-in-")
