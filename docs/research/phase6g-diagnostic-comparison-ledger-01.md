@@ -30,9 +30,9 @@ The identifier-slot rejection uses the separate KWAT-wrapped probe's diagnostics
 
 ### Known discrepancy: RE/RA homophone fixtures
 
-The archived Python implementation's `numeral()` accepts `RE MA` as a closed numeral (RE is consumed as digit 4, then MA is accepted as the unit) and accepts `KI RA` as a closed numeral (RA is in its unit set). The report prose and the recovered fixture labels instead describe these as ambiguous contexts that should fail closed unless context resolves them. The current TypeScript parser intentionally rejects both forms.
+Source inspection of the archived Python implementation's `Parser.numeral()` shows that it accepts `RE MA` as a closed numeral (RE is consumed from `DIGITS`, then MA is accepted from `UNITS`) and accepts `KI RA` as a closed numeral (KI is consumed from `DIGITS`, then RA is accepted from `UNITS`). This is a static reading of the archived source, not a fresh execution of the Python prototype. The report prose and the recovered fixture labels instead describe these as ambiguous contexts that should fail closed unless context resolves them. The current TypeScript parser intentionally rejects both forms.
 
-Consequently, fixtures `P6G-FX-011` and `P6G-FX-012` are marked `not-comparable` for historical diagnostic-family comparison. Their TypeScript diagnostics match the prose-level expectation, but they do **not** match the archived Python executable behaviour. This is a source/prototype discrepancy to investigate, not a TypeScript pass or failure against the historical implementation. The fixture records are preserved unchanged.
+Consequently, fixtures `P6G-FX-011` and `P6G-FX-012` are marked `not-comparable` for historical diagnostic-family comparison. The observation object now exposes structured `historicalBehavior: "accept"` and `historicalEvidence` fields for these two cases, and the workbench displays that evidence next to the current TypeScript diagnostics. Their TypeScript diagnostics match the prose-level expectation, but they do **not** match the archived Python executable behaviour. This is a source/prototype discrepancy to investigate, not a TypeScript pass or failure against the historical implementation. The fixture records are preserved unchanged.
 
 Mappings are intentionally exact and narrow. No fuzzy matching, substring matching, or inferred equivalence is used. If a historical family has no explicit mapping, the audit reports `not-comparable`.
 
@@ -60,7 +60,7 @@ The counts can coincide by chance; they do not represent the same evidence. Neit
 ## Known limitations and next actions
 
 1. The test assertions are authored but have not been confirmed by a fresh CI run for the latest commits.
-2. The archived Python prototype is historical evidence. A proper cross-implementation ledger still needs the relevant archived case-level outputs, not just the reported aggregate test count.
+2. The archived Python source establishes the likely control flow by inspection, but it has not been freshly executed. A proper cross-implementation ledger still needs reproducible case-level outputs from running both implementations against the same fixture corpus.
 3. The current harness reports observations at runtime; it does not persist a machine-readable baseline artifact with commit SHA and parser version.
 4. The audit does not type-check, evaluate, account for mana/resources, establish mechanisms, or assess physical feasibility.
 5. A future comparison artifact should record fixture ID, source evidence, expected behaviour, current TypeScript output, historical Python output where available, AST shape, diagnostic comparison, commit SHA, and an explicit unresolved reason.
