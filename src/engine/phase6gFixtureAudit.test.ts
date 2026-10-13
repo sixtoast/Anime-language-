@@ -49,6 +49,8 @@ describe("recovered Phase 6G fixture observations", () => {
     // Archived Python code accepts these numerals; prose-level homophone expectations differ.
     expect(byId("P6G-FX-011")?.errorFamilyComparison).toBe("not-comparable");
     expect(byId("P6G-FX-012")?.errorFamilyComparison).toBe("not-comparable");
+    expect(byId("P6G-FX-011")?.note).toContain("Archived Python numeral()");
+    expect(byId("P6G-FX-012")?.note).toContain("Archived Python numeral()");
     expect(byId("P6G-FX-013")?.errorFamilyComparison).toBe("match");
     expect(byId("P6G-FX-015")?.errorFamilyComparison).toBe("match");
     expect(byId("P6G-FX-008")?.errorFamilyComparison).toBeUndefined();
