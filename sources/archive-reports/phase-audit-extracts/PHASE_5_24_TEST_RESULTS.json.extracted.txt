@@ -1,0 +1,67 @@
+ARCHIVE SOURCE: Arcane_Phase_6S_Typed_Expression_Integration/PHASE_5_24_TEST_RESULTS.json
+SHA-256: ea6bad2ddba66146dab3646e892dd094e5dc050aac5d594126718dc540d0f70d
+NOTE: Derived review copy; original ZIP member unchanged.
+========================================================================
+
+[
+  {
+    "id": "P5.24-T01",
+    "status": "PASS",
+    "description": "KWAM declares a binding and KWAT reads captured value",
+    "detail": "declaration=3 [1]; KWAT=3 [1]"
+  },
+  {
+    "id": "P5.24-T02",
+    "status": "PASS",
+    "description": "KWAK reevaluates a stored expression against changed inputs",
+    "detail": "KWAT=4 [L]; KWAK after update=9 [L]"
+  },
+  {
+    "id": "P5.24-T03",
+    "status": "PASS",
+    "description": "Undefined binding is rejected",
+    "detail": "rejected: Undefined binding 'MISSING'"
+  },
+  {
+    "id": "P5.24-T04",
+    "status": "PASS",
+    "description": "Duplicate declaration in same scope is rejected",
+    "detail": "rejected: Duplicate declaration 'X' in the same scope"
+  },
+  {
+    "id": "P5.24-T05",
+    "status": "PASS",
+    "description": "Dimension mismatch during live evaluation is rejected",
+    "detail": "rejected: FRAPA requires matching dimensions; got L and T"
+  },
+  {
+    "id": "P5.24-T06",
+    "status": "PASS",
+    "description": "Division by zero is rejected",
+    "detail": "rejected: FRALA division by zero"
+  },
+  {
+    "id": "P5.24-T07",
+    "status": "PASS",
+    "description": "Declaration is atomic if its RHS fails",
+    "detail": "failed RHS left no X binding"
+  },
+  {
+    "id": "P5.24-T08",
+    "status": "PASS",
+    "description": "Captured value stays stable after external input changes",
+    "detail": "captured=2 [1]; live=7 [1]"
+  },
+  {
+    "id": "P5.24-T09",
+    "status": "PASS",
+    "description": "Nested arithmetic inside a binding preserves parse structure",
+    "detail": "{'expression': 'KWAM\u27e8X, FRAPA\u27e8KI, FRAPA\u27e8TO, MU\u27e9\u27e9\u27e9', 'result': '6 [1]', 'events': [{'event': 'declare', 'name': 'X', 'captured': '6 [1]'}]}"
+  },
+  {
+    "id": "P5.24-T10",
+    "status": "PASS",
+    "description": "Malformed arity is rejected before evaluation",
+    "detail": "rejected: FRAPA expects 2 argument(s), got 1"
+  }
+]

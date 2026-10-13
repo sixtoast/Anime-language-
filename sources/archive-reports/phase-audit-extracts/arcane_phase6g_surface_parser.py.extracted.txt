@@ -1,0 +1,283 @@
+ARCHIVE SOURCE: Arcane_Phase_6S_Typed_Expression_Integration/arcane_phase6g_surface_parser.py
+SHA-256: c703697e792129b831cea16802342eba0add75ab8fbf4abd8c68805fffcaa77e
+NOTE: Derived review copy; original ZIP member unchanged.
+========================================================================
+
+#!/usr/bin/env python3
+"""Arcane Phase 6G: a source-grounded, fail-closed surface token parser.
+
+This is a narrow parser prototype for the Formal expression subset. It consumes
+whitespace-tokenised lowercase/uppercase romanised words; it is not a speech
+recogniser, phonetic parser, complete Arcane grammar, or spell compiler.
+The AST deliberately keeps literals, identifiers, atoms, calls, and blocks distinct.
+"""
+from __future__ import annotations
+from dataclasses import dataclass
+from decimal import Decimal, InvalidOperation
+from pathlib import Path
+import csv, re, sys
+
+ROOT = Path(__file__).resolve().parent
+LEXICON_PATH = ROOT / 'Arcane_Lexicon_v5_draft.csv'
+
+class ArcaneParseError(ValueError):
+    pass
+
+@dataclass(frozen=True)
+class Node: pass
+@dataclass(frozen=True)
+class Atom(Node):
+    form: str
+    cls: str = 'UNKNOWN'
+@dataclass(frozen=True)
+class QuantityLiteral(Node):
+    value: Decimal
+    unit: str
+    raw_number: str
+@dataclass(frozen=True)
+class Identifier(Node):
+    digits: str
+@dataclass(frozen=True)
+class Call(Node):
+    operator: str
+    args: tuple[Node, ...]
+@dataclass(frozen=True)
+class Block(Node):
+    expressions: tuple[Node, ...]
+
+# Only operators whose fixed arity and operand parse shape are sufficiently clear
+# for this parser milestone. Unknown operator-like lexemes fail closed.
+ARITY = {
+    'frapa': 2, 'fraja': 2, 'frama': 2, 'frala': 2, 'frasha': 1,
+    'dran': 1, 'drem': 2, 'drum': 2, 'dras': 3,
+    'gran': 2, 'grat': 2, 'grash': 1,
+    'kwam': 2, 'kwat': 1, 'kwash': 1,
+    'bek': 2, 'zet': 2, 'kole': 2,
+}
+CONTROL = {'bek', 'zet', 'kole'}
+BLOCK_OPEN, BLOCK_CLOSE = 'meto', 'dogu'
+DIGITS = {'za':'0','ki':'1','to':'2','mu':'3','re':'4','sa':'5','fi':'6','du':'7','go':'8','pe':'9'}
+DECIMAL_MARK = 'shi'
+UNITS = {'ma','se','ke','ra','ku','sho','vo'}
+# DRAS's criterion vocabulary is audit metalanguage only, not approved Arcane words.
+AUDIT_CRITERIA = {'lt','le','eq','ne','ge','gt'}
+OPERATOR_CLASSES = {'ARITH','VEC','LOGIC','CTRL','BIND','SET','MATH','CONSTR','TIME','STATE','INFO'}
+LEGACY_ALIASES = {'frata':'fraja','fraka':'frama','drim':'drum','dral':'dras','grak':'grash','kwak':'kwash'}
+
+
+def load_lexicon(path=LEXICON_PATH):
+    if not Path(path).exists():
+        raise FileNotFoundError(f'Lexicon CSV not found: {path}')
+    rows = list(csv.DictReader(open(path, encoding='utf-8', newline='')))
+    forms = {}
+    for row in rows:
+        form = row.get('form','').strip().lower()
+        if not form or ' ' in form or form.endswith('-') or form.startswith('('):
+            continue
+        forms.setdefault(form, []).append(row)
+    # Rename notes provide documentary evidence for these aliases.
+    aliases = dict(LEGACY_ALIASES)
+    for form, entries in forms.items():
+        for row in entries:
+            note = row.get('note','')
+            match = re.search(r'\bwas\s+([a-zəʃŋ]+)', note.lower())
+            if match:
+                aliases[match.group(1)] = form
+    return forms, aliases
+
+FORMS, ALIASES = load_lexicon()
+
+
+def norm(token: str) -> str:
+    t = token.strip().lower()
+    if not t:
+        raise ArcaneParseError('Empty token')
+    return ALIASES.get(t, t)
+
+
+def lex_class(form: str) -> str:
+    entries = FORMS.get(form, [])
+    if not entries:
+        return 'UNKNOWN'
+    # Prefer formal/shared records over fused reference records when homophones exist.
+    classes = [e.get('cls','UNKNOWN') for e in entries]
+    for c in classes:
+        if c not in {'FUSED-REF'}:
+            return c
+    return classes[0]
+
+class Parser:
+    def __init__(self, tokens):
+        self.tokens = [norm(t) for t in tokens]
+        self.i = 0
+
+    def peek(self):
+        return self.tokens[self.i] if self.i < len(self.tokens) else None
+
+    def take(self):
+        t = self.peek()
+        if t is None:
+            raise ArcaneParseError('Unexpected end of input')
+        self.i += 1
+        return t
+
+    def parse_all(self):
+        if not self.tokens:
+            raise ArcaneParseError('Empty input')
+        nodes = []
+        while self.peek() is not None:
+            nodes.append(self.expr())
+        if len(nodes) != 1:
+            raise ArcaneParseError(f'Trailing expression sequence: input contains {len(nodes)} top-level expressions; expected exactly one')
+        return nodes[0]
+
+    def numeral(self):
+        """Parse digit+ [SHI digit+] unit; each numeral must end in a unit."""
+        start = self.i
+        whole = []
+        while self.peek() in DIGITS:
+            whole.append(DIGITS[self.take()])
+        if not whole:
+            raise ArcaneParseError('Expected numeral digit')
+        frac = None
+        if self.peek() == DECIMAL_MARK:
+            self.take()
+            frac_digits = []
+            while self.peek() in DIGITS:
+                frac_digits.append(DIGITS[self.take()])
+            if not frac_digits:
+                raise ArcaneParseError('SHI decimal marker must be followed by at least one digit')
+            frac = ''.join(frac_digits)
+        unit = self.peek()
+        if unit not in UNITS:
+            raw = ' '.join(self.tokens[start:self.i])
+            if self.tokens[start] in {'re', 'ra'}:
+                raise ArcaneParseError(f'{self.tokens[start].upper()} is a documented homophone (digit/unit/reference); explicit context-sensitive disambiguation is not implemented')
+            raise ArcaneParseError(f'Unterminated numeral {raw!r}: every numeral must end in a unit (SHO for dimensionless values)')
+        self.take()
+        rawnum = ''.join(whole) + ('.' + frac if frac is not None else '')
+        try:
+            value = Decimal(rawnum)
+        except InvalidOperation:
+            raise ArcaneParseError(f'Invalid numeral: {rawnum}')
+        return QuantityLiteral(value, unit, rawnum)
+
+    def identifier(self):
+        """Parse a binding identifier: one or more digits closed by SHO."""
+        start = self.i
+        digits = []
+        while self.peek() in DIGITS:
+            digits.append(DIGITS[self.take()])
+        if not digits:
+            raise ArcaneParseError('Binding identifier must be a numeral closed by SHO')
+        if self.peek() != 'sho':
+            raw = ' '.join(self.tokens[start:self.i])
+            raise ArcaneParseError(f'Binding identifier {raw!r} must end in SHO')
+        self.take()
+        return Identifier(''.join(digits))
+
+    def expr(self):
+        t = self.peek()
+        if t is None:
+            raise ArcaneParseError('Expected expression, found end of input')
+        if t in DIGITS:
+            return self.numeral()
+        if t == BLOCK_OPEN or t == BLOCK_CLOSE:
+            raise ArcaneParseError(f'{t.upper()} is only valid as a control-block delimiter')
+        if t in ARITY:
+            op = self.take()
+            if op == 'kwam':
+                ident = self.identifier()
+                value = self.expr()
+                return Call(op, (ident, value))
+            if op == 'kwat':
+                ident = self.identifier()
+                return Call(op, (ident,))
+            if op in CONTROL:
+                cond = self.expr()
+                if self.peek() != BLOCK_OPEN:
+                    raise ArcaneParseError(f'{op.upper()} requires METO before its block')
+                self.take()
+                body = []
+                while self.peek() != BLOCK_CLOSE:
+                    if self.peek() is None:
+                        raise ArcaneParseError(f'{op.upper()} block is missing DOGU')
+                    body.append(self.expr())
+                self.take()  # DOGU
+                return Call(op, (cond, Block(tuple(body))))
+            if op == 'dras':
+                a = self.expr(); b = self.expr()
+                criterion = self.peek()
+                if criterion not in AUDIT_CRITERIA:
+                    raise ArcaneParseError('DRAS third argument must be a comparison criterion; LT/LE/EQ/NE/GE/GT are audit-only tokens pending canonical surface forms')
+                self.take()
+                return Call(op, (a, b, Atom(criterion, 'AUDIT_CRITERION')))
+            args = tuple(self.expr() for _ in range(ARITY[op]))
+            return Call(op, args)
+        # Non-operator lexemes may be arguments/atomic references; unknown words are rejected.
+        form = self.take()
+        if form not in FORMS and form not in AUDIT_CRITERIA:
+            raise ArcaneParseError(f'Unknown lexical form {form!r}; not found in consolidated lexicon')
+        cls = lex_class(form)
+        if cls in OPERATOR_CLASSES:
+            raise ArcaneParseError(f'Operator-like lexeme {form.upper()} has no enabled parser signature in Phase 6G; refusing to guess its arity')
+        if form in {'re','ra'}:
+            raise ArcaneParseError(f'{form.upper()} is a documented homophone (digit/unit/reference); explicit context-sensitive disambiguation is not implemented')
+        return Atom(form, cls)
+
+
+def parse_surface(text: str) -> Node:
+    # Phase 6G accepts whitespace tokenisation only. Prosodic/sigil inputs are out of scope.
+    tokens = text.split()
+    return Parser(tokens).parse_all()
+
+
+def render(node: Node) -> str:
+    if isinstance(node, Atom): return f'Atom({node.form}:{node.cls})'
+    if isinstance(node, QuantityLiteral): return f'Quantity({node.raw_number} {node.unit.upper()})'
+    if isinstance(node, Identifier): return f'Identifier({node.digits})'
+    if isinstance(node, Block): return 'Block[' + ', '.join(render(x) for x in node.expressions) + ']'
+    if isinstance(node, Call): return node.operator.upper() + '(' + ', '.join(render(x) for x in node.args) + ')'
+    return repr(node)
+
+
+def run_tests():
+    tests = []
+    def check(name, source, expect_ok, contains=None):
+        try:
+            got = parse_surface(source)
+            ok = expect_ok
+            detail = render(got)
+            if contains and contains not in detail: ok = False; detail += f' [missing expected {contains}]'
+            if not expect_ok: ok = False; detail = 'unexpectedly accepted'
+        except ArcaneParseError as e:
+            ok = not expect_ok
+            detail = str(e)
+        tests.append((name, ok, detail))
+    check('integer numeral closes with unit', 'frapa ki sho to sho', True, 'FRAPA')
+    check('decimal numeral closes with unit', 'frapa za shi to ma ki sho', True, '0.2 MA')
+    check('reject unterminated numeral', 'frapa ki to', False)
+    check('reject decimal with no fractional digit', 'za shi ma', False)
+    check('binding identifier uses SHO closure', 'kwam ki sho frapa ki sho to sho', True, 'Identifier(1)')
+    check('reject binding id without SHO', 'kwam ki frapa ki sho to sho', False)
+    check('reference binding reads SHO-closed id', 'kwat to mu sho', True, 'Identifier(23)')
+    check('nested fixed-arity expressions', 'frapa frama ki sho to sho fraja mu sho za sho', True, 'FRAJA')
+    check('IF block with explicit delimiters', 'bek dras ki sho to sho gt meto frapa ki sho to sho dogu', True, 'Block[')
+    check('nested control blocks', 'bek gran dras ki sho to sho gt dras mu sho sa sho gt meto zet dras ki sho to sho lt meto frapa ki sho to sho dogu dogu', True, 'ZET')
+    check('reject missing METO', 'bek dras ki sho to sho gt frapa ki sho to sho dogu', False)
+    check('reject missing DOGU', 'bek dras ki sho to sho gt meto frapa ki sho to sho', False)
+    check('reject trailing top-level expression', 'ki sho to sho', False)
+    check('reject unknown word', 'notarealword', False)
+    check('reject unresolved operator arity', 'nes ni', False)
+    check('reject ambiguous homophone', 're', False)
+    check('legacy alias normalisation', 'frata ki sho to sho', True, 'FRAJA')
+    check('reject unclosed identifier numeral', 'kwat ki', False)
+    check('reject block delimiter at top level', 'meto ki sho dogu', False)
+    return tests
+
+if __name__ == '__main__':
+    tests = run_tests()
+    for i, (name, ok, detail) in enumerate(tests, 1):
+        print(f'{i:02d}. {"PASS" if ok else "FAIL"} — {name}: {detail}')
+    print(f'RESULT: {sum(x[1] for x in tests)}/{len(tests)} passed')
+    sys.exit(0 if all(x[1] for x in tests) else 1)

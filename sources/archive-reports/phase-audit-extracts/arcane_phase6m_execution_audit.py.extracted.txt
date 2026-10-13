@@ -1,0 +1,58 @@
+ARCHIVE SOURCE: Arcane_Phase_6S_Typed_Expression_Integration/arcane_phase6m_execution_audit.py
+SHA-256: cc63c6d7147f21190523f6ddc11928ae07795365a7276c3abf9487b5df3c1268
+NOTE: Derived review copy; original ZIP member unchanged.
+========================================================================
+
+#!/usr/bin/env python3
+"""Phase 6M: execute source/registry evidence checks and classify grammar tests honestly.
+This does not pretend unavailable parser/runtime/physical tests were executed.
+"""
+from pathlib import Path
+import csv
+ROOT=Path(__file__).resolve().parent
+REG=ROOT/'Arcane_Phase_6L_Operator_Contract_Registry.csv'
+P4=ROOT/'Arcane_Language_Audit_Phase_4.txt'
+REC=ROOT/'Arcane_Continuity_Recovery_Audit.txt'
+TESTS=ROOT/'Arcane_Grammar_Consistency_Test_Register.docx'
+with REG.open(encoding='utf-8-sig',newline='') as f: rows=list(csv.DictReader(f))
+by={r['form'].lower():r for r in rows}
+p4=P4.read_text(encoding='utf-8')
+rec=REC.read_text(encoding='utf-8')
+results=[]
+def check(name,condition,detail): results.append((name,'PASS' if condition else 'FAIL',detail))
+check('Registry input available',bool(rows),'Loaded Phase 6L operator registry')
+check('FRAPA binary contract documented',by.get('frapa',{}).get('arity_or_shape','').lower()=='binary','Registry documents FRAPA as binary; this checks metadata only, not parser enforcement')
+check('FRATA historical alias documented','was frata' in by.get('fraja',{}).get('lexicon_note','').lower(),'Registry links current FRAJA to historical FRATA')
+check('Unique-parse rule present','unique parse' in rec.lower(),'Recovery audit states executable expressions require a unique parse')
+check('Fixed-arity rule present','g-1 fixed arity' in p4.lower(),'Phase 4 records fixed arity and typed signatures as a grammar rule')
+check('Modifier scope rule present','nearest preceding clause at the same block level' in p4.lower(),'Phase 4 documents clause-level modifier attachment')
+check('FRASHA source/runtime mismatch remains flagged','frasha' in by and ('abs()' in by['frasha'].get('open_issue','').lower() and 'negative numeral sign' in by['frasha'].get('open_issue','').lower()),'Registry still flags the earlier absolute-value implementation conflict')
+check('KOLE remains provisional',by.get('kole',{}).get('lexicon_status','').upper().startswith('PROPOSED'),'No silent canon promotion')
+# These are execution statuses for the original T-001..T-016 plan. Document evidence is not a pass.
+tests=[
+('T-001','BLOCKED','Need current parser/runtime to verify missing/extra arguments; registry arity metadata is not execution.'),
+('T-002','BLOCKED','Historical FRATA alias is documented, but runtime operand-order test is unavailable.'),
+('T-003','BLOCKED','Grouping semantics require executable parser and evaluated examples.'),
+('T-004','BLOCKED','Need ambiguity corpus and parser rejection/disambiguation tests.'),
+('T-005','BLOCKED','No clause/modifier parser available to exercise scope.'),
+('T-006','BLOCKED','Requires authoritative type environment and type-checker integration.'),
+('T-007','BLOCKED','SIMA/RI/VANU measurement completeness requires a formal signature and context model.'),
+('T-008','BLOCKED','Registry documents binding forms, but the Phase 6H runtime source is unavailable for semantic execution.'),
+('T-009','BLOCKED','Temporal signatures are not complete in recovered materials.'),
+('T-010','BLOCKED','Control-flow runtime and termination contract are incomplete.'),
+('T-011','BLOCKED','Requires spoken/rapid-speech/noise listener testing; no audio/listener results supplied.'),
+('T-012','BLOCKED','Macro expansion and feasibility checker are not available in this package.'),
+('T-013','BLOCKED','Requires a construction mechanism model and feasibility checks.'),
+('T-014','BLOCKED','Requires a physical conservation/resource model.'),
+('T-015','BLOCKED','Requires Logos substrate, memory, energy, bandwidth and interface cost model.'),
+('T-016','BLOCKED','Requires a defined numeric feasibility model and a concrete spell specification.'),
+]
+with (ROOT/'PHASE_6M_EXECUTION_STATUS.csv').open('w',encoding='utf-8',newline='') as f:
+ w=csv.writer(f); w.writerow(['test_id','status','reason']); w.writerows(tests)
+with (ROOT/'PHASE_6M_EVIDENCE_CHECKS.txt').open('w',encoding='utf-8') as f:
+ for i,(name,status,detail) in enumerate(results,1): f.write(f'{i:02d}. {status} — {name}: {detail}\n')
+ f.write(f'RESULT: {sum(s=="PASS" for _,s,_ in results)}/{len(results)} evidence checks passed\n')
+ f.write('NOTE: these are source/registry evidence checks, not passes for T-001..T-016.\n')
+print((ROOT/'PHASE_6M_EVIDENCE_CHECKS.txt').read_text())
+print('Grammar test statuses:')
+for tid,status,reason in tests: print(f'{tid} {status}: {reason}')

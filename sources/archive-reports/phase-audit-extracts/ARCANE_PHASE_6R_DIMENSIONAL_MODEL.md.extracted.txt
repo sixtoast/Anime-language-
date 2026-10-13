@@ -1,0 +1,25 @@
+ARCHIVE SOURCE: Arcane_Phase_6S_Typed_Expression_Integration/ARCANE_PHASE_6R_DIMENSIONAL_MODEL.md
+SHA-256: 15024e3970bdb8ac8882745c04576f40995b35fc3e44b7ac147b727acab76968
+NOTE: Derived review copy; original ZIP member unchanged.
+========================================================================
+
+# Arcane Phase 6R — Provisional dimensional value model
+
+## Purpose
+Phase 6R introduces a small typed-value layer for physical quantities. It is deliberately separate from the Phase 6P/6Q expression evaluator, so the existing test-notation behaviour remains unchanged while dimensional semantics are reviewed.
+
+## Model
+A quantity is a Decimal magnitude plus a sparse dimension vector. Symbols such as `L`, `M`, and `T` are abstract placeholders for length, mass, and time; they do not establish canonical Arcane unit names, scale factors, or conversion rules. A vector such as `L^1 T^-1` can represent a length-per-time dimension without selecting a physical unit.
+
+- Addition and subtraction require identical dimension vectors.
+- Multiplication adds exponent vectors.
+- Division subtracts exponent vectors and rejects a zero divisor.
+- Negation changes only the magnitude.
+- Dimensionless values use the empty vector.
+- Decimal magnitudes are required to avoid silent binary-float coercion.
+
+## Explicit non-goals
+This does not establish canonical Arcane grammar, unit names, unit conversions, measurement-completeness rules, sensor/pathway semantics, uncertainty propagation, physical feasibility, or Logos cost. It does not yet connect quantities to the surface-language evaluator. All dimension symbols and signatures are provisional engineering scaffolding pending source-backed decisions.
+
+## Reproduction
+Run `python -m unittest -v test_arcane_reference_runtime test_phase6q_grammar test_phase6r_dimensions` from this directory. The suite combines the existing Phase 6P/6Q tests with the new Phase 6R dimensional tests.

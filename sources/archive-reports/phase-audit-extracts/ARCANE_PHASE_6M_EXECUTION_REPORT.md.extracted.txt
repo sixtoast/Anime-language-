@@ -1,0 +1,52 @@
+ARCHIVE SOURCE: Arcane_Phase_6S_Typed_Expression_Integration/ARCANE_PHASE_6M_EXECUTION_REPORT.md
+SHA-256: f25de76f588a7dc73e73e282451fa8f93c5d8fe4012372b56ad90dfafc588595
+NOTE: Derived review copy; original ZIP member unchanged.
+========================================================================
+
+# Arcane Phase 6M — Grammar and consistency test execution report
+
+**Status:** evidence audit executed; original semantic/operational test plan remains blocked pending missing components. No canon changes made.
+
+## Important distinction
+
+The recovered Grammar & Consistency Test Register explicitly says that its 16 tests were defined but had not been executed and evidenced. Phase 6M preserves that historical statement. The new script runs eight source/registry evidence checks, but those checks are **not** reported as passes for T-001–T-016.
+
+## Executed evidence checks
+
+The audit checks whether the current Phase 6L registry and recovered source files document: registry availability, FRAPA's declared binary arity, FRAJA's historical FRATA alias, the unique-parse rule, fixed-arity rule, modifier scope rule, the FRASHA mismatch warning and KOLE's provisional status.
+
+The result file records each check and its outcome. These checks confirm documentation presence only; they do not prove that an executable parser enforces the documented rules.
+
+## T-001–T-016 execution status
+
+| ID | Status | Why it is not yet executable here |
+|---|---|---|
+| T-001 | BLOCKED | Current parser/runtime missing; metadata is not arity enforcement. |
+| T-002 | BLOCKED | Need executable operand-order tests. |
+| T-003 | BLOCKED | Need parser and evaluation to compare nested expressions. |
+| T-004 | BLOCKED | Need ambiguity corpus and parser behaviour. |
+| T-005 | BLOCKED | Need modifier parser and scope tests. |
+| T-006 | BLOCKED | Need integrated type environment/checker. |
+| T-007 | BLOCKED | Measurement signature/context model incomplete. |
+| T-008 | BLOCKED | Binding runtime unavailable; forms alone do not prove semantics. |
+| T-009 | BLOCKED | Temporal signatures incomplete. |
+| T-010 | BLOCKED | Control-flow semantics and runtime incomplete. |
+| T-011 | BLOCKED | Requires human-listener and noisy/rapid-speech trials. |
+| T-012 | BLOCKED | Macro expansion and feasibility checker unavailable. |
+| T-013 | BLOCKED | Construction mechanism and feasibility model needed. |
+| T-014 | BLOCKED | Physical conservation/resource model needed. |
+| T-015 | BLOCKED | Logos cost model is underspecified. |
+| T-016 | BLOCKED | Requires a concrete spell and defined feasibility terms. |
+
+`BLOCKED` is not a failure; it means the test cannot honestly be executed with the currently available implementation/evidence. No original test is marked PASS.
+
+## Findings
+
+1. The specification's fixed-arity and unique-parse principles are documented, but source statements alone do not prove implementation conformance.
+2. The current registry says FRAJA replaced FRATA; T-002 still needs execution against the parser to confirm argument order and alias handling.
+3. FRASHA remains a known mismatch in the Phase 6H evaluator. Phase 6K tests only a reference negation contract, not the missing full runtime.
+4. Human-listener, construction feasibility, conservation, and Logos accounting tests cannot be substituted with lexical CSV checks.
+
+## Required next input/work
+
+Recover the actual Phase 6H runtime and its test files (or restore them from the earlier Phase 6H ZIP), then execute T-001–T-008 where supported. Separately define temporal/control signatures and the construction/physical feasibility model before attempting T-009–T-016. Listener-dependent T-011 requires a real protocol, audio stimuli and participant results.

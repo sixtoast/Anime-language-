@@ -1,0 +1,89 @@
+ARCHIVE SOURCE: Arcane_Phase_6S_Typed_Expression_Integration/ARCANE_PHASE_6G_SURFACE_PARSER.md
+SHA-256: ceb521416330a43e54972a7b2ef7da8479b71d62ae976948bf6e60e588c1b702
+NOTE: Derived review copy; original ZIP member unchanged.
+========================================================================
+
+# Arcane Phase 6G — Surface Parser Prototype
+
+**Status:** prototype; deliberately incomplete; not canon-locked.
+
+## Goal
+
+Implement the first source-grounded parser for the Formal expression subset, moving beyond the audit-only `OP⟨arg1, ...⟩` notation. Phase 6G accepts whitespace-tokenised, romanised forms and builds an AST. It does not perform speech recognition, parse pitch/prosody, parse sigils, type-check the AST, evaluate it, compile Construction Feet, or execute magic.
+
+## Source-grounded rules
+
+This parser follows the recovered Phase 4 rules:
+
+- **G-1:** fixed arity and head-initial expressions; argument boundaries are recovered from the operator's arity, not commas.
+- **G-2:** every numeral ends in a unit; `SHO` closes dimensionless numerals; binding identifiers are numerals closed by `SHO`.
+- **G-3:** no optional arguments. Missing required context must eventually be rejected by semantic/type checking; this parser does not yet model context bindings.
+- **G-5:** control forms take a condition followed by a block opened by `METO` and closed by `DOGU`.
+- **G-6:** the operational semantics for IF/WHILE/UNTIL remain the Phase 6F evaluator's concern; Phase 6G only parses their structure.
+- **Rename history:** the parser normalises documented legacy forms such as `FRATA` → `FRAJA`, `FRAKA` → `FRAMA`, `DRIM` → `DRUM`, `DRAL` → `DRAS`, `GRAK` → `GRASH`, and `KWAK` → `KWASH`.
+
+The lexicon CSV is read at runtime. Only operator signatures explicitly enabled in the parser are accepted as executable heads. Known operator-like forms with incomplete signatures (for example `NES`) are rejected instead of being guessed as one-argument or zero-argument words.
+
+## Supported parse subset
+
+- Arithmetic: `FRAPA`, `FRAJA`, `FRAMA`, `FRALA`, `FRASHA`.
+- Vector: `DRAN`, `DREM`, `DRUM`, `DRAS` (comparison criterion is audit-only).
+- Logic: `GRAN`, `GRAT`, `GRASH`.
+- Bindings: `KWAM`, `KWAT`, `KWASH` with numerically encoded identifiers closed by `SHO`.
+- Control blocks: `BEK`, `ZET`, and provisional `KOLE`, using explicit `METO ... DOGU` delimiters.
+- Numerals: digit tokens, optional `SHI` decimal fraction, then a unit (`MA`, `SE`, `KE`, `RA`, `KU`, `SHO`, or `VO`).
+
+The comparison criteria `LT`, `LE`, `EQ`, `NE`, `GE`, `GT` are parser-test metalanguage, not approved Arcane vocabulary. They must be replaced by recovered/canonically approved forms before treating `DRAS` examples as fully surface-canonical.
+
+## Validation
+
+The included script runs **19/19 parser tests**. Coverage includes:
+
+1. integer numeral closure;
+2. decimal numeral closure;
+3. unterminated numeral rejection;
+4. malformed decimal rejection;
+5. SHO-closed binding identifier;
+6. missing identifier closure rejection;
+7. identifier retrieval;
+8. nested fixed-arity arithmetic;
+9. explicit IF block;
+10. nested control blocks;
+11. missing `METO` rejection;
+12. missing `DOGU` rejection;
+13. multiple top-level expression rejection;
+14. unknown lexical form rejection;
+15. unresolved operator signature rejection;
+16. ambiguous `RE` rejection;
+17. legacy alias normalisation;
+18. unclosed binding identifier rejection;
+19. block delimiter outside a control form rejection.
+
+Run with Python 3:
+
+```bash
+python arcane_phase6g_surface_parser.py
+```
+
+Place `Arcane_Lexicon_v5_draft.csv` beside the script.
+
+## Known limitations / defects intentionally not hidden
+
+- This is a whitespace-token parser, not a phonological, prosodic, sigil, or vernacular parser.
+- The enabled signature table is incomplete. `SIMA`, `NES`, `GAMA`, `DAVE`, temporal operators, `WEKI`, `RUKI`, and several construction operators are not enabled because their full argument signatures or operational rules are not adequately recovered in the current implementation.
+- `DRAS` comparison criteria remain audit-only tokens; their canonical Arcane forms are unresolved.
+- `RE` and `RA` are documented homophones across digit/unit/reference uses. This parser fails closed on ambiguous contexts rather than inventing disambiguation rules. A future parser needs slot-sensitive lexical analysis and the exact recovered grammar.
+- Numeric parsing currently supports decimal notation only; no signed-number surface form, unit conversion, exponent notation, or locale-specific numeral conventions are implemented.
+- The parser builds AST nodes but does not yet convert them to the Phase 6E/6F AST classes. A separate adapter should be added and tested, not silently assumed.
+- A syntactically parsed expression is not necessarily well-typed, evaluable, physically feasible, or a valid mana construction.
+- `KOLE`, `METO`, and `DOGU` remain proposed in the current lexicon CSV. Implementing their documented Phase 4 grammar roles does not promote their lexical status to canon.
+
+## Decision ledger entry
+
+- **Existing rule/source:** Phase 4 G-1, G-2, G-3, G-5, G-6; Phase 4 rename table; Phase 5 consolidated lexicon.
+- **Defect addressed:** prior phases used audit notation and did not parse SHO-closed identifiers or explicit `METO`/`DOGU` blocks from a linear token stream.
+- **Implementation choice:** narrow, fixed-arity recursive-descent parser; explicit block delimiters; lexicon-backed token validation; fail-closed handling of unresolved signatures and known homophones.
+- **Alternatives rejected:** guessing missing operator arities; treating every token as an atom; using commas/brackets not present in the formal surface grammar.
+- **Test result:** 19/19 prototype tests pass.
+- **Decision status:** implementation approach provisionally accepted for further integration; grammar is not locked and the whole language is not certified complete.
+- **Next step:** build an AST adapter to the type checker/evaluator, then add source-backed signature coverage and unit/frame checks. Separately design a context-sensitive lexical disambiguator for homophones, backed by grammar slots and listening tests.

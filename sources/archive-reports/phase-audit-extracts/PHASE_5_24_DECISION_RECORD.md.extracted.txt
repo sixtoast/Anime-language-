@@ -1,0 +1,19 @@
+ARCHIVE SOURCE: Arcane_Phase_6S_Typed_Expression_Integration/PHASE_5_24_DECISION_RECORD.md
+SHA-256: 134664845fadda179a38f0dc44d597cfa5da92a969dd208412fae1ba37b318f8
+NOTE: Derived review copy; original ZIP member unchanged.
+========================================================================
+
+# Decision Record — Phase 5.24
+
+- **Decision ID:** D-051 (proposed; not canon until owner approval)
+- **Existing rule/source:** Canonical Arcane v3.0-L names `KWAM` as create binding, `KWAT` as reference binding, and `KWAK` as live evaluation. Exact evaluation, capture, and lifetime semantics were unresolved in the recovery audit.
+- **Concrete gap:** The three operators could be implemented inconsistently, making it unclear whether a later read returns an old value or recomputes from a changing input.
+- **Options considered:**
+  - A. Value-only binding: declaration evaluates and stores a value; no live expression exists.
+  - B. Expression-only binding: declaration stores an expression; every reference evaluates it.
+  - C. Dual binding (prototype): declaration stores both the defining expression and its captured value; `KWAT` reads the captured value and `KWAK` reevaluates the expression.
+- **Prototype choice:** C, because it operationalises the canonical distinction between reference and live evaluation without collapsing them.
+- **Tests:** P5.24-T01 through T10; all 10 pass in the Python prototype.
+- **Limitations:** The prototype currently treats bindings as non-overwritable within one scope and external inputs as live sources. Nested scopes, shadowing, cycles, and forward references are not implemented.
+- **Decision:** PROVISIONAL. Do not mark this rule canon until the owner explicitly accepts it.
+- **Date:** 2026-10-12

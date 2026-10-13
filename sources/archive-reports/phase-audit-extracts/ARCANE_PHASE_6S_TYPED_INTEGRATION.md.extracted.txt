@@ -1,0 +1,29 @@
+ARCHIVE SOURCE: Arcane_Phase_6S_Typed_Expression_Integration/ARCANE_PHASE_6S_TYPED_INTEGRATION.md
+SHA-256: cb10974158d21324ec087605cc48a2bfd0c05e3c1f52f792e899d7e306594cd1
+NOTE: Derived review copy; original ZIP member unchanged.
+========================================================================
+
+# Arcane Phase 6S — Typed expression integration
+
+## Summary
+Phase 6S connects the existing Phase 6P/6Q expression AST to the Phase 6R dimensional quantity model. This is a provisional reference implementation and does not change canonical Arcane syntax or vocabulary.
+
+## Implementation
+- Added `arcane_typed_runtime.py` with `evaluate_typed()` and a `QuantityLiteral` test-AST node.
+- Existing parsed numeric literals become dimensionless `Quantity` values in the typed evaluator.
+- Arithmetic operators call the Phase 6R quantity operations, preserving dimensions and rejecting incompatible addition/subtraction.
+- Boolean operators retain Boolean behaviour and reject quantity operands.
+- Dimensional failures are wrapped as `TypedEvaluationError` with operator context.
+- Existing untyped evaluator remains unchanged for backwards compatibility.
+
+## Grammar/canon boundary
+`QuantityLiteral` is a programmatic test harness node, not a newly asserted surface-language form. The source archive does not establish a canonical written syntax for attaching dimension metadata to literals, so Phase 6S does not invent one.
+
+## Verification
+The combined suite includes the existing Phase 6P runtime tests, Phase 6Q test-notation tests, Phase 6R dimension-model tests, and new Phase 6S integration tests. The package's test output records the actual run. These tests verify only the reference prototype and do not claim complete language conformance.
+
+## Remaining work
+- Decide source-backed syntax/semantics for quantities and measurement records.
+- Define units, conversion and precision/uncertainty policy from source evidence.
+- Implement measurement completeness only after recovering its exact required fields and applicability rules.
+- Keep physical feasibility, conservation, and Logos resource accounting as distinct future contracts.

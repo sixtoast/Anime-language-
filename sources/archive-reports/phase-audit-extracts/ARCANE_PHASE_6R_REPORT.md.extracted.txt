@@ -1,0 +1,19 @@
+ARCHIVE SOURCE: Arcane_Phase_6S_Typed_Expression_Integration/ARCANE_PHASE_6R_REPORT.md
+SHA-256: 71823932837304645725364b0bbbc2dd76873b5899f4bcc1f8177169286efd8c
+NOTE: Derived review copy; original ZIP member unchanged.
+========================================================================
+
+# Arcane Phase 6R — Typed quantities and dimensional analysis
+
+**Status:** Reference dimensional layer implemented; regression suite executed.
+
+Phase 6R adds `arcane_dimensions.py`, a separate provisional quantity model using Decimal magnitudes and sparse integer exponent vectors. Addition/subtraction require matching dimensions; multiplication/division combine dimensions algebraically; division by zero is rejected; negation preserves the dimension.
+
+## Validation
+The full included suite combines Phase 6P runtime tests, Phase 6Q grammar tests, and Phase 6R dimensional tests. See `PHASE_6R_TEST_OUTPUT.txt` for the exact interpreter output. The dimensional layer is tested independently and has not yet been wired into the expression evaluator.
+
+## Canon and limitations
+No canon change is made. `L`, `M`, and `T` are provisional engineering symbols, not claimed to be Arcane canonical tokens. There are no unit conversion rules, uncertainty propagation, sensor/pathway semantics, measurement-completeness enforcement, physical feasibility model, or Logos resource accounting. The current test notation remains provisional and unchanged.
+
+## Next phase
+Phase 6S should decide how quantity types are represented in the grammar and type system, with explicit tests for measurement completeness and source-backed unit rules before connecting the dimensional module to the evaluator.
