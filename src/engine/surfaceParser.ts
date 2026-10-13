@@ -141,9 +141,20 @@ class Parser {
     }
 
     const unit = this.peek();
+    const numeralTokens = this.tokens.slice(start, this.cursor);
+    const ambiguousDigit = numeralTokens.find((token) => token === "re");
+    if (ambiguousDigit !== undefined || unit === "ra") {
+      const token = ambiguousDigit ?? unit!;
+      throw new ParseFailure(
+        "AMBIGUOUS_HOMOPHONE",
+        `${token.toUpperCase()} has a documented digit/unit/reference collision; this parser has no slot-sensitive disambiguation policy and therefore rejects the numeral.`,
+        ambiguousDigit === undefined ? this.cursor : numeralTokens.indexOf(ambiguousDigit) + start,
+        token
+      );
+    }
     if (unit === undefined || !UNITS.has(unit)) {
       const first = this.tokens[start];
-      const code: SurfaceDiagnosticCode = first === "re" || first === "ra" ? "AMBIGUOUS_HOMOPHONE" : "UNTERMINATED_NUMERAL";
+      const code: SurfaceDiagnosticCode = first === "ra" ? "AMBIGUOUS_HOMOPHONE" : "UNTERMINATED_NUMERAL";
       const message = code === "AMBIGUOUS_HOMOPHONE"
         ? `${first.toUpperCase()} is ambiguous in this numeral context; context-sensitive disambiguation is not implemented.`
         : `Numeral "${this.tokens.slice(start, this.cursor).join(" ")}" is not closed by a registered unit (SHO closes dimensionless values).`;
