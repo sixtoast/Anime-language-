@@ -1,3 +1,5 @@
+import { existsSync, statSync } from "node:fs";
+import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { docs, filterDocuments } from "./documentationCatalogue";
 
@@ -39,5 +41,16 @@ describe("Documentation catalogue website regression checks", () => {
       "FRAPA contract"
     ]);
     expect(filterDocuments("this term should not exist")).toEqual([]);
+  });
+
+  it("[WEB-DOC-REG-007] resolves every catalogue source path to a repository file", () => {
+    for (const doc of docs) {
+      const normalized = doc.sourcePath.replaceAll("\\\\", "/");
+      expect(normalized, doc.title + " must use a repository-relative path").not.toMatch(/^\\//);
+      expect(normalized.split("/"), doc.title + " must not traverse outside the repository").not.toContain("..");
+      const absolutePath = resolve(process.cwd(), normalized);
+      expect(existsSync(absolutePath), doc.title + " source path must exist: " + doc.sourcePath).toBe(true);
+      expect(statSync(absolutePath).isFile(), doc.title + " source path must resolve to a file").toBe(true);
+    }
   });
 });

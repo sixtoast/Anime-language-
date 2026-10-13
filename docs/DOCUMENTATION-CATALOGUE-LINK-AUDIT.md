@@ -37,3 +37,10 @@ See [Website Feature Register](WEBSITE-FEATURE-REGISTER.md) for the capability m
 The Documentation catalogue now stores and displays a **source type** and a **provenance note** for each of its 19 entries. Examples include canonical specification copy, provisional audit document, derived structured catalogue, implementation documentation, product plan, documentation index, and original historical source file. These are descriptive provenance labels; they do not replace the existing status labels or establish that a source is correct, canonical, or fully implemented.
 
 The source-type metadata and its presentation have been committed in the website. Browser-level review of the wording and source-link interactions remains part of WEB-DOC-03 and WEB-DOC-02.
+
+
+## Automated path-integrity regression check
+
+Added `WEB-DOC-REG-007` in `src/documentationCatalogue.test.ts`. On each CI test run it checks that every catalogue source path is repository-relative, contains no parent-directory traversal, exists in the checked-out repository, and resolves to a file. This guards against future broken or unsafe local source paths.
+
+**Verification status:** the check is committed for CI execution; it is not marked passed until a run on this commit reports the result. It does not test the rendered browser link, mobile layout, the authority/content of the linked document, or completeness of source recovery.
