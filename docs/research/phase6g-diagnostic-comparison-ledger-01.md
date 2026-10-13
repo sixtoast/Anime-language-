@@ -22,11 +22,17 @@ These must remain separate. A diagnostic can match the expected family while the
 | `identifier-not-closed` | `IDENTIFIER_NOT_CLOSED` |
 | `missing-block-open` | `MISSING_BLOCK_OPEN` |
 | `missing-block-close` | `MISSING_BLOCK_CLOSE` |
-| `homophone-ambiguity` | `AMBIGUOUS_HOMOPHONE` |
+| `homophone-ambiguity` | `AMBIGUOUS_HOMOPHONE` (except known historical implementation divergences below) |
 | `unresolved-operator-signature` | `UNRESOLVED_OPERATOR` |
 | `delimiter-outside-control` | `BLOCK_DELIMITER_OUTSIDE_CONTROL` |
 
 The identifier-slot rejection uses the separate KWAT-wrapped probe's diagnostics because the fixture's unwrapped input is not itself a test of that argument slot. The source fixture remains unchanged and its main comparison remains context-dependent.
+
+### Known discrepancy: RE/RA homophone fixtures
+
+The archived Python implementation's `numeral()` accepts `RE MA` as a closed numeral (RE is consumed as digit 4, then MA is accepted as the unit) and accepts `KI RA` as a closed numeral (RA is in its unit set). The report prose and the recovered fixture labels instead describe these as ambiguous contexts that should fail closed unless context resolves them. The current TypeScript parser intentionally rejects both forms.
+
+Consequently, fixtures `P6G-FX-011` and `P6G-FX-012` are marked `not-comparable` for historical diagnostic-family comparison. Their TypeScript diagnostics match the prose-level expectation, but they do **not** match the archived Python executable behaviour. This is a source/prototype discrepancy to investigate, not a TypeScript pass or failure against the historical implementation. The fixture records are preserved unchanged.
 
 Mappings are intentionally exact and narrow. No fuzzy matching, substring matching, or inferred equivalence is used. If a historical family has no explicit mapping, the audit reports `not-comparable`.
 
@@ -45,7 +51,7 @@ The counts can coincide by chance; they do not represent the same evidence. Neit
 - Each recovered stable fixture ID produces one observation.
 - Expected root AST kinds are checked for directly accepted fixtures.
 - The identifier-slot probe records its child node and diagnostic codes without altering the fixture input.
-- Historical diagnostic mappings are checked for fixture IDs P6G-FX-003, 004, 006, 009, 010, 011, 012, 013 and 015.
+- Historical diagnostic mappings are checked for fixture IDs P6G-FX-003, 004, 006, 009, 010, 013 and 015. P6G-FX-011 and 012 are explicitly not-comparable because the archived Python implementation accepts those numeral/unit combinations despite the prose-level ambiguity expectation.
 - An intentionally unmapped family must be reported as `not-comparable`.
 - A separate summary assertion ensures diagnostic-family counts are not treated as syntax comparison counts.
 - Control-block structure is recorded without approving its signature.
