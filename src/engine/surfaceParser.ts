@@ -5,6 +5,8 @@
  * expressions. It does not replace parseAuditExpression, load the canonical
  * lexicon, type-check expressions, evaluate spells, or establish canon.
  */
+import { inspectLexiconForm, resolveLexiconForm, type LexiconRegistry } from "./lexiconRegistry";
+
 export type SurfaceNode =
   | { kind: "atom"; form: string; lexicalClass: string }
   | { kind: "quantity"; value: string; unit: string; rawNumber: string }
@@ -48,6 +50,8 @@ export interface SurfaceParserOptions {
   knownAtoms?: readonly string[];
   /** Enable the archived prototype's legacy spelling normalisation. */
   allowLegacyAliases?: boolean;
+  /** Optional source-loaded registry. It is consulted only for lexical atoms and alias resolution. */
+  lexiconRegistry?: LexiconRegistry;
 }
 
 const DIGITS: Readonly<Record<string, string>> = {
@@ -86,13 +90,16 @@ class Parser {
   private readonly tokens: string[];
   private cursor = 0;
   private readonly knownAtoms: Set<string>;
+  private readonly lexiconRegistry?: LexiconRegistry;
 
   constructor(input: string, options: SurfaceParserOptions) {
     this.tokens = input.trim() ? input.trim().split(/\s+/).map((token) => {
       const lowered = token.toLowerCase();
+      if (options.lexiconRegistry) return resolveLexiconForm(options.lexiconRegistry, lowered, { allowLegacyAliases: options.allowLegacyAliases }).resolvedForm;
       return options.allowLegacyAliases === true ? (LEGACY_ALIASES[lowered] ?? lowered) : lowered;
     }) : [];
     this.knownAtoms = new Set((options.knownAtoms ?? []).map((atom) => atom.toLowerCase()));
+    this.lexiconRegistry = options.lexiconRegistry;
   }
 
   private peek(): string | undefined { return this.tokens[this.cursor]; }
@@ -241,6 +248,15 @@ class Parser {
     const form = this.take();
     if (OPERATOR_CLASSES.has(form)) {
       throw new ParseFailure("UNRESOLVED_OPERATOR", `Operator ${form.toUpperCase()} has no usable signature in this parser context.`, this.cursor - 1, form);
+    }
+    if (this.lexiconRegistry) {
+      const inspected = inspectLexiconForm(this.lexiconRegistry, form);
+      if (inspected.isCollision) {
+        throw new ParseFailure("AMBIGUOUS_HOMOPHONE", `${form.toUpperCase()} has multiple source lexical analyses; this parser has no contextual disambiguation policy and therefore rejects it.`, this.cursor - 1, form);
+      }
+      if (inspected.entry) {
+        return { kind: "atom", form: inspected.form.toUpperCase(), lexicalClass: inspected.entry.classes.join("|") || "LEXICON_ATOM" };
+      }
     }
     if (this.knownAtoms.has(form)) {
       return { kind: "atom", form: form.toUpperCase(), lexicalClass: "KNOWN_ATOM" };
