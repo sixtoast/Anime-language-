@@ -43,8 +43,8 @@ describe("Documentation catalogue website regression checks", () => {
 
   it("[WEB-DOC-REG-007] rejects absolute and parent-traversal source paths", () => {
     for (const doc of docs) {
-      const normalized = doc.sourcePath.replaceAll("\\\\", "/");
-      expect(normalized, doc.title + " must use a repository-relative path").not.toMatch(/^\\//);
+      const normalized = doc.sourcePath.replaceAll("\\", "/");
+      expect(normalized.startsWith("/"), doc.title + " must use a repository-relative path").toBe(false);
       expect(normalized.split("/"), doc.title + " must not traverse outside the repository").not.toContain("..");
     }
   });
