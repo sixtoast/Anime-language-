@@ -90,6 +90,18 @@ function identifierSlotProbe(fixture: Phase6GFixture): {
   };
 }
 
+/**
+ * These fixtures' prose-level expectations conflict with the archived Python
+ * implementation: its numeral() accepts RE MA as 4 MA and KI RA as 1 RA
+ * because RE is a digit and RA is a registered unit when the unit slot is
+ * reached. Keep the source-derived fixture, but do not call the TypeScript
+ * diagnostic a match to historical executable behaviour.
+ */
+const HISTORICAL_IMPLEMENTATION_DIVERGENCES: Readonly<Record<string, string>> = {
+  "P6G-FX-011": "Archived Python numeral() accepts RE MA as a closed numeral; prose-level homophone expectation differs.",
+  "P6G-FX-012": "Archived Python numeral() accepts KI RA as a closed numeral because RA is a registered unit; prose-level homophone expectation differs."
+};
+
 const DIRECT_ERROR_FAMILY_CODES: Readonly<Record<string, string>> = {
   "unterminated-numeral": "UNTERMINATED_NUMERAL",
   "malformed-decimal": "MALFORMED_DECIMAL",
@@ -107,6 +119,7 @@ function observedErrorFamily(
   slotProbeDiagnosticCodes: readonly string[] | undefined
 ): "match" | "mismatch" | "not-comparable" | undefined {
   if (!fixture.expectedErrorFamily) return undefined;
+  if (HISTORICAL_IMPLEMENTATION_DIVERGENCES[fixture.id]) return "not-comparable";
   const expectedCode = DIRECT_ERROR_FAMILY_CODES[fixture.expectedErrorFamily];
   if (!expectedCode) return "not-comparable";
   const observedCodes = fixture.expected === "reject-in-identifier-slot"
