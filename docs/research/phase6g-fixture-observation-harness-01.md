@@ -1,0 +1,39 @@
+# Phase 6G fixture observation harness
+
+**Status:** harness and tests committed; test execution not yet verified  
+**Canon effect:** none
+
+## Purpose
+
+The recovered fixture file contains 16 source-derived cases. Several are direct accept/reject cases, while others explicitly depend on lexical context, parser slots, unresolved operator signatures, or the distinction between syntax and physical feasibility.
+
+`src/engine/phase6gFixtureAudit.ts` now executes the fixtures against the current provisional TypeScript parser and records one observation per stable fixture ID. It does not rewrite the source fixtures or reinterpret archived prototype results as current test evidence.
+
+## Comparison labels
+
+- `match`: the observed result matches a simple, directly comparable accept/reject expectation, or the explicitly enabled legacy alias resolves to the expected operator.
+- `mismatch`: a directly comparable expectation was not met.
+- `conditional-unresolved`: the parser rejects an input whose fixture says context may resolve the ambiguity. This is recorded as a conservative observation, not a complete disambiguation implementation.
+- `context-dependent`: the fixture requires a parser slot, source-backed operator signature, or error-family equivalence that the generic harness cannot safely assume.
+- `scope-guardrail-confirmed`: the parser returns a syntax result without asserting physical feasibility; this is a scope check, not a validity result.
+
+The audit summary deliberately uses the status `observations-generated-not-acceptance`. It is not a green/red release gate and does not claim every fixture passes.
+
+## Tests authored
+
+`src/engine/phase6gFixtureAudit.test.ts` checks:
+
+1. Every recovered fixture ID produces exactly one observation.
+2. The FRATA case normalises to FRAJA only because the fixture explicitly enables legacy aliases.
+3. RE/RA ambiguity cases remain rejected by the current parser.
+4. The harness does not claim canon approval or fixture acceptance.
+
+## What remains
+
+- Execute Vitest and the TypeScript/Vite build in CI.
+- Review every direct mismatch from the generated report.
+- Implement slot-aware comparison only when the recovered source defines the slot contract.
+- Compare error families to current diagnostic codes without assuming names are equivalent.
+- Keep syntax success distinct from semantic typing, mechanism validity, conservation/resource accounting, and physical feasibility.
+
+No canonical specification, lexicon entry, alias policy, or spell semantics were changed by this harness.
