@@ -43,7 +43,7 @@ export function auditLoadedLexicon(loaded: LoadedLexiconText): LexiconAuditRepor
   for (const diagnostic of loaded.registry.diagnostics) {
     findings.push({
       severity: diagnostic.code === "CONFLICTING_ALIAS_TARGETS" ? "error" : "warning",
-      code: diagnostic.code === "CONFLICTING_ALIAS_TARGETS" ? "ALIAS_EVIDENCE_MERGED" : "REGISTRY_FILTER",
+      code: diagnostic.code === "CONFLICTING_ALIAS_TARGETS" ? "ALIAS_CONFLICT" : "REGISTRY_FILTER",
       message: diagnostic.message,
       ...(diagnostic.form ? { form: diagnostic.form } : {})
     });
