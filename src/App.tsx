@@ -143,6 +143,8 @@ function App() {
     void refreshWorkflow();
   }, []);
 
+  const latestCiRun = workflowRuns.find((run) => run.name === "CI") ?? workflowRuns[0];
+
   const filteredDocs = useMemo(() => docs.filter((doc) =>
     (doc.title + " " + doc.category + " " + doc.description + " " + doc.status).toLowerCase().includes(query.toLowerCase())
   ), [query]);
@@ -231,7 +233,7 @@ function App() {
           <p className="page-intro">A traceable explorer for the authored parser and dimensional test cases, paired with live GitHub Actions run and job-step results for the repository. CI status is fetched from GitHub; this page does not execute tests in the browser.</p>
           <div className="test-summary">
             <div><span>AUTHORED CASES</span><strong>{workbenchTests.length}</strong><small>15 parser · 15 dimensional · 8 semantic · 8 operator-contract</small></div>
-            <div><span>LATEST CI RESULT</span><strong className={workflowRuns[0]?.conclusion === "success" ? "ci-success-text" : workflowRuns[0]?.conclusion === "failure" ? "ci-failure-text" : "amber-text"}>{workflowLoading ? "Loading…" : workflowRuns[0] ? formatRunStatus(workflowRuns[0].status, workflowRuns[0].conclusion) : "Unavailable"}</strong><small>{workflowRuns[0] ? `Run #${workflowRuns[0].run_number}` : "No run loaded"}</small></div>
+            <div><span>LATEST CI RESULT</span><strong className={latestCiRun?.conclusion === "success" ? "ci-success-text" : latestCiRun?.conclusion === "failure" ? "ci-failure-text" : "amber-text"}>{workflowLoading ? "Loading…" : latestCiRun ? formatRunStatus(latestCiRun.status, latestCiRun.conclusion) : "Unavailable"}</strong><small>{latestCiRun ? `Run #${latestCiRun.run_number}` : "No run loaded"}</small></div>
             <div><span>SPECIFICATION STATUS</span><strong className="amber-text">Prototype</strong><small>Provisional parser and dimensions</small></div>
           </div>
           <div className="ci-panel">
@@ -243,7 +245,7 @@ function App() {
             {!workflowError && workflowLoading && workflowRuns.length === 0 && <div className="ci-empty">Loading recent workflow runs from GitHub…</div>}
             {!workflowLoading && !workflowError && workflowRuns.length === 0 && <div className="ci-empty">No workflow runs were returned for the main branch.</div>}
             {workflowRuns.slice(0, 5).map((run) => {
-              const isLatest = run.id === workflowRuns[0]?.id;
+              const isLatest = run.id === latestCiRun?.id;
               return <article className="ci-run" key={run.id}>
                 <div className="ci-run-top">
                   <div><a href={run.html_url} target="_blank" rel="noreferrer" className="ci-run-link">{run.name || "Workflow"} · Run #{run.run_number} ↗</a><p>{(run.head_commit?.message ?? "Commit message unavailable").split("\n")[0]}</p></div>
