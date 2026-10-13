@@ -28,6 +28,8 @@ export interface Phase6GFixtureObservation {
   observedOperator?: string;
   observedNode?: string;
   observedShape?: string;
+  observedSlotNode?: string;
+  slotProbeDiagnosticCodes?: string[];
   note: string;
 }
 
@@ -61,6 +63,26 @@ function observedShape(result: SurfaceParseResult): string | undefined {
     return "Call-with-Block";
   }
   return undefined;
+}
+
+function identifierSlotProbe(fixture: Phase6GFixture): {
+  node?: string;
+  diagnosticCodes: string[];
+} | undefined {
+  if (fixture.expected !== "accept-in-identifier-slot" &&
+      fixture.expected !== "reject-in-identifier-slot") return undefined;
+
+  // KWAT is used only as a source-derived probe wrapper: its first argument is
+  // parsed as an identifier. The fixture input itself remains unchanged.
+  const probe = parseSurfaceExpression(`kwat ${fixture.input}`);
+  if (!probe.ok || probe.ast?.kind !== "call" || probe.ast.operator !== "KWAT") {
+    return { diagnosticCodes: probe.diagnostics.map((diagnostic) => diagnostic.code) };
+  }
+  const firstArgument = probe.ast.args[0];
+  return {
+    ...(firstArgument ? { node: firstArgument.kind === "identifier" ? "Identifier" : firstArgument.kind } : {}),
+    diagnosticCodes: probe.diagnostics.map((diagnostic) => diagnostic.code)
+  };
 }
 
 function compareFixture(fixture: Phase6GFixture, result: SurfaceParseResult): FixtureComparison {
@@ -104,6 +126,7 @@ export function auditPhase6GFixtures(
       allowLegacyAliases: fixture.expected === "normalise-head-to-FRAJA"
     });
     const comparison = compareFixture(fixture, result);
+    const slotProbe = identifierSlotProbe(fixture);
     return {
       id: fixture.id,
       input: fixture.input,
@@ -114,8 +137,12 @@ export function auditPhase6GFixtures(
       ...(result.ast?.kind === "call" ? { observedOperator: result.ast.operator } : {}),
       ...(rootNodeName(result) ? { observedNode: rootNodeName(result) } : {}),
       ...(observedShape(result) ? { observedShape: observedShape(result) } : {}),
-      note: fixture.expectedNode === "QuantityLiteral" || fixture.expectedNode === "Identifier"
-        ? "Fixture expects a particular syntactic slot/node; this generic expression audit does not certify that slot-specific contract."
+      ...(slotProbe?.node ? { observedSlotNode: slotProbe.node } : {}),
+      ...(slotProbe ? { slotProbeDiagnosticCodes: slotProbe.diagnosticCodes } : {}),
+      note: fixture.expected === "accept-in-identifier-slot" || fixture.expected === "reject-in-identifier-slot"
+        ? "Identifier-slot probe wraps the unchanged fixture input in KWAT to inspect the identifier position. This tests current parser behaviour only; it does not establish canonical grammar."
+        : fixture.expectedNode === "QuantityLiteral" || fixture.expectedNode === "Identifier"
+          ? "Fixture expects a particular syntactic slot/node; this generic expression audit does not certify that slot-specific contract."
         : fixture.expected.startsWith("accept-only-if") || fixture.expected.startsWith("accept-in-")
           ? "Context-dependent fixture; inspect the AST and source-backed signature before treating this observation as a result."
           : fixture.expectedErrorFamily
