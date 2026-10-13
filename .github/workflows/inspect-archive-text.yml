@@ -1,0 +1,129 @@
+name: Extract searchable text from source mega-pack
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/inspect-archive-text.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  extract-text:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+
+      - name: Extract text in memory and write review index
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import zipfile, pathlib, hashlib, datetime, re, xml.etree.ElementTree as ET, json
+
+          archive = pathlib.Path("sources/originals/Arcana mega pack.zip")
+          out = pathlib.Path("sources/archive-reports/mega-pack-text-index.md")
+          out.parent.mkdir(parents=True, exist_ok=True)
+          text_exts = {".md", ".txt", ".csv", ".json", ".py"}
+          docs = []
+          seen = {}
+          errors = []
+
+          with zipfile.ZipFile(archive) as zf:
+              for info in zf.infolist():
+                  if info.is_dir():
+                      continue
+                  name = info.filename
+                  low = name.lower()
+                  if name.startswith("__MACOSX/") or low.endswith(".pyc"):
+                      continue
+                  try:
+                      raw = zf.read(info)
+                  except Exception as e:
+                      errors.append((name, str(e)))
+                      continue
+                  digest = hashlib.sha256(raw).hexdigest()
+                  if digest in seen:
+                      continue
+                  seen[digest] = name
+                  suffix = pathlib.PurePosixPath(name).suffix.lower()
+                  content = ""
+                  kind = ""
+                  if suffix in text_exts:
+                      content = raw.decode("utf-8", errors="replace")
+                      kind = suffix[1:].upper()
+                  elif suffix == ".docx":
+                      try:
+                          with zipfile.ZipFile(__import__("io").BytesIO(raw)) as docx:
+                              xml = docx.read("word/document.xml")
+                          root = ET.fromstring(xml)
+                          ns = {"w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main"}
+                          paras = []
+                          for p in root.findall(".//w:p", ns):
+                              t = "".join(x.text or "" for x in p.findall(".//w:t", ns))
+                              if t.strip():
+                                  paras.append(t)
+                          content = "\n".join(paras)
+                          kind = "DOCX TEXT"
+                      except Exception as e:
+                          errors.append((name, "DOCX extraction: " + str(e)))
+                  elif suffix == ".pdf":
+                      kind = "PDF (not text-extracted in this pass)"
+                  if content.strip():
+                      docs.append({"name": name, "sha": digest, "kind": kind, "text": content})
+
+          docs.sort(key=lambda d: d["name"].lower())
+          lines = [
+              "# Mega-pack Searchable Text Index",
+              "",
+              f"- Generated (UTC): {datetime.datetime.now(datetime.timezone.utc).isoformat()}",
+              f"- Source archive: `{archive}`",
+              f"- Unique readable text documents: {len(docs)}",
+              f"- Errors: {len(errors)}",
+              "",
+              "## Scope and safety",
+              "",
+              "This index reads archive members without extracting them to disk or executing scripts. Exact byte-identical files are indexed once; the separate archive manifest retains duplicate names. DOCX text is extracted from the document XML. PDF text extraction is not included in this pass. This is a search aid, not a canon decision.",
+              "",
+              "## Document index and excerpts",
+              ""
+          ]
+          for d in docs:
+              text = d["text"].replace("\r", "")
+              lines += [
+                  f"### {d['name']}",
+                  "",
+                  f"- Type: {d['kind']}",
+                  f"- SHA-256: `{d['sha']}`",
+                  f"- Extracted characters: {len(text)}",
+                  "",
+                  "```text",
+                  text[:1800].strip(),
+                  "```",
+                  ""
+              ]
+              if len(text) > 1800:
+                  lines += [f"_Excerpt truncated at 1,800 characters; full length {len(text)} characters._", ""]
+          if errors:
+              lines += ["## Extraction errors", ""]
+              lines.extend(f"- `{name}`: {err}" for name, err in errors)
+          out.write_text("\n".join(lines) + "\n", encoding="utf-8")
+          print(json.dumps({"indexed_documents": len(docs), "errors": len(errors), "report": str(out)}, indent=2))
+          PY
+
+      - name: Commit searchable text index
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add sources/archive-reports/mega-pack-text-index.md
+          if git diff --cached --quiet; then
+            echo "No report changes to commit."
+          else
+            git commit -m "docs: add searchable text index for mega-pack"
+            git push origin HEAD:main
+          fi
