@@ -6,7 +6,8 @@ import { loadLexiconCsvText } from "./lexiconCsvLoader";
 describe("source lexicon audit report", () => {
   it("reports counts and known collisions without claiming canon approval", () => {
     const report = auditLoadedLexicon(bundledLexiconLoad);
-    expect(report.acceptedRows).toBeGreaterThan(0);
+    expect(report.structurallyValidRows).toBe(255);
+    expect(report.acceptedLexicalRows).toBeGreaterThan(0);
     expect(report.acceptedForms).toBeGreaterThan(0);
     expect(report.collisionForms).toContain("re");
     expect(report.collisionForms).toContain("ra");
