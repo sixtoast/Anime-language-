@@ -7,8 +7,15 @@ import {
 import { parseAuditExpression, type AuditParseResult } from "./engine/auditParser";
 import { workbenchTests } from "./engine/testRegistry";
 import { canonAuditItems, auditReadinessLabels } from "./engine/canonAuditRegistry";
+import phase6gFixtureData from "../tests/fixtures/phase6g-surface-parser-cases.json";
+import { auditPhase6GFixtures, type Phase6GFixture } from "./engine/phase6gFixtureAudit";
 
 type Section = "Overview" | "Documentation" | "Playground" | "Test suite" | "Research & review";
+
+const phase6gFixtureAudit = auditPhase6GFixtures(
+  phase6gFixtureData.suiteId,
+  phase6gFixtureData.cases as Phase6GFixture[]
+);
 type Status = "Canonical" | "Provisional" | "Open question" | "Deprecated";
 
 const navigation: { label: Section; icon: typeof Activity; group: string }[] = [
@@ -278,6 +285,17 @@ function App() {
           <div className="eyebrow"><span className="eyebrow-line"/> EVIDENCE, QUESTIONS, DECISIONS</div><h1 className="page-title">Research & review<span>.</span></h1><p className="page-intro">Keep unresolved questions visible. Findings should be traceable to source material and should not become canonical by implication.</p>
           <div className="review-banner"><FlaskConical size={20}/><div><strong>Active audit context</strong><p>Phase 2 is the priority source for the semantic audit. Preserve older forms as aliases unless an inconsistency is demonstrated.</p></div><span className="review-count">5 TOPICS</span></div>
           <div className="review-cards">{[{n:"01",title:"FRAPA contract",status:"Open question" as Status,tag:"SOURCE EVIDENCE",desc:"Establish the contract only from available source evidence. Do not invent definitions to fill gaps."},{n:"02",title:"Phase 4 — syntax & ambiguity",status:"Provisional" as Status,tag:"AUDIT MATERIAL",desc:"Test unique structural interpretation, operator arity and safe handling of incomplete expressions."},{n:"03",title:"Phase 5 — semantic audit",status:"Provisional" as Status,tag:"PHASE 2 PRIORITY",desc:"Compare semantic claims against Phase 2 first. Record conflicts and retain old forms unless inconsistency is demonstrated."},{n:"04",title:"Phase 6G — source lexicon",status:"Provisional" as Status,tag:"DATA INTEGRITY",desc:"Audit the v5 draft vocabulary, preserve non-atomic forms, validate alias targets, and keep RE/RA collisions visible."},{n:"05",title:"Phase 6G — parser fixtures",status:"Provisional" as Status,tag:"OBSERVATION ONLY",desc:"Compare recovered fixtures against the provisional parser without treating observations as canon approval or semantic validation."}].map((item) => <article className="review-card" key={item.n}><div className="review-card-top"><span className="review-number">{item.n}</span><StatusPill status={item.status}/></div><span className="detail-kicker">{item.tag}</span><h2>{item.title}</h2><p>{item.desc}</p><div className="review-card-bottom"><span>Evidence link required</span><span>↗</span></div></article>)}</div>
+          <div className="section-heading lower-heading"><div><div className="eyebrow">PHASE 6G · LIVE LOCAL OBSERVATIONS</div><h2>Recovered parser fixture review</h2></div><span className="section-caption">{phase6gFixtureAudit.fixtureCount} FIXTURES</span></div>
+          <p className="page-intro">These observations are computed in this browser build against the provisional Phase 6G parser. They are not CI results, source approval, semantic validation, or canon acceptance. A context-dependent case is deliberately not counted as a direct pass.</p>
+          <div className="audit-matrix">
+            <article className="audit-item"><div className="audit-item-top"><code>DIRECT COMPARISON</code><span className="audit-readiness audit-limited">OBSERVATION ONLY</span></div><h3>{phase6gFixtureAudit.directMatches} matches · {phase6gFixtureAudit.directMismatches} mismatches</h3><p>{phase6gFixtureAudit.directlyComparable} fixtures have direct accept/reject expectations that can be compared safely.</p><div className="audit-next"><strong>Not directly comparable</strong><p>{phase6gFixtureAudit.nonDirectComparisons} fixtures require context, remain unresolved, or test a scope guardrail.</p></div></article>
+            {phase6gFixtureAudit.observations.map((item) => <article className="audit-item" key={item.id}>
+              <div className="audit-item-top"><code>{item.id}</code><span className={"audit-readiness " + (item.comparison === "match" ? "audit-implemented" : item.comparison === "mismatch" ? "audit-blocked" : "audit-limited")}>{item.comparison.toUpperCase()}</span></div>
+              <h3>{item.input}</h3><p>Expected: <code>{item.expected}</code> · observed: <strong>{item.observed}</strong>{item.observedNode ? <> · AST root: <code>{item.observedNode}</code></> : null}{item.observedOperator ? <> · operator: <code>{item.observedOperator}</code></> : null}</p>
+              {item.diagnosticCodes.length > 0 && <div className="test-case-meta"><span>Diagnostics: {item.diagnosticCodes.join(", ")}</span></div>}
+              <div className="audit-next"><strong>Interpretation guardrail</strong><p>{item.note}</p></div>
+            </article>)}
+          </div>
           <div className="section-heading lower-heading"><div><div className="eyebrow">CANON IMPLEMENTATION AUDIT</div><h2>What is enforced, blocked, or still missing</h2></div><span className="section-caption">{canonAuditItems.length} TRACKED ITEMS</span></div>
           <p className="page-intro">This is an evidence matrix, not a second automated test report. “Implemented · limited scope” describes only the behaviour explicitly listed below; it does not mean the wider canon rule is fully enforced.</p>
           <div className="audit-matrix">
