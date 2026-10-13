@@ -1,0 +1,74 @@
+{
+  "title": "Arcane Phase 5.18 static audit",
+  "input_lexicon": "Arcane_Lexicon_v5_draft.csv",
+  "input_source": "phase5_vernacular.py",
+  "counts": {
+    "PASS": 6,
+    "FAIL": 0,
+    "BLOCKED": 3,
+    "NOT TESTED": 1
+  },
+  "results": [
+    {
+      "test": "P5.18-01 CSV schema",
+      "status": "PASS",
+      "detail": "255 rows; missing columns: []",
+      "severity": "blocking"
+    },
+    {
+      "test": "P5.18-02 Lexical entry completeness",
+      "status": "PASS",
+      "detail": "0 entries missing form/gloss; CSV line numbers: []",
+      "severity": "blocking"
+    },
+    {
+      "test": "P5.18-03 Homograph inventory",
+      "status": "PASS",
+      "detail": "2 duplicated spellings; 0 outside the documented review set. ra: radian (UNIT, Shared, CANON, source=v3.0-L) | TARGET-path (FUSED-REF, Performed, CANON (v2.0), source=v2.0); re: 4 (DIGIT, Shared, CANON, source=v3.0-L) | TARGET-surface (FUSED-REF, Performed, CANON (v2.0), source=v2.0)",
+      "severity": "review"
+    },
+    {
+      "test": "P5.18-04-ra Register separation",
+      "status": "BLOCKED",
+      "detail": "'ra' appears in registers ['Performed', 'Shared'] with statuses ['CANON', 'CANON (v2.0)']. Safety requires a normative rule preventing mixed-register executable parsing and a test showing it is enforced; CSV labels alone do not prove this.",
+      "severity": "blocking"
+    },
+    {
+      "test": "P5.18-04-re Register separation",
+      "status": "BLOCKED",
+      "detail": "'re' appears in registers ['Performed', 'Shared'] with statuses ['CANON', 'CANON (v2.0)']. Safety requires a normative rule preventing mixed-register executable parsing and a test showing it is enforced; CSV labels alone do not prove this.",
+      "severity": "blocking"
+    },
+    {
+      "test": "P5.18-05 Sentence fixture key coverage",
+      "status": "PASS",
+      "detail": "25 sentence fixtures; 0 unresolved keys: []",
+      "severity": "blocking"
+    },
+    {
+      "test": "P5.18-06 Shared vocabulary targets",
+      "status": "PASS",
+      "detail": "0 shared mappings do not point to a lexicon form: {}",
+      "severity": "blocking"
+    },
+    {
+      "test": "P5.18-07 Source fixture availability",
+      "status": "PASS",
+      "detail": "29 AST-extracted concept keys (partial due dynamic declarations); 25 sentence fixtures; 5 idiom fixtures.",
+      "severity": "blocking"
+    },
+    {
+      "test": "P5.18-08 Naturalness / listener comprehension",
+      "status": "NOT TESTED",
+      "detail": "Cannot be established by static source checks. Requires speakers/listeners and a recorded protocol.",
+      "severity": "blocking"
+    },
+    {
+      "test": "P5.18-09 Spoken unique-parse validation",
+      "status": "BLOCKED",
+      "detail": "No complete parser, authoritative register-switching rule, or spoken-boundary specification is present in this source package.",
+      "severity": "blocking"
+    }
+  ],
+  "decision": "DO NOT MARK PHASE 5 COMPLETE: source fixture contains unresolved lexical references and register/homograph enforcement remains unproven."
+}

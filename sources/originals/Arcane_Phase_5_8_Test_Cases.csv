@@ -1,0 +1,17 @@
+test_id,category,input,expected_result,execution_status
+P5.8-001,arithmetic,"FRAPA⟨Q[length],Q[length]⟩",accept; output Q[length],PASS
+P5.8-002,arithmetic,"FRAPA⟨Q[length],Q[time]⟩",reject dimension mismatch,PASS
+P5.8-003,alias,"FRATA⟨Q[time],Q[time]⟩",resolve to FRAJA,PASS
+P5.8-004,dimensional algebra,"FRAKA⟨Q[length],Q[length]⟩",output Q[area],PASS
+P5.8-005,dimensional algebra,"FRALA⟨Q[length],Q[time]⟩",output Q[velocity],PASS
+P5.8-006,vector,DRAN⟨V3[length;world]⟩,output Q[length],PASS
+P5.8-007,dot product,"DREM⟨V3[length;world],V3[velocity;world]⟩",output Q[L^2 T^-1],PASS
+P5.8-008,frame,"DREM⟨V3[length;world],V3[length;caster]⟩",reject frame mismatch,PASS
+P5.8-009,cross product,"DRIM⟨V3[length;world],V3[length;world]⟩",output V3[area;world],PASS
+P5.8-010,frame,"DRUM⟨V3[length;world],V3[length;caster]⟩",reject frame mismatch,PASS
+P5.8-011,type,"DRUM⟨Q[length],Q[length]⟩",reject non-vector inputs,PASS
+P5.8-012,nesting,"FRAPA⟨DRAN⟨V3[length;world]⟩,Q[length]⟩",accept nested expression,PASS
+P5.8-013,comparison,"DRAL⟨Q[length],Q[length],Criterion⟩",output Bool,PASS
+P5.8-014,comparison,"DRAS⟨Q[length],Q[time],Criterion⟩",reject incompatible operands,PASS
+P5.8-015,unknown signature,BEN⟨Q[length]⟩,reject unknown operator signature,PASS
+P5.8-016,syntax,"FRAPA⟨Q[length],Q[length]",reject malformed expression,PASS

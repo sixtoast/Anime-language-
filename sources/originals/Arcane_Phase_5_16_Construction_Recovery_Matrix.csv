@@ -1,0 +1,13 @@
+id,topic,evidence,conclusion,status,implementation_action
+C-01,Subsystem architecture,Phase 4 section 3.1,Expression and Construction are distinct subsystems,CANON,Represent as separate compiler stages
+C-02,Foot shape,Phase 4 section 3.1 and lexicon tools,Frame plus parameter vowel plus optional relation coda,STRUCTURE DOCUMENTED,Parse shape only; do not infer semantics
+C-03,Performed order,Phase 4 section 3.3,Reference then spatial role/vector then Feet then couplings then quantity then control then release,DOCUMENTED NOT GENERALLY TESTED,Add sequence validation and tests
+C-04,Reference persistence,Phase 4 section 3.3,Reference persists until replaced,DOCUMENTED SCOPE NEEDS TESTS,Track context and test replacement
+C-05,Reference scope,Phase 4 section 3.3,MI NI RI default volume scope; me described as SELF-surface,DOCUMENTED LANDMARKS MISSING,Do not invent landmark vocabulary
+C-06,Parameter vowels,Phase 4 section 3.3,Property-family mapping is provisional,PROVISIONAL,Gate behind versioned profile
+C-07,h coupling,Phase 4 section 3.3,Physical coupling mapping to h-domains is provisional,PROVISIONAL,Gate behind versioned profile
+C-08,Hand-flame,Phase 4 sections 8-9,Tokenisation checked; full parse and feasibility not checked,INCOMPLETE,Report partial structure only
+C-09,v2.0 rules,Recovery Audit and Decision Ledger D-006/D-007,Exact Foot coupling MEL KAN KEN KAS rules unavailable,UNRESOLVED,Recover source or propose replacement explicitly
+C-10,Expression notation,Phase 2 sections 2 and 5,Angle-bracket notation is audit metalanguage,PROVISIONAL,Do not treat as spoken syntax
+C-11,Validation coverage,Phase 4 section 9,Token checks do not prove whole-spell parsing or physical feasibility,GAP,Build parser and end-to-end tests
+C-12,Vernacular,Phase 5 section 8,Vernacular tests do not validate Construction compiler,SEPARATE SUBSYSTEM,Keep separate test suites

@@ -1,0 +1,43 @@
+{
+  "title": "Arcane Phase 5.20 Source Recovery and Homograph Evidence Matrix",
+  "counts": {
+    "RECOVERED/PASS": 4,
+    "PARTIALLY RECOVERED": 4,
+    "BLOCKED/UNRESOLVED": 3,
+    "CANON CHANGED": 0
+  },
+  "key_correction": "Phase 5.19 overstated source absence. Phase 4 consolidation documents fused readings and construction order, but the raw original v2.0 source and complete parser remain unavailable.",
+  "findings": [
+    {
+      "item": "re Performed",
+      "status": "PARTIALLY RECOVERED",
+      "evidence": "Phase 4 \u00a73.3, \u00a78, \u00a710 and lexicon generator: TARGET-surface; reference starts construction and persists until replaced."
+    },
+    {
+      "item": "ra Performed",
+      "status": "PARTIALLY RECOVERED",
+      "evidence": "Phase 4 fused-reference inventory and generator: TARGET-path; slot-resolved homophone."
+    },
+    {
+      "item": "Shared re digit / ra radian",
+      "status": "PASS",
+      "evidence": "Phase 5 CSV, v3.0-L."
+    },
+    {
+      "item": "Mixed-register prohibition",
+      "status": "UNRESOLVED",
+      "evidence": "Phase 5 G-V1 bars vernacular inside construction clauses, but Phase 4 example uses Shared numerals/units in Performed construction."
+    },
+    {
+      "item": "Whole spoken unique parse",
+      "status": "BLOCKED",
+      "evidence": "Phase 4 \u00a78-9 explicitly says whole-spell grammar parse/full parser not done."
+    },
+    {
+      "item": "Parameter-vowel and h-domain mappings",
+      "status": "PROVISIONAL",
+      "evidence": "Phase 4 \u00a73.3 labels mappings provisional."
+    }
+  ],
+  "canon_changed": false
+}

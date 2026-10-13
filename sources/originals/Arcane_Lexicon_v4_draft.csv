@@ -1,0 +1,141 @@
+form,gloss,cls,status,source,note
+za,0,DIGIT,CANON,v3.0-L,
+ki,1,DIGIT,CANON,v3.0-L,
+to,2,DIGIT,CANON,v3.0-L,
+mu,3,DIGIT,CANON,v3.0-L,
+re,4,DIGIT,CANON,v3.0-L,
+sa,5,DIGIT,CANON,v3.0-L,
+fi,6,DIGIT,CANON,v3.0-L,
+du,7,DIGIT,CANON,v3.0-L,
+go,8,DIGIT,CANON,v3.0-L,
+pe,9,DIGIT,CANON,v3.0-L,
+shi,decimal separator,DECIMAL,CANON,v3.0-L,
+ma,metre,UNIT,CANON,v3.0-L,
+se,second,UNIT,CANON,v3.0-L,
+ke,kilogram,UNIT,CANON,v3.0-L,
+ra,radian,UNIT,CANON,v3.0-L,
+ku,kelvin,UNIT,CANON,v3.0-L,
+pa,-X,AXIS,CANON,v3.0-L,
+ba,+X,AXIS,CANON,v3.0-L,
+ta,-Y,AXIS,CANON,v3.0-L,
+da,+Y,AXIS,CANON,v3.0-L,
+ka,-Z,AXIS,CANON,v3.0-L,
+ga,+Z,AXIS,CANON,v3.0-L,
+MI (formal),SELF (unscoped; default scope = volume),REF,"CANON (v3.0-L), reinterpreted",v3.0-L,performs as mə
+NI (formal),FIELD (unscoped; default scope = volume),REF,"CANON (v3.0-L), reinterpreted",v3.0-L,performs as nə
+RI (formal),TARGET (unscoped; default scope = volume),REF,"CANON (v3.0-L), reinterpreted",v3.0-L,performs as rə
+su,CURRENT,REF,CANON,v3.0-L,
+wo,WORLD,REF,CANON,v3.0-L,
+fe,FRAME,REF,CANON,v3.0-L,
+jo,toward,SPREL,CANON,v3.0-L,
+jur,away,SPREL,CANON,v3.0-L,
+ja,along,SPREL,CANON,v3.0-L,
+je,parallel,SPREL,CANON,v3.0-L,
+ji,aligned/coincident,SPREL,CANON,v3.0-L,
+pi,point,GEOM,CANON,v3.0-L,
+len,line,GEOM,CANON,v3.0-L,
+pla,plane,GEOM,CANON,v3.0-L,
+sur,surface,GEOM,CANON,v3.0-L,
+vom,volume,GEOM,CANON,v3.0-L,
+par,path,GEOM,CANON,v3.0-L,
+ben,region,GEOM,RENAMED,v3.0-L,was ren
+net,network,GEOM,CANON,v3.0-L,
+pala,position,PROP,CANON,v3.0-L,
+vanu,velocity,PROP,CANON,v3.0-L,
+moru,mass,PROP,CANON,v3.0-L,
+kera,acceleration,PROP,CANON,v3.0-L,
+feta,force,PROP,CANON,v3.0-L,
+enra,energy,PROP,CANON,v3.0-L,
+teva,temperature,PROP,CANON,v3.0-L,
+pura,pressure,PROP,CANON,v3.0-L,
+poma,momentum,PROP,CANON,v3.0-L,
+nes,read,INFO,CANON,v3.0-L,
+sima,measure,INFO,CANON,v3.0-L,
+gama,assign,INFO,CANON,v3.0-L,
+dave,infer,INFO,CANON,v3.0-L,
+frapa,add,ARITH,CANON,v3.0-L,
+fraja,subtract,ARITH,RENAMED,v3.0-L,was frata
+frama,multiply,ARITH,RENAMED,v3.0-L,was fraka
+frala,divide,ARITH,CANON,v3.0-L,
+frasha,negate,ARITH,CANON,v3.0-L,
+dran,magnitude,VEC,CANON,v3.0-L,
+drem,dot,VEC,CANON,v3.0-L,
+drum,cross,VEC,RENAMED,v3.0-L,was drim
+dras,compare,VEC,RENAMED,v3.0-L,was dral
+gran,and,LOGIC,CANON,v3.0-L,
+grat,or,LOGIC,CANON,v3.0-L,
+grash,not,LOGIC,RENAMED,v3.0-L,was grak
+bek,if,CTRL,CANON,v3.0-L,
+zet,while,CTRL,CANON,v3.0-L,
+kwam,bind,BIND,CANON,v3.0-L,
+kwat,reference binding,BIND,CANON,v3.0-L,
+kwash,live evaluation,BIND,RENAMED,v3.0-L,was kwak
+kren,establish,VERB,CANON,Magic v3.0 §26,
+trak,alter,VERB,CANON,Magic v3.0 §26,
+frem,maintain,VERB,CANON,Magic v3.0 §26,
+shren,release,VERB,CANON,Magic v3.0 §26,
+bran,couple,VERB,CANON,Magic v3.0 §26,
+vare,prefer,VERB,CANON,Magic v3.0 §26,
+po,position role,ROLE,CANON,v2.0,
+fo,direction role,ROLE,CANON,v2.0,
+lo,movement role,ROLE,CANON,v2.0,
+hə,couple: mana,COUP,CANON,v2.0,
+he,couple: matter,COUP,CANON,v2.0,
+ha,couple: energy,COUP,CANON,v2.0,
+hu,couple: living,COUP,CANON,v2.0,
+hi,couple: information,COUP,CANON,v2.0,
+ho,couple: field,COUP,CANON,v2.0,
+boni,now (instant of evaluation),TIME,PROPOSED,Phase 4,
+vote,before,TIME,PROPOSED,Phase 4,
+fuwo,after,TIME,PROPOSED,Phase 4,
+kole,until,CTRL,PROPOSED,Phase 4,
+shasu,delay (offset before start),TIME,PROPOSED,Phase 4,
+wela,duration,TIME,PROPOSED,Phase 4,
+vitu,repetition interval,TIME,PROPOSED,Phase 4,
+showa,deadline,TIME,PROPOSED,Phase 4,
+leko,predict (estimate future state),TIME,PROPOSED,Phase 4,
+tude,set union,SET,PROPOSED,Phase 4,
+kofa,set intersection,SET,PROPOSED,Phase 4,
+lipe,set difference,SET,PROPOSED,Phase 4,
+belu,set complement,SET,PROPOSED,Phase 4,
+tile,filter set by predicate,SET,PROPOSED,Phase 4,
+wuke,order set by key,SET,PROPOSED,Phase 4,
+fupa,pick min/max/nth from ordered set,SET,PROPOSED,Phase 4,
+buve,search a domain for candidates,SET,PROPOSED,Phase 4,
+bemi,exists (any),SET,PROPOSED,Phase 4,
+tipa,for all,SET,PROPOSED,Phase 4,
+weki,for each (iteration),CTRL,PROPOSED,Phase 4,
+mosha,hard requirement,CONSTR,PROPOSED,Phase 4,
+lisho,invariant: preserve,CONSTR,PROPOSED,Phase 4,
+vobi,tolerance: within,CONSTR,PROPOSED,Phase 4,
+wuga,exponent,MATH,PROPOSED,Phase 4,
+levu,scientific notation (x10^n),MATH,PROPOSED,Phase 4,
+nadi,relation: equal,RELVAL,PROPOSED,Phase 4,
+dofa,relation: less than,RELVAL,PROPOSED,Phase 4,
+guwi,relation: greater than,RELVAL,PROPOSED,Phase 4,
+luri,control state: attached,STATE,PROPOSED,Phase 4,
+dena,control state: transferred,STATE,PROPOSED,Phase 4,
+votu,control state: independent,STATE,PROPOSED,Phase 4,
+ruki,event: condition becomes true,CTRL,PROPOSED,Phase 4,
+labu,frame transform,MISC,PROPOSED,Phase 4,
+meto,block open,CTRL,PROPOSED,Phase 4,
+dogu,block close,CTRL,PROPOSED,Phase 4,
+sho,dimensionless unit (ends every numeral that has no physical unit),UNIT,PROPOSED,Phase 4,
+vo,bit (information unit),UNIT,PROPOSED,Phase 4,unit of information; no dimension assigned yet
+mi,SELF-point,FUSED-REF,CANON (v2.0),v2.0,Performed fusion of reference + scope vowel
+me,SELF-surface,FUSED-REF,CANON (v2.0),v2.0,Performed fusion of reference + scope vowel
+mə,SELF-volume,FUSED-REF,CANON (v2.0),v2.0,Performed fusion of reference + scope vowel
+ni,FIELD-point,FUSED-REF,CANON (v2.0),v2.0,Performed fusion of reference + scope vowel
+ne,FIELD-surface,FUSED-REF,CANON (v2.0),v2.0,Performed fusion of reference + scope vowel
+nə,FIELD-volume,FUSED-REF,CANON (v2.0),v2.0,Performed fusion of reference + scope vowel
+ri,TARGET-point,FUSED-REF,CANON (v2.0),v2.0,Performed fusion of reference + scope vowel
+re,TARGET-surface,FUSED-REF,CANON (v2.0),v2.0,Performed fusion of reference + scope vowel
+rə,TARGET-volume,FUSED-REF,CANON (v2.0),v2.0,Performed fusion of reference + scope vowel
+ra,TARGET-path,FUSED-REF,CANON (v2.0),v2.0,Performed fusion of reference + scope vowel
+ro,TARGET-network,FUSED-REF,CANON (v2.0),v2.0,Performed fusion of reference + scope vowel
+ru,TARGET-extended region,FUSED-REF,CANON (v2.0),v2.0,Performed fusion of reference + scope vowel
+s-,IF (clitic form of bek),CLITIC,"CANON (v2.0), reinterpreted",v2.0,Performed only
+sh-,WHILE (clitic form of zet),CLITIC,"CANON (v2.0), reinterpreted",v2.0,Performed only
+f-,UNTIL (clitic form of until root),CLITIC,"CANON (v2.0), reinterpreted",v2.0,Performed only
+wi,LIVE (performed form of kwash),CLITIC,"CANON (v2.0), reinterpreted",v2.0,Performed only
+we,LOCKED (performed form of kwam+kwat lock),CLITIC,"CANON (v2.0), reinterpreted",v2.0,Performed only

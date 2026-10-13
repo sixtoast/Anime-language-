@@ -1,0 +1,13 @@
+PASS	matrix has unique item keys
+PASS	construction-expression split recorded
+PASS	construction order preserved
+PASS	Foot shape does not claim full semantics
+PASS	parameter vowel mapping remains provisional
+PASS	coupling mapping remains provisional
+PASS	KREN not promoted
+PASS	worked example not executable
+PASS	compiler bridge not demonstrated
+PASS	missing v2.0 source gap explicit
+PASS	all rows have evidence and gap
+PASS	no row silently marks execution YES
+RESULT: 12/12 PASS

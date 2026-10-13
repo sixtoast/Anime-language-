@@ -1,0 +1,16 @@
+test_id,category,input,expected,status
+P5.7-001,alias,FRATA⟨Q:length; Q:length⟩,resolve to FRAJA,pass
+P5.7-002,preferred head,FRAJA⟨Q:length; Q:length⟩,accept as Quantity,pass
+P5.7-003,alias,FRAKA⟨Q:length; Q:time⟩,resolve to FRAMA,pass
+P5.7-004,alias,DRIM⟨V:3d; V:3d⟩,resolve to DRUM,pass
+P5.7-005,alias,GRAK⟨Boolean⟩,resolve to GRASH,pass
+P5.7-006,alias,DRAL⟨Comparable; Comparable; Criterion⟩,resolve to DRAS,pass
+P5.7-007,arity,FRAPA⟨Q:length⟩,reject missing argument,pass
+P5.7-008,arity,FRAPA⟨Q:length; Q:length; Q:length⟩,reject extra argument,pass
+P5.7-009,type,FRAPA⟨Boolean; Q:length⟩,reject Boolean operand,pass
+P5.7-010,type,GRASH⟨Q:length⟩,reject non-Boolean,pass
+P5.7-011,type,DRUM⟨V:2d; V:2d⟩,reject non-3D vectors,pass
+P5.7-012,nesting,GRASH⟨DRAL⟨Comparable; Comparable; Criterion⟩⟩,accept nested Boolean expression,pass
+P5.7-013,syntax,FRAPA⟨Q:length; Q:length, reject unclosed expression,pass
+P5.7-014,unknown signature,BEN⟨Q:length⟩,reject unregistered operator signature,pass
+P5.7-015,unknown atom,BEN,reject as unknown typed atom in this harness,pass
