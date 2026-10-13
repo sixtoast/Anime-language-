@@ -68,7 +68,7 @@ const LEGACY_ALIASES: Readonly<Record<string, string>> = {
   frata: "fraja", fraka: "frama", drim: "drum",
   dral: "dras", grak: "grash", kwak: "kwash"
 };
-const OPERATOR_CLASSES = new Set(["frapa", "fraja", "frama", "frala", "frasha", "dran", "drem", "drum", "dras", "gran", "grat", "grash", "kwam", "kwat", "kwash", "bek", "zet", "kole"]);
+const OPERATOR_CLASSES = new Set(["frapa", "fraja", "frama", "frala", "frasha", "dran", "drem", "drum", "dras", "gran", "grat", "grash", "kwam", "kwat", "kwash", "bek", "zet", "kole", "nes", "gama", "dave", "sima", "weki", "ruki"]);
 
 class ParseFailure extends Error {
   constructor(
