@@ -136,7 +136,8 @@ Statuses use only these meanings: **Planned** (not implemented), **Implemented**
 
 ### Phase 2 — Documentation and source inventory
 - [x] Keep the existing initial source inventory and archive report.
-- [ ] Audit the existing catalogue for valid paths, links, labels, metadata, and status claims.
+- [x] First-pass audit: all 14 explicit catalogue source paths exist in the repository tree; 19 entries lack an explicit path and need classification. See [Documentation Catalogue First-Pass Link Audit](DOCUMENTATION-CATALOGUE-LINK-AUDIT.md).
+- [ ] Complete UI-level catalogue checks for links, labels, search, and status claims.
 - [ ] Identify archive content not represented in the visible catalogue.
 - [ ] Separate original sources from derived summaries, historical prototypes, provisional reports, and generated outputs.
 - [ ] Surface duplicates, missing metadata, broken links, missing originals, and unreviewed archive content.
