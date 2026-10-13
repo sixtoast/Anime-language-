@@ -21,7 +21,7 @@ The audit summary deliberately uses the status `observations-generated-not-accep
 
 ## Root-node checks
 
-The harness now records the observed root AST node kind (when a parse succeeds) and compares it to `expectedNode` for directly comparable positive fixtures. This avoids counting a parse as a match when the parser accepts the text but returns the wrong top-level node kind. Slot-specific expectations such as an identifier embedded in a binding still remain context-dependent until the harness can compare the exact child slot safely.
+The harness now records the observed root AST node kind (when a parse succeeds) and compares it to `expectedNode` for directly comparable positive fixtures. This avoids counting a parse as a match when the parser accepts the text but returns the wrong top-level node kind. Slot-specific expectations such as an identifier embedded in a binding still remain context-dependent until the harness can compare the exact child slot safely. The harness also records the structural shape `Call-with-Block` when a successful call AST contains a block argument. This makes the control-block structure visible while keeping fixture 008 context-dependent: it does not validate the condition signature or establish that the form is canonical.
 
 ## Tests authored
 
@@ -31,6 +31,7 @@ The harness now records the observed root AST node kind (when a parse succeeds) 
 2. The FRATA case normalises to FRAJA only because the fixture explicitly enables legacy aliases.
 3. RE/RA ambiguity cases remain rejected by the current parser.
 4. The harness does not claim canon approval or fixture acceptance.
+5. The control fixture exposes its `Call-with-Block` AST shape while retaining a context-dependent comparison status.
 
 ## What remains
 
