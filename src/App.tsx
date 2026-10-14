@@ -71,6 +71,7 @@ function App() {
   const [selectedDoc, setSelectedDoc] = useState(docs[0].title);
   const [testQuery, setTestQuery] = useState("");
   const [testGroup, setTestGroup] = useState<"All" | "Parser" | "Dimensions" | "Semantic types" | "Operator contracts">("All");
+  const [impactRule, setImpactRule] = useState("All");
   const [workflowRuns, setWorkflowRuns] = useState<WorkflowRun[]>([]);
   const [workflowJobs, setWorkflowJobs] = useState<WorkflowJob[]>([]);
   const [workflowLoading, setWorkflowLoading] = useState(true);
@@ -196,6 +197,10 @@ function App() {
   const sourceKinds = useMemo(() => Array.from(new Set(docs.map((doc) => doc.sourceKind))).sort(), []);
   const filteredDocs = useMemo(() => filterDocuments(query, docStatus, docSourceKind), [query, docStatus, docSourceKind]);
   const selectedDocument = filteredDocs.find((item) => item.title === selectedDoc) ?? filteredDocs[0] ?? docs[0];
+  const evidenceRuleIds = [...new Set(evidenceChains.flatMap((chain) => chain.ruleIds))].sort();
+  const visibleEvidenceChains = impactRule === "All" ? evidenceChains : evidenceChains.filter((chain) => chain.ruleIds.includes(impactRule));
+  const visibleEvidenceNodes = visibleEvidenceChains.flatMap((chain) => chain.nodes);
+  const evidenceNodeCounts = [...new Set(visibleEvidenceNodes.map((node) => node.kind))].map((kind) => ({ kind, count: visibleEvidenceNodes.filter((node) => node.kind === kind).length }));
 
   const changeSection = (next: Section) => {
     setSection(next);
@@ -395,8 +400,9 @@ function App() {
           <div className="review-cards">{[{n:"01",title:"FRAPA contract",status:"Open question" as Status,tag:"SOURCE EVIDENCE",desc:"Establish the contract only from available source evidence. Do not invent definitions to fill gaps.",sourcePath:"docs/audits/phase-2-formal-syntax.md"},{n:"02",title:"Phase 4 — syntax & ambiguity",status:"Provisional" as Status,tag:"AUDIT MATERIAL",desc:"Test unique structural interpretation, operator arity and safe handling of incomplete expressions.",sourcePath:"sources/originals/Arcane_Language_Audit_Phase_4.docx"},{n:"03",title:"Phase 5 — semantic audit",status:"Provisional" as Status,tag:"PHASE 2 PRIORITY",desc:"Compare semantic claims against Phase 2 first. Record conflicts and retain old forms unless inconsistency is demonstrated.",sourcePath:"sources/originals/Arcane_Language_Audit_Phase_5.docx"},{n:"04",title:"Phase 6G — source lexicon",status:"Provisional" as Status,tag:"DATA INTEGRITY",desc:"Audit the v5 draft vocabulary, preserve non-atomic forms, validate alias targets, and keep RE/RA collisions visible.",sourcePath:"docs/research/phase6g-v5-source-lexicon-audit-01.md"},{n:"05",title:"Phase 6G — parser fixtures",status:"Provisional" as Status,tag:"OBSERVATION ONLY",desc:"Compare recovered fixtures against the provisional parser without treating observations as canon approval or semantic validation.",sourcePath:"docs/research/phase6g-fixture-observation-harness-01.md"}].map((item) => <article className="review-card" key={item.n}><div className="review-card-top"><span className="review-number">{item.n}</span><StatusPill status={item.status}/></div><span className="detail-kicker">{item.tag}</span><h2>{item.title}</h2><p>{item.desc}</p><div className="review-card-bottom"><a href={"https://github.com/sixtoast/Anime-language-/blob/main/" + item.sourcePath} target="_blank" rel="noreferrer" aria-label={"Open source evidence for " + item.title}>Open source evidence <span aria-hidden="true">↗</span></a></div></article>)}</div>
           <div className="section-heading lower-heading"><div><div className="eyebrow">SHARED EVIDENCE GRAPH · INITIAL COVERAGE</div><h2>Follow a claim across its records</h2></div><span className="section-caption">{evidenceChains.length} CHAINS</span></div>
           <p className="page-intro">These curated chains connect known source material, rule IDs, implementation notes, fixtures and tests. They are an initial, explicit map—not an inferred or complete dependency graph. A link records a documented relationship; it does not prove implementation completeness or test success.</p>
+          <div className="evidence-impact-controls"><label htmlFor="evidence-rule-filter">Inspect impact for a rule<select id="evidence-rule-filter" aria-label="Filter evidence by rule ID" value={impactRule} onChange={(event) => setImpactRule(event.target.value)}><option value="All">All tracked rule IDs</option>{evidenceRuleIds.map((ruleId) => <option value={ruleId} key={ruleId}>{ruleId}</option>)}</select></label><div className="evidence-impact-summary" role="status"><strong>{visibleEvidenceChains.length} related chains</strong><span>{visibleEvidenceNodes.length} linked record references</span><span>{evidenceNodeCounts.map((item) => `${item.count} ${item.kind.toLowerCase()}`).join(" · ") || "No mapped records"}</span></div>{impactRule !== "All" && <button className="secondary-button" onClick={() => setImpactRule("All")}>Clear rule filter</button>}</div>
           <div className="audit-matrix evidence-chain-grid">
-            {evidenceChains.map((chain) => <article className="audit-item evidence-chain" key={chain.id}>
+            {visibleEvidenceChains.map((chain) => <article className="audit-item evidence-chain" key={chain.id}>
               <div className="audit-item-top"><code>{chain.id}</code><span className={"audit-readiness " + (chain.status === "limited implementation" ? "audit-limited" : "audit-blocked")}>{chain.status.toUpperCase()}</span></div>
               <h3>{chain.title}</h3>
               <p>{chain.summary}</p>
