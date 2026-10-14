@@ -138,3 +138,8 @@ The five-section sidebar is now exposed as a named navigation landmark (`Main se
 ### Catalogue source-path regression coverage (2026-10-14)
 
 Added WEB-DOC-REG-008 to compare all catalogue source paths against Vite's repository file inventory at test time. This guards against broken catalogue links as files move or are renamed. CI must confirm the glob covers the intended source folders before the test is treated as verified; external/browser link behaviour remains a separate acceptance item.
+
+
+### CI test-summary reporting correction (2026-10-14)
+
+Run #179 confirmed the new `WEB-DOC-REG-008` source-path regression passes, but also exposed a reporting issue: `scripts/publish-test-summary.mjs` recognised only engine test ID families and returned exit code 1 whenever any test was unmapped. The reporting step now recognises the website catalogue regression ID family and treats remaining unmapped results as a visible warning instead of a test failure. The Vitest step remains responsible for pass/fail; the overall workflow still correctly fails when a real test fails. Verify this separation in the next CI run.

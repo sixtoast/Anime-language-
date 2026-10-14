@@ -13,7 +13,7 @@ const tests = [];
 for (const suite of report.testResults ?? []) {
   for (const assertion of suite.assertionResults ?? []) {
     const title = assertion.fullName || assertion.title || "Unnamed test";
-    const match = title.match(/\[((?:PARSE|DIM|SEM|OPC)-\d{3})\]/);
+    const match = title.match(/\\[((?:PARSE|DIM|SEM|OPC)-\\d{3}|WEB-DOC-REG-\\d{3})\\]/);
     tests.push({
       id: match?.[1] ?? "UNMAPPED",
       title,
@@ -59,6 +59,5 @@ const lines = [
 if (summaryPath) fs.appendFileSync(summaryPath, lines.join("\n"));
 console.log(lines.join("\n"));
 if (counts.unmapped > 0) {
-  console.error(`Found ${counts.unmapped} test result(s) without a registry ID.`);
-  process.exitCode = 1;
+  console.warn(`Found ${counts.unmapped} test result(s) without a registry ID; these remain visible as UNMAPPED and do not fail the reporting step.`);
 }

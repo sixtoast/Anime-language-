@@ -268,3 +268,8 @@ The sidebar section list now uses a named navigation landmark and exposes the se
 ## Website implementation note — catalogue path regression (2026-10-14)
 
 The documentation catalogue test suite now checks that every declared source path resolves to a repository file under the docs, sources, or engine Markdown trees. This protects internal repository references from future path drift. It does not validate the content or authority of a source, nor does it replace browser click acceptance.
+
+
+## Website implementation note — CI summary vs test failure (2026-10-14)
+
+The test-summary script now recognises `WEB-DOC-REG-###` IDs and does not fail merely because other test results are not yet mapped to stable IDs. Unmapped counts remain visible as warnings. Actual test failures still fail the test step and therefore the workflow; this avoids conflating incomplete metadata with a failing test.
