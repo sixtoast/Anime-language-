@@ -10,6 +10,7 @@ import { workbenchTests } from "./engine/testRegistry";
 import { canonAuditItems, auditReadinessLabels } from "./engine/canonAuditRegistry";
 import phase6gFixtureData from "../tests/fixtures/phase6g-surface-parser-cases.json";
 import { auditPhase6GFixtures, type Phase6GFixture } from "./engine/phase6gFixtureAudit";
+import { evidenceChains } from "./evidenceLinks";
 
 type Section = "Overview" | "Documentation" | "Playground" | "Test suite" | "Research & review";
 
@@ -392,7 +393,25 @@ function App() {
           <div className="eyebrow"><span className="eyebrow-line"/> EVIDENCE, QUESTIONS, DECISIONS</div><h1 className="page-title">Research & review<span>.</span></h1><p className="page-intro">Keep unresolved questions visible. Findings should be traceable to source material and should not become canonical by implication.</p>
           <div className="review-banner"><FlaskConical size={20}/><div><strong>Active audit context</strong><p>Phase 2 is the priority source for the semantic audit. Preserve older forms as aliases unless an inconsistency is demonstrated.</p></div><span className="review-count">5 TOPICS</span></div>
           <div className="review-cards">{[{n:"01",title:"FRAPA contract",status:"Open question" as Status,tag:"SOURCE EVIDENCE",desc:"Establish the contract only from available source evidence. Do not invent definitions to fill gaps.",sourcePath:"docs/audits/phase-2-formal-syntax.md"},{n:"02",title:"Phase 4 — syntax & ambiguity",status:"Provisional" as Status,tag:"AUDIT MATERIAL",desc:"Test unique structural interpretation, operator arity and safe handling of incomplete expressions.",sourcePath:"sources/originals/Arcane_Language_Audit_Phase_4.docx"},{n:"03",title:"Phase 5 — semantic audit",status:"Provisional" as Status,tag:"PHASE 2 PRIORITY",desc:"Compare semantic claims against Phase 2 first. Record conflicts and retain old forms unless inconsistency is demonstrated.",sourcePath:"sources/originals/Arcane_Language_Audit_Phase_5.docx"},{n:"04",title:"Phase 6G — source lexicon",status:"Provisional" as Status,tag:"DATA INTEGRITY",desc:"Audit the v5 draft vocabulary, preserve non-atomic forms, validate alias targets, and keep RE/RA collisions visible.",sourcePath:"docs/research/phase6g-v5-source-lexicon-audit-01.md"},{n:"05",title:"Phase 6G — parser fixtures",status:"Provisional" as Status,tag:"OBSERVATION ONLY",desc:"Compare recovered fixtures against the provisional parser without treating observations as canon approval or semantic validation.",sourcePath:"docs/research/phase6g-fixture-observation-harness-01.md"}].map((item) => <article className="review-card" key={item.n}><div className="review-card-top"><span className="review-number">{item.n}</span><StatusPill status={item.status}/></div><span className="detail-kicker">{item.tag}</span><h2>{item.title}</h2><p>{item.desc}</p><div className="review-card-bottom"><a href={"https://github.com/sixtoast/Anime-language-/blob/main/" + item.sourcePath} target="_blank" rel="noreferrer" aria-label={"Open source evidence for " + item.title}>Open source evidence <span aria-hidden="true">↗</span></a></div></article>)}</div>
-          <div className="section-heading lower-heading"><div><div className="eyebrow">PHASE 6G · LIVE LOCAL OBSERVATIONS</div><h2>Recovered parser fixture review</h2></div><span className="section-caption">{phase6gFixtureAudit.fixtureCount} FIXTURES</span></div>
+          <div className="section-heading lower-heading"><div><div className="eyebrow">SHARED EVIDENCE GRAPH · INITIAL COVERAGE</div><h2>Follow a claim across its records</h2></div><span className="section-caption">{evidenceChains.length} CHAINS</span></div>
+          <p className="page-intro">These curated chains connect known source material, rule IDs, implementation notes, fixtures and tests. They are an initial, explicit map—not an inferred or complete dependency graph. A link records a documented relationship; it does not prove implementation completeness or test success.</p>
+          <div className="audit-matrix evidence-chain-grid">
+            {evidenceChains.map((chain) => <article className="audit-item evidence-chain" key={chain.id}>
+              <div className="audit-item-top"><code>{chain.id}</code><span className={"audit-readiness " + (chain.status === "limited implementation" ? "audit-limited" : "audit-blocked")}>{chain.status.toUpperCase()}</span></div>
+              <h3>{chain.title}</h3>
+              <p>{chain.summary}</p>
+              {chain.ruleIds.length > 0 && <div className="test-case-meta"><span>Rule IDs: {chain.ruleIds.join(", ")}</span></div>}
+              <ol className="evidence-node-list">
+                {chain.nodes.map((node, index) => <li key={node.path}>
+                  <div className="evidence-node-heading"><span className="evidence-node-index">{index + 1}</span><div><strong>{node.label}</strong><span className="detail-kicker">{node.kind}</span></div></div>
+                  <p>{node.relationship}</p>
+                  <a href={"https://github.com/sixtoast/Anime-language-/blob/main/" + node.path} target="_blank" rel="noreferrer" aria-label={"Open " + node.label + " at " + node.path}><code>{node.path}</code> <span aria-hidden="true">↗</span></a>
+                </li>)}
+              </ol>
+              <div className="audit-next"><strong>Scope and evidence caveat</strong><p>{chain.caveat}</p></div>
+            </article>)}
+          </div>
+                    <div className="section-heading lower-heading"><div><div className="eyebrow">PHASE 6G · LIVE LOCAL OBSERVATIONS</div><h2>Recovered parser fixture review</h2></div><span className="section-caption">{phase6gFixtureAudit.fixtureCount} FIXTURES</span></div>
           <p className="page-intro">These observations are computed in this browser build against the provisional Phase 6G parser. They are not CI results, source approval, semantic validation, or canon acceptance. A context-dependent case is deliberately not counted as a direct pass.</p>
           <div className="audit-matrix">
             <article className="audit-item"><div className="audit-item-top"><code>DIRECT COMPARISON</code><span className="audit-readiness audit-limited">OBSERVATION ONLY</span></div><h3>{phase6gFixtureAudit.directMatches} matches · {phase6gFixtureAudit.directMismatches} mismatches</h3><p>{phase6gFixtureAudit.directlyComparable} fixtures have direct accept/reject expectations that can be compared safely.</p><div className="audit-next"><strong>Not directly comparable</strong><p>{phase6gFixtureAudit.nonDirectComparisons} fixtures require context, remain unresolved, or test a scope guardrail.</p></div></article>
