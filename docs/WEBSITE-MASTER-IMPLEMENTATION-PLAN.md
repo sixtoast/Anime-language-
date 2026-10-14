@@ -273,3 +273,8 @@ The documentation catalogue test suite now checks that every declared source pat
 ## Website implementation note — CI summary vs test failure (2026-10-14)
 
 The test-summary script now recognises `WEB-DOC-REG-###` IDs and does not fail merely because other test results are not yet mapped to stable IDs. Unmapped counts remain visible as warnings. Actual test failures still fail the test step and therefore the workflow; this avoids conflating incomplete metadata with a failing test.
+
+
+## Website implementation note — Development Cockpit live health summary (2026-10-14)
+
+The Overview now surfaces a compact health summary based on existing live GitHub Actions state and published test-report data. Workflow result, website build step, and per-test report are separate signals; a commit mismatch is called out to avoid combining results from different revisions. This improves the Overview without duplicating API requests or inventing status data. Responsive/browser acceptance remains pending, and the larger evidence-backed next-task recommendation remains unimplemented.

@@ -143,3 +143,8 @@ Added WEB-DOC-REG-008 to compare all catalogue source paths against Vite's repos
 ### CI test-summary reporting correction (2026-10-14)
 
 Run #179 confirmed the new `WEB-DOC-REG-008` source-path regression passes, but also exposed a reporting issue: `scripts/publish-test-summary.mjs` recognised only engine test ID families and returned exit code 1 whenever any test was unmapped. The reporting step now recognises the website catalogue regression ID family and treats remaining unmapped results as a visible warning instead of a test failure. The Vitest step remains responsible for pass/fail; the overall workflow still correctly fails when a real test fails. Verify this separation in the next CI run.
+
+
+## Development Cockpit live status panel (2026-10-14)
+
+The Overview now reuses the same live GitHub Actions state and published per-test report already fetched for the Test Suite. It distinguishes latest workflow conclusion, the type-check/build step, and per-test report availability/counts; it flags a report whose commit differs from the latest workflow commit rather than presenting the two as one coherent snapshot. The panel links directly to the Test Laboratory and latest run. This is a data-backed status summary, not a task recommendation engine or browser-verified acceptance.
