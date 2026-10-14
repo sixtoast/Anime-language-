@@ -33,6 +33,18 @@ test.describe("shared evidence chain explorer", () => {
     await expect(page.locator(".evidence-chain")).toHaveCount(3);
   });
 
+  test("opens related evidence directly from a documentation source", async ({ page }) => {
+    await page.getByRole("button", { name: "Documentation", exact: true }).click();
+    await page.getByRole("button", { name: /Arcane language v3.0-L/ }).click();
+    await page.getByRole("button", { name: "View Provisional operator arity" }).click();
+    await expect(page.getByRole("heading", { name: "Follow a claim across its records" })).toBeVisible();
+    await expect(page.getByText("Source-linked view")).toBeVisible();
+    await expect(page.locator(".evidence-chain")).toHaveCount(1);
+    await expect(page.getByRole("heading", { name: "Provisional operator arity" })).toBeVisible();
+    await page.getByRole("button", { name: "Show all evidence chains" }).click();
+    await expect(page.locator(".evidence-chain")).toHaveCount(3);
+  });
+
   test("evidence links remain inside the viewport on a 360px screen", async ({ page }) => {
     await page.setViewportSize({ width: 360, height: 800 });
     await page.goto("/");
