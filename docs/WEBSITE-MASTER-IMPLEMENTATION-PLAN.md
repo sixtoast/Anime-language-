@@ -293,3 +293,7 @@ Added a Playwright-based website browser suite and CI step for the Documentation
 ### Browser-discovered mobile overflow — 2026-10-14
 
 The first Playwright run passed 3/4 Documentation checks and found a real 19px page-level horizontal overflow at a 360px viewport (document width 379px). The responsive Documentation layout now stacks the source list and detail panel into one column at the existing mobile breakpoint. Keep the overflow assertion strict; the fix must pass the same browser test before acceptance is marked verified.
+
+## Implementation update — evidence-aware next-task recommendation (2026-10-14)
+
+The Overview recommendation now branches on the live latest CI run's `Run website browser acceptance` step. A confirmed success advances to WEB-SH-01 / WEB-SH-02 (shared source, research, fixture, and test references); an explicit failure keeps browser acceptance as the blocking task; missing, unavailable, loading, skipped, cancelled, or otherwise inconclusive states do not count as success. The card links to the exact CI run. Browser regression tests cover success, failure, and cancelled-step states. Status remains **Implemented — unverified** until CI confirms the build and new browser tests on the implementation commit. This does not close the outstanding 360px mobile acceptance gate unless that exact browser step succeeds.
