@@ -194,3 +194,7 @@ Added a rule-ID selector to Research & Review. Selecting a mapped rule narrows t
 ### Documentation-to-evidence navigation — 2026-10-14
 
 Documentation detail panels now show related curated evidence chains when the selected entry's source path exactly matches a node in the shared evidence model. A direct action opens Research & Review focused on that chain, with a clear return to all chains. The rule selector clears a focused-source view when the user chooses a rule, avoiding conflicting filters. Entries without a mapped chain do not show a fabricated relationship. Browser acceptance covers the source-to-chain path and restoring the full view. Status: **Implemented — unverified** pending CI.
+
+### Strict per-test report freshness gate — 2026-10-14
+
+The Test Suite and Development Cockpit now accept per-test statuses only when the published report's commit SHA and CI run ID match the latest main-branch CI run loaded by the page. When either differs, the stored report is labelled stale, per-test statuses and durations are withheld, and rows show STALE REPORT rather than reusing old pass/fail outcomes. The report metadata displays both the report run and the latest CI run. Browser tests cover both a matching report and a deliberately stale report. This is still bounded to the latest run represented by the existing GitHub API response; it is not a full historical run selector. Status: **Implemented — verification pending for latest commit**.
