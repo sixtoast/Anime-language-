@@ -54,6 +54,13 @@ test.describe("shared evidence chain explorer", () => {
     await expect(discrepancy.getByText("P6G-FX-011")).toBeVisible();
     await expect(discrepancy.getByText("P6G-FX-012")).toBeVisible();
     await expect(discrepancy.getByText(/not a decision to change aliases, lexicon, grammar, or parser behaviour/i)).toBeVisible();
+    await expect(discrepancy.getByText("RE MA", { exact: true })).toBeVisible();
+    await expect(discrepancy.getByText("KI RA", { exact: true })).toBeVisible();
+    await expect(discrepancy.getByText("Archived Python source", { exact: true })).toHaveCount(2);
+    await expect(discrepancy.getByText("Current TypeScript parser", { exact: true })).toHaveCount(2);
+    await expect(discrepancy.getByText("accept", { exact: true })).toHaveCount(2);
+    await expect(discrepancy.getByText("reject", { exact: true })).toHaveCount(2);
+    await expect(discrepancy.getByText(/not freshly executed/i)).toBeVisible();
     await discrepancy.getByRole("button", { name: "Focus linked evidence chain" }).click();
     await expect(page.getByText("Opened from a linked source or research record.")).toBeVisible();
     await expect(page.locator(".evidence-chain")).toHaveCount(1);
