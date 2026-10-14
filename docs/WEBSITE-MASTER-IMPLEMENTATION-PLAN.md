@@ -263,3 +263,8 @@ Added shared CSS `:focus-visible` styling for interactive elements, with inset f
 ## Website implementation note — section navigation semantics (2026-10-14)
 
 The sidebar section list now uses a named navigation landmark and exposes the selected section with `aria-current="page"`. This is a low-risk website-only accessibility improvement. It does not complete the accessibility audit; keyboard traversal, screen-reader output, contrast, and responsive browser checks remain open.
+
+
+## Website implementation note — catalogue path regression (2026-10-14)
+
+The documentation catalogue test suite now checks that every declared source path resolves to a repository file under the docs, sources, or engine Markdown trees. This protects internal repository references from future path drift. It does not validate the content or authority of a source, nor does it replace browser click acceptance.

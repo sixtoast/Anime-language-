@@ -48,4 +48,20 @@ describe("Documentation catalogue website regression checks", () => {
       expect(normalized.split("/"), doc.title + " must not traverse outside the repository").not.toContain("..");
     }
   });
+  it("[WEB-DOC-REG-008] keeps every catalogue source path resolvable in the repository", () => {
+    const sourceFiles = import.meta.glob([
+      "../docs/**/*",
+      "../sources/**/*",
+      "./engine/**/*.md"
+    ], { eager: false });
+    const availablePaths = new Set(Object.keys(sourceFiles).map((path) => {
+      if (path.startsWith("../")) return path.slice(3);
+      if (path.startsWith("./")) return "src/" + path.slice(2);
+      return path;
+    }));
+    for (const doc of docs) {
+      expect(availablePaths.has(doc.sourcePath), doc.title + " source path: " + doc.sourcePath).toBe(true);
+    }
+  });
+
 });

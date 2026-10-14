@@ -133,3 +133,8 @@ A shared `:focus-visible` style now makes keyboard focus visible across links, b
 ### Navigation semantics baseline (2026-10-14)
 
 The five-section sidebar is now exposed as a named navigation landmark (`Main sections`) and the active section button carries `aria-current="page"`. This is a focused semantic improvement, not evidence of a complete screen-reader audit. WEB-UX-02 remains Implemented — unverified pending browser acceptance.
+
+
+### Catalogue source-path regression coverage (2026-10-14)
+
+Added WEB-DOC-REG-008 to compare all catalogue source paths against Vite's repository file inventory at test time. This guards against broken catalogue links as files move or are renamed. CI must confirm the glob covers the intended source folders before the test is treated as verified; external/browser link behaviour remains a separate acceptance item.
