@@ -182,3 +182,7 @@ Added an initial, explicitly curated evidence-chain explorer to Research & Revie
 ### Evidence-chain browser-test adjustment — 2026-10-14
 
 The first browser run for the evidence-chain explorer confirmed the production build and existing seven browser checks, but the two new explorer checks timed out before reaching the content because the test required an exact accessible name that did not match the sidebar navigation button (which includes its navigation count). The selector now scopes to the sidebar and matches the navigation label. This is a test-harness correction, not a product acceptance pass; rerun CI on the corrected test commit before upgrading status.
+
+### Evidence-chain mobile acceptance follow-up — 2026-10-14
+
+The first corrected run confirms the explorer's three-chain rendering test passes and the production build passes. Its 360px test still timed out because it was using a navigation interaction that was not available in that mobile state. The test now follows the same working overview feature-card route as the desktop test before measuring document width. CI run #205 is checking this adjustment. The existing decimal-with-unit parser unit test remains the only reported unit failure; no Arcane parser behaviour was changed as part of this website work.
