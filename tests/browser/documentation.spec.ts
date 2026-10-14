@@ -49,6 +49,7 @@ test.describe("Documentation catalogue browser acceptance", () => {
   test("catalogue controls fit a narrow viewport without page-level horizontal overflow", async ({ page }) => {
     await page.setViewportSize({ width: 360, height: 800 });
     await page.reload();
+    await page.getByRole("button", { name: "Open navigation" }).click();
     await page.getByRole("button", { name: "Documentation", exact: true }).click();
     await expect(page.getByRole("heading", { name: "Documentation." })).toBeVisible();
     const sizes = await page.evaluate(() => ({
