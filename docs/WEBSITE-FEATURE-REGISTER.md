@@ -170,3 +170,7 @@ Playwright run #186 found that the Documentation view exceeded a 360px viewport 
 ### Evidence-aware Development Cockpit recommendation — 2026-10-14
 
 The Overview recommendation now derives its next action from the actual `Run website browser acceptance` step in the latest loaded CI run. A successful browser step advances the recommendation to shared source/research/fixture/test references (WEB-SH-01 / WEB-SH-02); a failed step keeps browser acceptance blocking; loading, missing, unavailable, skipped, or cancelled evidence cannot be interpreted as success. The card links to the exact latest CI run and displays its derived state. Added browser tests for successful, failed, and cancelled browser-step outcomes. This change is **Implemented — unverified** until CI executes the build and browser tests for its commit.
+
+### Mobile overflow follow-up — CI run #188 (2026-10-14)
+
+CI confirmed the first responsive-layout adjustment did not remove the 19px overflow: the page still measured 379px at a 360px viewport. The browser run also confirmed all three new Development Cockpit recommendation tests pass. A follow-up CSS fix now hides the nonessential specification-version chip at viewports up to 420px so the mobile top bar can fit its navigation and search controls. The strict 360px assertion remains unchanged; rerun CI before treating the fix as successful.
