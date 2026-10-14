@@ -411,6 +411,7 @@ function App() {
                 {chain.nodes.map((node, index) => <li key={node.path}>
                   <div className="evidence-node-heading"><span className="evidence-node-index">{index + 1}</span><div><strong>{node.label}</strong><span className="detail-kicker">{node.kind}</span></div></div>
                   <p>{node.relationship}</p>
+                  {node.recordIds && node.recordIds.length > 0 && <div className="evidence-record-ids" aria-label={"Stable record IDs for " + node.label}><span>Record IDs</span>{node.recordIds.map((recordId) => <code key={recordId}>{recordId}</code>)}</div>}
                   <a href={"https://github.com/sixtoast/Anime-language-/blob/main/" + node.path} target="_blank" rel="noreferrer" aria-label={"Open " + node.label + " at " + node.path}><code>{node.path}</code> <span aria-hidden="true">↗</span></a>
                 </li>)}
               </ol>
