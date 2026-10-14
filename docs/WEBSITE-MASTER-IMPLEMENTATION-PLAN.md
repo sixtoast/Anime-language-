@@ -345,3 +345,7 @@ The Test Suite now exposes current-run `UNMAPPED` results in a dedicated traceab
 ## Implementation update — lexicon and fixture-audit traceability (2026-10-15)
 
 Added stable identifiers for 31 tests across the bundled lexicon, lexicon audit, CSV loader, lexicon registry, and recovered Phase 6G fixture audit. The report publisher recognises the prefixes; the Test Suite exposes Lexicon and Fixture audit filters; source integrity tests verify the annotations; browser acceptance checks correct group mapping. The work improves visibility of existing checks only: source snapshots, legacy aliases, collisions, historical observations, and fixture comparisons retain their existing provisional status and do not imply canonical decisions. Status: **Implemented — verification pending for latest commit**.
+
+## Implementation update — workbench integrity test mapping (2026-10-15)
+
+Added stable IDs to 14 repository-level tests covering evidence-chain path and relationship integrity, research-record source/caveat integrity, and registry mapping. The report publisher recognises `EVID-*`, `RES-*` and `REG-*`; the Test Suite exposes a Workbench integrity group; source integrity checks verify 45 Lexicon, Fixture audit and Workbench integrity registry annotations; and browser acceptance checks group-specific report mapping. This makes the tests protecting the workbench itself visible in the workbench without implying those tests have passed before CI reports them. Status: **Implemented — verification pending for latest commit**.
