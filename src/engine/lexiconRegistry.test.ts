@@ -27,7 +27,7 @@ function registry(extraRows: LexiconRow[] = []) {
 }
 
 describe("source-aware provisional lexicon registry", () => {
-  it("preserves source identity and grouped records", () => {
+  it("[LEXREG-001] preserves source identity and grouped records", () => {
     const lexicon = registry();
     expect(lexicon.sourceLabel).toBe("test fixture");
     expect(lexicon.sourceVersion).toBe("fixture-v1");
@@ -40,7 +40,7 @@ describe("source-aware provisional lexicon registry", () => {
     });
   });
 
-  it("preserves multiword references and clitic forms outside the atom inventory", () => {
+  it("[LEXREG-002] preserves multiword references and clitic forms outside the atom inventory", () => {
     const lexicon = registry();
     expect(lexicon.nonAtomicEntries.get("mi (formal)")?.classes).toEqual(["REF"]);
     expect(lexicon.nonAtomicEntries.get("mi (formal)")?.glosses).toContain("SELF");
@@ -49,20 +49,20 @@ describe("source-aware provisional lexicon registry", () => {
     expect(lexicon.diagnostics.some((diagnostic) => diagnostic.code === "NON_ATOMIC_FORM")).toBe(true);
   });
 
-  it("extracts only the documented 'was <form>' alias pattern", () => {
+  it("[LEXREG-003] extracts only the documented 'was <form>' alias pattern", () => {
     const lexicon = registry();
     expect(lexicon.aliases.get("frata")?.preferredForm).toBe("fraja");
     expect(lexicon.aliases.get("ren")?.preferredForm).toBe("ben");
     expect(lexicon.aliases.get("fraka")?.preferredForm).toBe("frama");
   });
 
-  it("does not apply historical aliases unless explicitly requested", () => {
+  it("[LEXREG-004] does not apply historical aliases unless explicitly requested", () => {
     const lexicon = registry();
     expect(resolveLexiconForm(lexicon, "frata").resolvedForm).toBe("frata");
     expect(resolveLexiconForm(lexicon, "frata", { allowLegacyAliases: true }).resolvedForm).toBe("fraja");
   });
 
-  it("retains colliding lexical records rather than choosing a meaning", () => {
+  it("[LEXREG-005] retains colliding lexical records rather than choosing a meaning", () => {
     const lexicon = registry();
     expect(inspectLexiconForm(lexicon, "re")).toMatchObject({
       isCollision: true,
@@ -72,7 +72,7 @@ describe("source-aware provisional lexicon registry", () => {
     expect(inspectLexiconForm(lexicon, "ra").isCollision).toBe(true);
   });
 
-  it("does not register an alias with conflicting preferred forms", () => {
+  it("[LEXREG-006] does not register an alias with conflicting preferred forms", () => {
     const lexicon = registry([
       { form: "frob", gloss: "one", cls: "ARITH", note: "was legacy" },
       { form: "frub", gloss: "two", cls: "ARITH", note: "was legacy" }
@@ -81,7 +81,7 @@ describe("source-aware provisional lexicon registry", () => {
     expect(lexicon.diagnostics.some((diagnostic) => diagnostic.code === "CONFLICTING_ALIAS_TARGETS")).toBe(true);
   });
 
-  it("can merge explicit alias evidence with source-note evidence", () => {
+  it("[LEXREG-007] can merge explicit alias evidence with source-note evidence", () => {
     const lexicon = buildLexiconRegistry(rows, {
       sourceLabel: "test fixture",
       sourceVersion: "fixture-v1",
