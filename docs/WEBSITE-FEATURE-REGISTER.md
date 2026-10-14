@@ -174,3 +174,7 @@ The Overview recommendation now derives its next action from the actual `Run web
 ### Mobile overflow follow-up — CI run #188 (2026-10-14)
 
 CI confirmed the first responsive-layout adjustment did not remove the 19px overflow: the page still measured 379px at a 360px viewport. The browser run also confirmed all three new Development Cockpit recommendation tests pass. A follow-up CSS fix now hides the nonessential specification-version chip at viewports up to 420px so the mobile top bar can fit its navigation and search controls. The strict 360px assertion remains unchanged; rerun CI before treating the fix as successful.
+
+### Shared evidence-chain explorer — 2026-10-14
+
+Added an initial, explicitly curated evidence-chain explorer to Research & Review. It currently links three known areas: provisional operator arity (LAN-005/LAN-006), dimensional primitives (LAN-010/LAN-011), and the recovered Phase 6G fixture-observation workflow. Each chain connects only repository paths and relationships that were checked against existing records, includes stable IDs where available, and carries a scope caveat. The explorer explicitly states that the graph is incomplete and that links do not prove implementation completeness or test success. Added integrity tests for stable IDs, duplicate/missing relationship detection and caveat presence, plus browser tests for visible chains, key links, and 360px overflow. Status: **Implemented — unverified** pending CI for this branch.
