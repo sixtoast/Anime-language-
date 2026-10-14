@@ -96,9 +96,11 @@ test.describe("Development Cockpit next-task evidence", () => {
   test("exposes stable surface-parser IDs and their run-matched failure status", async ({ page }) => {
     await mockCi(page, "success", "completed", {
       generatedAt: "2026-10-14T20:01:00Z", commit: "abc123def456", runId: "123", runAttempt: "1",
-      counts: { total: 2, passed: 1, failed: 1, skipped: 0, unmapped: 1 },
+      counts: { total: 4, passed: 2, failed: 1, skipped: 0, unmapped: 1 },
       tests: [
         { id: "SURF-002", title: "[SURF-002] parses a decimal numeral with an explicit unit", status: "failed", durationMs: 7, file: "src/engine/surfaceParser.test.ts" },
+        { id: "LEX-001", title: "[LEX-001] records bundled source identity", status: "passed", durationMs: 2, file: "src/engine/bundledLexicon.test.ts" },
+        { id: "FIX-010", title: "[FIX-010] does not infer canon approval", status: "passed", durationMs: 5, file: "src/engine/phase6gFixtureAudit.test.ts" },
         { id: "UNMAPPED", title: "bundled lexicon rejects malformed header rows", status: "passed", durationMs: 3, file: "src/engine/bundledLexicon.test.ts" }
       ]
     });
@@ -116,6 +118,12 @@ test.describe("Development Cockpit next-task evidence", () => {
     await expect(unmapped.getByText("bundled lexicon rejects malformed header rows")).toBeVisible();
     await expect(unmapped.getByText("passed", { exact: true })).toBeVisible();
     await expect(unmapped.getByText("src/engine/bundledLexicon.test.ts")).toBeVisible();
+    await page.getByRole("button", { name: "Lexicon", exact: true }).click();
+    await expect(page.locator(".test-case").filter({ hasText: "LEX-001" })).toBeVisible();
+    await expect(page.locator(".test-case").filter({ hasText: "SURF-001" })).toHaveCount(0);
+    await page.getByRole("button", { name: "Fixture audit", exact: true }).click();
+    await expect(page.locator(".test-case").filter({ hasText: "FIX-010" })).toBeVisible();
+    await expect(page.locator(".test-case").filter({ hasText: "LEX-001" })).toHaveCount(0);
   });
 
   test("shows individual outcomes only when both CI run ID and commit match", async ({ page }) => {
