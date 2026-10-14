@@ -210,3 +210,7 @@ The RE/RA discrepancy record now renders the preserved inputs for P6G-FX-011 and
 ### Repository-level test discovery correction — 2026-10-14
 
 A verification audit found that Vitest was configured to discover only `src/**/*.test.ts`, so repository-level integrity tests under `tests/` were not included in the unit run. The Vitest include list now also covers `tests/**/*.test.ts`, activating the evidence-chain and research-record integrity suites rather than leaving them present but unexecuted. Browser specs remain under `tests/browser/*.spec.ts` and are handled by Playwright separately. This is a test-discovery correction, not a relaxation of assertions. Status: **Implemented — verification pending for latest commit**.
+
+### Stable Phase 6G surface-parser test traceability — 2026-10-14
+
+Added stable IDs `SURF-001` through `SURF-019` to the provisional surface-parser regression tests and registered each case in `src/engine/testRegistry.ts`. The Test Suite now has a dedicated **Surface parser** filter; the CI summary publisher recognises `SURF-*` IDs; and a browser acceptance test checks that a run-matched `SURF-002` failure is displayed on the correct case with its duration, without leaking into other groups. Repository-level tests check unique registry IDs, source-path existence, all 19 source annotations, and the known decimal-with-unit case's explicit registration. This improves traceability only; it does not change parser behaviour or convert authored tests into passing results. Status: **Implemented — verification pending for latest commit**.
