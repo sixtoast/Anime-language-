@@ -87,3 +87,12 @@
 .evidence-node-list li>a code{white-space:normal;overflow-wrap:anywhere;word-break:break-word;font-size:9px;color:inherit}
 .evidence-chain .audit-next{margin-top:14px}
 @media(max-width:760px){.evidence-chain-grid{grid-template-columns:minmax(0,1fr)}.evidence-node-list li{padding:10px}.evidence-node-list li>a{font-size:9px}}
+
+/* Rule impact controls for the curated evidence graph. */
+.evidence-impact-controls{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin:18px 0 22px;padding:14px;border:1px solid #343139;border-radius:8px;background:#17171a}
+.evidence-impact-controls>label{display:flex;flex-direction:column;gap:7px;min-width:210px;color:#b8b4c0;font-size:10px;letter-spacing:.04em}
+.evidence-impact-controls select{min-height:38px;max-width:100%;padding:8px 32px 8px 10px;background:#202024;color:#e5e1eb;border:1px solid #48434e;border-radius:5px;font:inherit;letter-spacing:normal}
+.evidence-impact-summary{display:flex;flex:1;flex-direction:column;gap:4px;min-width:190px;font-size:10px;color:#a9a5b1;line-height:1.6}
+.evidence-impact-summary strong{font-size:12px;color:#d7c8f4;font-weight:600}
+.evidence-impact-controls .secondary-button{white-space:nowrap}
+@media(max-width:480px){.evidence-impact-controls{align-items:stretch;flex-direction:column}.evidence-impact-controls>label{min-width:0}.evidence-impact-controls select{width:100%}.evidence-impact-summary{min-width:0}}
