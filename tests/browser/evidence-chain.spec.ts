@@ -12,6 +12,7 @@ test.describe("shared evidence chain explorer", () => {
     await expect(operatorChain.getByText("LAN-005, LAN-006")).toBeVisible();
     await expect(operatorChain.locator('a[href*="docs/canon/arcane-language-v3.0-L.md"]')).toHaveCount(1);
     await expect(operatorChain.locator('a[href*="src/engine/auditParser.test.ts"]')).toHaveCount(1);
+    await expect(operatorChain.getByText("PARSE-003")).toBeVisible();
 
     const dimensionChain = page.locator(".evidence-chain").filter({ has: page.getByRole("heading", { name: "Dimensional algebra primitives" }) });
     await expect(dimensionChain.locator('a[href*="src/engine/dimensions.test.ts"]')).toHaveCount(1);
@@ -19,6 +20,7 @@ test.describe("shared evidence chain explorer", () => {
 
     const fixtureChain = page.locator(".evidence-chain").filter({ has: page.getByRole("heading", { name: "Recovered Phase 6G fixture observations" }) });
     await expect(fixtureChain.locator('a[href*="tests/fixtures/phase6g-surface-parser-cases.json"]')).toHaveCount(1);
+    await expect(fixtureChain.getByText("P6G-FX-016")).toBeVisible();
     await expect(fixtureChain.locator('a[href*="src/engine/phase6gFixtureAudit.test.ts"]')).toHaveCount(1);
     await expect(fixtureChain.getByText(/not authoritative grammar/i)).toBeVisible();
 
