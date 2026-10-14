@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
-async function mockCi(page: Page, browserConclusion: string | null, browserStatus = "completed") {
+async function mockCi(page: Page, browserConclusion: string | null, browserStatus = "completed", registryReport: unknown = null) {
   await page.route(/api\.github\.com\/repos\/sixtoast\/Anime-language-\/actions\/runs\?branch=main/, async (route) => {
     await route.fulfill({
       status: 200,
@@ -42,7 +42,11 @@ async function mockCi(page: Page, browserConclusion: string | null, browserStatu
     });
   });
   await page.route(/raw\.githubusercontent\.com\/sixtoast\/Anime-language-\/ci-results\/latest\.json/, async (route) => {
-    await route.fulfill({ status: 404, body: "No published test report in this isolated test." });
+    if (registryReport) {
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(registryReport) });
+    } else {
+      await route.fulfill({ status: 404, body: "No published test report in this isolated test." });
+    }
   });
 }
 
@@ -72,5 +76,34 @@ test.describe("Development Cockpit next-task evidence", () => {
     await expect(recommendation).toHaveAttribute("data-browser-acceptance", "inconclusive");
     await expect(page.getByRole("heading", { name: "Recover trustworthy browser acceptance evidence" })).toBeVisible();
     await expect(recommendation.getByText(/skipped or cancelled is not a pass/i)).toBeVisible();
+  });
+
+  test("withholds per-test statuses when the stored report belongs to a different CI run", async ({ page }) => {
+    await mockCi(page, "success", "completed", {
+      generatedAt: "2026-10-14T20:01:00Z", commit: "older-sha", runId: "122", runAttempt: "1",
+      counts: { total: 1, passed: 1, failed: 0, skipped: 0, unmapped: 0 },
+      tests: [{ id: "PARSE-001", title: "Parses binary operator", status: "passed", durationMs: 4, file: "src/engine/auditParser.test.ts" }]
+    });
+    await page.goto("/");
+    await page.getByRole("button", { name: "Test suite", exact: true }).click();
+    await expect(page.locator(".registry-results-meta")).toHaveAttribute("data-report-freshness", "stale");
+    await expect(page.getByText("STALE REPORT — per-test statuses are withheld")).toBeVisible();
+    const testCase = page.locator(".test-case").filter({ hasText: "PARSE-001" });
+    await expect(testCase.getByText("STALE REPORT")).toBeVisible();
+    await expect(testCase.getByText("passed", { exact: true })).toHaveCount(0);
+  });
+
+  test("shows individual outcomes only when both CI run ID and commit match", async ({ page }) => {
+    await mockCi(page, "success", "completed", {
+      generatedAt: "2026-10-14T20:01:00Z", commit: "abc123def456", runId: "123", runAttempt: "1",
+      counts: { total: 1, passed: 1, failed: 0, skipped: 0, unmapped: 0 },
+      tests: [{ id: "PARSE-001", title: "Parses binary operator", status: "passed", durationMs: 4, file: "src/engine/auditParser.test.ts" }]
+    });
+    await page.goto("/");
+    await page.getByRole("button", { name: "Test suite", exact: true }).click();
+    await expect(page.locator(".registry-results-meta")).toHaveAttribute("data-report-freshness", "current");
+    const testCase = page.locator(".test-case").filter({ hasText: "PARSE-001" });
+    await expect(testCase.getByText("passed", { exact: true })).toBeVisible();
+    await expect(testCase.getByText("4 ms")).toBeVisible();
   });
 });
