@@ -96,12 +96,13 @@ test.describe("Development Cockpit next-task evidence", () => {
   test("exposes stable surface-parser IDs and their run-matched failure status", async ({ page }) => {
     await mockCi(page, "success", "completed", {
       generatedAt: "2026-10-14T20:01:00Z", commit: "abc123def456", runId: "123", runAttempt: "1",
-      counts: { total: 5, passed: 3, failed: 1, skipped: 0, unmapped: 1 },
+      counts: { total: 6, passed: 4, failed: 1, skipped: 0, unmapped: 1 },
       tests: [
         { id: "SURF-002", title: "[SURF-002] parses a decimal numeral with an explicit unit", status: "failed", durationMs: 7, file: "src/engine/surfaceParser.test.ts" },
         { id: "LEX-001", title: "[LEX-001] records bundled source identity", status: "passed", durationMs: 2, file: "src/engine/bundledLexicon.test.ts" },
         { id: "FIX-010", title: "[FIX-010] does not infer canon approval", status: "passed", durationMs: 5, file: "src/engine/phase6gFixtureAudit.test.ts" },
         { id: "REG-001", title: "[REG-001] registry IDs are unique and sources exist", status: "passed", durationMs: 4, file: "tests/testRegistry.test.ts" },
+        { id: "WEB-DOC-REG-001", title: "[WEB-DOC-REG-001] keeps all 19 catalogue entries and unique titles", status: "passed", durationMs: 4, file: "src/documentationCatalogue.test.ts" },
         { id: "UNMAPPED", title: "bundled lexicon rejects malformed header rows", status: "passed", durationMs: 3, file: "src/engine/bundledLexicon.test.ts" }
       ]
     });
@@ -129,6 +130,9 @@ test.describe("Development Cockpit next-task evidence", () => {
     await expect(page.locator(".test-case").filter({ hasText: "REG-001" })).toBeVisible();
     await expect(page.locator(".test-case").filter({ hasText: "EVID-001" })).toBeVisible();
     await expect(page.locator(".test-case").filter({ hasText: "LEX-001" })).toHaveCount(0);
+    await page.getByRole("button", { name: "Documentation", exact: true }).click();
+    await expect(page.locator(".test-case").filter({ hasText: "WEB-DOC-REG-001" })).toBeVisible();
+    await expect(page.locator(".test-case").filter({ hasText: "REG-001" })).toHaveCount(0);
   });
 
   test("shows individual outcomes only when both CI run ID and commit match", async ({ page }) => {
