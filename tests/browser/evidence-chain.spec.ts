@@ -56,10 +56,10 @@ test.describe("shared evidence chain explorer", () => {
     const kiRa = discrepancy.locator(".research-fixture-row").filter({ hasText: "P6G-FX-012" });
     await expect(reMa.getByText("RE MA", { exact: true })).toBeVisible();
     await expect(kiRa.getByText("KI RA", { exact: true })).toBeVisible();
-    await expect(reMa.getByText("Archived Python source", { exact: true })).toBeVisible();
-    await expect(kiRa.getByText("Archived Python source", { exact: true })).toBeVisible();
-    await expect(reMa.getByText("Current TypeScript parser", { exact: true })).toBeVisible();
-    await expect(kiRa.getByText("Current TypeScript parser", { exact: true })).toBeVisible();
+    await expect(reMa.locator(".research-fixture-values > span").nth(1)).toContainText("Current TypeScript parser");
+    await expect(kiRa.locator(".research-fixture-values > span").nth(1)).toContainText("Current TypeScript parser");
+    await expect(reMa.locator(".research-fixture-values > span").nth(2)).toContainText("Archived Python source");
+    await expect(kiRa.locator(".research-fixture-values > span").nth(2)).toContainText("Archived Python source");
     await expect(reMa.getByText("accept", { exact: true })).toBeVisible();
     await expect(kiRa.getByText("accept", { exact: true })).toBeVisible();
     await expect(reMa.getByText("reject", { exact: true })).toBeVisible();
