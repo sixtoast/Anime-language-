@@ -71,7 +71,7 @@ function App() {
   const [mobileNav, setMobileNav] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState(docs[0].title);
   const [testQuery, setTestQuery] = useState("");
-  const [testGroup, setTestGroup] = useState<"All" | "Parser" | "Dimensions" | "Semantic types" | "Operator contracts">("All");
+  const [testGroup, setTestGroup] = useState<"All" | "Parser" | "Surface parser" | "Dimensions" | "Semantic types" | "Operator contracts">("All");
   const [impactRule, setImpactRule] = useState("All");
   const [focusedEvidenceChainId, setFocusedEvidenceChainId] = useState<string | null>(null);
   const [workflowRuns, setWorkflowRuns] = useState<WorkflowRun[]>([]);
@@ -396,6 +396,16 @@ function App() {
               </article>)}
               {workbenchTests.filter((test) => (testGroup === "All" || test.group === testGroup) && (test.id + " " + test.title + " " + test.description + " " + test.sourceRule).toLowerCase().includes(testQuery.toLowerCase())).length === 0 && <div className="empty-state">No test cases match those filters.</div>}
             </div>
+            {registryReportMatchesLatestRun && reportTestResults.some((result) => result.id === "UNMAPPED") && <div className="unmapped-results" data-testid="unmapped-results">
+              <div className="unmapped-results-heading"><div><span className="detail-kicker">TRACEABILITY GAP</span><h2>Unmapped test results</h2><p>These results ran in the current CI report but do not yet have stable registry IDs. They are shown here rather than discarded or mistaken for verified registry cases.</p></div><span className="unmapped-count">{reportTestResults.filter((result) => result.id === "UNMAPPED").length} unmapped</span></div>
+              <div className="unmapped-result-list">
+                {reportTestResults.filter((result) => result.id === "UNMAPPED" && result.title.toLowerCase().includes(testQuery.toLowerCase())).map((result, index) => <article className="test-case unmapped-test-case" key={result.file + result.title + index}>
+                  <div className="test-case-main"><div className="test-case-title"><code>UNMAPPED</code><strong>{result.title}</strong></div><div className="test-case-meta"><span>Source file: {result.file}</span><a href={"https://github.com/sixtoast/Anime-language-/blob/main/" + result.file} target="_blank" rel="noreferrer">Open test source ↗</a></div></div>
+                  <div className="test-case-status"><span className={"test-status-chip " + (result.status === "passed" ? "test-status-passed" : result.status === "failed" ? "test-status-failed" : result.status === "pending" || result.status === "todo" ? "test-status-skipped" : "")}>{result.status}</span>{result.durationMs != null && <small>{result.durationMs} ms</small>}</div>
+                </article>)}
+                {reportTestResults.filter((result) => result.id === "UNMAPPED" && result.title.toLowerCase().includes(testQuery.toLowerCase())).length === 0 && <div className="empty-state">No unmapped results match this search.</div>}
+              </div>
+            </div>}
           </div>
           <div className="notice"><div className="notice-icon"><ShieldCheck size={18}/></div><div><strong>What this status means</strong><p>A case shows Passed, Failed or Skipped only when its stable ID appears in the published CI report for the displayed commit. Missing IDs remain Not verified, not a pass or a failure. Dimensional tests validate the current implementation convention only; they do not finalise Arcane unit semantics or operator typing.</p></div></div>
           <div className="next-step"><Sparkles size={17}/><p><strong>Result granularity</strong><br/>The live panel reports actual workflow outcomes, and each registry row is matched by its stable test ID to the published structured report. The report commit is shown explicitly; a missing or stale result is never silently treated as a pass.</p></div>
