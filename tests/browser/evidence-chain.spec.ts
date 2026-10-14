@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test.describe("shared evidence chain explorer", () => {
   test("renders the three explicit evidence chains with source, implementation and test links", async ({ page }) => {
     await page.goto("/");
-    await page.getByRole("button", { name: /Research & review/i }).click();
+    await page.getByRole("button", { name: "Research & review", exact: true }).click();
 
     const section = page.getByRole("heading", { name: "Follow a claim across its records" });
     await expect(section).toBeVisible();
@@ -26,7 +26,8 @@ test.describe("shared evidence chain explorer", () => {
   test("evidence links remain inside the viewport on a 360px screen", async ({ page }) => {
     await page.setViewportSize({ width: 360, height: 800 });
     await page.goto("/");
-    await page.getByRole("button", { name: /Research & review/i }).click();
+    await page.getByRole("button", { name: "Open navigation" }).click();
+    await page.getByRole("button", { name: "Research & review", exact: true }).click();
     await expect(page.getByRole("heading", { name: "Follow a claim across its records" })).toBeVisible();
     const dimensions = await page.evaluate(() => ({
       viewport: document.documentElement.clientWidth,
