@@ -15,9 +15,9 @@ describe("workbench test registry", () => {
     }
   });
 
-  it("[REG-002] maps every lexicon and fixture-audit registry ID to an annotated source test", () => {
-    const traceableGroups = workbenchTests.filter((test) => test.group === "Lexicon" || test.group === "Fixture audit");
-    expect(traceableGroups).toHaveLength(31);
+  it("[REG-002] maps lexicon, fixture-audit and workbench-integrity IDs to annotated source tests", () => {
+    const traceableGroups = workbenchTests.filter((test) => test.group === "Lexicon" || test.group === "Fixture audit" || test.group === "Workbench integrity");
+    expect(traceableGroups).toHaveLength(45);
     for (const test of traceableGroups) {
       const source = readFileSync(resolve(process.cwd(), test.file), "utf8");
       expect(source, test.id + " in " + test.file).toContain(`[${test.id}] `);
