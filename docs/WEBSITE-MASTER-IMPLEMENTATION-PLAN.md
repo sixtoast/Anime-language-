@@ -138,7 +138,7 @@ Statuses use only these meanings: **Planned** (not implemented), **Implemented**
 ### Phase 2 — Documentation and source inventory
 - [x] Keep the existing initial source inventory and archive report.
 - [x] Catalogue audit correction: 19 entries total; 14 originally had explicit paths and 5 did not. All five now have grounded links, and all 19 paths exist in the repository tree. Browser interaction and provenance audits remain. See [Documentation Catalogue First-Pass Link Audit](DOCUMENTATION-CATALOGUE-LINK-AUDIT.md).
-- [ ] Complete UI-level catalogue checks for links, labels, search, and status claims.
+- [x] Add Playwright browser acceptance checks for combined search/status/provenance filters, reset, empty-state recovery, all 19 source-link entries, and a 360px viewport; review the CI result tied to the implementation commit before marking the experience Verified.
 - [x] Extract catalogue data/filtering into `src/documentationCatalogue.ts` and add six catalogue regression tests; all six passed in CI run #167 and type-check/build passed. Overall CI remains failed on the existing out-of-scope surface-parser decimal-with-unit test. UI/browser checks remain.
 - [ ] Identify archive content not represented in the visible catalogue.
 - [ ] Separate original sources from derived summaries, historical prototypes, provisional reports, and generated outputs.
@@ -284,3 +284,7 @@ The Overview now surfaces a compact health summary based on existing live GitHub
 ## Website implementation note — source-aware catalogue facets (2026-10-14)
 
 The Documentation section now supports explicit source-status and provenance-type filtering in addition to search, with combined filters, result counts, a reset action, an informative empty state, and detail selection that remains valid as filters change. This is a usability improvement using existing catalogue metadata; it does not infer source authority or change any language specification. WEB-DOC-REG-009 requires CI confirmation, followed by browser/responsive acceptance.
+
+### Browser acceptance added — 2026-10-14
+
+Added a Playwright-based website browser suite and CI step for the Documentation catalogue. It covers filter combinations/reset, empty-state recovery, source-link presence for every catalogue entry, and a narrow mobile viewport. The suite is deliberately reported separately from Vitest and the production build so an unrelated existing engine test failure cannot hide website-level results. Browser acceptance remains **Implemented — unverified** until the run for the commit completes successfully and any failures are addressed.

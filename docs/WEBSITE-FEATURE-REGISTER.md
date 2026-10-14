@@ -156,3 +156,8 @@ Added separate source-status and provenance-type filters to the Documentation ca
 ### Development Cockpit next-task recommendation — WEB-OV-02 (2026-10-14)
 
 The Overview now presents one prioritized website task: perform browser-level acceptance of the documentation catalogue's combined search/status/provenance filters, result selection, repository source links, empty state, and responsive layout. This is grounded in the existing WEB-DOC-01 and WEB-DOC-02 acceptance gaps. The card records the reason, dependency, affected files, acceptance criteria, and navigation to the relevant work areas. It is a curated recommendation, not an autonomous task tracker, and it does not imply that browser acceptance has already occurred.
+
+
+## Browser-level acceptance coverage (WEB-DOC-03)
+
+A Playwright browser suite is now part of CI for the Documentation catalogue. It exercises combined search/status/provenance filtering, reset behaviour, the empty state and recovery, source links for all 19 entries, and a narrow 360px viewport. The browser suite runs even when the existing Vitest suite reports an unrelated engine failure, provided Chromium installation succeeds. Its results must be assessed independently from the Vitest test step and production build. The suite's existence is not proof that it has passed; use the CI run tied to the commit as evidence.

@@ -26,6 +26,10 @@ jobs:
           node-version: 22
       - name: Install dependencies
         run: npm install
+      - name: Install Chromium for browser acceptance
+        id: browser-install
+        if: ${{ always() }}
+        run: npx playwright install --with-deps chromium
       - name: Run tests and write machine-readable results
         run: |
           mkdir -p test-results
@@ -44,6 +48,9 @@ jobs:
       - name: Type-check and build
         if: ${{ always() }}
         run: npm run build
+      - name: Run website browser acceptance
+        if: ${{ always() && steps.browser-install.outcome == 'success' }}
+        run: npm run test:browser
       - name: Publish latest results for the public workbench
         if: ${{ success() && github.event_name == 'push' && github.ref == 'refs/heads/main' && hashFiles('test-results/registry-results.json') != '' }}
         env:
