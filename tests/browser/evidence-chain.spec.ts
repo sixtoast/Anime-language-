@@ -21,6 +21,14 @@ test.describe("shared evidence chain explorer", () => {
     await expect(fixtureChain.locator('a[href*="tests/fixtures/phase6g-surface-parser-cases.json"]')).toHaveCount(1);
     await expect(fixtureChain.locator('a[href*="src/engine/phase6gFixtureAudit.test.ts"]')).toHaveCount(1);
     await expect(fixtureChain.getByText(/not authoritative grammar/i)).toBeVisible();
+
+    await page.getByLabel("Filter evidence by rule ID").selectOption("LAN-005");
+    await expect(page.getByRole("status").filter({ hasText: "1 related chains" })).toBeVisible();
+    await expect(page.locator(".evidence-chain")).toHaveCount(1);
+    await expect(page.getByRole("heading", { name: "Provisional operator arity" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Dimensional algebra primitives" })).toHaveCount(0);
+    await page.getByRole("button", { name: "Clear rule filter" }).click();
+    await expect(page.locator(".evidence-chain")).toHaveCount(3);
   });
 
   test("evidence links remain inside the viewport on a 360px screen", async ({ page }) => {
