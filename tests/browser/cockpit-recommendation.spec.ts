@@ -96,11 +96,12 @@ test.describe("Development Cockpit next-task evidence", () => {
   test("exposes stable surface-parser IDs and their run-matched failure status", async ({ page }) => {
     await mockCi(page, "success", "completed", {
       generatedAt: "2026-10-14T20:01:00Z", commit: "abc123def456", runId: "123", runAttempt: "1",
-      counts: { total: 4, passed: 2, failed: 1, skipped: 0, unmapped: 1 },
+      counts: { total: 5, passed: 3, failed: 1, skipped: 0, unmapped: 1 },
       tests: [
         { id: "SURF-002", title: "[SURF-002] parses a decimal numeral with an explicit unit", status: "failed", durationMs: 7, file: "src/engine/surfaceParser.test.ts" },
         { id: "LEX-001", title: "[LEX-001] records bundled source identity", status: "passed", durationMs: 2, file: "src/engine/bundledLexicon.test.ts" },
         { id: "FIX-010", title: "[FIX-010] does not infer canon approval", status: "passed", durationMs: 5, file: "src/engine/phase6gFixtureAudit.test.ts" },
+        { id: "REG-001", title: "[REG-001] registry IDs are unique and sources exist", status: "passed", durationMs: 4, file: "tests/testRegistry.test.ts" },
         { id: "UNMAPPED", title: "bundled lexicon rejects malformed header rows", status: "passed", durationMs: 3, file: "src/engine/bundledLexicon.test.ts" }
       ]
     });
@@ -123,6 +124,10 @@ test.describe("Development Cockpit next-task evidence", () => {
     await expect(page.locator(".test-case").filter({ hasText: "SURF-001" })).toHaveCount(0);
     await page.getByRole("button", { name: "Fixture audit", exact: true }).click();
     await expect(page.locator(".test-case").filter({ hasText: "FIX-010" })).toBeVisible();
+    await expect(page.locator(".test-case").filter({ hasText: "LEX-001" })).toHaveCount(0);
+    await page.getByRole("button", { name: "Workbench integrity", exact: true }).click();
+    await expect(page.locator(".test-case").filter({ hasText: "REG-001" })).toBeVisible();
+    await expect(page.locator(".test-case").filter({ hasText: "EVID-001" })).toBeVisible();
     await expect(page.locator(".test-case").filter({ hasText: "LEX-001" })).toHaveCount(0);
   });
 
