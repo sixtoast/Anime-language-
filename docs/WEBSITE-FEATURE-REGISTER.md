@@ -178,3 +178,7 @@ CI confirmed the first responsive-layout adjustment did not remove the 19px over
 ### Shared evidence-chain explorer — 2026-10-14
 
 Added an initial, explicitly curated evidence-chain explorer to Research & Review. It currently links three known areas: provisional operator arity (LAN-005/LAN-006), dimensional primitives (LAN-010/LAN-011), and the recovered Phase 6G fixture-observation workflow. Each chain connects only repository paths and relationships that were checked against existing records, includes stable IDs where available, and carries a scope caveat. The explorer explicitly states that the graph is incomplete and that links do not prove implementation completeness or test success. Added integrity tests for stable IDs, duplicate/missing relationship detection and caveat presence, plus browser tests for visible chains, key links, and 360px overflow. Status: **Implemented — unverified** pending CI for this branch.
+
+### Evidence-chain browser-test adjustment — 2026-10-14
+
+The first browser run for the evidence-chain explorer confirmed the production build and existing seven browser checks, but the two new explorer checks timed out before reaching the content because the test required an exact accessible name that did not match the sidebar navigation button (which includes its navigation count). The selector now scopes to the sidebar and matches the navigation label. This is a test-harness correction, not a product acceptance pass; rerun CI on the corrected test commit before upgrading status.
