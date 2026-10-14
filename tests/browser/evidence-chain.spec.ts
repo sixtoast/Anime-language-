@@ -46,6 +46,20 @@ test.describe("shared evidence chain explorer", () => {
     await expect(page.locator(".evidence-chain")).toHaveCount(3);
   });
 
+  test("shows source-backed research records and follows a record into its evidence chain", async ({ page }) => {
+    await page.goto("/");
+    await page.locator(".feature-card").filter({ hasText: "Research & review" }).click();
+    await expect(page.getByRole("heading", { name: "Research findings and unresolved decisions" })).toBeVisible();
+    const discrepancy = page.locator(".research-record-card").filter({ hasText: "RES-P6G-RE-RA-001" });
+    await expect(discrepancy.getByText("P6G-FX-011")).toBeVisible();
+    await expect(discrepancy.getByText("P6G-FX-012")).toBeVisible();
+    await expect(discrepancy.getByText(/not a decision to change aliases, lexicon, grammar, or parser behaviour/i)).toBeVisible();
+    await discrepancy.getByRole("button", { name: "Focus linked evidence chain" }).click();
+    await expect(page.getByText("Opened from a linked source or research record.")).toBeVisible();
+    await expect(page.locator(".evidence-chain")).toHaveCount(1);
+    await expect(page.getByRole("heading", { name: "Recovered Phase 6G fixture observations" })).toBeVisible();
+  });
+
   test("evidence links remain inside the viewport on a 360px screen", async ({ page }) => {
     await page.setViewportSize({ width: 360, height: 800 });
     await page.goto("/");
