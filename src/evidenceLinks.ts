@@ -13,6 +13,7 @@ export interface EvidenceNode {
   kind: EvidenceNodeKind;
   path: string;
   relationship: string;
+  recordIds?: string[];
 }
 
 export interface EvidenceChain {
@@ -61,7 +62,8 @@ export const evidenceChains: EvidenceChain[] = [
         label: "Parser regression tests",
         kind: "Automated test",
         path: "src/engine/auditParser.test.ts",
-        relationship: "Contains stable PARSE test IDs, including tests linked to LAN-005 and LAN-006."
+        relationship: "Contains stable parser test records; IDs identify individual checks but do not independently certify complete rule enforcement.",
+        recordIds: ["PARSE-001", "PARSE-003", "PARSE-004", "PARSE-007"]
       },
       {
         label: "Machine-readable rule catalogue",
@@ -101,7 +103,8 @@ export const evidenceChains: EvidenceChain[] = [
         label: "Dimension regression tests",
         kind: "Automated test",
         path: "src/engine/dimensions.test.ts",
-        relationship: "Contains DIM test IDs for units, compatible operations, mismatches, and dimension-vector arithmetic."
+        relationship: "Contains stable dimensional primitive test records; these test the standalone module rather than parser integration.",
+        recordIds: ["DIM-001", "DIM-002", "DIM-003", "DIM-005", "DIM-008"]
       },
       {
         label: "Canon implementation evidence matrix",
@@ -129,7 +132,8 @@ export const evidenceChains: EvidenceChain[] = [
         label: "Preserved fixture suite",
         kind: "Fixture set",
         path: "tests/fixtures/phase6g-surface-parser-cases.json",
-        relationship: "Keeps stable fixture IDs, source notes, expectations, and provisional status without changing canon."
+        relationship: "Keeps stable fixture IDs, source notes, expectations, and provisional status without changing canon.",
+        recordIds: ["P6G-FX-001", "P6G-FX-002", "P6G-FX-003", "P6G-FX-004", "P6G-FX-005", "P6G-FX-006", "P6G-FX-007", "P6G-FX-008", "P6G-FX-009", "P6G-FX-010", "P6G-FX-011", "P6G-FX-012", "P6G-FX-013", "P6G-FX-014", "P6G-FX-015", "P6G-FX-016"]
       },
       {
         label: "Fixture observation implementation",
