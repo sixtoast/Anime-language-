@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test.describe("shared evidence chain explorer", () => {
   test("renders the three explicit evidence chains with source, implementation and test links", async ({ page }) => {
     await page.goto("/");
-    await page.locator(".sidebar").getByRole("button", { name: /Research & review/i }).click();
+    await page.locator(".nav-item").filter({ hasText: "Research & review" }).click();
 
     const section = page.getByRole("heading", { name: "Follow a claim across its records" });
     await expect(section).toBeVisible();
