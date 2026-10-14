@@ -222,3 +222,7 @@ The Test Suite now renders current-run `UNMAPPED` test results in a dedicated tr
 ### Lexicon and fixture-audit result mapping — 2026-10-15
 
 Expanded stable test identity to 31 additional cases: `LEX-001`–`LEX-006`, `LEXAUD-001`–`LEXAUD-003`, `CSV-001`–`CSV-005`, `LEXREG-001`–`LEXREG-007`, and `FIX-001`–`FIX-010`. The CI summary publisher recognises these IDs; the Test Suite exposes dedicated **Lexicon** and **Fixture audit** filters; registry integrity tests ensure every added ID is present in its source test; and browser coverage checks that run-matched outcomes appear in the correct group. These IDs describe implementation and evidence checks only and do not promote source lexicon content or fixture expectations to canon. Status: **Implemented — verification pending for latest commit**.
+
+### Evidence, research and registry integrity result mapping — 2026-10-15
+
+Added stable IDs `EVID-001`–`EVID-006`, `RES-001`–`RES-004`, and `REG-001`–`REG-004` to the repository-level evidence-chain, research-register and test-registry checks. The CI summary mapper recognises these prefixes, and the Test Suite exposes a **Workbench integrity** filter for the related registry records. Registry integrity coverage now verifies that lexicon, fixture-audit and workbench-integrity IDs are present in their source test annotations. Browser acceptance verifies that run-matched results appear in the correct Lexicon, Fixture audit and Workbench integrity groups. Status: **Implemented — verification pending for latest commit**.
