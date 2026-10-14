@@ -166,3 +166,7 @@ A Playwright browser suite is now part of CI for the Documentation catalogue. It
 ### Browser finding — mobile overflow (2026-10-14)
 
 Playwright run #186 found that the Documentation view exceeded a 360px viewport by 19px. The responsive source-list/detail layout has been changed to a single column at the mobile breakpoint. The fix remains Implemented — unverified until the strict 360px browser assertion passes on a recorded commit.
+
+### Evidence-aware Development Cockpit recommendation — 2026-10-14
+
+The Overview recommendation now derives its next action from the actual `Run website browser acceptance` step in the latest loaded CI run. A successful browser step advances the recommendation to shared source/research/fixture/test references (WEB-SH-01 / WEB-SH-02); a failed step keeps browser acceptance blocking; loading, missing, unavailable, skipped, or cancelled evidence cannot be interpreted as success. The card links to the exact latest CI run and displays its derived state. Added browser tests for successful, failed, and cancelled browser-step outcomes. This change is **Implemented — unverified** until CI executes the build and browser tests for its commit.
