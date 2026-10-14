@@ -148,3 +148,7 @@ Run #179 confirmed the new `WEB-DOC-REG-008` source-path regression passes, but 
 ## Development Cockpit live status panel (2026-10-14)
 
 The Overview now reuses the same live GitHub Actions state and published per-test report already fetched for the Test Suite. It distinguishes latest workflow conclusion, the type-check/build step, and per-test report availability/counts; it flags a report whose commit differs from the latest workflow commit rather than presenting the two as one coherent snapshot. The panel links directly to the Test Laboratory and latest run. This is a data-backed status summary, not a task recommendation engine or browser-verified acceptance.
+
+### Documentation facets by status and provenance — WEB-DOC-REG-009 (2026-10-14)
+
+Added separate source-status and provenance-type filters to the Documentation catalogue, composable with full-text search. The result count reflects the combined filters; reset clears all three, and the detail pane follows the first visible result if the previous selection is filtered out. Automated coverage exercises canonical-only filtering, historical original-source filtering, combined query/status/type filtering, and an empty status category. Browser and assistive-technology acceptance remains pending.

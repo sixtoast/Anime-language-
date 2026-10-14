@@ -32,13 +32,11 @@ export const docs: DocumentationEntry[] = [
   { title: "FRAPA contract", category: "Research", status: "Open question" as Status, sourcePath: "docs/audits/phase-2-formal-syntax.md", sourceKind: "Provisional audit source", sourceNote: "Links to the provisional formal-syntax audit; does not resolve or approve the FRAPA contract.", description: "Establish the operator contract only from available source evidence; dimensional algebra and quantity compatibility remain open." }
 ];
 
-export function filterDocuments(query: string): DocumentationEntry[] {
+export function filterDocuments(query: string, status: Status | "All" = "All", sourceKind = "All"): DocumentationEntry[] {
   const normalizedQuery = query.trim().toLocaleLowerCase();
-  if (!normalizedQuery) return docs;
-  return docs.filter((doc) =>
-    [doc.title, doc.category, doc.description, doc.status, doc.sourcePath, doc.sourceKind, doc.sourceNote]
-      .join(" ")
-      .toLocaleLowerCase()
-      .includes(normalizedQuery)
-  );
+  return docs.filter((doc) => {
+    const matchesQuery = !normalizedQuery || [doc.title, doc.category, doc.description, doc.status, doc.sourcePath, doc.sourceKind, doc.sourceNote]
+      .join(" ").toLocaleLowerCase().includes(normalizedQuery);
+    return matchesQuery && (status === "All" || doc.status === status) && (sourceKind === "All" || doc.sourceKind === sourceKind);
+  });
 }

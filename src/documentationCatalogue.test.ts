@@ -41,6 +41,13 @@ describe("Documentation catalogue website regression checks", () => {
     expect(filterDocuments("this term should not exist")).toEqual([]);
   });
 
+  it("[WEB-DOC-REG-009] filters sources by status and provenance type together", () => {
+    expect(filterDocuments("", "Canonical").map((doc) => doc.title)).toEqual(["Magic system v3.0", "Arcane language v3.0-L"]);
+    expect(filterDocuments("", "Provisional", "Original historical source file").map((doc) => doc.title)).toEqual(["Phase 4 — ambiguity audit", "Phase 5 — semantic audit"]);
+    expect(filterDocuments("phase 6g", "Provisional", "Provisional research audit").map((doc) => doc.title)).toEqual(["Phase 6G — source lexicon audit"]);
+    expect(filterDocuments("", "Deprecated")).toEqual([]);
+  });
+
   it("[WEB-DOC-REG-007] rejects absolute and parent-traversal source paths", () => {
     for (const doc of docs) {
       const normalized = doc.sourcePath.replaceAll("\\", "/");

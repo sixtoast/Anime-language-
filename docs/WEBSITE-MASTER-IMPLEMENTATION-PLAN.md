@@ -278,3 +278,7 @@ The test-summary script now recognises `WEB-DOC-REG-###` IDs and does not fail m
 ## Website implementation note — Development Cockpit live health summary (2026-10-14)
 
 The Overview now surfaces a compact health summary based on existing live GitHub Actions state and published test-report data. Workflow result, website build step, and per-test report are separate signals; a commit mismatch is called out to avoid combining results from different revisions. This improves the Overview without duplicating API requests or inventing status data. Responsive/browser acceptance remains pending, and the larger evidence-backed next-task recommendation remains unimplemented.
+
+## Website implementation note — source-aware catalogue facets (2026-10-14)
+
+The Documentation section now supports explicit source-status and provenance-type filtering in addition to search, with combined filters, result counts, a reset action, an informative empty state, and detail selection that remains valid as filters change. This is a usability improvement using existing catalogue metadata; it does not infer source authority or change any language specification. WEB-DOC-REG-009 requires CI confirmation, followed by browser/responsive acceptance.
