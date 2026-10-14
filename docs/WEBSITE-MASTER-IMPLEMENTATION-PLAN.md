@@ -313,3 +313,7 @@ The initial shared evidence graph now includes a rule impact selector. It filter
 ## Implementation update — stable IDs for evidence records (2026-10-14)
 
 Evidence nodes now expose stable IDs for representative parser tests (`PARSE-001`, `PARSE-003`, `PARSE-004`, `PARSE-007`), dimensional primitive tests (`DIM-001`, `DIM-002`, `DIM-003`, `DIM-005`, `DIM-008`), and the recovered Phase 6G fixtures (`P6G-FX-001` through `P6G-FX-016`). The IDs are rendered beside their repository paths and checked by unit/browser tests. They identify specific records; they do not assert that every record is passing or that a whole language rule is implemented. Research decision records and commit-matched result IDs remain future work because they need their own stable source and freshness model. Status: **Implemented — unverified** until CI on the latest branch commit completes.
+
+## Implementation update — Documentation to evidence navigation (2026-10-14)
+
+The Documentation detail view now derives related evidence links from exact source-path matches against the curated evidence graph. Selecting a related chain navigates to Research & Review and focuses that chain; the user can restore all chains. Choosing a rule filter clears the focused-source state so the two navigation modes do not conflict. This provides the first real cross-section workflow without adding inferred links or pretending that unmatched records have no dependencies. Browser acceptance tests the route and reset behaviour. Status: **Implemented — unverified** pending CI on the latest commit.
