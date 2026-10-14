@@ -34,6 +34,7 @@ test.describe("shared evidence chain explorer", () => {
   });
 
   test("opens related evidence directly from a documentation source", async ({ page }) => {
+    await page.goto("/");
     await page.getByRole("button", { name: "Documentation", exact: true }).click();
     await page.getByRole("button", { name: /Arcane language v3.0-L/ }).click();
     await page.getByRole("button", { name: "View Provisional operator arity" }).click();
