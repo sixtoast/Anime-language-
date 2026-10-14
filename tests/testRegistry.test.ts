@@ -15,6 +15,15 @@ describe("workbench test registry", () => {
     }
   });
 
+  it("maps every lexicon and fixture-audit registry ID to an annotated source test", () => {
+    const traceableGroups = workbenchTests.filter((test) => test.group === "Lexicon" || test.group === "Fixture audit");
+    expect(traceableGroups).toHaveLength(31);
+    for (const test of traceableGroups) {
+      const source = readFileSync(resolve(process.cwd(), test.file), "utf8");
+      expect(source, test.id + " in " + test.file).toContain(`[${test.id}] `);
+    }
+  });
+
   it("maps each provisional surface-parser test to its stable registry ID", () => {
     const surfaceTests = workbenchTests.filter((test) => test.group === "Surface parser");
     expect(surfaceTests).toHaveLength(19);
