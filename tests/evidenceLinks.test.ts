@@ -22,12 +22,14 @@ describe("shared evidence chains", () => {
     expect(chain?.ruleIds).toEqual(["LAN-005", "LAN-006"]);
     expect(chain?.nodes.map((node) => node.path)).toContain("src/engine/auditParser.md");
     expect(chain?.nodes.map((node) => node.path)).toContain("src/engine/auditParser.test.ts");
+    expect(chain?.nodes.find((node) => node.path === "src/engine/auditParser.test.ts")?.recordIds).toContain("PARSE-003");
     expect(chain?.caveat).toMatch(/does not establish full semantic typing/i);
   });
 
   it("keeps dimensional primitives explicitly separate from full semantic validation", () => {
     const chain = evidenceChains.find((item) => item.id === "EVID-LAN-010-011");
     expect(chain?.nodes.map((node) => node.path)).toContain("src/engine/dimensions.test.ts");
+    expect(chain?.nodes.find((node) => node.path === "src/engine/dimensions.test.ts")?.recordIds).toContain("DIM-003");
     expect(chain?.caveat).toMatch(/not integrated with parsed expressions/i);
   });
 
@@ -35,6 +37,7 @@ describe("shared evidence chains", () => {
     const chain = evidenceChains.find((item) => item.id === "EVID-P6G-FIXTURES");
     expect(chain?.status).toBe("provisional observation");
     expect(chain?.nodes.map((node) => node.path)).toContain("tests/fixtures/phase6g-surface-parser-cases.json");
+    expect(chain?.nodes.find((node) => node.path === "tests/fixtures/phase6g-surface-parser-cases.json")?.recordIds).toContain("P6G-FX-016");
     expect(chain?.caveat).toMatch(/not authoritative grammar/i);
   });
 
