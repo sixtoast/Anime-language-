@@ -186,3 +186,7 @@ The first browser run for the evidence-chain explorer confirmed the production b
 ### Evidence-chain mobile acceptance follow-up — 2026-10-14
 
 The first corrected run confirms the explorer's three-chain rendering test passes and the production build passes. Its 360px test still timed out because it was using a navigation interaction that was not available in that mobile state. The test now follows the same working overview feature-card route as the desktop test before measuring document width. CI run #205 is checking this adjustment. The existing decimal-with-unit parser unit test remains the only reported unit failure; no Arcane parser behaviour was changed as part of this website work.
+
+### Rule impact filtering in shared evidence explorer — 2026-10-14
+
+Added a rule-ID selector to Research & Review. Selecting a mapped rule narrows the visible evidence chains to records explicitly associated with that rule, summarises the number of related chains and linked record references by record kind, and offers a clear-filter action. This is curated traceability, not automatic dependency discovery: only currently documented relationships appear, and unlinked or unrepresented dependencies remain possible. The selector is responsive at narrow viewports. Browser acceptance now exercises rule selection, chain filtering, and reset. Status: **Implemented — unverified** pending CI on this change.
