@@ -100,3 +100,11 @@
 .evidence-record-ids{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin:8px 0}
 .evidence-record-ids>span{width:100%;font-size:8px;color:#8f8a99;text-transform:uppercase;letter-spacing:.08em}
 .evidence-record-ids code{border:1px solid #3d3748;border-radius:4px;padding:3px 5px;color:#cbb9ef;background:#211e27;font-size:8px;line-height:1.3}
+
+.related-evidence-panel{display:flex;flex-direction:column;align-items:flex-start;gap:8px;margin:16px 0;padding:12px;border:1px solid #393343;border-radius:6px;background:#1a181f}
+.related-evidence-panel>p{font-size:11px;line-height:1.6;color:#a9a4b2;margin:0}
+.related-evidence-link{max-width:100%;white-space:normal;text-align:left}
+.evidence-focused-banner{display:flex;flex-direction:column;align-items:flex-start;gap:5px;flex:1;min-width:190px;color:#aaa5b3;font-size:10px;line-height:1.6}
+.evidence-focused-banner strong{color:#d4c2f4;font-size:11px}
+.evidence-focused-banner .secondary-button{margin-top:3px}
+@media(max-width:480px){.evidence-focused-banner{min-width:0}}
