@@ -127,6 +127,70 @@ function App() {
   const latestBuildStep = workflowJobs
     .flatMap((job) => job.steps ?? [])
     .find((step) => /type-check and build/i.test(step.name));
+  const latestBrowserStep = workflowJobs
+    .flatMap((job) => job.steps ?? [])
+    .find((step) => /run website browser acceptance/i.test(step.name));
+  const browserAcceptanceState = workflowError || !latestCiRun
+    ? "unavailable"
+    : workflowLoading
+      ? "loading"
+      : !latestBrowserStep
+        ? "missing"
+        : latestBrowserStep.status !== "completed"
+          ? "running"
+          : latestBrowserStep.conclusion === "success"
+            ? "passed"
+            : latestBrowserStep.conclusion === "failure"
+              ? "failed"
+              : "inconclusive";
+  const nextTask = browserAcceptanceState === "passed"
+    ? {
+        id: "WEB-SH-01 / WEB-SH-02",
+        title: "Connect source, research and fixture evidence",
+        priority: "NEXT BUILD PHASE",
+        summary: "Browser acceptance passed for the latest CI run. Move forward to the shared-record foundation: connect known source, research, fixture and test references without inventing relationships.",
+        reason: "This advances the next major product capability after the catalogue acceptance gate. Shared links will let a reviewer follow evidence across sections and expose unknown relationships honestly.",
+        dependencies: "Stable IDs already present in the catalogue, fixture records and test registry; add only grounded relationships.",
+        files: "src/documentationCatalogue.ts, src/engine/testRegistry.ts, tests/fixtures/, docs/research/, and a small shared relationship module.",
+        acceptance: "At least one end-to-end source-to-research/fixture/test chain is navigable; links are evidence-backed; missing links are labelled unknown; tests cover the relationship data.",
+        primaryAction: "Open research & review",
+        primarySection: "Research & review" as Section
+      }
+    : browserAcceptanceState === "failed"
+      ? {
+          id: "WEB-DOC-03",
+          title: "Resolve browser acceptance failures",
+          priority: "BLOCKING",
+          summary: "The latest CI run reports a failed browser-acceptance step. Inspect its exact failing assertion and trace before changing the implementation; keep the strict viewport and interaction checks intact.",
+          reason: "The documentation catalogue must pass its real-browser acceptance checks before we treat the source-library experience as verified or move the release gate forward.",
+          dependencies: "Latest CI run and its browser-acceptance logs; current catalogue implementation.",
+          files: "src/App.tsx, src/documentationCatalogue.ts, src/styles.css, and tests/browser/.",
+          acceptance: "The failing browser assertion is reproduced and fixed; filtering, empty-state recovery, source links and 360px layout all pass in the same recorded run.",
+          primaryAction: "Inspect source library",
+          primarySection: "Documentation" as Section
+        }
+      : {
+          id: "WEB-DOC-03",
+          title: browserAcceptanceState === "running" || browserAcceptanceState === "loading"
+            ? "Confirm browser acceptance for the current run"
+            : "Recover trustworthy browser acceptance evidence",
+          priority: "VERIFICATION GATE",
+          summary: browserAcceptanceState === "running"
+            ? "The browser-acceptance step is still running. Its outcome is not known yet; wait for the completed step result before deciding whether to fix or close this task."
+            : browserAcceptanceState === "loading"
+              ? "Live workflow data is refreshing. No recommendation is treated as verified until the current run and browser step are available."
+              : browserAcceptanceState === "missing"
+                ? "The latest run did not expose a browser-acceptance step. Inspect the workflow configuration and run details before inferring that the browser checks passed or failed."
+                : browserAcceptanceState === "inconclusive"
+                  ? "The browser-acceptance step did not finish with a clear success or failure conclusion. Inspect the run details; skipped or cancelled is not a pass."
+                  : "Live browser-acceptance evidence is unavailable. Refresh the workflow data or open GitHub Actions directly; do not infer a pass from deployment readiness.",
+          reason: "The 360px mobile assertion previously exposed horizontal overflow. The fix must be confirmed by the actual browser run, not by a successful deployment or build alone.",
+          dependencies: "A completed CI run for the current main-branch commit and the actual browser-acceptance step result.",
+          files: "src/App.tsx, src/styles.css, tests/browser/, and .github/workflows/ci.yml if the step is absent.",
+          acceptance: "The browser step has an explicit successful conclusion for a recorded commit, including filter/reset, empty-state recovery, all source links and the strict 360px viewport check.",
+          primaryAction: "Inspect source library",
+          primarySection: "Documentation" as Section
+        };
 
   const sourceKinds = useMemo(() => Array.from(new Set(docs.map((doc) => doc.sourceKind))).sort(), []);
   const filteredDocs = useMemo(() => filterDocuments(query, docStatus, docSourceKind), [query, docStatus, docSourceKind]);
@@ -196,24 +260,25 @@ function App() {
             </div>
             <p className="cockpit-note">{workflowError ? "Live workflow data could not be confirmed. Treat CI health as unavailable until refreshed." : latestCiRun?.conclusion === "failure" ? "The workflow is failing. Open the run for the exact failing step; a successful website build does not mean the entire test suite passed." : latestCiRun?.status !== "completed" ? "The latest workflow is still running or queued. Its final result is not known yet." : "Workflow state comes from GitHub Actions. Per-test results are shown separately and may refer to a different commit."}</p>
           </div>
-          <section className="next-task-panel" aria-labelledby="next-task-title">
+          <section className="next-task-panel" aria-labelledby="next-task-title" data-browser-acceptance={browserAcceptanceState}>
             <div className="next-task-heading">
-              <div><div className="eyebrow"><CheckCircle2 size={13}/> RECOMMENDED NEXT · WEB-DOC-01 / WEB-DOC-02</div><h2 id="next-task-title">Verify the source library in a real browser</h2></div>
-              <span className="next-task-priority">HIGH PRIORITY</span>
+              <div><div className="eyebrow"><CheckCircle2 size={13}/> RECOMMENDED NEXT · {nextTask.id}</div><h2 id="next-task-title">{nextTask.title}</h2></div>
+              <span className="next-task-priority">{nextTask.priority}</span>
             </div>
-            <p className="next-task-summary">The catalogue now has combined search, status and provenance filters, plus repository-path regression coverage. The remaining release-critical gap is user-facing acceptance: confirm that filtering, selection, source links and narrow-screen layouts behave correctly in the running website.</p>
+            <p className="next-task-summary">{nextTask.summary}</p>
             <div className="next-task-grid">
-              <div><span>WHY THIS IS NEXT</span><p>It closes the gap between passing data-level tests and a usable, traceable source library. The latest CI build passed, while browser behaviour has not yet been verified.</p></div>
-              <div><span>DEPENDENCIES</span><p>Current catalogue and filter implementation; a browser session or browser automation environment. No engine changes are needed.</p></div>
-              <div><span>FILES / SURFACES</span><p><code>src/App.tsx</code>, <code>src/documentationCatalogue.ts</code>, <code>src/styles.css</code>, and <code>src/documentationCatalogue.test.ts</code>.</p></div>
-              <div><span>ACCEPTANCE CRITERIA</span><p>Search and both filters combine and reset correctly; the selected detail follows visible results; all 19 source links open the intended repository path; empty results are understandable; desktop and mobile layouts have no harmful overflow.</p></div>
+              <div><span>WHY THIS IS NEXT</span><p>{nextTask.reason}</p></div>
+              <div><span>DEPENDENCIES</span><p>{nextTask.dependencies}</p></div>
+              <div><span>FILES / SURFACES</span><p>{nextTask.files}</p></div>
+              <div><span>ACCEPTANCE CRITERIA</span><p>{nextTask.acceptance}</p></div>
             </div>
             <div className="next-task-actions">
-              <button className="secondary-button" onClick={() => changeSection("Documentation")}>Inspect source library <span aria-hidden="true">→</span></button>
+              <button className="secondary-button" onClick={() => changeSection(nextTask.primarySection)}>{nextTask.primaryAction} <span aria-hidden="true">→</span></button>
               <button className="secondary-button" onClick={() => changeSection("Test suite")}>Review CI evidence <span aria-hidden="true">→</span></button>
+              {latestCiRun && <a className="secondary-button" href={latestCiRun.html_url} target="_blank" rel="noreferrer">Open latest CI run ↗</a>}
               <a className="secondary-button" href="https://github.com/sixtoast/Anime-language-/blob/main/docs/WEBSITE-FEATURE-REGISTER.md" target="_blank" rel="noreferrer">Open feature register <span aria-hidden="true">↗</span></a>
             </div>
-            <p className="next-task-caveat">Status: implemented as a recommendation, not a completed task. Browser acceptance remains pending; this card does not claim that the catalogue is verified.</p>
+            <p className="next-task-caveat">Browser acceptance status: {browserAcceptanceState}. {browserAcceptanceState === "passed" ? "The browser step succeeded for the latest run; the recommendation advances to shared evidence links." : browserAcceptanceState === "failed" ? "The browser step failed; inspect the run before changing code. No acceptance gate is marked complete." : "This card reflects the live step state and does not treat missing, stale, skipped or unfinished evidence as a pass."}</p>
           </section>
           <div className="section-heading"><div><div className="eyebrow">WORKSPACE</div><h2>Everything in one place</h2></div><span className="section-caption">SOURCE RECOVERY · PHASE 01</span></div>
           <div className="feature-grid">
