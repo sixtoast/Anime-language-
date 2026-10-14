@@ -1,7 +1,16 @@
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { evidenceChains, validateEvidenceChains } from "./evidenceLinks";
 
 describe("shared evidence chains", () => {
+  it("links only to repository paths that currently exist", () => {
+    const missing = evidenceChains.flatMap((chain) => chain.nodes
+      .filter((node) => !existsSync(resolve(process.cwd(), node.path)))
+      .map((node) => `${chain.id}: ${node.path}`));
+    expect(missing).toEqual([]);
+  });
+
   it("uses unique stable IDs and provides an explicit caveat for every chain", () => {
     expect(validateEvidenceChains()).toEqual([]);
     expect(new Set(evidenceChains.map((chain) => chain.id)).size).toBe(evidenceChains.length);
