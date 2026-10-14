@@ -93,6 +93,23 @@ test.describe("Development Cockpit next-task evidence", () => {
     await expect(testCase.getByText("passed", { exact: true })).toHaveCount(0);
   });
 
+  test("exposes stable surface-parser IDs and their run-matched failure status", async ({ page }) => {
+    await mockCi(page, "success", "completed", {
+      generatedAt: "2026-10-14T20:01:00Z", commit: "abc123def456", runId: "123", runAttempt: "1",
+      counts: { total: 1, passed: 0, failed: 1, skipped: 0, unmapped: 0 },
+      tests: [{ id: "SURF-002", title: "[SURF-002] parses a decimal numeral with an explicit unit", status: "failed", durationMs: 7, file: "src/engine/surfaceParser.test.ts" }]
+    });
+    await page.goto("/");
+    await page.getByRole("button", { name: "Test suite", exact: true }).click();
+    await page.getByRole("button", { name: "Surface parser", exact: true }).click();
+    const decimalCase = page.locator(".test-case").filter({ hasText: "SURF-002" });
+    await expect(decimalCase).toBeVisible();
+    await expect(decimalCase.getByText("failed", { exact: true })).toBeVisible();
+    await expect(decimalCase.getByText("7 ms")).toBeVisible();
+    await expect(page.locator(".test-case").filter({ hasText: "SURF-001" })).toHaveCount(1);
+    await expect(page.locator(".test-case").filter({ hasText: "PARSE-001" })).toHaveCount(0);
+  });
+
   test("shows individual outcomes only when both CI run ID and commit match", async ({ page }) => {
     await mockCi(page, "success", "completed", {
       generatedAt: "2026-10-14T20:01:00Z", commit: "abc123def456", runId: "123", runAttempt: "1",
