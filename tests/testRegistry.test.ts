@@ -55,13 +55,13 @@ describe("workbench test registry", () => {
     const sourceIds: string[] = [];
     for (const file of collectVitestFiles(resolve(process.cwd(), "src"))) {
       const source = readFileSync(file, "utf8");
-      for (const match of source.matchAll(/\\bit\\(\\s*["'\x60]\\[((?:[A-Z0-9]+-)+\\d{3})\\]\\s/g)) {
+      for (const match of source.matchAll(/\bit\(\s*["'\x60]\[((?:[A-Z0-9]+-)+\d{3})\]\s/g)) {
         sourceIds.push(match[1]);
       }
     }
     for (const file of collectVitestFiles(resolve(process.cwd(), "tests"))) {
       const source = readFileSync(file, "utf8");
-      for (const match of source.matchAll(/\\bit\\(\\s*["'\x60]\\[((?:[A-Z0-9]+-)+\\d{3})\\]\\s/g)) {
+      for (const match of source.matchAll(/\bit\(\s*["'\x60]\[((?:[A-Z0-9]+-)+\d{3})\]\s/g)) {
         sourceIds.push(match[1]);
       }
     }
