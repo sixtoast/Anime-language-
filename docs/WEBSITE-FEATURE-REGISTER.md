@@ -190,3 +190,7 @@ The first corrected run confirms the explorer's three-chain rendering test passe
 ### Rule impact filtering in shared evidence explorer — 2026-10-14
 
 Added a rule-ID selector to Research & Review. Selecting a mapped rule narrows the visible evidence chains to records explicitly associated with that rule, summarises the number of related chains and linked record references by record kind, and offers a clear-filter action. This is curated traceability, not automatic dependency discovery: only currently documented relationships appear, and unlinked or unrepresented dependencies remain possible. The selector is responsive at narrow viewports. Browser acceptance now exercises rule selection, chain filtering, and reset. Status: **Implemented — unverified** pending CI on this change.
+
+### Documentation-to-evidence navigation — 2026-10-14
+
+Documentation detail panels now show related curated evidence chains when the selected entry's source path exactly matches a node in the shared evidence model. A direct action opens Research & Review focused on that chain, with a clear return to all chains. The rule selector clears a focused-source view when the user chooses a rule, avoiding conflicting filters. Entries without a mapped chain do not show a fabricated relationship. Browser acceptance covers the source-to-chain path and restoring the full view. Status: **Implemented — unverified** pending CI.
