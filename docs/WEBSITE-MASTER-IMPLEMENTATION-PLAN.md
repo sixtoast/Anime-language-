@@ -297,3 +297,7 @@ The first Playwright run passed 3/4 Documentation checks and found a real 19px p
 ## Implementation update — evidence-aware next-task recommendation (2026-10-14)
 
 The Overview recommendation now branches on the live latest CI run's `Run website browser acceptance` step. A confirmed success advances to WEB-SH-01 / WEB-SH-02 (shared source, research, fixture, and test references); an explicit failure keeps browser acceptance as the blocking task; missing, unavailable, loading, skipped, cancelled, or otherwise inconclusive states do not count as success. The card links to the exact CI run. Browser regression tests cover success, failure, and cancelled-step states. Status remains **Implemented — unverified** until CI confirms the build and new browser tests on the implementation commit. This does not close the outstanding 360px mobile acceptance gate unless that exact browser step succeeds.
+
+### Mobile viewport follow-up — 2026-10-14
+
+The first responsive-layout adjustment did not resolve the observed 360px overflow in CI run #188 (document width remained 379px). The same run passed all three new evidence-aware recommendation tests and the production build, while the pre-existing decimal-with-unit parser test remained the sole unit-test failure. A focused follow-up hides the nonessential specification-version chip at viewports up to 420px to prevent the top bar from forcing page overflow. The strict browser assertion must pass on a subsequent run before the mobile acceptance gate is closed.
