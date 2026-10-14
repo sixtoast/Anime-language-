@@ -2,7 +2,7 @@ export type TestExecutionStatus = "authored-unverified" | "blocked-by-specificat
 
 export interface WorkbenchTest {
   id: string;
-  group: "Parser" | "Surface parser" | "Dimensions" | "Semantic types" | "Operator contracts" | "Lexicon" | "Fixture audit" | "Workbench integrity";
+  group: "Parser" | "Surface parser" | "Dimensions" | "Semantic types" | "Operator contracts" | "Lexicon" | "Fixture audit" | "Workbench integrity" | "Documentation";
   title: string;
   description: string;
   status: TestExecutionStatus;
@@ -121,4 +121,13 @@ export const workbenchTests: WorkbenchTest[] = [
   { id: "REG-002", group: "Workbench integrity", title: "Lexicon and fixture IDs match source tests", description: "Checks all lexicon and fixture-audit IDs appear in their source test annotations.", status: "authored-unverified", file: "tests/testRegistry.test.ts", sourceRule: "lexicon and fixture test mapping" },
   { id: "REG-003", group: "Workbench integrity", title: "Surface parser IDs match source tests", description: "Checks all 19 provisional surface-parser tests have matching stable registry IDs.", status: "authored-unverified", file: "tests/testRegistry.test.ts", sourceRule: "surface parser test mapping" },
   { id: "REG-004", group: "Workbench integrity", title: "Registers known decimal-unit failure", description: "Ensures the known decimal-with-unit failure remains explicitly registered.", status: "authored-unverified", file: "tests/testRegistry.test.ts", sourceRule: "known parser regression traceability" },
+  { id: "WEB-DOC-REG-001", group: "Documentation", title: "Keeps catalogue entries and unique titles", description: "Checks the documentation catalogue retains all 19 entries and unique titles.", status: "authored-unverified", file: "src/documentationCatalogue.test.ts", sourceRule: "documentation catalogue identity" },
+  { id: "WEB-DOC-REG-002", group: "Documentation", title: "Provides provenance for every source", description: "Checks every documentation entry has a source path, type and provenance note.", status: "authored-unverified", file: "src/documentationCatalogue.test.ts", sourceRule: "documentation source provenance" },
+  { id: "WEB-DOC-REG-003", group: "Documentation", title: "Returns full catalogue for blank query", description: "Checks a blank search query returns the full documentation catalogue.", status: "authored-unverified", file: "src/documentationCatalogue.test.ts", sourceRule: "documentation catalogue search" },
+  { id: "WEB-DOC-REG-004", group: "Documentation", title: "Searches titles and descriptions case-insensitively", description: "Checks documentation search across titles and descriptions without case sensitivity.", status: "authored-unverified", file: "src/documentationCatalogue.test.ts", sourceRule: "documentation search behaviour" },
+  { id: "WEB-DOC-REG-005", group: "Documentation", title: "Searches source type and provenance", description: "Checks search includes source type and provenance metadata.", status: "authored-unverified", file: "src/documentationCatalogue.test.ts", sourceRule: "documentation source search" },
+  { id: "WEB-DOC-REG-006", group: "Documentation", title: "Filters by status and handles no matches", description: "Checks status filtering and empty search results.", status: "authored-unverified", file: "src/documentationCatalogue.test.ts", sourceRule: "documentation catalogue filters" },
+  { id: "WEB-DOC-REG-007", group: "Documentation", title: "Rejects unsafe source paths", description: "Checks absolute and parent-traversal source paths are rejected.", status: "authored-unverified", file: "src/documentationCatalogue.test.ts", sourceRule: "documentation path safety" },
+  { id: "WEB-DOC-REG-008", group: "Documentation", title: "Keeps catalogue paths resolvable", description: "Checks every catalogue source path resolves within the repository.", status: "authored-unverified", file: "src/documentationCatalogue.test.ts", sourceRule: "documentation source path integrity" },
+  { id: "WEB-DOC-REG-009", group: "Documentation", title: "Combines status and provenance filters", description: "Checks status and provenance-type filters can be applied together.", status: "authored-unverified", file: "src/documentationCatalogue.test.ts", sourceRule: "documentation catalogue filters" },
 ];
