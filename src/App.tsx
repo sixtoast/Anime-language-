@@ -146,19 +146,19 @@ function App() {
           <div className="workspace-meta"><strong>Anime Language</strong><span>Personal workspace</span></div>
           <ChevronDown size={15} className="muted-icon"/>
         </button>
-        <div className="side-nav">
+        <nav className="side-nav" aria-label="Main sections">
           {["WORKSPACE", "LANGUAGE", "QUALITY"].map((group) => (
             <div className="nav-group" key={group}>
               <div className="nav-label">{group}</div>
               {navigation.filter((item) => item.group === group).map(({ label, icon: Icon }) => (
-                <button key={label} className={"nav-item " + (section === label ? "active" : "")} onClick={() => changeSection(label)}>
+                <button key={label} className={"nav-item " + (section === label ? "active" : "")} aria-current={section === label ? "page" : undefined} onClick={() => changeSection(label)}>
                   <Icon size={17} strokeWidth={1.8}/><span>{label}</span>
                   {label === "Research & review" && <span className="nav-count">5</span>}
                 </button>
               ))}
             </div>
           ))}
-        </div>
+        </nav>
         <div className="sidebar-bottom">
           <div className="repo-card">
             <GitBranch size={15}/><div><strong>main</strong><span>GitHub repository</span></div>

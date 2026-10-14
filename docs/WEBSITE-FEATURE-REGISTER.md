@@ -128,3 +128,8 @@ The five review cards now carry explicit repository-relative `sourcePath` values
 ### Keyboard focus baseline (2026-10-14)
 
 A shared `:focus-visible` style now makes keyboard focus visible across links, buttons, form controls, and tabindex elements. The search and editor inputs receive an inset outline to avoid clipping at their edges. This is a baseline usability improvement, not a completed accessibility audit; keyboard traversal, contrast, screen-reader announcements, and browser-level acceptance still need checking.
+
+
+### Navigation semantics baseline (2026-10-14)
+
+The five-section sidebar is now exposed as a named navigation landmark (`Main sections`) and the active section button carries `aria-current="page"`. This is a focused semantic improvement, not evidence of a complete screen-reader audit. WEB-UX-02 remains Implemented — unverified pending browser acceptance.

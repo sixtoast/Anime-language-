@@ -258,3 +258,8 @@ The five existing Research & Review cards now link to the repository files that 
 ## Website implementation note — keyboard focus baseline (2026-10-14)
 
 Added shared CSS `:focus-visible` styling for interactive elements, with inset focus outlines for search/editor text inputs whose default outlines are reset. This addresses a basic visible-focus gap while keeping the wider accessibility audit open. Do not mark WEB-UX-02 Verified until keyboard, screen-reader, contrast, and responsive browser acceptance is recorded.
+
+
+## Website implementation note — section navigation semantics (2026-10-14)
+
+The sidebar section list now uses a named navigation landmark and exposes the selected section with `aria-current="page"`. This is a low-risk website-only accessibility improvement. It does not complete the accessibility audit; keyboard traversal, screen-reader output, contrast, and responsive browser checks remain open.
