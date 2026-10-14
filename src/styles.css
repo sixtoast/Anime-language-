@@ -40,3 +40,8 @@
 .source-gap-list strong{color:#e0dce7;font-weight:600}
 .source-recovery-actions{display:flex;gap:8px;flex-wrap:wrap;padding-top:4px}
 @media(max-width:760px){.source-recovery-panel{padding:13px}.source-recovery-heading{align-items:flex-start;flex-direction:column}.source-recovery-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.source-recovery-actions{align-items:stretch;flex-direction:column}.source-recovery-actions .secondary-button{justify-content:center}}
+
+
+/* Keyboard accessibility baseline: keep focus visible even on controls with reset outlines. */
+:where(a,button,input,textarea,select,[tabindex]):focus-visible{outline:2px solid #c4adff;outline-offset:3px}
+.test-search input:focus-visible,.editor-body textarea:focus-visible{outline-offset:-3px;border-radius:2px}

@@ -253,3 +253,8 @@ This is a visibility improvement, not a completed source audit. It does not clai
 ## Website implementation note — Research & Review evidence links (2026-10-14)
 
 The five existing Research & Review cards now link to the repository files that ground each topic: the Phase 2 syntax audit for FRAPA, preserved Phase 4 and Phase 5 historical audit files, the Phase 6G source-lexicon audit, and the Phase 6G fixture-observation harness. This is a navigation/traceability improvement only. It does not approve findings, resolve open questions, or change language-engine behaviour. WEB-REV-01 remains Implemented — unverified until browser link checks and acceptance evidence tied to the new commit are available.
+
+
+## Website implementation note — keyboard focus baseline (2026-10-14)
+
+Added shared CSS `:focus-visible` styling for interactive elements, with inset focus outlines for search/editor text inputs whose default outlines are reset. This addresses a basic visible-focus gap while keeping the wider accessibility audit open. Do not mark WEB-UX-02 Verified until keyboard, screen-reader, contrast, and responsive browser acceptance is recorded.
