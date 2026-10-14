@@ -206,3 +206,7 @@ Research & Review now includes three source-backed records with stable IDs: the 
 ### Side-by-side historical/current fixture observations — 2026-10-14
 
 The RE/RA discrepancy record now renders the preserved inputs for P6G-FX-011 and P6G-FX-012 alongside the fixture expectation, current TypeScript parser observation, and historical behaviour recorded by source inspection. The display labels the current result as a live parser observation and clearly warns that archived Python behaviour has not been freshly executed. It also shows each observation's comparison classification and interpretation note. Browser acceptance checks both inputs and the distinct current/historical outcomes. This makes the discrepancy actionable without changing fixture expectations, parser semantics, or canon. Status: **Implemented — verification pending for latest commit**.
+
+### Repository-level test discovery correction — 2026-10-14
+
+A verification audit found that Vitest was configured to discover only `src/**/*.test.ts`, so repository-level integrity tests under `tests/` were not included in the unit run. The Vitest include list now also covers `tests/**/*.test.ts`, activating the evidence-chain and research-record integrity suites rather than leaving them present but unexecuted. Browser specs remain under `tests/browser/*.spec.ts` and are handled by Playwright separately. This is a test-discovery correction, not a relaxation of assertions. Status: **Implemented — verification pending for latest commit**.
