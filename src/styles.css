@@ -53,3 +53,20 @@
 /* Documentation filters: explicit source-status and provenance facets. */
 .doc-filter-bar{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;margin-top:12px;padding:12px;border:1px solid #2b2c30;border-radius:7px;background:#151618}.doc-filter-bar label{display:flex;flex-direction:column;gap:6px;font-size:9px;color:#898894;min-width:150px;flex:1}.doc-filter-bar select{width:100%;min-height:34px;background:#1b1c1f;border:1px solid #37383e;border-radius:5px;padding:7px 9px;color:#dedbe5;font-size:10px}.doc-result-count{font:9px var(--mono);color:#aaa0c7;white-space:nowrap;padding:10px 0}.doc-filter-bar .secondary-button:disabled{opacity:.4;cursor:default}.doc-filter-bar .secondary-button{white-space:nowrap}
 @media(max-width:520px){.doc-filter-bar{align-items:stretch;flex-direction:column}.doc-filter-bar label{min-width:0}.doc-result-count{padding:2px 0}}
+
+
+/* Evidence-backed next-task card for the Development Cockpit. */
+.next-task-panel{margin-top:18px;padding:18px;border:1px solid #393344;border-radius:9px;background:#19181e;min-width:0}
+.next-task-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+.next-task-heading .eyebrow{display:flex;align-items:center;gap:6px}
+.next-task-heading h2{font:600 19px var(--display);letter-spacing:-.45px;margin:8px 0 0;color:#eee9f5}
+.next-task-priority{flex:0 0 auto;border:1px solid #65543c;border-radius:5px;padding:5px 7px;color:#e2c28e;font:600 9px var(--mono);letter-spacing:.7px}
+.next-task-summary{max-width:900px;margin:13px 0 16px;color:#b5b0bd;font-size:12px;line-height:1.8}
+.next-task-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.next-task-grid>div{min-width:0;padding:12px;border:1px solid #302e36;border-radius:7px;background:#161619}
+.next-task-grid>div>span{font:600 9px var(--mono);letter-spacing:.8px;color:#bca9e6}
+.next-task-grid p{margin:7px 0 0;color:#b5b1bb;font-size:11px;line-height:1.75;overflow-wrap:anywhere}
+.next-task-grid code{font:10px var(--mono);color:#d1c0f2;overflow-wrap:anywhere}
+.next-task-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}
+.next-task-caveat{margin:13px 0 0;padding-top:11px;border-top:1px solid #302e36;color:#928d9a;font-size:10px;line-height:1.7}
+@media(max-width:760px){.next-task-panel{padding:13px}.next-task-heading{flex-direction:column}.next-task-grid{grid-template-columns:1fr}.next-task-actions{align-items:stretch;flex-direction:column}.next-task-actions .secondary-button{justify-content:center}}

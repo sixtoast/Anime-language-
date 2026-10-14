@@ -150,10 +150,12 @@ Statuses use only these meanings: **Planned** (not implemented), **Implemented**
 ### Phase 3 — Overview Development Cockpit
 - [ ] Show verified CI/build/test status and commit, with timestamps and links.
 - [ ] Show actionable blockers, source gaps, review decisions, and recent changes using repository evidence.
-- [ ] Provide a single next-task recommendation with reason, dependencies, affected files, and acceptance criteria.
+- [x] Add a single evidence-backed next-task recommendation with reason, dependencies, affected files, acceptance criteria, and navigation to the relevant work areas; browser acceptance of the recommended task remains open.
 - [ ] Distinguish current state from historical reports and stale data.
 
-**Exit:** the Overview helps a new session identify the next safe website task without reconstructing context from conversation history.
+**Progress:** the recommendation card is implemented and explicitly distinguishes the recommendation from completed work. Its chosen next task is browser acceptance of the Documentation catalogue; it is not yet evidence that the task itself is complete.
+
+**Exit:** the Overview helps a new session identify the next safe website task without reconstructing context from conversation history, using current evidence and honest state labels.
 
 ### Phase 4 — Shared records and cross-section connections
 - [ ] Establish/reuse consistent IDs for sources, questions, fixtures, test evidence, and work items where practical.

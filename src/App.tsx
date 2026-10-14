@@ -196,6 +196,25 @@ function App() {
             </div>
             <p className="cockpit-note">{workflowError ? "Live workflow data could not be confirmed. Treat CI health as unavailable until refreshed." : latestCiRun?.conclusion === "failure" ? "The workflow is failing. Open the run for the exact failing step; a successful website build does not mean the entire test suite passed." : latestCiRun?.status !== "completed" ? "The latest workflow is still running or queued. Its final result is not known yet." : "Workflow state comes from GitHub Actions. Per-test results are shown separately and may refer to a different commit."}</p>
           </div>
+          <section className="next-task-panel" aria-labelledby="next-task-title">
+            <div className="next-task-heading">
+              <div><div className="eyebrow"><CheckCircle2 size={13}/> RECOMMENDED NEXT · WEB-DOC-01 / WEB-DOC-02</div><h2 id="next-task-title">Verify the source library in a real browser</h2></div>
+              <span className="next-task-priority">HIGH PRIORITY</span>
+            </div>
+            <p className="next-task-summary">The catalogue now has combined search, status and provenance filters, plus repository-path regression coverage. The remaining release-critical gap is user-facing acceptance: confirm that filtering, selection, source links and narrow-screen layouts behave correctly in the running website.</p>
+            <div className="next-task-grid">
+              <div><span>WHY THIS IS NEXT</span><p>It closes the gap between passing data-level tests and a usable, traceable source library. The latest CI build passed, while browser behaviour has not yet been verified.</p></div>
+              <div><span>DEPENDENCIES</span><p>Current catalogue and filter implementation; a browser session or browser automation environment. No engine changes are needed.</p></div>
+              <div><span>FILES / SURFACES</span><p><code>src/App.tsx</code>, <code>src/documentationCatalogue.ts</code>, <code>src/styles.css</code>, and <code>src/documentationCatalogue.test.ts</code>.</p></div>
+              <div><span>ACCEPTANCE CRITERIA</span><p>Search and both filters combine and reset correctly; the selected detail follows visible results; all 19 source links open the intended repository path; empty results are understandable; desktop and mobile layouts have no harmful overflow.</p></div>
+            </div>
+            <div className="next-task-actions">
+              <button className="secondary-button" onClick={() => changeSection("Documentation")}>Inspect source library <span aria-hidden="true">→</span></button>
+              <button className="secondary-button" onClick={() => changeSection("Test suite")}>Review CI evidence <span aria-hidden="true">→</span></button>
+              <a className="secondary-button" href="https://github.com/sixtoast/Anime-language-/blob/main/docs/WEBSITE-FEATURE-REGISTER.md" target="_blank" rel="noreferrer">Open feature register <span aria-hidden="true">↗</span></a>
+            </div>
+            <p className="next-task-caveat">Status: implemented as a recommendation, not a completed task. Browser acceptance remains pending; this card does not claim that the catalogue is verified.</p>
+          </section>
           <div className="section-heading"><div><div className="eyebrow">WORKSPACE</div><h2>Everything in one place</h2></div><span className="section-caption">SOURCE RECOVERY · PHASE 01</span></div>
           <div className="feature-grid">
             <button className="feature-card" onClick={() => changeSection("Documentation")}><div className="feature-icon icon-violet"><BookOpen size={20}/></div><div className="feature-title">Language reference <span>↗</span></div><p>Specification, grammar, operators, semantics and terminology with explicit source status.</p><div className="feature-foot"><span>Explore documentation</span><span>01</span></div></button>
