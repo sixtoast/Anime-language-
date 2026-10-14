@@ -161,3 +161,8 @@ The Overview now presents one prioritized website task: perform browser-level ac
 ## Browser-level acceptance coverage (WEB-DOC-03)
 
 A Playwright browser suite is now part of CI for the Documentation catalogue. It exercises combined search/status/provenance filtering, reset behaviour, the empty state and recovery, source links for all 19 entries, and a narrow 360px viewport. The browser suite runs even when the existing Vitest suite reports an unrelated engine failure, provided Chromium installation succeeds. Its results must be assessed independently from the Vitest test step and production build. The suite's existence is not proof that it has passed; use the CI run tied to the commit as evidence.
+
+
+### Browser finding — mobile overflow (2026-10-14)
+
+Playwright run #186 found that the Documentation view exceeded a 360px viewport by 19px. The responsive source-list/detail layout has been changed to a single column at the mobile breakpoint. The fix remains Implemented — unverified until the strict 360px browser assertion passes on a recorded commit.

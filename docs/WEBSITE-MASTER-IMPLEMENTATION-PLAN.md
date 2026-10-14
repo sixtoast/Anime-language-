@@ -288,3 +288,8 @@ The Documentation section now supports explicit source-status and provenance-typ
 ### Browser acceptance added — 2026-10-14
 
 Added a Playwright-based website browser suite and CI step for the Documentation catalogue. It covers filter combinations/reset, empty-state recovery, source-link presence for every catalogue entry, and a narrow mobile viewport. The suite is deliberately reported separately from Vitest and the production build so an unrelated existing engine test failure cannot hide website-level results. Browser acceptance remains **Implemented — unverified** until the run for the commit completes successfully and any failures are addressed.
+
+
+### Browser-discovered mobile overflow — 2026-10-14
+
+The first Playwright run passed 3/4 Documentation checks and found a real 19px page-level horizontal overflow at a 360px viewport (document width 379px). The responsive Documentation layout now stacks the source list and detail panel into one column at the existing mobile breakpoint. Keep the overflow assertion strict; the fix must pass the same browser test before acceptance is marked verified.
