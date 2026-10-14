@@ -1,5 +1,6 @@
 export type EvidenceNodeKind =
   | "Canonical source"
+  | "Historical source"
   | "Provisional audit"
   | "Rule catalogue"
   | "Implementation"
@@ -120,7 +121,7 @@ export const evidenceChains: EvidenceChain[] = [
     nodes: [
       {
         label: "Archived prototype report",
-        kind: "Canonical source",
+        kind: "Historical source",
         path: "sources/archive-reports/phase-audit-extracts/ARCANE_PHASE_6G_SURFACE_PARSER.md.extracted.txt",
         relationship: "Historical report used as source evidence; its reported results are not current CI results."
       },
