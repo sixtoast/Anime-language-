@@ -13,7 +13,7 @@ const tests = [];
 for (const suite of report.testResults ?? []) {
   for (const assertion of suite.assertionResults ?? []) {
     const title = assertion.fullName || assertion.title || "Unnamed test";
-    const match = title.match(/\\[((?:PARSE|DIM|SEM|OPC)-\\d{3}|WEB-DOC-REG-\\d{3})\\]/);
+    const match = title.match(/\[((?:PARSE|DIM|SEM|OPC)-\d{3}|WEB-DOC-REG-\d{3})\]/);
     tests.push({
       id: match?.[1] ?? "UNMAPPED",
       title,
