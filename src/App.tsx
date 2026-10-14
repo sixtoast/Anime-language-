@@ -71,7 +71,7 @@ function App() {
   const [mobileNav, setMobileNav] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState(docs[0].title);
   const [testQuery, setTestQuery] = useState("");
-  const [testGroup, setTestGroup] = useState<"All" | "Parser" | "Surface parser" | "Dimensions" | "Semantic types" | "Operator contracts">("All");
+  const [testGroup, setTestGroup] = useState<"All" | "Parser" | "Surface parser" | "Dimensions" | "Semantic types" | "Operator contracts" | "Lexicon" | "Fixture audit">("All");
   const [impactRule, setImpactRule] = useState("All");
   const [focusedEvidenceChainId, setFocusedEvidenceChainId] = useState<string | null>(null);
   const [workflowRuns, setWorkflowRuns] = useState<WorkflowRun[]>([]);
@@ -383,7 +383,7 @@ function App() {
             <div className="test-explorer-toolbar">
               <div className="test-search"><Search size={16}/><input value={testQuery} onChange={(e) => setTestQuery(e.target.value)} placeholder="Filter by ID, title, rule or description…" aria-label="Filter test cases"/></div>
               <div className="test-filters" aria-label="Filter test group">
-                {(["All", "Parser", "Surface parser", "Dimensions", "Semantic types", "Operator contracts"] as const).map((group) => <button key={group} className={testGroup === group ? "test-filter active" : "test-filter"} onClick={() => setTestGroup(group)}>{group}</button>)}
+                {(["All", "Parser", "Surface parser", "Dimensions", "Semantic types", "Operator contracts", "Lexicon", "Fixture audit"] as const).map((group) => <button key={group} className={testGroup === group ? "test-filter active" : "test-filter"} onClick={() => setTestGroup(group)}>{group}</button>)}
               </div>
             </div>
             <div className="test-explorer-meta"><span>{workbenchTests.filter((test) => (testGroup === "All" || test.group === testGroup) && (test.id + " " + test.title + " " + test.description + " " + test.sourceRule).toLowerCase().includes(testQuery.toLowerCase())).length} cases shown</span><span><span className="status-dot status-dot-pending"/> {registryReportMatchesLatestRun && registryResults ? `Current run ${registryResults.runId} · ${registryResults.counts.passed} passed · ${registryResults.counts.failed} failed · ${registryResults.counts.skipped} skipped` : registryResults ? `Stored report ${registryResults.commit?.slice(0, 7) ?? "unknown"} is stale; results withheld` : "Waiting for published per-test results"}</span></div>
