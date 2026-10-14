@@ -341,3 +341,7 @@ The 19 provisional Phase 6G surface-parser tests now have stable `SURF-001`–`S
 ## Implementation update — unmapped result visibility (2026-10-14)
 
 The Test Suite now exposes current-run `UNMAPPED` results in a dedicated traceability-gap list. Rows show the actual test title, status, duration, source file and link, and use the same strict run-ID plus commit freshness gate as registry rows. Stale report statuses remain withheld. Browser coverage checks an unmapped passing result alongside the registered decimal-with-unit failure. The Surface parser group is now reflected in the controlled state type and filter. This provides immediate visibility into the remaining mapping gap while preserving the distinction between a test result and a stable registry entry. Status: **Implemented — verification pending for latest commit**.
+
+## Implementation update — lexicon and fixture-audit traceability (2026-10-15)
+
+Added stable identifiers for 31 tests across the bundled lexicon, lexicon audit, CSV loader, lexicon registry, and recovered Phase 6G fixture audit. The report publisher recognises the prefixes; the Test Suite exposes Lexicon and Fixture audit filters; source integrity tests verify the annotations; browser acceptance checks correct group mapping. The work improves visibility of existing checks only: source snapshots, legacy aliases, collisions, historical observations, and fixture comparisons retain their existing provisional status and do not imply canonical decisions. Status: **Implemented — verification pending for latest commit**.
