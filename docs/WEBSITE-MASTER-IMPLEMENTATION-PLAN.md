@@ -329,3 +329,7 @@ Added a typed research-record register based on existing repository evidence. It
 ## Implementation update — inspectable fixture discrepancy (2026-10-14)
 
 The RE/RA research record now shows P6G-FX-011 (`RE MA`) and P6G-FX-012 (`KI RA`) with four distinct pieces of evidence: the preserved fixture expectation, the current TypeScript parser's computed accept/reject observation, the archived Python behaviour recorded from static source inspection, and the comparison note. The UI explicitly says the historical implementation was not freshly executed, and labels the display as an observation rather than acceptance. Regression coverage checks the side-by-side values and interpretation guardrail. No fixture, parser, or canon behaviour was modified. Status: **Implemented — verification pending for latest commit**.
+
+## Verification correction — repository-level unit tests (2026-10-14)
+
+The Vitest configuration previously discovered only `src/**/*.test.ts`; therefore the new integrity tests stored under `tests/` were not actually running despite being present in the repository. Expanded the include pattern to cover `tests/**/*.test.ts` as well. Playwright browser specs use `.spec.ts` and remain in the separate browser acceptance command. The next CI run must confirm that repository-level evidence/research tests execute and pass. This correction increases verification coverage and does not weaken any existing assertion. Status: **Implemented — verification pending for latest commit**.
