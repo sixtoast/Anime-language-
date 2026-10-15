@@ -44,7 +44,7 @@ export interface LexiconRegistry {
 }
 
 export interface LexiconDiagnostic {
-  code: "EMPTY_FORM" | "NON_ATOMIC_FORM" | "CONFLICTING_ALIAS_TARGETS" | "SELF_ALIAS";
+  code: "EMPTY_FORM" | "NON_ATOMIC_FORM" | "CONFLICTING_ALIAS_TARGETS" | "SELF_ALIAS" | "MISSING_ALIAS_TARGET";
   message: string;
   form?: string;
 }
@@ -142,6 +142,14 @@ export function buildLexiconRegistry(
       continue;
     }
     const chosen = candidates[0];
+    if (!entries.has(chosen.preferredForm)) {
+      diagnostics.push({
+        code: "MISSING_ALIAS_TARGET",
+        message: `Alias ${alias.toUpperCase()} targets ${chosen.preferredForm.toUpperCase()}, which is absent from the loaded lexicon. It was not registered.`,
+        form: alias
+      });
+      continue;
+    }
     aliases.set(alias, {
       alias,
       preferredForm: chosen.preferredForm,
