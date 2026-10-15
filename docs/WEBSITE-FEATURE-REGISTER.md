@@ -280,3 +280,8 @@ Added `CSV-006`, a dedicated lexicon CSV ingestion test for all seven Phase 5.5 
 ## Alias target integrity guard (2026-10-15)
 
 Added `LEXREG-008` and diagnostic `MISSING_ALIAS_TARGET`. An explicit historical alias whose preferred form is absent from the loaded single-token lexicon is now diagnosed and withheld from the alias map, instead of being exposed as a successful alias that resolves to a form with no lexical entry. This is a source-integrity guard, not a change to canonical spellings or the parser's default alias policy. The test registry count is updated; CI verification remains pending until the latest branch workflow completes.
+
+
+## Surface diagnostic source-spelling provenance (2026-10-15)
+
+Added optional `sourceToken` to provisional surface-parser diagnostics and retain the original token sequence separately from the normalised parse tokens. This allows failures after alias normalisation to report the spelling the author actually entered, while `token`/message continue to describe the parser's resolved view. Added `SURF-021` regression coverage for uppercase `FRATA` when the registry is present but alias resolution is not enabled, and updated the parser test-count integrity assertion to 21. Successful ASTs still do not carry full token provenance; that is a separate, broader source-map design question and has not been implied by this change.
