@@ -260,3 +260,10 @@ Added [FRASHA Current Workbench Implementation Inventory](research/frasha-curren
 ## Operator alias evidence chain strengthened (2026-10-15)
 
 Expanded `docs/research/operator-spelling-lineage-audit-01.md` after recovering the surrounding Phase 5.5/5.6 report excerpts from the archive index. The reconciliation report explicitly attributes seven legacy aliases to Phase 4 §5.1 and D-032; the Phase 5.6 report records 42/42 registry/lexicon consistency checks for each of v4 and v5 but cautions this does not prove parser/compiler integration. Static inspection now also documents the current TypeScript boundary: the CSV loader ingests explicit aliases, registry construction builds an alias map, and Phase 6G normalisation is opt-in. Canon and default parser behaviour remain unchanged.
+
+
+## Decimal-with-unit CI failure root cause identified (2026-10-15)
+
+The CI log for run #301 showed that `SURF-002` did not fail because the parser rejected the decimal or explicit unit. The returned AST contained the expected first argument (`0.2 MA`) and the second FRAPA argument (`1 SHO`); the test expectation listed only one item in the binary operator's `args` array. The regression assertion has been corrected to assert both arguments, and the test registry / `REG-004` integrity check now describe the actual coverage rather than calling this a known parser failure. This is an evidence-backed test correction, not a parser semantic change. The latest CI run for the updated test remains pending at time of this note.
+
+Added `SURF-020` to exercise all seven historical aliases across the parser's explicit opt-in paths, including the registry-backed `REN → BEN` case. This is a conformance fixture for the current provisional parser and alias evidence, not a change to default alias handling or canonical language policy. Await CI before marking it verified.
