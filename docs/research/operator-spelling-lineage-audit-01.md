@@ -30,6 +30,18 @@ The indexed CSV declares these columns: `legacy_form`, `preferred_form`, `gloss`
 
 The word “conflict” here means the imported canonical baseline and historical registry name different forms for the same gloss. It does **not** decide which source is later, more authoritative, or approved.
 
+## Additional recovered Phase 5.5 reconciliation evidence
+
+A wider inspection of `sources/archive-reports/mega-pack-text-index.md` recovered the surrounding entry for `Arcane_Phase_6S_Typed_Expression_Integration/Arcane_Phase_5_5_Source_Reconciliation.md` (archive SHA-256 recorded in the index as `989cecda962d1a295f2b7fd678c78239c51415273bfe408b6f52e19058397c34`). That report explicitly states that Phase 4 §5.1 and D-032 establish the seven old forms as valid aliases after sibling-collision renames, and recommends preserving source spelling for diagnostics while resolving to the preferred form. The adjacent Phase 5.6 report says its validator completed 42/42 registry/lexicon consistency checks for both v4 and v5, while expressly warning that these checks do not prove an existing parser/compiler resolves aliases.
+
+This improves the historical evidence chain: it is stronger than the CSV excerpt alone because a reconciliation report explains the intended compatibility rule and reports its own checks. It is still an indexed excerpt from an archived report, not the original Phase 4 §5.1 text, D-032 decision record, complete validator output, or a fresh execution of that archived validator. Therefore the historical compatibility intent is well-supported by secondary archive evidence, while the original decision's full context and the present workbench's end-to-end conformance remain separate questions.
+
+## Current TypeScript implementation boundary
+
+Static inspection of `src/engine/lexiconCsvLoader.ts` and `src/engine/lexiconRegistry.ts` shows that the workbench can ingest the explicit Phase 5.5 alias CSV and build an alias map. The registry also derives a narrow alias candidate from preferred-form notes matching `was <form>`. The Phase 6G parser only applies alias resolution when `allowLegacyAliases: true`; with no registry, its local fallback table covers six operator-like aliases and does not include REN→BEN. With a supplied registry, alias coverage depends on the CSV and registry diagnostics. This is configurable prototype behaviour, not a claim that every entry point in the application normalises aliases consistently.
+
+No aliases have been added to the canonical vocabulary and no default parser behaviour has been changed as part of this audit.
+
 ## What this audit does and does not establish
 
 Established from indexed archive evidence:
