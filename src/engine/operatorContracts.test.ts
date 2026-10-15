@@ -46,6 +46,14 @@ describe("Source-traceable operator contract registry", () => {
     expect(operatorContractPrinciples.map((principle) => principle.id)).toEqual(["OPCON-001", "OPCON-002", "OPCON-003", "OPCON-004"]);
   });
 
+  it("[OPC-009] exposes FRASHA semantic and numeral-sign uncertainty without enabling execution", () => {
+    const frasha = getOperatorContract("FRASHA");
+    expect(frasha?.arityStatus).toBe("provisional-audit-signature");
+    expect(frasha?.evaluationRule).toContain("historical negate-versus-absolute-value mismatch");
+    expect(frasha?.openQuestions.some((question) => question.includes("negative numeral sign"))).toBe(true);
+    expect(frasha?.openQuestions.some((question) => question.includes("Boolean NOT"))).toBe(true);
+  });
+
   it("[OPC-008] keeps dimensional and evaluation rules explicitly non-executable", () => {
     for (const contract of operatorContracts) {
       expect(contract.dimensionalRule.length).toBeGreaterThan(0);
