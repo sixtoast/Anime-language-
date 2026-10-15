@@ -270,3 +270,8 @@ Added `SURF-020` to exercise all seven historical aliases across the parser's ex
 
 
 The first CI run including `SURF-020` (#309) confirms that the seven-alias conformance test passed, and the corrected `SURF-002` decimal-unit assertion also passed. The run still failed because `REG-003` had a stale expected count of 19 surface-parser tests after `SURF-020` increased the suite to 20; the test log reports 122 passed and one failed. Updated the registry integrity assertion to expect 20. The new run must verify that follow-up correction before the work is considered green.
+
+
+## Cross-entry-point historical alias conformance (2026-10-15)
+
+Added `CSV-006`, a dedicated lexicon CSV ingestion test for all seven Phase 5.5 historical alias mappings. It checks the explicit alias CSV loads seven distinct targets, each resolves to its recorded preferred form in the registry, and legacy forms remain absent from the canonical-form entry map. This complements `SURF-020`, which checks the surface parser's opt-in paths. Updated `REG-002`'s expected traceable test count and registered the new case. Both tests are authored; CI verification is pending. These fixtures are conformance checks for recovered historical records and existing opt-in plumbing, not canon promotion or a default parser behaviour change.
