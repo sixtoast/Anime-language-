@@ -18,7 +18,7 @@
 |---|---|---|---|---|
 | Surface syntax | Strongly head-initial; `HEAD + ARGUMENTS + MODIFIERS`; executable forms must have one recoverable parse | Current TypeScript parser is explicitly for Phase 2 audit notation `OP⟨arg1, arg2, …⟩`. Phase 6G describes a distinct surface-parser prototype | Recover the exact Phase 4 grammar text and compare its rules with the full Phase 6G source and fixtures; do not infer equivalence from shared operator names | Evidence recovery required |
 | Operator spellings and aliases | v3.0-L lists forms such as FRATA, FRAKA, DRIM, DRAL, GRAK and KWAK in its operator tables | Phase 5.5 alias records cite Phase 4 §5.1 and D-032 for FRATA→FRAJA, FRAKA→FRAMA, DRIM→DRUM, REN→BEN, GRAK→GRASH, KWAK→KWASH, DRAL→DRAS. Phase 6G has its own normalisation layer | Establish version/context for every mapping from the original decision source; label each as canonical, legacy alias, prototype-only, or unresolved | Owner/source reconciliation required |
-| Lexical classes and token boundaries | Canonical vocabulary is structured by semantic domain; canonical source says MA is metre, not SELF | v5 draft contains 255 structurally valid records, 247 distinct single-token forms after filtering and six non-atomic entries preserved separately. The v5 audit reports collisions for `re` and `ra` | Keep atomic and non-atomic forms separate until a grammar-aware rule establishes how each is consumed; decide homograph disambiguation from source evidence | Partially audited |
+| Lexical classes and token boundaries | Canonical vocabulary is structured by semantic domain; canonical source says MA is metre, not SELF | v5 draft contains 255 structurally valid records, 247 distinct single-token forms after filtering and six non-atomic entries preserved separately. Phase 5.20 consolidation evidence records `re = TARGET-surface` and `ra = TARGET-path` as declared slot-resolved Performed homophones, but full whole-spell parsing remains unrecovered; the v5 audit also reports collisions for `re` and `ra` | Keep atomic and non-atomic forms separate until a grammar-aware rule establishes how each is consumed; decide homograph disambiguation from source evidence | Partially audited |
 | Fixed arity and grouping | Core operators have fixed argument counts; precedence must not be relied on to resolve grouping | Current audit parser supports a limited set of registered arities in audit notation. Operator contract records leave some types and evaluation rules unresolved | Create a source-backed signature record per operator: spelling/version, arity, argument categories, result category, grouping rule, evidence and tests; do not fill unknown fields by analogy | Partially implemented |
 | Semantic types and evaluation | Canonical specification describes typed expressions and incompatible types requiring a defined operation or conversion | Current operator contracts and dimensional primitives are not a complete parsed-expression evaluator | Define the missing source-backed type/evaluation contracts first; then add rejection tests for unsupported combinations | Unresolved integration |
 | Physical quantities and units | Canonical table lists MA, SE, KE, RA and KU; property and value are distinct | TypeScript model represents an angle exponent but currently maps RA to dimensionless; archived Phase 6R uses an abstract L/M/T model and explicitly leaves canonical units unresolved | Record the chosen relationship between physical dimension and semantic angle typing before changing RA or derived-unit behaviour | Owner decision required |
@@ -35,7 +35,7 @@
 1. Obtain the exact Phase 4 grammar and decision sources cited by the alias registry.
 2. Compare the complete Phase 6G report, parser, lexicon CSV and fixture/test output against those sources.
 3. Produce a spelling lineage table with one row per operator or alias, preserving version and source context.
-4. Resolve the `re` and `ra` homographs without deleting either lexical record or inventing context rules.
+4. Reconcile the Phase 4 consolidation's declared slot-resolved Performed readings for `re`/`ra` with shared digit/unit readings in v3.0-L; do not claim full parser disambiguation or delete either lexical record.
 
 ### P1 — make confirmed grammar testable
 
@@ -52,7 +52,7 @@
 
 ## Current source-reconciliation artefact
 
-[Operator Spelling Lineage Audit 01](../research/operator-spelling-lineage-audit-01.md) transcribes the seven mappings recoverable from the indexed Phase 5.5 alias registry and compares them with v3.0-L. It records the historical registry claims without treating them as canon, and separates the `re`/`ra` lexicon collisions from operator aliases. The cited Phase 4 §5.1 and D-032/D-017 decision sources remain to be recovered in full.
+[Operator Spelling Lineage Audit 01](../research/operator-spelling-lineage-audit-01.md) transcribes the seven mappings recoverable from the indexed Phase 5.5 alias registry and compares them with v3.0-L. It records the historical registry claims without treating them as canon, and summarises the additional Phase 5.20 consolidation evidence on `re`/`ra` while preserving the gap between slot-resolved fixture checks and a complete parser. The cited Phase 4 §5.1 and D-032/D-017 decision sources remain to be recovered in full.
 
 ## Evidence references
 
