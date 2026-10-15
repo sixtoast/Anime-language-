@@ -34,7 +34,7 @@ describe("workbench test registry", () => {
 
   it("[REG-003] maps each provisional surface-parser test to its stable registry ID", () => {
     const surfaceTests = workbenchTests.filter((test) => test.group === "Surface parser");
-    expect(surfaceTests).toHaveLength(20);
+    expect(surfaceTests).toHaveLength(21);
     const source = readFileSync(resolve(process.cwd(), "src/engine/surfaceParser.test.ts"), "utf8");
     for (const test of surfaceTests) {
       expect(source).toContain(`[${test.id}] `);
