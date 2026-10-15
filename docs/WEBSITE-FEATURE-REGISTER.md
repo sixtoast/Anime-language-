@@ -235,3 +235,8 @@ Registered `WEB-DOC-REG-001`–`WEB-DOC-REG-009` under the **Documentation** Tes
 ### Source-backed Arcane grammar recovery matrix — 2026-10-15
 
 Added `docs/grammar/GRAMMAR-RECOVERY-MATRIX.md` and linked it from the grammar index. The matrix separates the v3.0-L canonical baseline from Phase 5/6 historical prototype claims and current TypeScript capability, then assigns acceptance gates across surface syntax, alias lineage, lexical collisions, fixed arity, semantic typing, units/angles, bindings, control blocks, numerals, registers and physical feasibility. It prioritises recovering the exact Phase 4/decision evidence and resolving the `re`/`ra` collisions before changing parser behaviour. The matrix is a recovery index, not a new specification; no language forms or canonical decisions were changed. Status: **Documentation added — source recovery and CI verification remain open**.
+
+
+## Language-development milestone — operator spelling lineage audit (2026-10-15)
+
+Added [Operator Spelling Lineage Audit 01](research/operator-spelling-lineage-audit-01.md), based on the searchable archive index and the imported v3.0-L specification. The audit records seven historical alias-registry mappings, explicitly documents the conflicts with the currently imported canonical spellings, and names the missing Phase 4 §5.1 / D-032 / D-017 evidence required to resolve them. It also separates the `re`/`ra` lexical collisions from operator aliases. **No language form or parser behaviour was changed.** This is a source-reconciliation milestone, not a canon decision or a test-pass claim.
