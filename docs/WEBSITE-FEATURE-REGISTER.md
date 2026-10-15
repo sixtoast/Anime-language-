@@ -245,3 +245,8 @@ Added [Operator Spelling Lineage Audit 01](research/operator-spelling-lineage-au
 ## Language-development milestone — FRASHA semantic recovery (2026-10-15)
 
 Added [Semantic Recovery Audit 01 — FRASHA and the runtime boundary](research/semantic-recovery-audit-01-frasha.md). It captures archived Phase 6J/6K/6L evidence for a historical negate-versus-absolute-value mismatch, distinguishes arithmetic negation from negative numeral syntax and Boolean NOT, and sets integration criteria without assuming historical runtime code exists in the current TypeScript workbench. No parser, evaluator, or canon changes were made.
+
+
+## Workbench implementation milestone — FRASHA caveat surfaced in operator registry (2026-10-15)
+
+The provisional `FRASHA` operator contract in `src/engine/operatorContracts.ts` now links the semantic recovery audit and explicitly reports that archived Phase 6J/6K/6L evidence flags a historical negate-versus-absolute-value mismatch. It also keeps the negative-numeral-sign distinction and separation from Boolean NOT (`GRASH`) as open questions. No evaluation rule was enabled and no canon was changed. Added `[OPC-009]` in `src/engine/operatorContracts.test.ts` and registered it in `src/engine/testRegistry.ts`. During this update, the missing comma between `OPC-008` and `SURF-001` registry entries was corrected so the registry array is syntactically valid. CI run [#296](https://github.com/sixtoast/Anime-language-/actions/runs/38734036890) was pending at the last check; do not treat the change as verified until it completes.
