@@ -25,7 +25,7 @@ describe("workbench test registry", () => {
 
   it("[REG-002] maps lexicon, fixture, workbench and documentation IDs to annotated source tests", () => {
     const traceableGroups = workbenchTests.filter((test) => test.group === "Lexicon" || test.group === "Fixture audit" || test.group === "Workbench integrity" || test.group === "Documentation");
-    expect(traceableGroups).toHaveLength(54);
+    expect(traceableGroups).toHaveLength(55);
     for (const test of traceableGroups) {
       const source = readFileSync(resolve(process.cwd(), test.file), "utf8");
       expect(source, test.id + " in " + test.file).toContain(`[${test.id}] `);
