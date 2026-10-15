@@ -230,3 +230,8 @@ Added stable IDs `EVID-001`–`EVID-006`, `RES-001`–`RES-004`, and `REG-001`�
 ### Documentation catalogue test mapping and completeness guard — 2026-10-15
 
 Registered `WEB-DOC-REG-001`–`WEB-DOC-REG-009` under the **Documentation** Test Suite filter, covering catalogue identity, provenance, search, filters and source-path safety. Extended registry integrity checks to verify the documentation annotations and added `REG-005`, which scans Vitest `.test.ts` files and requires each stable test ID to match the registry exactly. This closes the previously identified gap where all 119 unit-test annotations were recognised by the CI report publisher but nine documentation catalogue tests were not yet represented in the workbench registry. Current source inspection found 119 unique annotated cases before the new completeness safeguard; the latest code still requires CI verification. Status: **Implemented — verification pending**.
+
+
+### Source-backed Arcane grammar recovery matrix — 2026-10-15
+
+Added `docs/grammar/GRAMMAR-RECOVERY-MATRIX.md` and linked it from the grammar index. The matrix separates the v3.0-L canonical baseline from Phase 5/6 historical prototype claims and current TypeScript capability, then assigns acceptance gates across surface syntax, alias lineage, lexical collisions, fixed arity, semantic typing, units/angles, bindings, control blocks, numerals, registers and physical feasibility. It prioritises recovering the exact Phase 4/decision evidence and resolving the `re`/`ra` collisions before changing parser behaviour. The matrix is a recovery index, not a new specification; no language forms or canonical decisions were changed. Status: **Documentation added — source recovery and CI verification remain open**.
