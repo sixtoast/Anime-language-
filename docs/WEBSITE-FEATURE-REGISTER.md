@@ -275,3 +275,8 @@ The first CI run including `SURF-020` (#309) confirms that the seven-alias confo
 ## Cross-entry-point historical alias conformance (2026-10-15)
 
 Added `CSV-006`, a dedicated lexicon CSV ingestion test for all seven Phase 5.5 historical alias mappings. It checks the explicit alias CSV loads seven distinct targets, each resolves to its recorded preferred form in the registry, and legacy forms remain absent from the canonical-form entry map. This complements `SURF-020`, which checks the surface parser's opt-in paths. Updated `REG-002`'s expected traceable test count and registered the new case. Both tests are authored; CI verification is pending. These fixtures are conformance checks for recovered historical records and existing opt-in plumbing, not canon promotion or a default parser behaviour change.
+
+
+## Alias target integrity guard (2026-10-15)
+
+Added `LEXREG-008` and diagnostic `MISSING_ALIAS_TARGET`. An explicit historical alias whose preferred form is absent from the loaded single-token lexicon is now diagnosed and withheld from the alias map, instead of being exposed as a successful alias that resolves to a form with no lexical entry. This is a source-integrity guard, not a change to canonical spellings or the parser's default alias policy. The test registry count is updated; CI verification remains pending until the latest branch workflow completes.
