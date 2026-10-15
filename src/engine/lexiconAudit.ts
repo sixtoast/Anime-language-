@@ -44,11 +44,15 @@ export function auditLoadedLexicon(loaded: LoadedLexiconText): LexiconAuditRepor
     });
   }
   for (const diagnostic of loaded.registry.diagnostics) {
+    const isAliasTargetMissing = diagnostic.code === "MISSING_ALIAS_TARGET";
+    const isAliasConflict = diagnostic.code === "CONFLICTING_ALIAS_TARGETS";
     findings.push({
-      severity: diagnostic.code === "CONFLICTING_ALIAS_TARGETS" ? "error" : "warning",
-      code: diagnostic.code === "CONFLICTING_ALIAS_TARGETS"
-        ? "ALIAS_CONFLICT"
-        : diagnostic.code === "NON_ATOMIC_FORM" ? "NON_ATOMIC_FORM" : "REGISTRY_FILTER",
+      severity: isAliasTargetMissing || isAliasConflict ? "error" : "warning",
+      code: isAliasTargetMissing
+        ? "ALIAS_TARGET_MISSING"
+        : isAliasConflict
+          ? "ALIAS_CONFLICT"
+          : diagnostic.code === "NON_ATOMIC_FORM" ? "NON_ATOMIC_FORM" : "REGISTRY_FILTER",
       message: diagnostic.message,
       ...(diagnostic.form ? { form: diagnostic.form } : {})
     });
