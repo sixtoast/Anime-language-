@@ -50,6 +50,10 @@
 10. Cover ordinary conversation as well as technical and performed registers; do not let the executable subset stand in for the entire language.
 11. Measure lexical coverage and listener intelligibility instead of repeating unverified percentage estimates.
 
+## Current source-reconciliation artefact
+
+[Operator Spelling Lineage Audit 01](../research/operator-spelling-lineage-audit-01.md) transcribes the seven mappings recoverable from the indexed Phase 5.5 alias registry and compares them with v3.0-L. It records the historical registry claims without treating them as canon, and separates the `re`/`ra` lexicon collisions from operator aliases. The cited Phase 4 §5.1 and D-032/D-017 decision sources remain to be recovered in full.
+
 ## Evidence references
 
 - Canonical baseline: `docs/canon/arcane-language-v3.0-L.md`.
