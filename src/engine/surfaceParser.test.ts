@@ -154,6 +154,19 @@ describe("parseSurfaceExpression — provisional Phase 6G subset", () => {
     expect(parseSurfaceExpression("ren", { lexiconRegistry, allowLegacyAliases: true }).ast).toMatchObject({ kind: "atom", form: "BEN", lexicalClass: "GEOM" });
   });
 
+  it("[SURF-021] preserves original source spelling in alias-related diagnostics", () => {
+    const registry = buildLexiconRegistry(
+      [{ form: "fraja", gloss: "subtract", cls: "ARITH", note: "was frata" }],
+      { sourceLabel: "diagnostic provenance fixture", sourceVersion: "test-v1" }
+    );
+    const result = parseSurfaceExpression("FRATA ki sho to sho", { lexiconRegistry: registry });
+    expect(result.ok).toBe(false);
+    expect(result.diagnostics[0]).toMatchObject({
+      code: "UNRESOLVED_OPERATOR",
+      sourceToken: "FRATA"
+    });
+  });
+
   it("[SURF-018] rejects block delimiters outside a control form", () => {
     expect(parseSurfaceExpression("meto ki sho dogu").diagnostics[0]?.code).toBe("BLOCK_DELIMITER_OUTSIDE_CONTROL");
   });
