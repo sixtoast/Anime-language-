@@ -144,8 +144,8 @@ describe("parseSurfaceExpression — provisional Phase 6G subset", () => {
     expect(parseSurfaceExpression("frata ki sho to sho", { lexiconRegistry, allowLegacyAliases: true }).ast).toMatchObject({ operator: "FRAJA" });
     expect(parseSurfaceExpression("fraka ki sho to sho", { lexiconRegistry, allowLegacyAliases: true }).ast).toMatchObject({ operator: "FRAMA" });
     expect(parseSurfaceExpression("drim ki sho to sho", { lexiconRegistry, allowLegacyAliases: true }).ast).toMatchObject({ operator: "DRUM" });
-    expect(parseSurfaceExpression("dral ki sho to sho mu sho", { lexiconRegistry, allowLegacyAliases: true }).ast).toMatchObject({ operator: "DRAS" });
-    expect(parseSurfaceExpression("grak grash ki sho", { lexiconRegistry, allowLegacyAliases: true }).ast).toMatchObject({ operator: "GRASH" });
+    expect(parseSurfaceExpression("dral ki sho to sho gt", { lexiconRegistry, allowLegacyAliases: true }).ast).toMatchObject({ operator: "DRAS" });
+    expect(parseSurfaceExpression("grak ki sho", { lexiconRegistry, allowLegacyAliases: true }).ast).toMatchObject({ operator: "GRASH" });
     expect(parseSurfaceExpression("kwak ki sho", { lexiconRegistry, allowLegacyAliases: true }).ast).toMatchObject({ operator: "KWASH" });
     expect(parseSurfaceExpression("ren", { lexiconRegistry, allowLegacyAliases: true }).ast).toMatchObject({ kind: "atom", form: "BEN", lexicalClass: "GEOM" });
   });
