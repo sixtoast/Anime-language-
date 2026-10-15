@@ -167,6 +167,26 @@ describe("parseSurfaceExpression — provisional Phase 6G subset", () => {
     });
   });
 
+  it("[SURF-022] returns original and normalised token spellings for successful alias parses", () => {
+    const registry = buildLexiconRegistry(
+      [{ form: "fraja", gloss: "subtract", cls: "ARITH", note: "was frata" }],
+      { sourceLabel: "successful provenance fixture", sourceVersion: "test-v1" }
+    );
+    const result = parseSurfaceExpression("FRATA ki sho to sho", {
+      lexiconRegistry: registry,
+      allowLegacyAliases: true
+    });
+
+    expect(result.ok).toBe(true);
+    expect(result.tokenProvenance).toEqual([
+      { tokenIndex: 0, sourceToken: "FRATA", normalizedToken: "fraja" },
+      { tokenIndex: 1, sourceToken: "ki", normalizedToken: "ki" },
+      { tokenIndex: 2, sourceToken: "sho", normalizedToken: "sho" },
+      { tokenIndex: 3, sourceToken: "to", normalizedToken: "to" },
+      { tokenIndex: 4, sourceToken: "sho", normalizedToken: "sho" }
+    ]);
+  });
+
   it("[SURF-018] rejects block delimiters outside a control form", () => {
     expect(parseSurfaceExpression("meto ki sho dogu").diagnostics[0]?.code).toBe("BLOCK_DELIMITER_OUTSIDE_CONTROL");
   });
