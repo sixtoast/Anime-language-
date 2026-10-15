@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { getOperatorContract, operatorContracts, operatorContractPrinciples } from "./operatorContracts";
+import { parseAuditExpression } from "./auditParser";
 
 describe("Source-traceable operator contract registry", () => {
   it("[OPC-001] records only the nine provisional Phase 2 arities", () => {
@@ -52,6 +53,14 @@ describe("Source-traceable operator contract registry", () => {
     expect(frasha?.evaluationRule).toContain("historical negate-versus-absolute-value mismatch");
     expect(frasha?.openQuestions.some((question) => question.includes("negative numeral sign"))).toBe(true);
     expect(frasha?.openQuestions.some((question) => question.includes("Boolean NOT"))).toBe(true);
+  });
+
+  it("[OPC-010] confirms FRASHA audit parsing produces structure, not a computed value", () => {
+    const result = parseAuditExpression("FRASHA⟨KI⟩");
+    expect(result.ok).toBe(true);
+    expect(result.notation).toBe("phase-2-provisional");
+    expect(result.ast).toEqual({ kind: "call", operator: "FRASHA", args: [{ kind: "symbol", value: "KI" }] });
+    expect(result).not.toHaveProperty("value");
   });
 
   it("[OPC-008] keeps dimensional and evaluation rules explicitly non-executable", () => {
