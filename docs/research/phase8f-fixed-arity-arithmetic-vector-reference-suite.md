@@ -64,9 +64,9 @@ These cases are based on the inspected Phase 6G grammar. Expected shapes are des
 | AR-04 | `dran ki sho` | DRAN(quantity 1 SHO) | Scalar input is a valid magnitude operand |
 | AR-05 | `drem ki sho to sho` | DREM(quantity 1 SHO, quantity 2 SHO) | Scalars are valid vector operands; this is deliberately syntax-only |
 | AR-06 | `dras ki sho to sho gt` | DRAS(quantity 1 SHO, quantity 2 SHO, audit criterion GT) | GT is canonical Arcane vocabulary or comparison syntax |
-| AR-07 | `frapa frama ki sho to sho fraja mu sho za sho` with legacy aliases enabled | FRAPA(FRAMA(1,2), FRAJA(3,0)) | The alias spellings are preferred in every version or the arithmetic is type-valid |
+| AR-07 | `frapa fraka ki sho to sho frata mu sho za sho` with legacy aliases enabled | FRAPA(FRAMA(1,2), FRAJA(3,0)) | The alias spellings are preferred in every version or the arithmetic is type-valid |
 
-AR-07 is a prototype alias-path fixture. The input intentionally uses old spellings `frama` and `fraja` as preferred forms in the current prototype; alias-specific tests must instead supply legacy spellings `fraka` and `frata` with `allowLegacyAliases: true`. The two cases must not be conflated.
+AR-07 is the alias-path fixture: it supplies legacy spellings `fraka` and `frata` with `allowLegacyAliases: true`, and expects the resolved AST to use `FRAMA` and `FRAJA`. A separate fixture should verify the preferred spellings directly with aliases disabled. The two cases must not be conflated.
 
 ## 5. Negative and boundary fixtures
 
