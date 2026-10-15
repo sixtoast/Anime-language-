@@ -1,5 +1,9 @@
 # Arcane Phase 9G — bounded information-question placement decision and contrast pilot
 
+> **SUPERSESSION NOTICE — Modern Vernacular v1.0 (2026-10-15):** This document is retained as a research/history record. For the bounded Modern Vernacular core, the binding rules are now in [Arcane Modern Vernacular v1.0 — Locked Core Grammar](../canon/arcane-modern-vernacular-v1.0-locked-core.md). Where this document labels SVO, information-question placement, polar-question placement, or clause negation as provisional/open, the v1.0 specification supersedes that status for its defined scope. Historical claims, other verbs, other registers, and explicitly blocked constructions remain outside that lock. Do not copy older candidate rules over the locked specification.
+
+
+
 **Status:** Provisional Vernacular design proposal; not canon  
 **Date:** 2026-10-15  
 **Canon changes:** none  
