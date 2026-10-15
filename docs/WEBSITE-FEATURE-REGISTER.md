@@ -255,3 +255,8 @@ The provisional `FRASHA` operator contract in `src/engine/operatorContracts.ts` 
 ## FRASHA implementation inventory and structural-parser guard (2026-10-15)
 
 Added [FRASHA Current Workbench Implementation Inventory](research/frasha-current-workbench-inventory.md) after inspecting `operatorContracts.ts`, `auditParser.ts`, and `surfaceParser.ts`. The Phase 2 parser returns a structural call AST only; the Phase 6G prototype treats FRASHA as a unary operator and has no negative-prefix branch in its numeral routine. An integrated evaluator was not established by the inspected files, so the record avoids claiming no evaluator exists anywhere in the repository. Added `OPC-010` to verify that audit parsing yields an AST rather than a computed value, and registered it in the test catalogue. CI must confirm the new tests before they are marked verified.
+
+
+## Operator alias evidence chain strengthened (2026-10-15)
+
+Expanded `docs/research/operator-spelling-lineage-audit-01.md` after recovering the surrounding Phase 5.5/5.6 report excerpts from the archive index. The reconciliation report explicitly attributes seven legacy aliases to Phase 4 §5.1 and D-032; the Phase 5.6 report records 42/42 registry/lexicon consistency checks for each of v4 and v5 but cautions this does not prove parser/compiler integration. Static inspection now also documents the current TypeScript boundary: the CSV loader ingests explicit aliases, registry construction builds an alias map, and Phase 6G normalisation is opt-in. Canon and default parser behaviour remain unchanged.
