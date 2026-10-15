@@ -42,13 +42,13 @@ describe("workbench test registry", () => {
     }
   });
 
-  it("[REG-004] keeps the known decimal-with-unit failure visible as a registered case", () => {
+  it("[REG-004] keeps decimal-with-unit argument coverage registered", () => {
     const decimalCase = workbenchTests.find((test) => test.id === "SURF-002");
     expect(decimalCase).toMatchObject({
       group: "Surface parser",
       file: "src/engine/surfaceParser.test.ts"
     });
-    expect(decimalCase?.description).toMatch(/known failing regression/i);
+    expect(decimalCase?.description).toMatch(/second argument to FRAPA/i);
   });
 
   it("[REG-005] requires every Vitest test case to have exactly one registry entry", () => {
