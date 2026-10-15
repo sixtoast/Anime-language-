@@ -132,7 +132,7 @@ test.describe("Development Cockpit next-task evidence", () => {
     await expect(page.locator(".test-case").filter({ hasText: "LEX-001" })).toHaveCount(0);
     await page.getByLabel("Filter test group").getByRole("button", { name: "Documentation", exact: true }).click();
     await expect(page.locator(".test-case").filter({ hasText: "WEB-DOC-REG-001" })).toBeVisible();
-    await expect(page.locator(".test-case").filter({ hasText: "REG-001" })).toHaveCount(0);
+    await expect(page.locator(".test-case-title code").filter({ hasText: /^REG-001$/ })).toHaveCount(0);
   });
 
   test("shows individual outcomes only when both CI run ID and commit match", async ({ page }) => {
