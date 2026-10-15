@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { parseSurfaceExpression } from "./surfaceParser";
+import { buildLexiconRegistry, type LexiconRow } from "./lexiconRegistry";
 
 describe("parseSurfaceExpression — provisional Phase 6G subset", () => {
   it("[SURF-001] parses an integer numeral closed by a unit", () => {
@@ -115,6 +116,38 @@ describe("parseSurfaceExpression — provisional Phase 6G subset", () => {
       ok: true,
       ast: { kind: "call", operator: "FRAJA" }
     });
+  });
+
+  it("[SURF-020] resolves all seven historical aliases only through explicit opt-in paths", () => {
+    const rows: LexiconRow[] = [
+      { form: "fraja", gloss: "subtract", cls: "ARITH", note: "was frata" },
+      { form: "frama", gloss: "multiply", cls: "ARITH", note: "was fraka" },
+      { form: "drum", gloss: "cross product", cls: "VEC", note: "was drim" },
+      { form: "dras", gloss: "compare", cls: "COMP", note: "was dral" },
+      { form: "grash", gloss: "Boolean NOT", cls: "LOGIC", note: "was grak" },
+      { form: "kwash", gloss: "live evaluation", cls: "BIND", note: "was kwak" },
+      { form: "ben", gloss: "region", cls: "GEOM", note: "was ren" }
+    ];
+    const explicitAliases = [
+      { legacyForm: "frata", preferredForm: "fraja", evidence: "Phase 5.5 audit fixture" },
+      { legacyForm: "fraka", preferredForm: "frama", evidence: "Phase 5.5 audit fixture" },
+      { legacyForm: "drim", preferredForm: "drum", evidence: "Phase 5.5 audit fixture" },
+      { legacyForm: "dral", preferredForm: "dras", evidence: "Phase 5.5 audit fixture" },
+      { legacyForm: "grak", preferredForm: "grash", evidence: "Phase 5.5 audit fixture" },
+      { legacyForm: "kwak", preferredForm: "kwash", evidence: "Phase 5.5 audit fixture" },
+      { legacyForm: "ren", preferredForm: "ben", evidence: "Phase 5.5 audit fixture" }
+    ];
+    const lexiconRegistry = buildLexiconRegistry(rows, { sourceLabel: "alias conformance fixture", sourceVersion: "test-v1", explicitAliases });
+
+    expect(parseSurfaceExpression("frata ki sho to sho", { allowLegacyAliases: true }).ast).toMatchObject({ operator: "FRAJA" });
+    expect(parseSurfaceExpression("frata ki sho to sho", { lexiconRegistry }).diagnostics[0]?.code).toBe("UNRESOLVED_OPERATOR");
+    expect(parseSurfaceExpression("frata ki sho to sho", { lexiconRegistry, allowLegacyAliases: true }).ast).toMatchObject({ operator: "FRAJA" });
+    expect(parseSurfaceExpression("fraka ki sho to sho", { lexiconRegistry, allowLegacyAliases: true }).ast).toMatchObject({ operator: "FRAMA" });
+    expect(parseSurfaceExpression("drim ki sho to sho", { lexiconRegistry, allowLegacyAliases: true }).ast).toMatchObject({ operator: "DRUM" });
+    expect(parseSurfaceExpression("dral ki sho to sho mu sho", { lexiconRegistry, allowLegacyAliases: true }).ast).toMatchObject({ operator: "DRAS" });
+    expect(parseSurfaceExpression("grak grash ki sho", { lexiconRegistry, allowLegacyAliases: true }).ast).toMatchObject({ operator: "GRASH" });
+    expect(parseSurfaceExpression("kwak ki sho", { lexiconRegistry, allowLegacyAliases: true }).ast).toMatchObject({ operator: "KWASH" });
+    expect(parseSurfaceExpression("ren", { lexiconRegistry, allowLegacyAliases: true }).ast).toMatchObject({ kind: "atom", form: "BEN", lexicalClass: "GEOM" });
   });
 
   it("[SURF-018] rejects block delimiters outside a control form", () => {
