@@ -65,3 +65,8 @@
 ## Completion criteria
 
 This recovery phase is complete only when each P0 spelling/grammar question has either (a) a source-backed resolution recorded in the decision workflow, or (b) a precisely scoped unresolved decision with the missing evidence named. A prototype test passing is not itself a language decision. No canonical rule changes as a side effect of this matrix.
+
+
+## Semantic recovery follow-up — FRASHA (2026-10-15)
+
+The archived Phase 6J/6K/6L records identify a historical FRASHA mismatch: the recovered gloss is arithmetic negate, while Phase 6H was reported to implement absolute value. The Phase 6K examples test a reference contract, not an integrated parser/evaluator. See [Semantic Recovery Audit 01 — FRASHA and the runtime boundary](../research/semantic-recovery-audit-01-frasha.md). Before any code change, inspect the current TypeScript workbench paths and resolve the separate negative-numeral-sign syntax question. No canon or runtime behaviour changed.
