@@ -90,4 +90,25 @@ describe("source-aware provisional lexicon registry", () => {
     expect(lexicon.aliases.get("ren")?.preferredForm).toBe("ben");
     expect(lexicon.aliases.get("ren")?.evidence).toContain("Phase 5.5 alias registry");
   });
+  it("[LEXREG-008] rejects an alias whose preferred form is absent from the loaded lexicon", () => {
+    const lexicon = buildLexiconRegistry(
+      [{ form: "fraja", gloss: "subtract", cls: "ARITH" }],
+      {
+        sourceLabel: "incomplete alias fixture",
+        sourceVersion: "fixture-v2",
+        explicitAliases: [{ legacyForm: "frata", preferredForm: "missing-form", evidence: "test decision record" }]
+      }
+    );
+    expect(lexicon.aliases.has("frata")).toBe(false);
+    expect(lexicon.diagnostics).toContainEqual(expect.objectContaining({
+      code: "MISSING_ALIAS_TARGET",
+      form: "frata"
+    }));
+    expect(resolveLexiconForm(lexicon, "frata", { allowLegacyAliases: true })).toMatchObject({
+      inputForm: "frata",
+      resolvedForm: "frata"
+    });
+  });
+
+
 });
