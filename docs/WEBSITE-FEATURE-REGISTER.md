@@ -166,3 +166,127 @@ A Playwright browser suite is now part of CI for the Documentation catalogue. It
 ### Browser finding — mobile overflow (2026-10-14)
 
 Playwright run #186 found that the Documentation view exceeded a 360px viewport by 19px. The responsive source-list/detail layout has been changed to a single column at the mobile breakpoint. The fix remains Implemented — unverified until the strict 360px browser assertion passes on a recorded commit.
+
+### Evidence-aware Development Cockpit recommendation — 2026-10-14
+
+The Overview recommendation now derives its next action from the actual `Run website browser acceptance` step in the latest loaded CI run. A successful browser step advances the recommendation to shared source/research/fixture/test references (WEB-SH-01 / WEB-SH-02); a failed step keeps browser acceptance blocking; loading, missing, unavailable, skipped, or cancelled evidence cannot be interpreted as success. The card links to the exact latest CI run and displays its derived state. Added browser tests for successful, failed, and cancelled browser-step outcomes. This change is **Implemented — unverified** until CI executes the build and browser tests for its commit.
+
+### Mobile overflow follow-up — CI run #188 (2026-10-14)
+
+CI confirmed the first responsive-layout adjustment did not remove the 19px overflow: the page still measured 379px at a 360px viewport. The browser run also confirmed all three new Development Cockpit recommendation tests pass. A follow-up CSS fix now hides the nonessential specification-version chip at viewports up to 420px so the mobile top bar can fit its navigation and search controls. The strict 360px assertion remains unchanged; rerun CI before treating the fix as successful.
+
+### Shared evidence-chain explorer — 2026-10-14
+
+Added an initial, explicitly curated evidence-chain explorer to Research & Review. It currently links three known areas: provisional operator arity (LAN-005/LAN-006), dimensional primitives (LAN-010/LAN-011), and the recovered Phase 6G fixture-observation workflow. Each chain connects only repository paths and relationships that were checked against existing records, includes stable IDs where available, and carries a scope caveat. The explorer explicitly states that the graph is incomplete and that links do not prove implementation completeness or test success. Added integrity tests for stable IDs, duplicate/missing relationship detection and caveat presence, plus browser tests for visible chains, key links, and 360px overflow. Status: **Implemented — unverified** pending CI for this branch.
+
+### Evidence-chain browser-test adjustment — 2026-10-14
+
+The first browser run for the evidence-chain explorer confirmed the production build and existing seven browser checks, but the two new explorer checks timed out before reaching the content because the test required an exact accessible name that did not match the sidebar navigation button (which includes its navigation count). The selector now scopes to the sidebar and matches the navigation label. This is a test-harness correction, not a product acceptance pass; rerun CI on the corrected test commit before upgrading status.
+
+### Evidence-chain mobile acceptance follow-up — 2026-10-14
+
+The first corrected run confirms the explorer's three-chain rendering test passes and the production build passes. Its 360px test still timed out because it was using a navigation interaction that was not available in that mobile state. The test now follows the same working overview feature-card route as the desktop test before measuring document width. CI run #205 is checking this adjustment. The existing decimal-with-unit parser unit test remains the only reported unit failure; no Arcane parser behaviour was changed as part of this website work.
+
+### Rule impact filtering in shared evidence explorer — 2026-10-14
+
+Added a rule-ID selector to Research & Review. Selecting a mapped rule narrows the visible evidence chains to records explicitly associated with that rule, summarises the number of related chains and linked record references by record kind, and offers a clear-filter action. This is curated traceability, not automatic dependency discovery: only currently documented relationships appear, and unlinked or unrepresented dependencies remain possible. The selector is responsive at narrow viewports. Browser acceptance now exercises rule selection, chain filtering, and reset. Status: **Implemented — unverified** pending CI on this change.
+
+### Documentation-to-evidence navigation — 2026-10-14
+
+Documentation detail panels now show related curated evidence chains when the selected entry's source path exactly matches a node in the shared evidence model. A direct action opens Research & Review focused on that chain, with a clear return to all chains. The rule selector clears a focused-source view when the user chooses a rule, avoiding conflicting filters. Entries without a mapped chain do not show a fabricated relationship. Browser acceptance covers the source-to-chain path and restoring the full view. Status: **Implemented — unverified** pending CI.
+
+### Strict per-test report freshness gate — 2026-10-14
+
+The Test Suite and Development Cockpit now accept per-test statuses only when the published report's commit SHA and CI run ID match the latest main-branch CI run loaded by the page. When either differs, the stored report is labelled stale, per-test statuses and durations are withheld, and rows show STALE REPORT rather than reusing old pass/fail outcomes. The report metadata displays both the report run and the latest CI run. Browser tests cover both a matching report and a deliberately stale report. This is still bounded to the latest run represented by the existing GitHub API response; it is not a full historical run selector. Status: **Implemented — verification pending for latest commit**.
+
+### Curated research record register — 2026-10-14
+
+Research & Review now includes three source-backed records with stable IDs: the Phase 6G RE/RA historical-behaviour discrepancy, unresolved operator semantics, and the dimensional-primitives integration gap. Each record states its source path, status, next evidence action, and explicit interpretation caveat. The RE/RA record links the existing P6G-FX-011 and P6G-FX-012 fixture IDs; each record can focus its linked evidence chain when one is documented. These are unresolved research records, not approved language decisions. Unit tests validate stable IDs, source existence, fixture existence, caveats, and known chain references; browser acceptance covers the record-to-chain workflow. Status: **Implemented — verification pending for latest commit**.
+
+### Side-by-side historical/current fixture observations — 2026-10-14
+
+The RE/RA discrepancy record now renders the preserved inputs for P6G-FX-011 and P6G-FX-012 alongside the fixture expectation, current TypeScript parser observation, and historical behaviour recorded by source inspection. The display labels the current result as a live parser observation and clearly warns that archived Python behaviour has not been freshly executed. It also shows each observation's comparison classification and interpretation note. Browser acceptance checks both inputs and the distinct current/historical outcomes. This makes the discrepancy actionable without changing fixture expectations, parser semantics, or canon. Status: **Implemented — verification pending for latest commit**.
+
+### Repository-level test discovery correction — 2026-10-14
+
+A verification audit found that Vitest was configured to discover only `src/**/*.test.ts`, so repository-level integrity tests under `tests/` were not included in the unit run. The Vitest include list now also covers `tests/**/*.test.ts`, activating the evidence-chain and research-record integrity suites rather than leaving them present but unexecuted. Browser specs remain under `tests/browser/*.spec.ts` and are handled by Playwright separately. This is a test-discovery correction, not a relaxation of assertions. Status: **Implemented — verification pending for latest commit**.
+
+### Stable Phase 6G surface-parser test traceability — 2026-10-14
+
+Added stable IDs `SURF-001` through `SURF-019` to the provisional surface-parser regression tests and registered each case in `src/engine/testRegistry.ts`. The Test Suite now has a dedicated **Surface parser** filter; the CI summary publisher recognises `SURF-*` IDs; and a browser acceptance test checks that a run-matched `SURF-002` failure is displayed on the correct case with its duration, without leaking into other groups. Repository-level tests check unique registry IDs, source-path existence, all 19 source annotations, and the known decimal-with-unit case's explicit registration. This improves traceability only; it does not change parser behaviour or convert authored tests into passing results. Status: **Implemented — verification pending for latest commit**.
+
+### Visible unmapped test results — 2026-10-14
+
+The Test Suite now renders current-run `UNMAPPED` test results in a dedicated traceability-gap section beneath the stable registry. Each row retains its actual result, duration, source file and source link. The section is only shown when the report matches the latest CI run by both commit and run ID; stale reports remain withheld. The existing test search also filters these rows. Browser acceptance now verifies that a passing unmapped result remains visible beside the stable `SURF-002` failure. The Surface parser group is included in the state type as well as the rendered filter, preventing a UI/type mismatch. This does not relabel unmapped results as registry cases; it makes the mapping gap inspectable. Status: **Implemented — verification pending for latest commit**.
+
+### Lexicon and fixture-audit result mapping — 2026-10-15
+
+Expanded stable test identity to 31 additional cases: `LEX-001`–`LEX-006`, `LEXAUD-001`–`LEXAUD-003`, `CSV-001`–`CSV-005`, `LEXREG-001`–`LEXREG-007`, and `FIX-001`–`FIX-010`. The CI summary publisher recognises these IDs; the Test Suite exposes dedicated **Lexicon** and **Fixture audit** filters; registry integrity tests ensure every added ID is present in its source test; and browser coverage checks that run-matched outcomes appear in the correct group. These IDs describe implementation and evidence checks only and do not promote source lexicon content or fixture expectations to canon. Status: **Implemented — verification pending for latest commit**.
+
+### Evidence, research and registry integrity result mapping — 2026-10-15
+
+Added stable IDs `EVID-001`–`EVID-006`, `RES-001`–`RES-004`, and `REG-001`–`REG-004` to the repository-level evidence-chain, research-register and test-registry checks. The CI summary mapper recognises these prefixes, and the Test Suite exposes a **Workbench integrity** filter for the related registry records. Registry integrity coverage now verifies that lexicon, fixture-audit and workbench-integrity IDs are present in their source test annotations. Browser acceptance verifies that run-matched results appear in the correct Lexicon, Fixture audit and Workbench integrity groups. Status: **Implemented — verification pending for latest commit**.
+
+### Documentation catalogue test mapping and completeness guard — 2026-10-15
+
+Registered `WEB-DOC-REG-001`–`WEB-DOC-REG-009` under the **Documentation** Test Suite filter, covering catalogue identity, provenance, search, filters and source-path safety. Extended registry integrity checks to verify the documentation annotations and added `REG-005`, which scans Vitest `.test.ts` files and requires each stable test ID to match the registry exactly. This closes the previously identified gap where all 119 unit-test annotations were recognised by the CI report publisher but nine documentation catalogue tests were not yet represented in the workbench registry. Current source inspection found 119 unique annotated cases before the new completeness safeguard; the latest code still requires CI verification. Status: **Implemented — verification pending**.
+
+
+### Source-backed Arcane grammar recovery matrix — 2026-10-15
+
+Added `docs/grammar/GRAMMAR-RECOVERY-MATRIX.md` and linked it from the grammar index. The matrix separates the v3.0-L canonical baseline from Phase 5/6 historical prototype claims and current TypeScript capability, then assigns acceptance gates across surface syntax, alias lineage, lexical collisions, fixed arity, semantic typing, units/angles, bindings, control blocks, numerals, registers and physical feasibility. It prioritises recovering the exact Phase 4/decision evidence and resolving the `re`/`ra` collisions before changing parser behaviour. The matrix is a recovery index, not a new specification; no language forms or canonical decisions were changed. Status: **Documentation added — source recovery and CI verification remain open**.
+
+
+## Language-development milestone — operator spelling lineage audit (2026-10-15)
+
+Added [Operator Spelling Lineage Audit 01](research/operator-spelling-lineage-audit-01.md), based on the searchable archive index and the imported v3.0-L specification. The audit records seven historical alias-registry mappings, explicitly documents the conflicts with the currently imported canonical spellings, and names the missing Phase 4 §5.1 / D-032 / D-017 evidence required to resolve them. It also separates the `re`/`ra` lexical collisions from operator aliases. **No language form or parser behaviour was changed.** This is a source-reconciliation milestone, not a canon decision or a test-pass claim.
+
+
+## Language-development milestone — FRASHA semantic recovery (2026-10-15)
+
+Added [Semantic Recovery Audit 01 — FRASHA and the runtime boundary](research/semantic-recovery-audit-01-frasha.md). It captures archived Phase 6J/6K/6L evidence for a historical negate-versus-absolute-value mismatch, distinguishes arithmetic negation from negative numeral syntax and Boolean NOT, and sets integration criteria without assuming historical runtime code exists in the current TypeScript workbench. No parser, evaluator, or canon changes were made.
+
+
+## Workbench implementation milestone — FRASHA caveat surfaced in operator registry (2026-10-15)
+
+The provisional `FRASHA` operator contract in `src/engine/operatorContracts.ts` now links the semantic recovery audit and explicitly reports that archived Phase 6J/6K/6L evidence flags a historical negate-versus-absolute-value mismatch. It also keeps the negative-numeral-sign distinction and separation from Boolean NOT (`GRASH`) as open questions. No evaluation rule was enabled and no canon was changed. Added `[OPC-009]` in `src/engine/operatorContracts.test.ts` and registered it in `src/engine/testRegistry.ts`. During this update, the missing comma between `OPC-008` and `SURF-001` registry entries was corrected so the registry array is syntactically valid. CI run [#296](https://github.com/sixtoast/Anime-language-/actions/runs/38734036890) was pending at the last check; do not treat the change as verified until it completes.
+
+
+## FRASHA implementation inventory and structural-parser guard (2026-10-15)
+
+Added [FRASHA Current Workbench Implementation Inventory](research/frasha-current-workbench-inventory.md) after inspecting `operatorContracts.ts`, `auditParser.ts`, and `surfaceParser.ts`. The Phase 2 parser returns a structural call AST only; the Phase 6G prototype treats FRASHA as a unary operator and has no negative-prefix branch in its numeral routine. An integrated evaluator was not established by the inspected files, so the record avoids claiming no evaluator exists anywhere in the repository. Added `OPC-010` to verify that audit parsing yields an AST rather than a computed value, and registered it in the test catalogue. CI must confirm the new tests before they are marked verified.
+
+
+## Operator alias evidence chain strengthened (2026-10-15)
+
+Expanded `docs/research/operator-spelling-lineage-audit-01.md` after recovering the surrounding Phase 5.5/5.6 report excerpts from the archive index. The reconciliation report explicitly attributes seven legacy aliases to Phase 4 §5.1 and D-032; the Phase 5.6 report records 42/42 registry/lexicon consistency checks for each of v4 and v5 but cautions this does not prove parser/compiler integration. Static inspection now also documents the current TypeScript boundary: the CSV loader ingests explicit aliases, registry construction builds an alias map, and Phase 6G normalisation is opt-in. Canon and default parser behaviour remain unchanged.
+
+
+## Decimal-with-unit CI failure root cause identified (2026-10-15)
+
+The CI log for run #301 showed that `SURF-002` did not fail because the parser rejected the decimal or explicit unit. The returned AST contained the expected first argument (`0.2 MA`) and the second FRAPA argument (`1 SHO`); the test expectation listed only one item in the binary operator's `args` array. The regression assertion has been corrected to assert both arguments, and the test registry / `REG-004` integrity check now describe the actual coverage rather than calling this a known parser failure. This is an evidence-backed test correction, not a parser semantic change. The latest CI run for the updated test remains pending at time of this note.
+
+Added `SURF-020` to exercise all seven historical aliases across the parser's explicit opt-in paths, including the registry-backed `REN → BEN` case. This is a conformance fixture for the current provisional parser and alias evidence, not a change to default alias handling or canonical language policy. Await CI before marking it verified.
+
+
+The first CI run including `SURF-020` (#309) confirms that the seven-alias conformance test passed, and the corrected `SURF-002` decimal-unit assertion also passed. The run still failed because `REG-003` had a stale expected count of 19 surface-parser tests after `SURF-020` increased the suite to 20; the test log reports 122 passed and one failed. Updated the registry integrity assertion to expect 20. The new run must verify that follow-up correction before the work is considered green.
+
+
+## Cross-entry-point historical alias conformance (2026-10-15)
+
+Added `CSV-006`, a dedicated lexicon CSV ingestion test for all seven Phase 5.5 historical alias mappings. It checks the explicit alias CSV loads seven distinct targets, each resolves to its recorded preferred form in the registry, and legacy forms remain absent from the canonical-form entry map. This complements `SURF-020`, which checks the surface parser's opt-in paths. Updated `REG-002`'s expected traceable test count and registered the new case. Both tests are authored; CI verification is pending. These fixtures are conformance checks for recovered historical records and existing opt-in plumbing, not canon promotion or a default parser behaviour change.
+
+
+## Alias target integrity guard (2026-10-15)
+
+Added `LEXREG-008` and diagnostic `MISSING_ALIAS_TARGET`. An explicit historical alias whose preferred form is absent from the loaded single-token lexicon is now diagnosed and withheld from the alias map, instead of being exposed as a successful alias that resolves to a form with no lexical entry. This is a source-integrity guard, not a change to canonical spellings or the parser's default alias policy. The test registry count is updated; CI verification remains pending until the latest branch workflow completes.
+
+
+## Surface diagnostic source-spelling provenance (2026-10-15)
+
+Added optional `sourceToken` to provisional surface-parser diagnostics and retain the original token sequence separately from the normalised parse tokens. This allows failures after alias normalisation to report the spelling the author actually entered, while `token`/message continue to describe the parser's resolved view. Added `SURF-021` regression coverage for uppercase `FRATA` when the registry is present but alias resolution is not enabled, and updated the parser test-count integrity assertion to 21. Successful ASTs still do not carry full token provenance; that is a separate, broader source-map design question and has not been implied by this change.
+## Alias target audit consistency and successful-parse provenance (2026-10-15)
+
+The new MISSING_ALIAS_TARGET registry guard initially exposed a reporting gap: invalid aliases were correctly withheld from the alias map, but the lexicon audit only inspected registered aliases and therefore stopped surfacing its established ALIAS_TARGET_MISSING finding. The audit now translates the registry diagnostic into an error finding, keeping parser-experiment readiness blocked and preserving the audit's prior user-facing contract.
+
+Successful provisional surface parses now also return tokenProvenance, an ordered list containing each token's index, exact source spelling, and normalised token. SURF-022 verifies that FRATA remains visible as the source spelling while its explicitly enabled alias-normalised form is fraja. This is token-level lineage only: it does not claim character offsets, AST-node source spans, or complete editor-grade source maps. Alias resolution remains opt-in, and no canonical vocabulary or language semantics changed.

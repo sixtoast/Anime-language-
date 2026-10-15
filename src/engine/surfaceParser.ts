@@ -36,12 +36,22 @@ export interface SurfaceDiagnostic {
   message: string;
   tokenIndex: number;
   token?: string;
+  /** Original source spelling at tokenIndex, retained even when aliases are normalised. */
+  sourceToken?: string;
+}
+
+export interface SurfaceTokenProvenance {
+  tokenIndex: number;
+  sourceToken: string;
+  normalizedToken: string;
 }
 
 export interface SurfaceParseResult {
   ok: boolean;
   notation: "phase-6g-provisional";
   ast?: SurfaceNode;
+  /** Token-level spelling lineage for successful parses; this is not a source-span map for AST nodes. */
+  tokenProvenance?: SurfaceTokenProvenance[];
   diagnostics: SurfaceDiagnostic[];
 }
 
@@ -88,18 +98,30 @@ class ParseFailure extends Error {
 
 class Parser {
   private readonly tokens: string[];
+  private readonly sourceTokens: string[];
   private cursor = 0;
   private readonly knownAtoms: Set<string>;
   private readonly lexiconRegistry?: LexiconRegistry;
 
   constructor(input: string, options: SurfaceParserOptions) {
-    this.tokens = input.trim() ? input.trim().split(/\s+/).map((token) => {
+    this.sourceTokens = input.trim() ? input.trim().split(/\s+/) : [];
+    this.tokens = this.sourceTokens.map((token) => {
       const lowered = token.toLowerCase();
       if (options.lexiconRegistry) return resolveLexiconForm(options.lexiconRegistry, lowered, { allowLegacyAliases: options.allowLegacyAliases }).resolvedForm;
       return options.allowLegacyAliases === true ? (LEGACY_ALIASES[lowered] ?? lowered) : lowered;
-    }) : [];
+    });
     this.knownAtoms = new Set((options.knownAtoms ?? []).map((atom) => atom.toLowerCase()));
     this.lexiconRegistry = options.lexiconRegistry;
+  }
+
+  sourceTokenAt(index: number): string | undefined { return this.sourceTokens[index]; }
+
+  tokenProvenance(): SurfaceTokenProvenance[] {
+    return this.sourceTokens.map((sourceToken, tokenIndex) => ({
+      tokenIndex,
+      sourceToken,
+      normalizedToken: this.tokens[tokenIndex]
+    }));
   }
 
   private peek(): string | undefined { return this.tokens[this.cursor]; }
@@ -266,15 +288,16 @@ class Parser {
 }
 
 export function parseSurfaceExpression(input: string, options: SurfaceParserOptions = {}): SurfaceParseResult {
+  const parser = new Parser(input, options);
   try {
-    const ast = new Parser(input, options).parseAll();
-    return { ok: true, notation: "phase-6g-provisional", ast, diagnostics: [] };
+    const ast = parser.parseAll();
+    return { ok: true, notation: "phase-6g-provisional", ast, tokenProvenance: parser.tokenProvenance(), diagnostics: [] };
   } catch (error) {
     if (error instanceof ParseFailure) {
       return {
         ok: false,
         notation: "phase-6g-provisional",
-        diagnostics: [{ code: error.code, message: error.message, tokenIndex: error.tokenIndex, ...(error.token === undefined ? {} : { token: error.token }) }]
+        diagnostics: [{ code: error.code, message: error.message, tokenIndex: error.tokenIndex, ...(error.token === undefined ? {} : { token: error.token }), ...(parser.sourceTokenAt(error.tokenIndex) === undefined ? {} : { sourceToken: parser.sourceTokenAt(error.tokenIndex) }) }]
       };
     }
     return {

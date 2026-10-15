@@ -38,7 +38,16 @@ export const operatorContracts: readonly OperatorContract[] = [
     ["FRAPA", "add", 2], ["FRATA", "subtract", 2], ["FRAKA", "multiply", 2],
     ["FRALA", "divide", 2], ["FRASHA", "negate", 1], ["DRAN", "magnitude", 1],
     ["DREM", "dot product", 2], ["DRIM", "cross product", 2], ["DRAL", "compare", 3]
-  ].map(([operator, label, arity]) => provisional(String(operator), String(label), Number(arity))),
+  ].map(([operator, label, arity]) => {
+    const contract = provisional(String(operator), String(label), Number(arity));
+    if (String(operator) !== "FRASHA") return contract;
+    return {
+      ...contract,
+      source: [...contract.source, "docs/research/semantic-recovery-audit-01-frasha.md", "Archived Phase 6J/6K/6L reports (historical evidence only)"],
+      evaluationRule: "Not executable: archived Phase 6J/6K/6L reports flag a historical negate-versus-absolute-value mismatch; current runtime behaviour has not been established by this metadata.",
+      openQuestions: [...contract.openQuestions, "Resolve whether FRASHA as a negative numeral sign is distinct from unary operator syntax.", "Verify current TypeScript implementation paths before proposing a runtime change.", "Keep arithmetic negation separate from Boolean NOT (GRASH)."]
+    };
+  }),
   {
     operator: "SIMA", label: "measure", arity: null,
     arityStatus: "canon-described-incomplete",

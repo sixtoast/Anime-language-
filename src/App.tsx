@@ -10,6 +10,8 @@ import { workbenchTests } from "./engine/testRegistry";
 import { canonAuditItems, auditReadinessLabels } from "./engine/canonAuditRegistry";
 import phase6gFixtureData from "../tests/fixtures/phase6g-surface-parser-cases.json";
 import { auditPhase6GFixtures, type Phase6GFixture } from "./engine/phase6gFixtureAudit";
+import { evidenceChains } from "./evidenceLinks";
+import { researchRecords } from "./researchRecords";
 
 type Section = "Overview" | "Documentation" | "Playground" | "Test suite" | "Research & review";
 
@@ -69,7 +71,9 @@ function App() {
   const [mobileNav, setMobileNav] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState(docs[0].title);
   const [testQuery, setTestQuery] = useState("");
-  const [testGroup, setTestGroup] = useState<"All" | "Parser" | "Dimensions" | "Semantic types" | "Operator contracts">("All");
+  const [testGroup, setTestGroup] = useState<"All" | "Parser" | "Surface parser" | "Dimensions" | "Semantic types" | "Operator contracts" | "Lexicon" | "Fixture audit" | "Workbench integrity" | "Documentation">("All");
+  const [impactRule, setImpactRule] = useState("All");
+  const [focusedEvidenceChainId, setFocusedEvidenceChainId] = useState<string | null>(null);
   const [workflowRuns, setWorkflowRuns] = useState<WorkflowRun[]>([]);
   const [workflowJobs, setWorkflowJobs] = useState<WorkflowJob[]>([]);
   const [workflowLoading, setWorkflowLoading] = useState(true);
@@ -124,13 +128,86 @@ function App() {
   }, []);
 
   const latestCiRun = workflowRuns.find((run) => run.name === "CI") ?? workflowRuns[0];
+  const registryReportMatchesLatestRun = Boolean(registryResults && latestCiRun && registryResults.commit === latestCiRun.head_sha && registryResults.runId === String(latestCiRun.id));
+  const reportTestResults = registryReportMatchesLatestRun ? registryResults?.tests ?? [] : [];
   const latestBuildStep = workflowJobs
     .flatMap((job) => job.steps ?? [])
     .find((step) => /type-check and build/i.test(step.name));
+  const latestBrowserStep = workflowJobs
+    .flatMap((job) => job.steps ?? [])
+    .find((step) => /run website browser acceptance/i.test(step.name));
+  const browserAcceptanceState = workflowError || !latestCiRun
+    ? "unavailable"
+    : workflowLoading
+      ? "loading"
+      : !latestBrowserStep
+        ? "missing"
+        : latestBrowserStep.status !== "completed"
+          ? "running"
+          : latestBrowserStep.conclusion === "success"
+            ? "passed"
+            : latestBrowserStep.conclusion === "failure"
+              ? "failed"
+              : "inconclusive";
+  const nextTask = browserAcceptanceState === "passed"
+    ? {
+        id: "WEB-SH-01 / WEB-SH-02",
+        title: "Connect source, research and fixture evidence",
+        priority: "NEXT BUILD PHASE",
+        summary: "Browser acceptance passed for the latest CI run. Move forward to the shared-record foundation: connect known source, research, fixture and test references without inventing relationships.",
+        reason: "This advances the next major product capability after the catalogue acceptance gate. Shared links will let a reviewer follow evidence across sections and expose unknown relationships honestly.",
+        dependencies: "Stable IDs already present in the catalogue, fixture records and test registry; add only grounded relationships.",
+        files: "src/documentationCatalogue.ts, src/engine/testRegistry.ts, tests/fixtures/, docs/research/, and a small shared relationship module.",
+        acceptance: "At least one end-to-end source-to-research/fixture/test chain is navigable; links are evidence-backed; missing links are labelled unknown; tests cover the relationship data.",
+        primaryAction: "Open research & review",
+        primarySection: "Research & review" as Section
+      }
+    : browserAcceptanceState === "failed"
+      ? {
+          id: "WEB-DOC-03",
+          title: "Resolve browser acceptance failures",
+          priority: "BLOCKING",
+          summary: "The latest CI run reports a failed browser-acceptance step. Inspect its exact failing assertion and trace before changing the implementation; keep the strict viewport and interaction checks intact.",
+          reason: "The documentation catalogue must pass its real-browser acceptance checks before we treat the source-library experience as verified or move the release gate forward.",
+          dependencies: "Latest CI run and its browser-acceptance logs; current catalogue implementation.",
+          files: "src/App.tsx, src/documentationCatalogue.ts, src/styles.css, and tests/browser/.",
+          acceptance: "The failing browser assertion is reproduced and fixed; filtering, empty-state recovery, source links and 360px layout all pass in the same recorded run.",
+          primaryAction: "Inspect source library",
+          primarySection: "Documentation" as Section
+        }
+      : {
+          id: "WEB-DOC-03",
+          title: browserAcceptanceState === "running" || browserAcceptanceState === "loading"
+            ? "Confirm browser acceptance for the current run"
+            : "Recover trustworthy browser acceptance evidence",
+          priority: "VERIFICATION GATE",
+          summary: browserAcceptanceState === "running"
+            ? "The browser-acceptance step is still running. Its outcome is not known yet; wait for the completed step result before deciding whether to fix or close this task."
+            : browserAcceptanceState === "loading"
+              ? "Live workflow data is refreshing. No recommendation is treated as verified until the current run and browser step are available."
+              : browserAcceptanceState === "missing"
+                ? "The latest run did not expose a browser-acceptance step. Inspect the workflow configuration and run details before inferring that the browser checks passed or failed."
+                : browserAcceptanceState === "inconclusive"
+                  ? "The browser-acceptance step did not finish with a clear success or failure conclusion. Inspect the run details; skipped or cancelled is not a pass."
+                  : "Live browser-acceptance evidence is unavailable. Refresh the workflow data or open GitHub Actions directly; do not infer a pass from deployment readiness.",
+          reason: "The 360px mobile assertion previously exposed horizontal overflow. The fix must be confirmed by the actual browser run, not by a successful deployment or build alone.",
+          dependencies: "A completed CI run for the current main-branch commit and the actual browser-acceptance step result.",
+          files: "src/App.tsx, src/styles.css, tests/browser/, and .github/workflows/ci.yml if the step is absent.",
+          acceptance: "The browser step has an explicit successful conclusion for a recorded commit, including filter/reset, empty-state recovery, all source links and the strict 360px viewport check.",
+          primaryAction: "Inspect source library",
+          primarySection: "Documentation" as Section
+        };
 
   const sourceKinds = useMemo(() => Array.from(new Set(docs.map((doc) => doc.sourceKind))).sort(), []);
   const filteredDocs = useMemo(() => filterDocuments(query, docStatus, docSourceKind), [query, docStatus, docSourceKind]);
   const selectedDocument = filteredDocs.find((item) => item.title === selectedDoc) ?? filteredDocs[0] ?? docs[0];
+  const relatedEvidenceChains = evidenceChains.filter((chain) => chain.nodes.some((node) => node.path === selectedDocument.sourcePath));
+  const evidenceRuleIds = [...new Set(evidenceChains.flatMap((chain) => chain.ruleIds))].sort();
+  const visibleEvidenceChains = focusedEvidenceChainId
+    ? evidenceChains.filter((chain) => chain.id === focusedEvidenceChainId)
+    : impactRule === "All" ? evidenceChains : evidenceChains.filter((chain) => chain.ruleIds.includes(impactRule));
+  const visibleEvidenceNodes = visibleEvidenceChains.flatMap((chain) => chain.nodes);
+  const evidenceNodeCounts = [...new Set(visibleEvidenceNodes.map((node) => node.kind))].map((kind) => ({ kind, count: visibleEvidenceNodes.filter((node) => node.kind === kind).length }));
 
   const changeSection = (next: Section) => {
     setSection(next);
@@ -192,28 +269,29 @@ function App() {
             <div className="cockpit-metrics">
               <div><span>LATEST WORKFLOW</span><strong className={workflowLoading ? "" : latestCiRun?.status !== "completed" ? "cockpit-warn" : latestCiRun.conclusion === "success" ? "cockpit-good" : "cockpit-bad"}>{workflowLoading ? "Loading…" : latestCiRun ? formatRunStatus(latestCiRun.status, latestCiRun.conclusion) : "Unavailable"}</strong><small>{latestCiRun ? <a href={latestCiRun.html_url} target="_blank" rel="noreferrer">Run #{latestCiRun.run_number} · {latestCiRun.head_sha.slice(0,7)} ↗</a> : "No workflow evidence loaded"}</small></div>
               <div><span>WEBSITE BUILD</span><strong className={workflowLoading ? "" : latestBuildStep?.status === "completed" && latestBuildStep.conclusion === "success" ? "cockpit-good" : latestBuildStep?.status === "completed" && latestBuildStep.conclusion === "failure" ? "cockpit-bad" : "cockpit-warn"}>{workflowLoading ? "Loading…" : workflowError ? "Unavailable" : latestBuildStep ? formatRunStatus(latestBuildStep.status, latestBuildStep.conclusion) : "Unavailable"}</strong><small>Type-check and build step</small></div>
-              <div><span>PER-TEST REPORT</span><strong className={registryResults ? (latestCiRun && registryResults.commit !== latestCiRun.head_sha ? "cockpit-warn" : registryResults.counts.failed > 0 ? "cockpit-bad" : "cockpit-good") : "cockpit-warn"}>{registryResults ? (latestCiRun && registryResults.commit !== latestCiRun.head_sha ? "Stale / different commit" : registryResults.counts.failed > 0 ? "Failures reported" : "Report loaded") : "Unavailable"}</strong><small>{registryResults ? registryResults.counts.passed + " passed · " + registryResults.counts.failed + " failed · " + registryResults.counts.unmapped + " unmapped" : (registryResultsError ?? "Waiting for published results")}</small></div>
+              <div><span>PER-TEST REPORT</span><strong className={registryReportMatchesLatestRun ? (registryResults && registryResults.counts.failed > 0 ? "cockpit-bad" : "cockpit-good") : "cockpit-warn"}>{!registryResults ? "Unavailable" : registryReportMatchesLatestRun ? (registryResults.counts.failed > 0 ? "Failures reported" : "Run-matched report") : "Stale / different run"}</strong><small>{registryReportMatchesLatestRun && registryResults ? registryResults.counts.passed + " passed · " + registryResults.counts.failed + " failed · " + registryResults.counts.unmapped + " unmapped" : registryResults ? "Stored results withheld until the report matches the latest CI run and commit." : (registryResultsError ?? "Waiting for published results")}</small></div>
             </div>
             <p className="cockpit-note">{workflowError ? "Live workflow data could not be confirmed. Treat CI health as unavailable until refreshed." : latestCiRun?.conclusion === "failure" ? "The workflow is failing. Open the run for the exact failing step; a successful website build does not mean the entire test suite passed." : latestCiRun?.status !== "completed" ? "The latest workflow is still running or queued. Its final result is not known yet." : "Workflow state comes from GitHub Actions. Per-test results are shown separately and may refer to a different commit."}</p>
           </div>
-          <section className="next-task-panel" aria-labelledby="next-task-title">
+          <section className="next-task-panel" aria-labelledby="next-task-title" data-browser-acceptance={browserAcceptanceState}>
             <div className="next-task-heading">
-              <div><div className="eyebrow"><CheckCircle2 size={13}/> RECOMMENDED NEXT · WEB-DOC-01 / WEB-DOC-02</div><h2 id="next-task-title">Verify the source library in a real browser</h2></div>
-              <span className="next-task-priority">HIGH PRIORITY</span>
+              <div><div className="eyebrow"><CheckCircle2 size={13}/> RECOMMENDED NEXT · {nextTask.id}</div><h2 id="next-task-title">{nextTask.title}</h2></div>
+              <span className="next-task-priority">{nextTask.priority}</span>
             </div>
-            <p className="next-task-summary">The catalogue now has combined search, status and provenance filters, plus repository-path regression coverage. The remaining release-critical gap is user-facing acceptance: confirm that filtering, selection, source links and narrow-screen layouts behave correctly in the running website.</p>
+            <p className="next-task-summary">{nextTask.summary}</p>
             <div className="next-task-grid">
-              <div><span>WHY THIS IS NEXT</span><p>It closes the gap between passing data-level tests and a usable, traceable source library. The latest CI build passed, while browser behaviour has not yet been verified.</p></div>
-              <div><span>DEPENDENCIES</span><p>Current catalogue and filter implementation; a browser session or browser automation environment. No engine changes are needed.</p></div>
-              <div><span>FILES / SURFACES</span><p><code>src/App.tsx</code>, <code>src/documentationCatalogue.ts</code>, <code>src/styles.css</code>, and <code>src/documentationCatalogue.test.ts</code>.</p></div>
-              <div><span>ACCEPTANCE CRITERIA</span><p>Search and both filters combine and reset correctly; the selected detail follows visible results; all 19 source links open the intended repository path; empty results are understandable; desktop and mobile layouts have no harmful overflow.</p></div>
+              <div><span>WHY THIS IS NEXT</span><p>{nextTask.reason}</p></div>
+              <div><span>DEPENDENCIES</span><p>{nextTask.dependencies}</p></div>
+              <div><span>FILES / SURFACES</span><p>{nextTask.files}</p></div>
+              <div><span>ACCEPTANCE CRITERIA</span><p>{nextTask.acceptance}</p></div>
             </div>
             <div className="next-task-actions">
-              <button className="secondary-button" onClick={() => changeSection("Documentation")}>Inspect source library <span aria-hidden="true">→</span></button>
+              <button className="secondary-button" onClick={() => changeSection(nextTask.primarySection)}>{nextTask.primaryAction} <span aria-hidden="true">→</span></button>
               <button className="secondary-button" onClick={() => changeSection("Test suite")}>Review CI evidence <span aria-hidden="true">→</span></button>
+              {latestCiRun && <a className="secondary-button" href={latestCiRun.html_url} target="_blank" rel="noreferrer">Open latest CI run ↗</a>}
               <a className="secondary-button" href="https://github.com/sixtoast/Anime-language-/blob/main/docs/WEBSITE-FEATURE-REGISTER.md" target="_blank" rel="noreferrer">Open feature register <span aria-hidden="true">↗</span></a>
             </div>
-            <p className="next-task-caveat">Status: implemented as a recommendation, not a completed task. Browser acceptance remains pending; this card does not claim that the catalogue is verified.</p>
+            <p className="next-task-caveat">Browser acceptance status: {browserAcceptanceState}. {browserAcceptanceState === "passed" ? "The browser step succeeded for the latest run; the recommendation advances to shared evidence links." : browserAcceptanceState === "failed" ? "The browser step failed; inspect the run before changing code. No acceptance gate is marked complete." : "This card reflects the live step state and does not treat missing, stale, skipped or unfinished evidence as a pass."}</p>
           </section>
           <div className="section-heading"><div><div className="eyebrow">WORKSPACE</div><h2>Everything in one place</h2></div><span className="section-caption">SOURCE RECOVERY · PHASE 01</span></div>
           <div className="feature-grid">
@@ -254,7 +332,7 @@ function App() {
           <div className="eyebrow"><span className="eyebrow-line"/> THE LANGUAGE REFERENCE</div><h1 className="page-title">Documentation<span>.</span></h1><p className="page-intro">A source-aware index for the recovered canonical specifications, provisional syntax audit, and continuity register. Source status, deployed application status, and automated test status are tracked separately.</p>
           <div className="search-bar"><Search size={18}/><input id="global-search" aria-label="Search documentation catalogue" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search titles, topics, source type, status…"/><kbd>SEARCH</kbd></div>
           <div className="doc-filter-bar"><label>Source status<select aria-label="Filter documentation by source status" value={docStatus} onChange={(e) => setDocStatus(e.target.value as Status | "All")}><option value="All">All statuses</option>{(["Canonical","Provisional","Open question","Deprecated"] as Status[]).map((status) => <option key={status} value={status}>{status}</option>)}</select></label><label>Provenance type<select aria-label="Filter documentation by provenance type" value={docSourceKind} onChange={(e) => setDocSourceKind(e.target.value)}><option value="All">All source types</option>{sourceKinds.map((kind) => <option key={kind} value={kind}>{kind}</option>)}</select></label><span className="doc-result-count" role="status">{filteredDocs.length} of {docs.length} sources</span><button className="secondary-button" onClick={() => { setQuery(""); setDocStatus("All"); setDocSourceKind("All"); }} disabled={!query && docStatus === "All" && docSourceKind === "All"}>Reset filters</button></div>
-          <div className="doc-layout"><div className="doc-list" aria-label="Documentation catalogue entries">{filteredDocs.map((doc) => <button key={doc.title} aria-pressed={selectedDocument.title === doc.title} className={"doc-row " + (selectedDocument.title === doc.title ? "doc-selected" : "")} onClick={() => setSelectedDoc(doc.title)}><div className="doc-icon"><FileText size={18}/></div><div className="doc-row-main"><strong>{doc.title}</strong><span>{doc.category}</span></div><StatusPill status={doc.status}/></button>)}{filteredDocs.length === 0 && <div className="empty-state" role="status">No sources match these filters. Try another status, source type, or search term.</div>}</div><div className="doc-detail">{(() => { const doc = selectedDocument; return <><div className="detail-top"><span className="detail-kicker">REFERENCE ENTRY</span><StatusPill status={doc.status}/></div><h2>{doc.title}</h2><p>{doc.description}</p><div className="detail-divider"/><div className="detail-meta"><span>Category</span><strong>{doc.category}</strong></div><div className="detail-meta"><span>Source citation</span><strong>{doc.sourcePath ? "Repository document" : "Not yet attached"}</strong></div><div className="detail-meta"><span>Source type</span><strong>{doc.sourceKind ?? "Not classified"}</strong></div><div className="detail-meta"><span>Provenance note</span><strong>{doc.sourceNote ?? "Source type needs review."}</strong></div><div className="detail-meta"><span>Implementation</span><strong>Not yet verified</strong></div>{doc.sourcePath && <a className="secondary-button source-link" href={"https://github.com/sixtoast/Anime-language-/blob/main/" + doc.sourcePath} target="_blank" rel="noreferrer">Open source document: {doc.title} <span aria-hidden="true">↗</span></a>}<div className="detail-callout"><CircleHelp size={17}/><p>Source status and implementation status are separate. Provisional audit notation is not silently promoted to canonical spoken grammar, and no test is labelled passed without execution evidence.</p></div><button className="secondary-button" onClick={() => changeSection("Research & review")}>Review source status <span>→</span></button></>; })()}</div></div>
+          <div className="doc-layout"><div className="doc-list" aria-label="Documentation catalogue entries">{filteredDocs.map((doc) => <button key={doc.title} aria-pressed={selectedDocument.title === doc.title} className={"doc-row " + (selectedDocument.title === doc.title ? "doc-selected" : "")} onClick={() => setSelectedDoc(doc.title)}><div className="doc-icon"><FileText size={18}/></div><div className="doc-row-main"><strong>{doc.title}</strong><span>{doc.category}</span></div><StatusPill status={doc.status}/></button>)}{filteredDocs.length === 0 && <div className="empty-state" role="status">No sources match these filters. Try another status, source type, or search term.</div>}</div><div className="doc-detail">{(() => { const doc = selectedDocument; return <><div className="detail-top"><span className="detail-kicker">REFERENCE ENTRY</span><StatusPill status={doc.status}/></div><h2>{doc.title}</h2><p>{doc.description}</p><div className="detail-divider"/><div className="detail-meta"><span>Category</span><strong>{doc.category}</strong></div><div className="detail-meta"><span>Source citation</span><strong>{doc.sourcePath ? "Repository document" : "Not yet attached"}</strong></div><div className="detail-meta"><span>Source type</span><strong>{doc.sourceKind ?? "Not classified"}</strong></div><div className="detail-meta"><span>Provenance note</span><strong>{doc.sourceNote ?? "Source type needs review."}</strong></div><div className="detail-meta"><span>Implementation</span><strong>Not yet verified</strong></div>{doc.sourcePath && <a className="secondary-button source-link" href={"https://github.com/sixtoast/Anime-language-/blob/main/" + doc.sourcePath} target="_blank" rel="noreferrer">Open source document: {doc.title} <span aria-hidden="true">↗</span></a>}{relatedEvidenceChains.length > 0 && <div className="related-evidence-panel"><span className="detail-kicker">LINKED EVIDENCE</span><p>{relatedEvidenceChains.length} curated evidence {relatedEvidenceChains.length === 1 ? "chain" : "chains"} reference this exact source path.</p>{relatedEvidenceChains.map((chain) => <button className="secondary-button related-evidence-link" key={chain.id} onClick={() => { setImpactRule("All"); setFocusedEvidenceChainId(chain.id); changeSection("Research & review"); }}>View {chain.title} <span aria-hidden="true">→</span></button>)}</div>}<div className="detail-callout"><CircleHelp size={17}/><p>Source status and implementation status are separate. Provisional audit notation is not silently promoted to canonical spoken grammar, and no test is labelled passed without execution evidence.</p></div><button className="secondary-button" onClick={() => changeSection("Research & review")}>Review source status <span>→</span></button></>; })()}</div></div>
         </section>}
 
         {section === "Playground" && <section className="page-content">
@@ -270,7 +348,7 @@ function App() {
           <div className="eyebrow"><span className="eyebrow-line"/> QUALITY & REGRESSION</div><h1 className="page-title">Test suite<span>.</span></h1>
           <p className="page-intro">A traceable explorer for the authored parser and dimensional test cases, paired with live GitHub Actions run and job-step results for the repository. CI status is fetched from GitHub; this page does not execute tests in the browser.</p>
           <div className="test-summary">
-            <div><span>AUTHORED CASES</span><strong>{workbenchTests.length}</strong><small>15 parser · 15 dimensional · 8 semantic · 8 operator-contract</small></div>
+            <div><span>AUTHORED CASES</span><strong>{workbenchTests.length}</strong><small>15 audit-parser · 19 surface-parser · 15 dimensional · 8 semantic · 8 operator-contract</small></div>
             <div><span>LATEST CI RESULT</span><strong className={latestCiRun?.conclusion === "success" ? "ci-success-text" : latestCiRun?.conclusion === "failure" ? "ci-failure-text" : "amber-text"}>{workflowLoading ? "Loading…" : latestCiRun ? formatRunStatus(latestCiRun.status, latestCiRun.conclusion) : "Unavailable"}</strong><small>{latestCiRun ? `Run #${latestCiRun.run_number}` : "No run loaded"}</small></div>
             <div><span>WEBSITE BUILD</span><strong className={latestBuildStep?.status === "completed" && latestBuildStep.conclusion === "success" ? "ci-success-text" : latestBuildStep?.status === "completed" && latestBuildStep.conclusion === "failure" ? "ci-failure-text" : "amber-text"}>{workflowLoading ? "Loading…" : workflowError ? "Unavailable" : latestBuildStep ? formatRunStatus(latestBuildStep.status, latestBuildStep.conclusion) : "Unavailable"}</strong><small>{latestCiRun ? `Run #${latestCiRun.run_number} · Type-check and build` : "Build step unavailable"}</small></div>
             <div><span>SPECIFICATION STATUS</span><strong className="amber-text">Prototype</strong><small>Provisional parser and dimensions</small></div>
@@ -305,19 +383,29 @@ function App() {
             <div className="test-explorer-toolbar">
               <div className="test-search"><Search size={16}/><input value={testQuery} onChange={(e) => setTestQuery(e.target.value)} placeholder="Filter by ID, title, rule or description…" aria-label="Filter test cases"/></div>
               <div className="test-filters" aria-label="Filter test group">
-                {(["All", "Parser", "Dimensions", "Semantic types", "Operator contracts"] as const).map((group) => <button key={group} className={testGroup === group ? "test-filter active" : "test-filter"} onClick={() => setTestGroup(group)}>{group}</button>)}
+                {(["All", "Parser", "Surface parser", "Dimensions", "Semantic types", "Operator contracts", "Lexicon", "Fixture audit", "Workbench integrity", "Documentation"] as const).map((group) => <button key={group} className={testGroup === group ? "test-filter active" : "test-filter"} onClick={() => setTestGroup(group)}>{group}</button>)}
               </div>
             </div>
-            <div className="test-explorer-meta"><span>{workbenchTests.filter((test) => (testGroup === "All" || test.group === testGroup) && (test.id + " " + test.title + " " + test.description + " " + test.sourceRule).toLowerCase().includes(testQuery.toLowerCase())).length} cases shown</span><span><span className="status-dot status-dot-pending"/> {registryResults ? `Report for ${registryResults.commit?.slice(0, 7) ?? "unknown commit"} · ${registryResults.counts.passed} passed · ${registryResults.counts.failed} failed · ${registryResults.counts.skipped} skipped` : "Waiting for published per-test results"}</span></div>
+            <div className="test-explorer-meta"><span>{workbenchTests.filter((test) => (testGroup === "All" || test.group === testGroup) && (test.id + " " + test.title + " " + test.description + " " + test.sourceRule).toLowerCase().includes(testQuery.toLowerCase())).length} cases shown</span><span><span className="status-dot status-dot-pending"/> {registryReportMatchesLatestRun && registryResults ? `Current run ${registryResults.runId} · ${registryResults.counts.passed} passed · ${registryResults.counts.failed} failed · ${registryResults.counts.skipped} skipped` : registryResults ? `Stored report ${registryResults.commit?.slice(0, 7) ?? "unknown"} is stale; results withheld` : "Waiting for published per-test results"}</span></div>
             {registryResultsError && <div className="ci-empty">{registryResultsError}</div>}
-            {registryResults && <div className="registry-results-meta">Test report commit <code>{registryResults.commit?.slice(0, 7) ?? "unknown"}</code> · generated {prettyDate(registryResults.generatedAt)} · <a href={`https://github.com/sixtoast/Anime-language-/actions/runs/${registryResults.runId}`} target="_blank" rel="noreferrer">Open matching CI run ↗</a></div>}
+            {registryResults && <div className="registry-results-meta" data-report-freshness={registryReportMatchesLatestRun ? "current" : "stale"}>{registryReportMatchesLatestRun ? "Run-matched report" : "STALE REPORT — per-test statuses are withheld"} · report commit <code>{registryResults.commit?.slice(0, 7) ?? "unknown"}</code> · generated {prettyDate(registryResults.generatedAt)} · <a href={`https://github.com/sixtoast/Anime-language-/actions/runs/${registryResults.runId}`} target="_blank" rel="noreferrer">Open report CI run ↗</a>{latestCiRun && <> · latest CI run <a href={latestCiRun.html_url} target="_blank" rel="noreferrer">#{latestCiRun.run_number} / <code>{latestCiRun.head_sha.slice(0, 7)}</code></a></>}</div>}
             <div className="test-case-list">
               {workbenchTests.filter((test) => (testGroup === "All" || test.group === testGroup) && (test.id + " " + test.title + " " + test.description + " " + test.sourceRule).toLowerCase().includes(testQuery.toLowerCase())).map((test) => <article className="test-case" key={test.id}>
                 <div className="test-case-main"><div className="test-case-title"><code>{test.id}</code><strong>{test.title}</strong></div><p>{test.description}</p><div className="test-case-meta"><span>Rules: {test.sourceRule}</span><a href={"https://github.com/sixtoast/Anime-language-/blob/main/" + test.file} target="_blank" rel="noreferrer">Open test source ↗</a></div></div>
-                <div className="test-case-status"><span className={"test-status-chip " + ((registryResults?.tests.find((result) => result.id === test.id)?.status === "passed") ? "test-status-passed" : (registryResults?.tests.find((result) => result.id === test.id)?.status === "failed") ? "test-status-failed" : (registryResults?.tests.find((result) => result.id === test.id)?.status === "pending" || registryResults?.tests.find((result) => result.id === test.id)?.status === "todo") ? "test-status-skipped" : "")}>{registryResults?.tests.find((result) => result.id === test.id) ? registryResults.tests.find((result) => result.id === test.id)?.status : "NOT VERIFIED"}</span><small>{test.group}</small>{registryResults?.tests.find((result) => result.id === test.id)?.durationMs != null && <small>{registryResults.tests.find((result) => result.id === test.id)?.durationMs} ms</small>}</div>
+                <div className="test-case-status"><span className={"test-status-chip " + ((reportTestResults.find((result) => result.id === test.id)?.status === "passed") ? "test-status-passed" : (reportTestResults.find((result) => result.id === test.id)?.status === "failed") ? "test-status-failed" : (reportTestResults.find((result) => result.id === test.id)?.status === "pending" || reportTestResults.find((result) => result.id === test.id)?.status === "todo") ? "test-status-skipped" : "")}>{reportTestResults.find((result) => result.id === test.id) ? reportTestResults.find((result) => result.id === test.id)?.status : registryResults && !registryReportMatchesLatestRun ? "STALE REPORT" : "NOT VERIFIED"}</span><small>{test.group}</small>{reportTestResults.find((result) => result.id === test.id)?.durationMs != null && <small>{reportTestResults.find((result) => result.id === test.id)?.durationMs} ms</small>}</div>
               </article>)}
               {workbenchTests.filter((test) => (testGroup === "All" || test.group === testGroup) && (test.id + " " + test.title + " " + test.description + " " + test.sourceRule).toLowerCase().includes(testQuery.toLowerCase())).length === 0 && <div className="empty-state">No test cases match those filters.</div>}
             </div>
+            {registryReportMatchesLatestRun && reportTestResults.some((result) => result.id === "UNMAPPED") && <div className="unmapped-results" data-testid="unmapped-results">
+              <div className="unmapped-results-heading"><div><span className="detail-kicker">TRACEABILITY GAP</span><h2>Unmapped test results</h2><p>These results ran in the current CI report but do not yet have stable registry IDs. They are shown here rather than discarded or mistaken for verified registry cases.</p></div><span className="unmapped-count">{reportTestResults.filter((result) => result.id === "UNMAPPED").length} unmapped</span></div>
+              <div className="unmapped-result-list">
+                {reportTestResults.filter((result) => result.id === "UNMAPPED" && result.title.toLowerCase().includes(testQuery.toLowerCase())).map((result, index) => <article className="test-case unmapped-test-case" key={result.file + result.title + index}>
+                  <div className="test-case-main"><div className="test-case-title"><code>UNMAPPED</code><strong>{result.title}</strong></div><div className="test-case-meta"><span>Source file: {result.file}</span><a href={"https://github.com/sixtoast/Anime-language-/blob/main/" + result.file} target="_blank" rel="noreferrer">Open test source ↗</a></div></div>
+                  <div className="test-case-status"><span className={"test-status-chip " + (result.status === "passed" ? "test-status-passed" : result.status === "failed" ? "test-status-failed" : result.status === "pending" || result.status === "todo" ? "test-status-skipped" : "")}>{result.status}</span>{result.durationMs != null && <small>{result.durationMs} ms</small>}</div>
+                </article>)}
+                {reportTestResults.filter((result) => result.id === "UNMAPPED" && result.title.toLowerCase().includes(testQuery.toLowerCase())).length === 0 && <div className="empty-state">No unmapped results match this search.</div>}
+              </div>
+            </div>}
           </div>
           <div className="notice"><div className="notice-icon"><ShieldCheck size={18}/></div><div><strong>What this status means</strong><p>A case shows Passed, Failed or Skipped only when its stable ID appears in the published CI report for the displayed commit. Missing IDs remain Not verified, not a pass or a failure. Dimensional tests validate the current implementation convention only; they do not finalise Arcane unit semantics or operator typing.</p></div></div>
           <div className="next-step"><Sparkles size={17}/><p><strong>Result granularity</strong><br/>The live panel reports actual workflow outcomes, and each registry row is matched by its stable test ID to the published structured report. The report commit is shown explicitly; a missing or stale result is never silently treated as a pass.</p></div>
@@ -327,7 +415,39 @@ function App() {
           <div className="eyebrow"><span className="eyebrow-line"/> EVIDENCE, QUESTIONS, DECISIONS</div><h1 className="page-title">Research & review<span>.</span></h1><p className="page-intro">Keep unresolved questions visible. Findings should be traceable to source material and should not become canonical by implication.</p>
           <div className="review-banner"><FlaskConical size={20}/><div><strong>Active audit context</strong><p>Phase 2 is the priority source for the semantic audit. Preserve older forms as aliases unless an inconsistency is demonstrated.</p></div><span className="review-count">5 TOPICS</span></div>
           <div className="review-cards">{[{n:"01",title:"FRAPA contract",status:"Open question" as Status,tag:"SOURCE EVIDENCE",desc:"Establish the contract only from available source evidence. Do not invent definitions to fill gaps.",sourcePath:"docs/audits/phase-2-formal-syntax.md"},{n:"02",title:"Phase 4 — syntax & ambiguity",status:"Provisional" as Status,tag:"AUDIT MATERIAL",desc:"Test unique structural interpretation, operator arity and safe handling of incomplete expressions.",sourcePath:"sources/originals/Arcane_Language_Audit_Phase_4.docx"},{n:"03",title:"Phase 5 — semantic audit",status:"Provisional" as Status,tag:"PHASE 2 PRIORITY",desc:"Compare semantic claims against Phase 2 first. Record conflicts and retain old forms unless inconsistency is demonstrated.",sourcePath:"sources/originals/Arcane_Language_Audit_Phase_5.docx"},{n:"04",title:"Phase 6G — source lexicon",status:"Provisional" as Status,tag:"DATA INTEGRITY",desc:"Audit the v5 draft vocabulary, preserve non-atomic forms, validate alias targets, and keep RE/RA collisions visible.",sourcePath:"docs/research/phase6g-v5-source-lexicon-audit-01.md"},{n:"05",title:"Phase 6G — parser fixtures",status:"Provisional" as Status,tag:"OBSERVATION ONLY",desc:"Compare recovered fixtures against the provisional parser without treating observations as canon approval or semantic validation.",sourcePath:"docs/research/phase6g-fixture-observation-harness-01.md"}].map((item) => <article className="review-card" key={item.n}><div className="review-card-top"><span className="review-number">{item.n}</span><StatusPill status={item.status}/></div><span className="detail-kicker">{item.tag}</span><h2>{item.title}</h2><p>{item.desc}</p><div className="review-card-bottom"><a href={"https://github.com/sixtoast/Anime-language-/blob/main/" + item.sourcePath} target="_blank" rel="noreferrer" aria-label={"Open source evidence for " + item.title}>Open source evidence <span aria-hidden="true">↗</span></a></div></article>)}</div>
-          <div className="section-heading lower-heading"><div><div className="eyebrow">PHASE 6G · LIVE LOCAL OBSERVATIONS</div><h2>Recovered parser fixture review</h2></div><span className="section-caption">{phase6gFixtureAudit.fixtureCount} FIXTURES</span></div>
+          <div className="section-heading lower-heading"><div><div className="eyebrow">RESEARCH REGISTER · OPEN RECORDS</div><h2>Research findings and unresolved decisions</h2></div><span className="section-caption">{researchRecords.length} RECORDS</span></div>
+          <p className="page-intro">These records capture source-backed discrepancies and implementation gaps. An open record is not an approved decision. Each entry names its source, next evidence action, related fixture IDs where applicable, and a caveat that prevents a research observation from becoming a language rule by implication.</p>
+          <div className="research-record-grid">{researchRecords.map((record) => <article className="research-record-card" key={record.id}>
+            <div className="research-record-top"><code>{record.id}</code><span className="research-record-status">{record.status}</span></div>
+            <h3>{record.title}</h3><p>{record.summary}</p>
+            {record.relatedFixtureIds.length > 0 && <div className="evidence-record-ids"><span>Related fixture IDs</span>{record.relatedFixtureIds.map((fixtureId) => <code key={fixtureId}>{fixtureId}</code>)}</div>}
+            {record.id === "RES-P6G-RE-RA-001" && <div className="research-fixture-comparisons"><strong>Current fixture observations</strong><p>Computed from the current TypeScript parser when this page loads; historical behaviour below is source-inspected, not freshly executed.</p>{record.relatedFixtureIds.map((fixtureId) => { const fixture = phase6gFixtureData.cases.find((item) => item.id === fixtureId); const observation = phase6gFixtureAudit.observations.find((item) => item.id === fixtureId); if (!fixture || !observation) return null; return <div className="research-fixture-row" key={fixtureId}><div className="research-fixture-heading"><code>{fixtureId}</code><span>{observation.comparison}</span></div><code className="research-fixture-input">{fixture.input}</code><div className="research-fixture-values"><span>Prose/fixture expectation<strong>{fixture.expected}</strong></span><span>Current TypeScript parser<strong>{observation.observed}</strong></span><span>Archived Python source<strong>{observation.historicalBehavior ?? "not recovered"}</strong></span></div><p>{observation.historicalEvidence ?? "No source-inspected historical behaviour recorded."}</p><small>{observation.note}</small></div>; })}</div>}
+            <div className="research-record-source"><span className="detail-kicker">SOURCE RECORD</span><a href={"https://github.com/sixtoast/Anime-language-/blob/main/" + record.sourcePath} target="_blank" rel="noreferrer">{record.sourceLabel} <span aria-hidden="true">↗</span></a><code>{record.sourcePath}</code></div>
+            <div className="audit-next"><strong>Next evidence action</strong><p>{record.nextAction}</p></div>
+            <div className="research-record-caveat"><strong>Interpretation guardrail</strong><p>{record.caveat}</p></div>
+            {record.relatedChainId && <button className="secondary-button related-evidence-link" onClick={() => { setImpactRule("All"); setFocusedEvidenceChainId(record.relatedChainId); changeSection("Research & review"); document.getElementById("shared-evidence-graph")?.scrollIntoView({ behavior: "smooth", block: "start" }); }}>Focus linked evidence chain <span aria-hidden="true">→</span></button>}
+          </article>)}</div>
+          <div className="section-heading lower-heading" id="shared-evidence-graph"><div><div className="eyebrow">SHARED EVIDENCE GRAPH · INITIAL COVERAGE</div><h2>Follow a claim across its records</h2></div><span className="section-caption">{evidenceChains.length} CHAINS</span></div>
+          <p className="page-intro">These curated chains connect known source material, rule IDs, implementation notes, fixtures and tests. They are an initial, explicit map—not an inferred or complete dependency graph. A link records a documented relationship; it does not prove implementation completeness or test success.</p>
+          <div className="evidence-impact-controls">{focusedEvidenceChainId && <div className="evidence-focused-banner"><strong>Source-linked view</strong><span>Opened from a linked source or research record.</span><button className="secondary-button" onClick={() => setFocusedEvidenceChainId(null)}>Show all evidence chains</button></div>}<label htmlFor="evidence-rule-filter">Inspect impact for a rule<select id="evidence-rule-filter" aria-label="Filter evidence by rule ID" value={impactRule} onChange={(event) => { setImpactRule(event.target.value); setFocusedEvidenceChainId(null); }}><option value="All">All tracked rule IDs</option>{evidenceRuleIds.map((ruleId) => <option value={ruleId} key={ruleId}>{ruleId}</option>)}</select></label><div className="evidence-impact-summary" role="status"><strong>{visibleEvidenceChains.length} related chains</strong><span>{visibleEvidenceNodes.length} linked record references</span><span>{evidenceNodeCounts.map((item) => `${item.count} ${item.kind.toLowerCase()}`).join(" · ") || "No mapped records"}</span></div>{impactRule !== "All" && <button className="secondary-button" onClick={() => setImpactRule("All")}>Clear rule filter</button>}</div>
+          <div className="audit-matrix evidence-chain-grid">
+            {visibleEvidenceChains.map((chain) => <article className="audit-item evidence-chain" key={chain.id}>
+              <div className="audit-item-top"><code>{chain.id}</code><span className={"audit-readiness " + (chain.status === "limited implementation" ? "audit-limited" : "audit-blocked")}>{chain.status.toUpperCase()}</span></div>
+              <h3>{chain.title}</h3>
+              <p>{chain.summary}</p>
+              {chain.ruleIds.length > 0 && <div className="test-case-meta"><span>Rule IDs: {chain.ruleIds.join(", ")}</span></div>}
+              <ol className="evidence-node-list">
+                {chain.nodes.map((node, index) => <li key={node.path}>
+                  <div className="evidence-node-heading"><span className="evidence-node-index">{index + 1}</span><div><strong>{node.label}</strong><span className="detail-kicker">{node.kind}</span></div></div>
+                  <p>{node.relationship}</p>
+                  {node.recordIds && node.recordIds.length > 0 && <div className="evidence-record-ids" aria-label={"Stable record IDs for " + node.label}><span>Record IDs</span>{node.recordIds.map((recordId) => <code key={recordId}>{recordId}</code>)}</div>}
+                  <a href={"https://github.com/sixtoast/Anime-language-/blob/main/" + node.path} target="_blank" rel="noreferrer" aria-label={"Open " + node.label + " at " + node.path}><code>{node.path}</code> <span aria-hidden="true">↗</span></a>
+                </li>)}
+              </ol>
+              <div className="audit-next"><strong>Scope and evidence caveat</strong><p>{chain.caveat}</p></div>
+            </article>)}
+          </div>
+                    <div className="section-heading lower-heading"><div><div className="eyebrow">PHASE 6G · LIVE LOCAL OBSERVATIONS</div><h2>Recovered parser fixture review</h2></div><span className="section-caption">{phase6gFixtureAudit.fixtureCount} FIXTURES</span></div>
           <p className="page-intro">These observations are computed in this browser build against the provisional Phase 6G parser. They are not CI results, source approval, semantic validation, or canon acceptance. A context-dependent case is deliberately not counted as a direct pass.</p>
           <div className="audit-matrix">
             <article className="audit-item"><div className="audit-item-top"><code>DIRECT COMPARISON</code><span className="audit-readiness audit-limited">OBSERVATION ONLY</span></div><h3>{phase6gFixtureAudit.directMatches} matches · {phase6gFixtureAudit.directMismatches} mismatches</h3><p>{phase6gFixtureAudit.directlyComparable} fixtures have direct accept/reject expectations that can be compared safely.</p><div className="audit-next"><strong>Not directly comparable</strong><p>{phase6gFixtureAudit.nonDirectComparisons} fixtures require context, remain unresolved, or test a scope guardrail.</p></div></article>

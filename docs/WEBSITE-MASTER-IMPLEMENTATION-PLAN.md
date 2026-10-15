@@ -293,3 +293,68 @@ Added a Playwright-based website browser suite and CI step for the Documentation
 ### Browser-discovered mobile overflow — 2026-10-14
 
 The first Playwright run passed 3/4 Documentation checks and found a real 19px page-level horizontal overflow at a 360px viewport (document width 379px). The responsive Documentation layout now stacks the source list and detail panel into one column at the existing mobile breakpoint. Keep the overflow assertion strict; the fix must pass the same browser test before acceptance is marked verified.
+
+## Implementation update — evidence-aware next-task recommendation (2026-10-14)
+
+The Overview recommendation now branches on the live latest CI run's `Run website browser acceptance` step. A confirmed success advances to WEB-SH-01 / WEB-SH-02 (shared source, research, fixture, and test references); an explicit failure keeps browser acceptance as the blocking task; missing, unavailable, loading, skipped, cancelled, or otherwise inconclusive states do not count as success. The card links to the exact CI run. Browser regression tests cover success, failure, and cancelled-step states. Status remains **Implemented — unverified** until CI confirms the build and new browser tests on the implementation commit. This does not close the outstanding 360px mobile acceptance gate unless that exact browser step succeeds.
+
+### Mobile viewport follow-up — 2026-10-14
+
+The first responsive-layout adjustment did not resolve the observed 360px overflow in CI run #188 (document width remained 379px). The same run passed all three new evidence-aware recommendation tests and the production build, while the pre-existing decimal-with-unit parser test remained the sole unit-test failure. A focused follow-up hides the nonessential specification-version chip at viewports up to 420px to prevent the top bar from forcing page overflow. The strict browser assertion must pass on a subsequent run before the mobile acceptance gate is closed.
+
+## Implementation update — initial shared evidence chains (2026-10-14)
+
+The Research & Review section now renders three curated, source-backed chains spanning canonical/source context, provisional audit records, rule catalogue entries, implementation notes, fixtures, research ledgers and automated test files where those relationships are known. Each node has a repository link and relationship explanation; each chain includes explicit limitations. This is an initial map, not a complete dependency graph, and it makes no claim that linked code fully enforces a rule or that linked tests passed. Unit tests validate chain integrity; browser tests validate rendering, key destinations and narrow-screen layout. Status remains **Implemented — unverified** until CI runs the new checks on the implementation commit. Next: extend the graph through a shared typed relationship model only after this initial slice is verified, then add source/research decision IDs and explicit test-result links without fabricating relationships.
+
+## Implementation update — rule impact filtering (2026-10-14)
+
+The initial shared evidence graph now includes a rule impact selector. It filters chains by existing rule IDs and displays the number of matching chains and linked record references grouped by record kind, with an explicit reset. This gives a first, limited answer to “what known evidence is related to this rule?” without pretending to perform complete dependency analysis. It remains a curated map; absence from the results is not proof of no dependency. Browser acceptance covers the LAN-005 filter and restoration of all chains, alongside existing mobile width coverage. Status: **Implemented — unverified** pending CI. Next: add explicit stable IDs for linked tests/fixtures and research decisions, then render test-result freshness only from commit-matched CI evidence.
+
+## Implementation update — stable IDs for evidence records (2026-10-14)
+
+Evidence nodes now expose stable IDs for representative parser tests (`PARSE-001`, `PARSE-003`, `PARSE-004`, `PARSE-007`), dimensional primitive tests (`DIM-001`, `DIM-002`, `DIM-003`, `DIM-005`, `DIM-008`), and the recovered Phase 6G fixtures (`P6G-FX-001` through `P6G-FX-016`). The IDs are rendered beside their repository paths and checked by unit/browser tests. They identify specific records; they do not assert that every record is passing or that a whole language rule is implemented. Research decision records and commit-matched result IDs remain future work because they need their own stable source and freshness model. Status: **Implemented — unverified** until CI on the latest branch commit completes.
+
+## Implementation update — Documentation to evidence navigation (2026-10-14)
+
+The Documentation detail view now derives related evidence links from exact source-path matches against the curated evidence graph. Selecting a related chain navigates to Research & Review and focuses that chain; the user can restore all chains. Choosing a rule filter clears the focused-source state so the two navigation modes do not conflict. This provides the first real cross-section workflow without adding inferred links or pretending that unmatched records have no dependencies. Browser acceptance tests the route and reset behaviour. Status: **Implemented — unverified** pending CI on the latest commit.
+
+## Implementation update — run-matched per-test evidence (2026-10-14)
+
+Per-test outcomes are now considered current only when both commit and runId in the published structured report match the latest CI run displayed by the workbench. If either differs, old statuses and durations are withheld, the report is labelled stale, and rows display STALE REPORT. The UI shows the stored report run/commit alongside the latest CI run/commit. Added browser regression cases for stale-report withholding and matching-report display. This prevents a previous green report from making newer failing or unverified work look passed. Limit: this compares against the latest main-branch run currently returned by the existing API query; historical run selection and attempt-level identity remain future improvements. Status: **Implemented — verification pending for latest commit**.
+
+## Implementation update — curated research records (2026-10-14)
+
+Added a typed research-record register based on existing repository evidence. It captures (1) the RE/RA discrepancy between archived Python source inspection and the prose/fixture interpretation, (2) unresolved operator semantic contracts, and (3) the lack of integration between dimensional primitives and parsed expressions. Each record has a stable ID, status, source path, next evidence action, caveat, and only explicitly known fixture/chain links. The RE/RA record exposes P6G-FX-011 and P6G-FX-012 and opens the existing fixture evidence chain. Integrity tests validate IDs, linked sources, fixtures and chain references; browser acceptance exercises the cross-record route. No canon or parser behaviour changes are included. Status: **Implemented — verification pending for latest commit**.
+
+## Implementation update — inspectable fixture discrepancy (2026-10-14)
+
+The RE/RA research record now shows P6G-FX-011 (`RE MA`) and P6G-FX-012 (`KI RA`) with four distinct pieces of evidence: the preserved fixture expectation, the current TypeScript parser's computed accept/reject observation, the archived Python behaviour recorded from static source inspection, and the comparison note. The UI explicitly says the historical implementation was not freshly executed, and labels the display as an observation rather than acceptance. Regression coverage checks the side-by-side values and interpretation guardrail. No fixture, parser, or canon behaviour was modified. Status: **Implemented — verification pending for latest commit**.
+
+## Verification correction — repository-level unit tests (2026-10-14)
+
+The Vitest configuration previously discovered only `src/**/*.test.ts`; therefore the new integrity tests stored under `tests/` were not actually running despite being present in the repository. Expanded the include pattern to cover `tests/**/*.test.ts` as well. Playwright browser specs use `.spec.ts` and remain in the separate browser acceptance command. The next CI run must confirm that repository-level evidence/research tests execute and pass. This correction increases verification coverage and does not weaken any existing assertion. Status: **Implemented — verification pending for latest commit**.
+
+## Implementation update — stable surface-parser test IDs (2026-10-14)
+
+The 19 provisional Phase 6G surface-parser tests now have stable `SURF-001`–`SURF-019` identifiers and matching workbench registry records. The Test Suite includes a dedicated Surface parser filter, and the machine-readable CI summary mapper recognises these IDs. New integrity coverage verifies registry uniqueness, test-source existence, source annotation for all 19 cases, and explicit registration of the known failing decimal-numeral-with-unit test. A browser test verifies that a matching run/commit report maps `SURF-002`'s failure and duration to the correct filtered case. This closes a test-evidence navigation gap without altering parser semantics or hiding the existing failure. Status: **Implemented — verification pending for latest commit**.
+
+## Implementation update — unmapped result visibility (2026-10-14)
+
+The Test Suite now exposes current-run `UNMAPPED` results in a dedicated traceability-gap list. Rows show the actual test title, status, duration, source file and link, and use the same strict run-ID plus commit freshness gate as registry rows. Stale report statuses remain withheld. Browser coverage checks an unmapped passing result alongside the registered decimal-with-unit failure. The Surface parser group is now reflected in the controlled state type and filter. This provides immediate visibility into the remaining mapping gap while preserving the distinction between a test result and a stable registry entry. Status: **Implemented — verification pending for latest commit**.
+
+## Implementation update — lexicon and fixture-audit traceability (2026-10-15)
+
+Added stable identifiers for 31 tests across the bundled lexicon, lexicon audit, CSV loader, lexicon registry, and recovered Phase 6G fixture audit. The report publisher recognises the prefixes; the Test Suite exposes Lexicon and Fixture audit filters; source integrity tests verify the annotations; browser acceptance checks correct group mapping. The work improves visibility of existing checks only: source snapshots, legacy aliases, collisions, historical observations, and fixture comparisons retain their existing provisional status and do not imply canonical decisions. Status: **Implemented — verification pending for latest commit**.
+
+## Implementation update — workbench integrity test mapping (2026-10-15)
+
+Added stable IDs to 14 repository-level tests covering evidence-chain path and relationship integrity, research-record source/caveat integrity, and registry mapping. The report publisher recognises `EVID-*`, `RES-*` and `REG-*`; the Test Suite exposes a Workbench integrity group; source integrity checks verify 45 Lexicon, Fixture audit and Workbench integrity registry annotations; and browser acceptance checks group-specific report mapping. This makes the tests protecting the workbench itself visible in the workbench without implying those tests have passed before CI reports them. Status: **Implemented — verification pending for latest commit**.
+
+## Implementation update — documentation coverage and registry completeness (2026-10-15)
+
+Added a Documentation test group and registered `WEB-DOC-REG-001`–`WEB-DOC-REG-009`. A new `REG-005` safeguard recursively scans `src` and `tests` for Vitest `.test.ts` files, extracts stable IDs from `it(...)` titles, and requires the unique source-ID set to equal the registry-ID set. This makes missing registrations a CI-detectable integrity defect rather than a future manual audit. Earlier source inspection found 119 uniquely annotated unit-test cases and 110 registry entries, with the nine documentation catalogue cases missing from the registry; the registry now includes those nine plus the completeness safeguard. Latest CI verification is pending; no passing result is claimed.
+
+
+## Language-development update — grammar recovery matrix (2026-10-15)
+
+Created `docs/grammar/GRAMMAR-RECOVERY-MATRIX.md` as a practical, source-backed work queue rather than another broad audit. It distinguishes the canonical v3.0-L baseline, historical Phase 5/6 prototype evidence and current TypeScript implementation. The next language work is now ordered: recover exact Phase 4 and decision-source evidence; reconcile each operator alias and version; address `re`/`ra` homographs; then encode only confirmed rules as fixtures and worked examples. The matrix explicitly preserves unresolved angle/unit policy, binding semantics, control-block delimiters and numeral closure. No canonical forms or parser behaviour changed. CI run #286 for the prior head concluded failure in unit tests, build and browser acceptance; detailed step logs were not available through the current retrieval path, so failure causes are not inferred. Status: **Matrix committed; latest branch CI must be rechecked**.
