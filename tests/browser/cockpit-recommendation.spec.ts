@@ -130,7 +130,7 @@ test.describe("Development Cockpit next-task evidence", () => {
     await expect(page.locator(".test-case").filter({ hasText: "REG-001" })).toBeVisible();
     await expect(page.locator(".test-case").filter({ hasText: "EVID-001" })).toBeVisible();
     await expect(page.locator(".test-case").filter({ hasText: "LEX-001" })).toHaveCount(0);
-    await page.getByRole("button", { name: "Documentation", exact: true }).click();
+    await page.getByLabel("Filter test group").getByRole("button", { name: "Documentation", exact: true }).click();
     await expect(page.locator(".test-case").filter({ hasText: "WEB-DOC-REG-001" })).toBeVisible();
     await expect(page.locator(".test-case").filter({ hasText: "REG-001" })).toHaveCount(0);
   });
