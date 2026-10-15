@@ -40,10 +40,18 @@ export interface SurfaceDiagnostic {
   sourceToken?: string;
 }
 
+export interface SurfaceTokenProvenance {
+  tokenIndex: number;
+  sourceToken: string;
+  normalizedToken: string;
+}
+
 export interface SurfaceParseResult {
   ok: boolean;
   notation: "phase-6g-provisional";
   ast?: SurfaceNode;
+  /** Token-level spelling lineage for successful parses; this is not a source-span map for AST nodes. */
+  tokenProvenance?: SurfaceTokenProvenance[];
   diagnostics: SurfaceDiagnostic[];
 }
 
@@ -107,6 +115,14 @@ class Parser {
   }
 
   sourceTokenAt(index: number): string | undefined { return this.sourceTokens[index]; }
+
+  tokenProvenance(): SurfaceTokenProvenance[] {
+    return this.sourceTokens.map((sourceToken, tokenIndex) => ({
+      tokenIndex,
+      sourceToken,
+      normalizedToken: this.tokens[tokenIndex]
+    }));
+  }
 
   private peek(): string | undefined { return this.tokens[this.cursor]; }
 
@@ -275,7 +291,7 @@ export function parseSurfaceExpression(input: string, options: SurfaceParserOpti
   const parser = new Parser(input, options);
   try {
     const ast = parser.parseAll();
-    return { ok: true, notation: "phase-6g-provisional", ast, diagnostics: [] };
+    return { ok: true, notation: "phase-6g-provisional", ast, tokenProvenance: parser.tokenProvenance(), diagnostics: [] };
   } catch (error) {
     if (error instanceof ParseFailure) {
       return {
