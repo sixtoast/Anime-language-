@@ -106,7 +106,13 @@ The particles ka, du and li are modern design coinages restricted to these frame
 
 This closes one bounded part of transfer-role design, not the full transfer/possession system. Ownership, possession, permission, consent, successful delivery and general recipient-question syntax remain open.
 
-## 9. Decision record
+## 9. Version 1.3 extension
+
+The [Modern Vernacular v1.3 Motion and Routes specification](arcane-modern-vernacular-v1.3-motion-and-routes.md) locks bounded motion clauses for ful (go/travel) and zem (come), with tava marking a goal, dava a source and yara a route. These are modern design coinages restricted to those motion frames. They do not reinterpret Formal JO/JUR/JA or the transfer particles ka/du/li.
+
+Questions for destination/source/route, multiple same-role phrases, tense/aspect, manner and general spatial adpositions remain blocked. This closes a bounded motion construction, not the full spatial grammar.
+
+## 10. Decision record
 
 - **Ledger ID:** MV1-DECISION-LEDGER-01
 - **Authority:** Modern Vernacular v1.0 locked core
