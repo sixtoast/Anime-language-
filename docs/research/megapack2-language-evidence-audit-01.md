@@ -22,9 +22,9 @@ The duplicate groups mean the archive contains many repeated copies of the same 
 
 ## 2. Important outputs
 
-- Archive manifest and duplicate report: `../sources/archive-reports/megapack2-report.md`
+- Archive manifest and duplicate report: `../../sources/archive-reports/megapack2-report.md`
 - Searchable extracted-text index: `../sources/archive-reports/megapack2-text-index.md`
-- Source archive itself: `../../docs/Arcana megapack2.zip`
+- Source archive itself: `../Arcana megapack2.zip`
 
 The index includes source snapshots such as `Arcane_Lexicon_v5_draft.csv`, `phase5_vernacular.py`, `PHASE_5_README.txt`, Phase 7A–7W reports, test outputs, and runtime/checker source files. The archive is therefore useful for both lexicon provenance and reconstructing the history of the provisional executable subset.
 
