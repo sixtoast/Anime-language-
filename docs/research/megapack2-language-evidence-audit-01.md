@@ -84,7 +84,17 @@ The archive's repeated copies of runtime files are not independent implementatio
 - The archive's decision-ledger DOCX is explicitly labelled a recovery draft and contains unresolved gaps around v2.0 frame–vowel–coda morphology, H-coupling, MEL anchoring, KAN/KEN/KAS, operator signatures and modifier scope.
 - No evidence in this archive justifies silently rewriting historical rules, declaring the reconstructed runtime canonical, or promoting every Phase 5/Phase 4 proposal to canon.
 
-## 7. Audit conclusion
+## 7. Cross-register collisions that affect current Modern Vernacular
+
+The indexed v5 lexicon also confirms exact collisions relevant to the already locked v1.2 transfer particles:
+
+- `ka` is a Shared / CANON / v3.0-L axis token glossed `-Z`.
+- `du` is a Shared / CANON / v3.0-L digit glossed `7`.
+- `li` has no exact entry in the inspected v5 lexicon and remains a modern design coinage in the transfer frame.
+
+The v1.2 design already restricts `ka` and `du` to specific transfer-role slots. The source audit makes the remaining obligation explicit: any future parser must resolve `ka` as recipient and `du` as source only in those licensed slots, while preserving the axis and digit readings elsewhere. These are not globally unique strings. The v1.2 specification now records the collision and adds parser-target expectations; parser execution is still not claimed.
+
+## 8. Audit conclusion
 
 Mega Pack2 is now located and indexed. It supplies valuable provenance for the Phase 5 Vernacular lexicon and the history of the provisional Phase 7 runtime. It also strengthens the need to keep three layers separate:
 
