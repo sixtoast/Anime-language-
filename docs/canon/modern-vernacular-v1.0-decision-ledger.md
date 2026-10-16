@@ -87,7 +87,15 @@ Do not create another phase whose only result is a slightly revised comparison t
 - Formal Arcane and historical source strata: unchanged.
 - Parser and independent speaker validation: not claimed to have been run.
 
-## 7. Decision record
+## 7. Version 1.1 extension
+
+The separate [Modern Vernacular v1.1 Core Verb Expansion](arcane-modern-vernacular-v1.1-core-verb-expansion.md) locks six narrow frames: nak, zir, shus, mos, mol and tut. It extends nava, pun, shuk and zosh to this closed list only.
+
+This does not alter the v1.0 baseline. It closes part of VP-01 (verb frames). Motion roles for ful/zem; transfer/source roles for bul/lil; teaching roles for pup; task complements for las; endpoints for shem; modality for fam; event complements for kong/tek; and unrestricted propositional complements remain open or blocked.
+
+**Current status:** v1.0 is a compatibility baseline; v1.1 adds these six verb frames. Neither claims independent speaker validation or parser execution.
+
+## 8. Decision record
 
 - **Ledger ID:** MV1-DECISION-LEDGER-01
 - **Authority:** Modern Vernacular v1.0 locked core
