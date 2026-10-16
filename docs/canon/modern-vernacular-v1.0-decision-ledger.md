@@ -130,7 +130,13 @@ The [Modern Vernacular v1.6 Modal Negation and Prohibition specification](arcane
 
 This closes the bounded modal-negation and prohibition construction at specification level. Parser and independent-speaker validation are not claimed. Historical and Formal Arcane remain unchanged; if Arcana Mega Pack2 becomes accessible, relevant evidence should be recorded and compared before any amendment.
 
-## 13. Decision record
+## 13. Version 1.7 extension
+
+The [Modern Vernacular v1.7 Directives, Requests, Advice and Instructions specification](arcane-modern-vernacular-v1.7-directives-and-requests.md) introduces four modern speech-act markers: dema (direct command), sori (request), mira (advice/recommendation) and toku (procedural instruction). The marker begins the utterance and scopes over a licensed action frame; the addressee is the understood actor. Underlying verb frames and role particles remain binding. Directive negation, directive questions, modal stacking and separate unexpressed actors remain blocked. The inspected v5 draft lexicon contained vanu as a Formal velocity entry, so it was deliberately not reused as an advice marker. The inspected v5 draft lexicon had no exact entries for dema, sori, mira or toku; this is a bounded collision check, not proof of absence from uninspected historical sources.
+
+This closes a bounded speech-act layer, not the full imperative, politeness, authority, procedure sequencing or command-negation systems. Parser and independent-speaker validation are not claimed. Historical and Formal Arcane remain unchanged.
+
+## 14. Decision record
 
 - **Ledger ID:** MV1-DECISION-LEDGER-01
 - **Authority:** Modern Vernacular v1.0 locked core
