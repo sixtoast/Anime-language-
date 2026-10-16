@@ -118,7 +118,13 @@ The [Modern Vernacular v1.4 Modality and Intention specification](arcane-modern-
 
 This closes a bounded part of the modality work package. Negative modality, permission, obligation, different-subject complements, unrestricted propositional embedding, tense/aspect and other mood meanings remain open or blocked. The modern design decision does not establish historical attestation; newly recovered old documents must be examined as source evidence and reconciled through a transparent versioned amendment if they materially contradict this specification.
 
-## 11. Decision record
+## 11. Version 1.5 extension
+
+The [Modern Vernacular v1.5 Permission specification](arcane-modern-vernacular-v1.5-permission.md) introduces yemi as a modern permission-status modal. It is distinct from fam (ability), kong (desire) and tek (practical need). It uses the subject-controlled modal-action pattern, allows positive polar questions with pun, and preserves the action verb's existing frame. It does not identify a grantor, entail action or consent, or license negation, prohibition, modal stacking or a separate grantor argument. The inspected v5 draft lexicon had no exact yemi or permission/allow/permit entry for this construction; this is a bounded collision check, not proof that no uninspected source contains the form.
+
+This closes a bounded permission-status construction. Explicit granting, prohibition, permission negation and consent remain open or blocked. Historical Arcane remains unchanged; recovered source material should be compared transparently if Arcana Mega Pack2 becomes accessible.
+
+## 12. Decision record
 
 - **Ledger ID:** MV1-DECISION-LEDGER-01
 - **Authority:** Modern Vernacular v1.0 locked core
