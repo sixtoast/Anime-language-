@@ -124,7 +124,13 @@ The [Modern Vernacular v1.5 Permission specification](arcane-modern-vernacular-v
 
 This closes a bounded permission-status construction. Explicit granting, prohibition, permission negation and consent remain open or blocked. Historical Arcane remains unchanged; recovered source material should be compared transparently if Arcana Mega Pack2 becomes accessible.
 
-## 12. Decision record
+## 12. Version 1.6 extension
+
+The [Modern Vernacular v1.6 Modal Negation and Prohibition specification](arcane-modern-vernacular-v1.6-modal-negation-and-prohibition.md) defines scope in modal constructions: nava before the modal negates the modal proposition; nava immediately before the action verb negates the action within modal scope. It introduces zami as a modern coinage for explicit prohibition, distinct from inability (fam) and absence of permission (nava yemi). Positive and negative modal/prohibition propositions may take pun; the question particle does not alter scope. Modal stacking, negated zami and zami+yemi combinations remain blocked. The v5 lexicon check found no exact zami entry; this is not proof of absence from uninspected historical sources.
+
+This closes the bounded modal-negation and prohibition construction at specification level. Parser and independent-speaker validation are not claimed. Historical and Formal Arcane remain unchanged; if Arcana Mega Pack2 becomes accessible, relevant evidence should be recorded and compared before any amendment.
+
+## 13. Decision record
 
 - **Ledger ID:** MV1-DECISION-LEDGER-01
 - **Authority:** Modern Vernacular v1.0 locked core
