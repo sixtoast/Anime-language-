@@ -112,7 +112,13 @@ The [Modern Vernacular v1.3 Motion and Routes specification](arcane-modern-verna
 
 Questions for destination/source/route, multiple same-role phrases, tense/aspect, manner and general spatial adpositions remain blocked. This closes a bounded motion construction, not the full spatial grammar.
 
-## 10. Decision record
+## 10. Version 1.4 extension
+
+The [Modern Vernacular v1.4 Modality and Intention specification](arcane-modern-vernacular-v1.4-modality-and-intention.md) locks a bounded modal construction: subject + fam/kong/tek + a licensed action frame, with the modal subject controlling the action subject. Fam means ability/capacity, kong means desire, and tek means practical or goal-dependent need; permission, moral/legal obligation and guaranteed action are not implied. Kong and tek may also take bounded noun-phrase complements, while fam may not. Positive modal constructions can take pun; nava with modals is deliberately blocked until scope is specified. Existing action frames and their role markers remain binding.
+
+This closes a bounded part of the modality work package. Negative modality, permission, obligation, different-subject complements, unrestricted propositional embedding, tense/aspect and other mood meanings remain open or blocked. The modern design decision does not establish historical attestation; newly recovered old documents must be examined as source evidence and reconciled through a transparent versioned amendment if they materially contradict this specification.
+
+## 11. Decision record
 
 - **Ledger ID:** MV1-DECISION-LEDGER-01
 - **Authority:** Modern Vernacular v1.0 locked core
