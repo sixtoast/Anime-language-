@@ -101,13 +101,25 @@ Questions asking “to whom?”, “from whom?”, or questions combining multip
 | TR-11 | teshi nava bul li fape ka fezo pun | BLOCKED: negative polar question remains unsupported |
 | TR-12 | teshi bul li fape ka fezo nava | BLOCKED: clause-final negation not licensed |
 
-## 8. Compatibility and limits
+## 8. Source-form collision clarification (Mega Pack2 audit)
+
+The Phase 5 v5 draft lexicon in Mega Pack2 confirms two exact-form collisions that must be preserved rather than ignored:
+
+- `ka` is also a Shared / CANON / v3.0-L axis token glossed `-Z`.
+- `du` is also the Shared / CANON / v3.0-L digit `7`.
+- `li` has no exact entry in the inspected v5 draft lexicon; its transfer-item role remains a modern design coinage.
+
+These source meanings are not deleted or globally renamed. In Modern Vernacular v1.2, `ka` is interpreted as RECIPIENT only in the licensed give-frame slot immediately before the recipient noun phrase. `du` is interpreted as SOURCE only in the licensed take/receive-frame slot immediately before the source noun phrase. Outside those exact slots, neither token may be assumed to have a transfer-role meaning. In Formal spatial contexts, `ka` retains its axis meaning; in valid numeric notation, `du` retains its digit meaning and must obey the applicable numeral-boundary rules. This is a register/slot restriction, not a claim that the strings are globally unambiguous.
+
+Future parsers must test both the intended transfer reading and the preserved axis/digit readings. The current grammar specification has not itself been parser-validated.
+
+## 9. Compatibility and limits
 
 This extension leaves v1.0/v1.1 constructions unchanged. ka, du and li are only licensed in the transfer patterns above; they are not yet general-purpose adpositions or universal case markers. Do not use them for motion goals, locations, instruments, beneficiaries or possession without a separate specification.
 
 This extension describes intended transfer-event roles. It does not encode tense, aspect, successful delivery, ownership change, permission, consent, or moral judgement. Those are separate meanings.
 
-## 9. Decision record
+## 10. Decision record
 
 - **Lock ID:** MV1.2-TRANSFER-01
 - **Version:** Modern Vernacular v1.2
