@@ -140,7 +140,11 @@ This closes a bounded speech-act layer, not the full imperative, politeness, aut
 
 The [Modern Vernacular v1.8 Clause Coordination and Causal Links specification](arcane-modern-vernacular-v1.8-clause-linking.md) adds lena (and, non-causal coordination), savi (because, following clause gives the reason for the preceding clause), and doru (therefore/as a result, following clause is the consequence of the preceding clause). Each side must be an independently licensed complete clause; participants remain clause-local. The linkers mark the speaker's asserted relation but do not prove its objective truth. Directive coordination, nested linkers, ambiguous broad question scope, conditionals, temporal sequence and reported speech remain blocked. Exact-form checks found no entries for lena, savi or doru in the inspected v5 draft lexicon; this is not a claim about uninspected sources. No parser or independent-speaker validation is claimed.
 
-## 15. Decision record
+## 15. Version 1.9 extension
+
+The [Modern Vernacular v1.9 Conditions, Hypotheses and Consequences specification](arcane-modern-vernacular-v1.9-conditionals-and-hypotheses.md) adds navi (IF), saku (THEN/conditional consequence), and ravi (SUPPOSE). The core conditional is navi CONDITION saku CONSEQUENCE; both clauses must be independently licensed and the condition is not thereby asserted as actual. ravi is restricted to a written supposition followed by an explicitly marked navi…saku conditional, with a semicolon used in teaching notation to make the boundary visible. Conditional, causal (savi) and inferential/consequence (doru) constructions remain distinct. Nested conditionals, directive conditionals, conditional questions, broad conditional negation scope and external coordination remain blocked. Exact-form checks found no entries for navi, saku or ravi in the inspected v5 draft lexicon; this is not a claim about uninspected historical sources. Parser and independent-speaker validation are not claimed.
+
+## 16. Decision record
 
 - **Ledger ID:** MV1-DECISION-LEDGER-01
 - **Authority:** Modern Vernacular v1.0 locked core
