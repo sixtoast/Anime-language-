@@ -1,0 +1,154 @@
+name: Inspect Arcana Mega Pack2 archive
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/inspect-megapack2.yml"
+      - "docs/Arcana megapack2.zip"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  inspect-megapack2:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+
+      - name: Inventory and index archive without executing members
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import collections, datetime, hashlib, io, json, pathlib, zipfile, xml.etree.ElementTree as ET
+
+          archive = pathlib.Path("docs/Arcana megapack2.zip")
+          report = pathlib.Path("sources/archive-reports/megapack2-report.md")
+          index = pathlib.Path("sources/archive-reports/megapack2-text-index.md")
+          report.parent.mkdir(parents=True, exist_ok=True)
+          if not archive.is_file():
+              raise SystemExit(f"Archive not found: {archive}")
+
+          MAX_MEMBER = 10 * 1024 * 1024
+          MAX_TOTAL = 50 * 1024 * 1024
+          text_exts = {".md", ".txt", ".csv", ".json", ".py", ".ts", ".tsx", ".js", ".yaml", ".yml", ".xml", ".html", ".css"}
+          entries = []
+          docs = []
+          errors = []
+          digests = collections.defaultdict(list)
+          total_uncompressed = 0
+
+          with zipfile.ZipFile(archive) as zf:
+              infos = [info for info in zf.infolist() if not info.is_dir()]
+              for info in infos:
+                  name = info.filename
+                  total_uncompressed += info.file_size
+                  if info.file_size > MAX_MEMBER or total_uncompressed > MAX_TOTAL:
+                      entries.append({"name": name, "size": info.file_size, "compressed": info.compress_size, "sha": "SKIPPED_SIZE_LIMIT", "crc": info.CRC, "kind": pathlib.PurePosixPath(name).suffix.lower()})
+                      errors.append((name, "Skipped because archive member/total size limit was reached"))
+                      continue
+                  try:
+                      raw = zf.read(info)
+                      digest = hashlib.sha256(raw).hexdigest()
+                      digests[digest].append(name)
+                      suffix = pathlib.PurePosixPath(name).suffix.lower()
+                      entries.append({"name": name, "size": info.file_size, "compressed": info.compress_size, "sha": digest, "crc": info.CRC, "kind": suffix})
+                      if name.startswith("__MACOSX/") or suffix == ".pyc":
+                          continue
+                      extracted = ""
+                      kind = suffix[1:].upper() if suffix else "UNKNOWN"
+                      if suffix in text_exts:
+                          extracted = raw.decode("utf-8-sig", errors="replace")
+                      elif suffix == ".docx":
+                          try:
+                              with zipfile.ZipFile(io.BytesIO(raw)) as docx:
+                                  xml = docx.read("word/document.xml")
+                              root = ET.fromstring(xml)
+                              ns = {"w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main"}
+                              paragraphs = []
+                              for paragraph in root.findall(".//w:p", ns):
+                                  value = "".join(node.text or "" for node in paragraph.findall(".//w:t", ns))
+                                  if value.strip():
+                                      paragraphs.append(value)
+                              extracted = "\n".join(paragraphs)
+                              kind = "DOCX TEXT"
+                          except Exception as exc:
+                              errors.append((name, "DOCX extraction: " + str(exc)))
+                      elif suffix == ".pdf":
+                          kind = "PDF (not text-extracted in this pass)"
+                      if extracted.strip():
+                          docs.append({"name": name, "sha": digest, "kind": kind, "text": extracted.replace("\r\n", "\n").replace("\r", "\n")})
+                  except Exception as exc:
+                      errors.append((name, str(exc)))
+                      entries.append({"name": name, "size": info.file_size, "compressed": info.compress_size, "sha": "UNREADABLE", "crc": info.CRC, "kind": pathlib.PurePosixPath(name).suffix.lower()})
+
+          duplicate_groups = [(digest, names) for digest, names in digests.items() if len(names) > 1]
+          stamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
+          report_lines = [
+              "# Arcana Mega Pack2 — Archive Inspection", "",
+              f"- Inspection date (UTC): {stamp}",
+              f"- Archive: `{archive}`",
+              f"- Archive bytes: {archive.stat().st_size}",
+              f"- Non-directory entries: {len(entries)}",
+              f"- Total declared uncompressed bytes: {total_uncompressed}",
+              f"- Exact duplicate groups: {len(duplicate_groups)}",
+              f"- Unique readable text documents: {len(docs)}",
+              f"- Errors or size-limit skips: {len(errors)}", "",
+              "## Safety and scope", "",
+              "Archive members were read in memory; no member was extracted to a path or executed. Individual members above 10 MiB or archives exceeding the 50 MiB cumulative processing limit are skipped. DOCX document text is extracted from its XML. PDF text extraction is not included in this pass. Duplicate content is evidence of byte identity, not permission to delete files.", "",
+              "## Exact duplicate groups", ""
+          ]
+          if duplicate_groups:
+              for digest, names in sorted(duplicate_groups, key=lambda item: item[1][0].lower()):
+                  report_lines.append(f"- SHA-256 `{digest}`")
+                  report_lines.extend(f"  - `{name}`" for name in sorted(names))
+          else:
+              report_lines.append("No byte-identical groups found.")
+          report_lines += ["", "## Full archive manifest", "", "| Member | Bytes | Compressed bytes | CRC32 | SHA-256 |", "|---|---:|---:|---|---|"]
+          for entry in sorted(entries, key=lambda item: item["name"].lower()):
+              safe = entry["name"].replace("|", "\\|").replace("\n", " ")
+              report_lines.append(f"| `{safe}` | {entry['size']} | {entry['compressed']} | `{entry['crc']:08x}` | `{entry['sha']}` |")
+          if errors:
+              report_lines += ["", "## Extraction errors and skipped entries", ""]
+              report_lines.extend(f"- `{name}`: {error}" for name, error in errors)
+          report.write_text("\n".join(report_lines) + "\n", encoding="utf-8")
+
+          docs.sort(key=lambda item: item["name"].lower())
+          index_lines = [
+              "# Arcana Mega Pack2 — Searchable Text Index", "",
+              f"- Generated (UTC): {stamp}",
+              f"- Source archive: `{archive}`",
+              f"- Unique readable text documents: {len(docs)}",
+              f"- Extraction errors or skips: {len(errors)}", "",
+              "## Scope", "",
+              "This is a search and review aid, not a canon decision. Duplicate byte-identical documents are indexed once; their archive names remain visible in the manifest. Scripts are treated as text and never executed. PDF text is not extracted in this pass.", ""
+          ]
+          for doc in docs:
+              index_lines += [
+                  f"## {doc['name']}", "",
+                  f"- Type: {doc['kind']}",
+                  f"- SHA-256: `{doc['sha']}`",
+                  f"- Extracted characters: {len(doc['text'])}", "",
+                  "~~~text", doc["text"], "~~~", ""
+              ]
+          index.write_text("\n".join(index_lines) + "\n", encoding="utf-8")
+          print(json.dumps({"archive": str(archive), "entries": len(entries), "duplicate_groups": len(duplicate_groups), "indexed_documents": len(docs), "errors_or_skips": len(errors), "report": str(report), "index": str(index)}, indent=2))
+          PY
+
+      - name: Commit Mega Pack2 inspection outputs
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add sources/archive-reports/megapack2-report.md sources/archive-reports/megapack2-text-index.md
+          if git diff --cached --quiet; then
+            echo "No report changes to commit."
+          else
+            git commit -m "docs: inspect Arcana Mega Pack2 archive"
+            git push origin HEAD:main
+          fi
