@@ -103,3 +103,14 @@ Mega Pack2 is now located and indexed. It supplies valuable provenance for the P
 3. **Executable implementation status** — what a specific parser/runtime actually accepts and has tested.
 
 The most actionable new evidence for the ongoing language work is the existing Phase 5 pair `don` (“already/done”) and `kok` (“ongoing”). These can support a small aspect system without inventing new forms or pretending that the Phase 4 Formal temporal proposals are already Vernacular canon.
+
+
+## 7. Follow-on design decision: Modern Vernacular v2.1
+
+The Phase 5 generator defines `now`, `before` and `after` in its `SHARED` map by retrieving the Phase 4 forms from the formal lexicon. The merged v5 lexicon, however, labels `boni`, `vote` and `fuwo` as Formal / PROPOSED / Phase 4. The generator's mechanical checks establish that these strings existed in its input and were used in sample generation; they do not reconcile the register labels or independently validate their suitability for everyday Vernacular. The source discrepancy therefore remains documented rather than silently resolved.
+
+Modern Vernacular v2.1 makes a separate, explicit design decision: `nemi` means NOW as a reference-time anchor; `pavo` orders two completed events with the first before the second; `sula` orders two completed events with the first after the second. An exact-form check against the indexed v5 CSV found no entries for these three forms. This is only a bounded collision check against that inspected file, not a claim of historical absence.
+
+The v2.1 rules intentionally require `don` for both clauses in event ordering and require `don` or `kok` with `nemi`. That makes the new system narrower than the English words “before” and “after” in general use, but prevents an unmarked clause from acquiring an undocumented temporal interpretation. Event ordering does not entail causation; both events are asserted rather than conditionally supposed. The new specification includes 16 acceptance/rejection fixtures; they are design fixtures only and have not been executed by a parser or tested with independent speakers.
+
+See [Modern Vernacular v2.1](../canon/arcane-modern-vernacular-v2.1-temporal-anchor-and-event-order.md) and the [decision ledger](../canon/modern-vernacular-v1.0-decision-ledger.md). No Formal Arcane or historical source entry was rewritten by this decision.
