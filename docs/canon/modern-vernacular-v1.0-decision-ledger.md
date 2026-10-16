@@ -95,7 +95,18 @@ This does not alter the v1.0 baseline. It closes part of VP-01 (verb frames). Mo
 
 **Current status:** v1.0 is a compatibility baseline; v1.1 adds these six verb frames. Neither claims independent speaker validation or parser execution.
 
-## 8. Decision record
+## 8. Version 1.2 extension
+
+The [Modern Vernacular v1.2 Transfer and Recipients specification](arcane-modern-vernacular-v1.2-transfer-and-recipients.md) locks a bounded transfer construction:
+- bul with an explicit li item and ka recipient for “give”;
+- bul with an explicit li item and du source for the recipient-centred “receive” frame;
+- lil with an explicit li item and du source for “take”.
+
+The particles ka, du and li are modern design coinages restricted to these frames. They are not yet general case markers or unrestricted adpositions. Questions for recipient/source roles remain blocked.
+
+This closes one bounded part of transfer-role design, not the full transfer/possession system. Ownership, possession, permission, consent, successful delivery and general recipient-question syntax remain open.
+
+## 9. Decision record
 
 - **Ledger ID:** MV1-DECISION-LEDGER-01
 - **Authority:** Modern Vernacular v1.0 locked core
