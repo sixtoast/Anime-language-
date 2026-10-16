@@ -136,7 +136,11 @@ The [Modern Vernacular v1.7 Directives, Requests, Advice and Instructions specif
 
 This closes a bounded speech-act layer, not the full imperative, politeness, authority, procedure sequencing or command-negation systems. Parser and independent-speaker validation are not claimed. Historical and Formal Arcane remain unchanged.
 
-## 14. Decision record
+## 14. Version 1.8 extension
+
+The [Modern Vernacular v1.8 Clause Coordination and Causal Links specification](arcane-modern-vernacular-v1.8-clause-linking.md) adds lena (and, non-causal coordination), savi (because, following clause gives the reason for the preceding clause), and doru (therefore/as a result, following clause is the consequence of the preceding clause). Each side must be an independently licensed complete clause; participants remain clause-local. The linkers mark the speaker's asserted relation but do not prove its objective truth. Directive coordination, nested linkers, ambiguous broad question scope, conditionals, temporal sequence and reported speech remain blocked. Exact-form checks found no entries for lena, savi or doru in the inspected v5 draft lexicon; this is not a claim about uninspected sources. No parser or independent-speaker validation is claimed.
+
+## 15. Decision record
 
 - **Ledger ID:** MV1-DECISION-LEDGER-01
 - **Authority:** Modern Vernacular v1.0 locked core
