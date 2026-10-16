@@ -41,9 +41,6 @@ The directive marker is not an ordinary subject and does not occupy the modal sl
 | sori nak rawu | Please listen/hear the sound. |
 | mira mol gisho | Recommendation: eat food. |
 | toku bul li fape ka fezo | Procedure step: give the book to the friend. |
-| sori ful tava gezi pun | Is it a request that you go home? — **blocked in v1.7**; see question restriction below. |
-
-The last row is intentionally labelled blocked: the examples above the line illustrate ordinary forms, but directive questions are not licensed in this version. It is retained here as an explicit negative fixture to prevent the apparent presence of pun from being mistaken for a rule.
 
 ## 3. Four meanings that must stay distinct
 
