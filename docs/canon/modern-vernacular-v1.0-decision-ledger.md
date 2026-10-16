@@ -158,3 +158,8 @@ The [Modern Vernacular v2.0 Completion and Ongoing Aspect specification](arcane-
 - **Authority:** Modern Vernacular v1.0 locked core
 - **Rule for reopening:** evidence, reproducible failure, internal contradiction, or explicit owner-requested versioned redesign
 - **Goal:** close work packages into usable grammar instead of multiplying provisional documents
+
+
+## 19. Version 2.1 extension
+
+The [Modern Vernacular v2.1 Temporal Anchor and Event Order specification](arcane-modern-vernacular-v2.1-temporal-anchor-and-event-order.md) introduces `nemi` (explicit current-time anchor), `pavo` (first completed event precedes the second), and `sula` (first completed event follows the second). These are modern design coinages after an exact-form check against the inspected Mega Pack2 v5 draft lexicon. `nemi` is restricted to aspect-marked clauses using `don` or `kok`; `pavo` and `sula` connect exactly two independently licensed completed-event clauses using `don`. Ongoing-event ordering, event chains, clock time, duration, deadlines, repetition and prediction remain blocked. Temporal order is distinct from causation and conditionality. Formal Phase 4 `boni`, `vote` and `fuwo` remain Formal / PROPOSED; the Phase 5 generator's shared mapping is recorded as a cross-register inconsistency, not a promotion into Vernacular canon. Sixteen specification fixtures are documented but have not been parser-executed or independently speaker-tested.
