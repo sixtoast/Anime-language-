@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "status": "proposed-test-matrix",
+  "scope": "provisional Phase 7W executable subset only; not canonical Arcane grammar",
+  "instructions": "Before enabling these fixtures, map each case to syntax actually supported by the checked-out parser. Cases marked conditional must be skipped or converted to deliberate-rejection tests if the feature is not implemented.",
+  "cases": [
+    {
+      "id": "EXPR-001",
+      "area": "arithmetic",
+      "purpose": "direct operator result",
+      "status": "required",
+      "note": "Use a supported binary arithmetic operator and assert the exact result."
+    },
+    {
+      "id": "EXPR-002",
+      "area": "precedence",
+      "purpose": "multiplication versus addition",
+      "status": "required-if-both-supported",
+      "note": "Choose operands so the conventional precedence parse and the alternative parse produce different results; derive expected behaviour from the implementation contract."
+    },
+    {
+      "id": "EXPR-003",
+      "area": "associativity",
+      "purpose": "repeated same-precedence operator",
+      "status": "required-if-supported",
+      "note": "Use a non-associative example such as subtraction to distinguish left and right grouping."
+    },
+    {
+      "id": "EXPR-004",
+      "area": "parentheses",
+      "purpose": "explicit grouping",
+      "status": "required-if-supported",
+      "note": "Show parentheses alter grouping when the grammar supports them."
+    },
+    {
+      "id": "EXPR-005",
+      "area": "nested-calls",
+      "purpose": "function call inside function argument",
+      "status": "required",
+      "note": "Checker and runtime must agree on valid nested calls."
+    },
+    {
+      "id": "EXPR-006",
+      "area": "arity",
+      "purpose": "wrong number of function arguments",
+      "status": "required",
+      "expected_error": "E_ARITY"
+    },
+    {
+      "id": "EXPR-007",
+      "area": "name-resolution",
+      "purpose": "unknown function name",
+      "status": "required",
+      "expected_error": "E_NAME"
+    },
+    {
+      "id": "EXPR-008",
+      "area": "syntax",
+      "purpose": "missing operand or delimiter",
+      "status": "required",
+      "expected_error": "E_SYNTAX"
+    },
+    {
+      "id": "EXPR-009",
+      "area": "runtime",
+      "purpose": "division by zero",
+      "status": "required-if-division-supported",
+      "expected_error": "E_DIV_ZERO"
+    },
+    {
+      "id": "EXPR-010",
+      "area": "limits",
+      "purpose": "recursion or statement-step guard",
+      "status": "required",
+      "expected_error": "E_LIMIT"
+    },
+    {
+      "id": "EXPR-011",
+      "area": "checker-runtime-parity",
+      "purpose": "same malformed input is rejected consistently",
+      "status": "required",
+      "note": "Compare error category and phase; exact wording may differ if documented."
+    },
+    {
+      "id": "EXPR-012",
+      "area": "source-location",
+      "purpose": "diagnostic includes real source location when available",
+      "status": "required-if-source-spans-exist",
+      "note": "Never invent line or column information."
+    }
+  ]
+}
