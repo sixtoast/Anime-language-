@@ -164,7 +164,7 @@ test.describe("Playground Phase 6G parser integration", () => {
     await expect(browser.locator(".fixture-browser-meta").first()).toContainText("BUDGET-EXCEEDED");
     await select.selectOption("RES19-26");
     await expect(browser.locator(".fixture-browser-meta").first()).toContainText("no implicit conversion");
-    await expect(browser).toContainText("does not demonstrate physical feasibility");
+    await expect(browser).toContainText("do not demonstrate physical feasibility");
     await expect(browser).not.toContainText("Parse resource fixture");
   });
 
