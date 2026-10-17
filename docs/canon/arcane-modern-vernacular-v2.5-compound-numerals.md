@@ -76,7 +76,7 @@ The v2.4 licensing list and restrictions remain in force:
 - no `kok), no `nava), no modal predicates, no directives, no bare nouns or incomplete clauses;
 - no stacking with qualitative markers `melo` or `runi`;
 - no second duration phrase in the same clause;
-- `nela) must precede the complete numeric quantity;
+- `nela` must precede the complete numeric quantity;
 - a positive polar question may append `pun` to the complete clause;
 - a numeric travel duration does not assert arrival, and a transfer duration does not prove successful delivery, consent or ownership change.
 
