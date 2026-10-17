@@ -70,3 +70,6 @@
 .next-task-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}
 .next-task-caveat{margin:13px 0 0;padding-top:11px;border-top:1px solid #302e36;color:#928d9a;font-size:10px;line-height:1.7}
 @media(max-width:760px){.next-task-panel{padding:13px}.next-task-heading{flex-direction:column}.next-task-grid{grid-template-columns:1fr}.next-task-actions{align-items:stretch;flex-direction:column}.next-task-actions .secondary-button{justify-content:center}}
+
+/* Keep the sticky header within narrow mobile viewports; neither breadcrumb text nor the version chip may force document overflow. */
+@media(max-width:420px){.topbar{gap:8px;min-width:0}.breadcrumbs{flex:1;min-width:0;overflow:hidden;white-space:nowrap}.breadcrumbs>span:first-of-type{min-width:0;overflow:hidden;text-overflow:ellipsis}.topbar-actions{flex-shrink:0;min-width:0}.version-chip{max-width:105px}}
