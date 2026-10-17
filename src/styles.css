@@ -73,3 +73,27 @@
 
 /* Keep the sticky header within narrow mobile viewports; neither breadcrumb text nor the version chip may force document overflow. */
 @media(max-width:420px){.topbar{gap:8px;min-width:0}.breadcrumbs{flex:1;min-width:0;overflow:hidden;white-space:nowrap}.breadcrumbs>span:first-of-type{min-width:0;overflow:hidden;text-overflow:ellipsis}.topbar-actions{flex-shrink:0;min-width:0}.version-chip{max-width:105px}}
+
+
+/* Provenance-aware exact-form lookup for the bundled draft lexicon. */
+.lexicon-inspector{margin-top:16px;border:1px solid #303136;border-radius:8px;background:#151618;padding:16px;min-width:0}
+.lexicon-inspector-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.lexicon-inspector-head>div{min-width:0}
+.lexicon-inspector-head h2{font:600 18px var(--display);letter-spacing:-.35px;color:#e9e5f0;margin:6px 0}
+.lexicon-inspector-head p{font-size:11px;line-height:1.7;color:#9995a2;margin:0;max-width:650px}
+.lexicon-inspector-head>a{font-size:10px;color:#c2b0fa;white-space:nowrap;padding-top:3px}
+.lexicon-query-label{display:flex;flex-direction:column;gap:6px;margin:15px 0 12px;font:9px var(--mono);letter-spacing:.6px;color:#a7a1b2}
+.lexicon-query-label input{width:100%;min-width:0;background:#101113;border:1px solid #3a3b41;border-radius:5px;color:#e7e2ef;padding:10px 11px;font:12px var(--mono);outline:none}
+.lexicon-query-label input:focus{border-color:#8270b5;box-shadow:0 0 0 2px #8270b522}
+.lexicon-record-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.lexicon-record-grid>div{min-width:0;border:1px solid #2c2d32;border-radius:6px;background:#191a1d;padding:10px}
+.lexicon-record-grid>div>span{display:block;font:9px var(--mono);letter-spacing:.5px;color:#898794;margin-bottom:6px}
+.lexicon-record-grid>div>strong{display:block;color:#dcd7e5;font-size:11px;line-height:1.65;font-weight:500;overflow-wrap:anywhere;white-space:pre-wrap}
+.lexicon-record-grid .lexicon-record-wide{grid-column:1/-1}
+.lexicon-warning,.lexicon-alias{margin:11px 0 0;padding:10px 11px;border-radius:5px;font-size:10px;line-height:1.7;overflow-wrap:anywhere}
+.lexicon-warning{border:1px solid #59462f;background:#211d18;color:#e2c18a}
+.lexicon-alias{border:1px solid #393047;background:#1f1b27;color:#c6b5ec}
+.lexicon-alias strong{color:#e0d3f7}
+.lexicon-empty{margin:0;padding:13px;border:1px dashed #3b3b42;border-radius:5px;color:#a5a1ad;font-size:11px;line-height:1.7;overflow-wrap:anywhere}
+.lexicon-provenance{margin:12px 0 0;padding-top:10px;border-top:1px solid #2d2e33;color:#8d8995;font-size:9px;line-height:1.7;overflow-wrap:anywhere}
+@media(max-width:520px){.lexicon-inspector{padding:12px}.lexicon-inspector-head{flex-direction:column;gap:8px}.lexicon-record-grid{grid-template-columns:1fr}.lexicon-record-grid .lexicon-record-wide{grid-column:auto}.lexicon-inspector-head>a{white-space:normal}}
