@@ -123,3 +123,12 @@ The v5 draft lexicon labels `wela` (“duration”) Formal / PROPOSED / Phase 4.
 The new grammar deliberately covers qualitative duration only for affirmative completed-event clauses. It does not assign numeric units, a universal threshold for “short” or “long”, or a duration-so-far reading for ongoing events. It blocks combinations with negation in this version to avoid unanalysed scope readings. The specification includes 16 design fixtures, not parser or independent-speaker results.
 
 See [Modern Vernacular v2.2](../canon/arcane-modern-vernacular-v2.2-qualitative-duration.md) and the [decision ledger](../canon/modern-vernacular-v1.0-decision-ledger.md). No Formal Arcane or historical source entry was rewritten.
+
+
+## 9. Follow-on design decision: Modern Vernacular v2.3
+
+The inspected v5 draft lexicon labels `kole` (“until”) and `shasu` (“delay; offset before start”) Formal / PROPOSED / Phase 4. Their use in Phase 5's shared-word mapping does not reconcile those labels. Modern Vernacular v2.3 therefore introduces `seno` (“wait”) and `kavi` (“until”) as new modern forms after exact-form checks against the inspected v5 draft lexicon found no entries for either. This is a bounded collision check, not evidence of historical absence from all Arcane material.
+
+The only licensed endpoint construction is an ongoing `seno` clause followed by `kavi` and a completed `zem` (“come”) clause. This deliberately narrow rule avoids implying that any arbitrary event can serve as an endpoint before its event structure and completion meaning have been specified. Aspect and qualitative-duration rules are explicitly extended to `seno` within their existing boundaries. The specification includes 18 design fixtures, not parser or independent-speaker results.
+
+Delay is deliberately left unresolved: an offset-before-start needs a baseline/expected start and an offset representation. A word meaning merely “later” would not define these. See [Modern Vernacular v2.3](../canon/arcane-modern-vernacular-v2.3-waiting-and-until.md) and the [decision ledger](../canon/modern-vernacular-v1.0-decision-ledger.md).
