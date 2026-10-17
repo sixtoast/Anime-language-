@@ -119,3 +119,12 @@
 .fixture-browser-actions>span{font-size:9px;color:#8e8995}
 .fixture-browser-caveat{border-top:1px solid #302d36;padding-top:9px;margin-bottom:0;color:#898491}
 @media(max-width:520px){.fixture-browser{padding:12px}.fixture-browser-head{align-items:flex-start;flex-direction:column}.fixture-browser-meta{grid-template-columns:1fr}.fixture-browser-actions{align-items:stretch;flex-direction:column}.fixture-browser-actions .secondary-button{justify-content:center}}
+
+
+/* Resource specification fixtures are source expectations, never simulated execution. */
+.resource-fixture-browser{border-color:#3b3546;background:#17151b}
+.resource-fixture-browser .fixture-browser-head h2{max-width:520px}
+.resource-fixture-browser .fixture-browser-meta .fixture-browser-meta-wide{grid-column:1/-1}
+.resource-fixture-browser .fixture-browser-actions a.secondary-button{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;min-height:32px}
+.resource-fixture-browser .fixture-browser-caveat{color:#b6a5d8}
+@media(max-width:520px){.resource-fixture-browser .fixture-browser-meta .fixture-browser-meta-wide{grid-column:auto}.resource-fixture-browser .fixture-browser-actions a.secondary-button{width:100%;text-align:center;white-space:normal}}
