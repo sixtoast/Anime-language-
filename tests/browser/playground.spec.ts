@@ -144,6 +144,41 @@ test.describe("Playground Phase 6G parser integration", () => {
     await expect(page.locator(".analysis-output")).toContainText("UNTERMINATED_NUMERAL");
   });
 
+  test("browses all resource-accounting design fixtures without running a spell", async ({ page }) => {
+    await openPlayground(page);
+    const browser = page.locator(".resource-fixture-browser");
+    await expect(browser.getByRole("heading", { name: "Incantation resource-accounting fixtures" })).toBeVisible();
+    await expect(browser.getByText("60 design cases")).toBeVisible();
+    await expect(browser).toContainText("not runs of a resource evaluator");
+    await expect(browser.getByRole("link", { name: "Open full v1.9 specification" })).toHaveAttribute("href", /arcane-incantations-v1.9-resource-accounting-and-conservation-contracts/);
+    await expect(browser.getByRole("combobox", { name: "Choose resource-accounting specification fixture" }).locator("option")).toHaveCount(60);
+    await expect(browser).not.toContainText("RESOURCE-RECONCILED");
+  });
+
+  test("shows selected expected outcomes while retaining the non-runtime caveat", async ({ page }) => {
+    await openPlayground(page);
+    const browser = page.locator(".resource-fixture-browser");
+    const select = browser.getByRole("combobox", { name: "Choose resource-accounting specification fixture" });
+    await select.selectOption("RES19-10");
+    await expect(browser.locator(".fixture-browser-meta")).toContainText("RES19-10");
+    await expect(browser.locator(".fixture-browser-meta")).toContainText("BUDGET-EXCEEDED");
+    await select.selectOption("RES19-26");
+    await expect(browser.locator(".fixture-browser-meta")).toContainText("no implicit conversion");
+    await expect(browser).toContainText("does not demonstrate physical feasibility");
+    await expect(browser).not.toContainText("Parse resource fixture");
+  });
+
+  test("keeps the resource specification browser within a 360px viewport", async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 800 });
+    await openPlayground(page);
+    await page.locator(".resource-fixture-browser").getByRole("combobox", { name: "Choose resource-accounting specification fixture" }).selectOption("RES19-60");
+    const sizes = await page.evaluate(() => ({
+      viewport: document.documentElement.clientWidth,
+      page: document.documentElement.scrollWidth
+    }));
+    expect(sizes.page, "Resource specification browser should not overflow at 360px").toBeLessThanOrEqual(sizes.viewport);
+  });
+
   test("shows conditional source expectations without relabelling them as canonical", async ({ page }) => {
     await openPlayground(page);
     const fixtureSelect = page.getByRole("combobox", { name: "Choose Phase 6G source fixture" });
