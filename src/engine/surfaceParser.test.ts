@@ -20,7 +20,10 @@ describe("parseSurfaceExpression — provisional Phase 6G subset", () => {
     expect(result.ok).toBe(true);
     expect(result.ast).toMatchObject({
       kind: "call",
-      args: [{ kind: "quantity", value: "0.2", unit: "MA" }]
+      args: [
+        { kind: "quantity", value: "0.2", unit: "MA" },
+        { kind: "quantity", value: "1", unit: "SHO" }
+      ]
     });
   });
 
