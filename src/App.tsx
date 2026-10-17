@@ -256,7 +256,7 @@ function App() {
               <div><span>WHY THIS IS NEXT</span><p>It closes the gap between passing data-level tests and a usable, traceable source library. The latest CI build passed, while browser behaviour has not yet been verified.</p></div>
               <div><span>DEPENDENCIES</span><p>Current catalogue and filter implementation; a browser session or browser automation environment. No engine changes are needed.</p></div>
               <div><span>FILES / SURFACES</span><p><code>src/App.tsx</code>, <code>src/documentationCatalogue.ts</code>, <code>src/styles.css</code>, and <code>src/documentationCatalogue.test.ts</code>.</p></div>
-              <div><span>ACCEPTANCE CRITERIA</span><p>Search and both filters combine and reset correctly; the selected detail follows visible results; all 19 source links open the intended repository path; empty results are understandable; desktop and mobile layouts have no harmful overflow.</p></div>
+              <div><span>ACCEPTANCE CRITERIA</span><p>Search and both filters combine and reset correctly; the selected detail follows visible results; all 28 source links open the intended repository path; empty results are understandable; desktop and mobile layouts have no harmful overflow.</p></div>
             </div>
             <div className="next-task-actions">
               <button className="secondary-button" onClick={() => changeSection("Documentation")}>Inspect source library <span aria-hidden="true">→</span></button>
