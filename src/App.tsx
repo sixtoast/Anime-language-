@@ -257,22 +257,22 @@ function App() {
           </div>
           <section className="next-task-panel" aria-labelledby="next-task-title">
             <div className="next-task-heading">
-              <div><div className="eyebrow"><CheckCircle2 size={13}/> RECOMMENDED NEXT · WEB-DOC-01 / WEB-DOC-02</div><h2 id="next-task-title">Verify the source library in a real browser</h2></div>
+              <div><div className="eyebrow"><CheckCircle2 size={13}/> RECOMMENDED NEXT · WEB-OV-03 / WEB-UX-02</div><h2 id="next-task-title">Verify live health signals and recovery states</h2></div>
               <span className="next-task-priority">HIGH PRIORITY</span>
             </div>
-            <p className="next-task-summary">The catalogue now has combined search, status and provenance filters, plus repository-path regression coverage. The remaining release-critical gap is user-facing acceptance: confirm that filtering, selection, source links and narrow-screen layouts behave correctly in the running website.</p>
+            <p className="next-task-summary">The source catalogue and its browser acceptance suite now pass in CI. The next reliability gap is the Overview cockpit: confirm it reports the correct commit, separates workflow/build/report health, and remains useful when one external status endpoint fails.</p>
             <div className="next-task-grid">
-              <div><span>WHY THIS IS NEXT</span><p>It closes the gap between passing data-level tests and a usable, traceable source library. The latest CI build passed, while browser behaviour has not yet been verified.</p></div>
-              <div><span>DEPENDENCIES</span><p>Current catalogue and filter implementation; a browser session or browser automation environment. No engine changes are needed.</p></div>
+              <div><span>WHY THIS IS NEXT</span><p>The last CI run passed the test suite, production build and catalogue browser checks. This task extends browser acceptance to the live-health panel so stale reports and partial network failures cannot be mistaken for a healthy, current release.</p></div>
+              <div><span>DEPENDENCIES</span><p>Existing GitHub Actions status loader, per-test report endpoint and Playwright browser harness. No Arcane grammar or parser changes are needed.</p></div>
               <div><span>FILES / SURFACES</span><p><code>src/App.tsx</code>, <code>src/documentationCatalogue.ts</code>, <code>src/styles.css</code>, and <code>src/documentationCatalogue.test.ts</code>.</p></div>
-              <div><span>ACCEPTANCE CRITERIA</span><p>Search and both filters combine and reset correctly; the selected detail follows visible results; all 28 source links open the intended repository path; empty results are understandable; desktop and mobile layouts have no harmful overflow.</p></div>
+              <div><span>ACCEPTANCE CRITERIA</span><p>A successful workflow and matching report show the same commit; a stale report is explicitly flagged; a failed workflow endpoint does not hide a valid per-test report; failed build state is distinct from workflow state; Overview remains usable at 360px.</p></div>
             </div>
             <div className="next-task-actions">
-              <button className="secondary-button" onClick={() => changeSection("Documentation")}>Inspect source library <span aria-hidden="true">→</span></button>
+              <button className="secondary-button" onClick={() => changeSection("Test suite")}>Inspect status evidence <span aria-hidden="true">→</span></button>
               <button className="secondary-button" onClick={() => changeSection("Test suite")}>Review CI evidence <span aria-hidden="true">→</span></button>
               <a className="secondary-button" href="https://github.com/sixtoast/Anime-language-/blob/main/docs/WEBSITE-FEATURE-REGISTER.md" target="_blank" rel="noreferrer">Open feature register <span aria-hidden="true">↗</span></a>
             </div>
-            <p className="next-task-caveat">Status: implemented as a recommendation, not a completed task. Browser acceptance remains pending; this card does not claim that the catalogue is verified.</p>
+            <p className="next-task-caveat">Status: next acceptance task. Catalogue browser checks passed in CI; the new Overview-specific checks must pass before the cockpit is marked verified.</p>
           </section>
           <div className="section-heading"><div><div className="eyebrow">WORKSPACE</div><h2>Everything in one place</h2></div><span className="section-caption">SOURCE RECOVERY · PHASE 01</span></div>
           <div className="feature-grid">
