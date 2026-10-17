@@ -10,13 +10,13 @@ const suite = fixtureData as {
 describe("recovered Phase 6G fixture observations", () => {
   const audit = auditPhase6GFixtures(suite.suiteId, suite.cases);
 
-  it("produces exactly one observation for each recovered stable fixture ID", () => {
+  it("[FIX-001] produces exactly one observation for each recovered stable fixture ID", () => {
     expect(audit.fixtureCount).toBe(suite.cases.length);
     expect(audit.observations.map((item) => item.id)).toEqual(suite.cases.map((item) => item.id));
     expect(new Set(audit.observations.map((item) => item.id)).size).toBe(suite.cases.length);
   });
 
-  it("checks expected root-node kinds for directly accepted fixtures", () => {
+  it("[FIX-002] checks expected root-node kinds for directly accepted fixtures", () => {
     const cases: Phase6GFixture[] = [
       { id: "NODE-001", category: "numeral", label: "correct quantity root", input: "ki sho", expected: "accept", expectedNode: "QuantityLiteral", canonStatus: "provisional" },
       { id: "NODE-002", category: "numeral", label: "incorrect expected root", input: "ki sho", expected: "accept", expectedNode: "Call", canonStatus: "provisional" }
@@ -28,7 +28,7 @@ describe("recovered Phase 6G fixture observations", () => {
     expect(audit.directMismatches).toBe(1);
   });
 
-  it("probes recovered identifier fixtures in the KWAT identifier slot without changing their input", () => {
+  it("[FIX-003] probes recovered identifier fixtures in the KWAT identifier slot without changing their input", () => {
     const acceptedIdentifier = audit.observations.find((item) => item.id === "P6G-FX-005");
     const rejectedIdentifier = audit.observations.find((item) => item.id === "P6G-FX-006");
     expect(acceptedIdentifier?.input).toBe("KI TO SHO");
@@ -39,7 +39,7 @@ describe("recovered Phase 6G fixture observations", () => {
     expect(rejectedIdentifier?.comparison).toBe("context-dependent");
   });
 
-  it("compares only explicitly mapped historical diagnostic families", () => {
+  it("[FIX-004] compares only explicitly mapped historical diagnostic families", () => {
     const byId = (id: string) => audit.observations.find((item) => item.id === id);
     expect(byId("P6G-FX-003")?.errorFamilyComparison).toBe("match");
     expect(byId("P6G-FX-004")?.errorFamilyComparison).toBe("match");
@@ -60,7 +60,7 @@ describe("recovered Phase 6G fixture observations", () => {
     expect(byId("P6G-FX-008")?.errorFamilyComparison).toBeUndefined();
   });
 
-  it("records a control call containing a block without treating its signature as approved", () => {
+  it("[FIX-005] records a control call containing a block without treating its signature as approved", () => {
     const controlCase = audit.observations.find((item) => item.id === "P6G-FX-008");
     expect(controlCase?.observedShape).toBe("Call-with-Block");
     expect(controlCase?.comparison).toBe("context-dependent");
@@ -68,20 +68,20 @@ describe("recovered Phase 6G fixture observations", () => {
     expect(audit.canonEffect).toBe("none");
   });
 
-  it("records current alias-normalisation behaviour only when explicitly enabled for the fixture", () => {
+  it("[FIX-006] records current alias-normalisation behaviour only when explicitly enabled for the fixture", () => {
     const aliasCase = audit.observations.find((item) => item.id === "P6G-FX-014");
     expect(aliasCase?.comparison).toBe("match");
     expect(aliasCase?.observedOperator).toBe("FRAJA");
   });
 
-  it("keeps unresolved homophone fixtures rejected by the current parser", () => {
+  it("[FIX-007] keeps unresolved homophone fixtures rejected by the current parser", () => {
     expect(audit.observations.find((item) => item.id === "P6G-FX-011")?.comparison)
       .toBe("conditional-unresolved");
     expect(audit.observations.find((item) => item.id === "P6G-FX-012")?.comparison)
       .toBe("conditional-unresolved");
   });
 
-  it("reports diagnostic-family comparisons separately from direct syntax comparisons", () => {
+  it("[FIX-008] reports diagnostic-family comparisons separately from direct syntax comparisons", () => {
     expect(audit.diagnosticFamilyMatches).toBe(7);
     expect(audit.diagnosticFamilyMismatches).toBe(0);
     expect(audit.diagnosticFamiliesNotComparable).toBe(2);
@@ -90,7 +90,7 @@ describe("recovered Phase 6G fixture observations", () => {
     // Equal counts here are coincidental; they represent different comparisons.
   });
 
-  it("does not guess when a historical error family has no explicit mapping", () => {
+  it("[FIX-009] does not guess when a historical error family has no explicit mapping", () => {
     const unknownFamily: Phase6GFixture = {
       id: "ERROR-FAMILY-UNKNOWN",
       category: "diagnostic",
@@ -105,7 +105,7 @@ describe("recovered Phase 6G fixture observations", () => {
     expect(result.diagnosticFamiliesNotComparable).toBe(1);
   });
 
-  it("does not label observational comparisons as fixture acceptance or canon approval", () => {
+  it("[FIX-010] does not label observational comparisons as fixture acceptance or canon approval", () => {
     expect(audit.status).toBe("observations-generated-not-acceptance");
     expect(audit.canonEffect).toBe("none");
     expect(audit.observations.every((item) => item.note.length > 0)).toBe(true);

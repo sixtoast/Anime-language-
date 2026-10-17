@@ -17,13 +17,13 @@ ren,ben,region,D-032,preserve as alias,preferred row records old form
 `;
 
 describe("lexicon CSV loader", () => {
-  it("parses quoted commas and CRLF records", () => {
+  it("[LEX-010] parses quoted commas and CRLF records", () => {
     const parsed = parseCsvText('form,gloss\r\njo,"toward, in relation to"\r\n');
     expect(parsed.diagnostics).toEqual([]);
     expect(parsed.rows[0]).toMatchObject({ form: "jo", gloss: "toward, in relation to" });
   });
 
-  it("loads source rows and an explicit alias registry without auto-applying aliases", () => {
+  it("[LEX-011] loads source rows and an explicit alias registry without auto-applying aliases", () => {
     const loaded = loadLexiconCsvText(lexiconCsv, {
       sourceLabel: "v5 source snapshot",
       sourceVersion: "v5-test",
@@ -37,7 +37,7 @@ describe("lexicon CSV loader", () => {
     expect(loaded.registry.aliases.get("frata")?.preferredForm).toBe("fraja");
   });
 
-  it("reports missing required headers rather than silently guessing column names", () => {
+  it("[LEX-012] reports missing required headers rather than silently guessing column names", () => {
     const loaded = loadLexiconCsvText("word,meaning\nza,0\n", {
       sourceLabel: "broken fixture",
       sourceVersion: "fixture"
@@ -46,13 +46,13 @@ describe("lexicon CSV loader", () => {
     expect(loaded.sourceDiagnostics.join(" ")).toContain("missing required columns");
   });
 
-  it("rejects unterminated quoted CSV input", () => {
+  it("[LEX-013] rejects unterminated quoted CSV input", () => {
     const parsed = parseCsvText('form,gloss\njo,"unfinished');
     expect(parsed.rows).toEqual([]);
     expect(parsed.diagnostics[0]).toContain("inside a quoted field");
   });
 
-  it("rejects rows whose cell count differs from the header", () => {
+  it("[LEX-014] rejects rows whose cell count differs from the header", () => {
     const parsed = parseCsvText("form,gloss\nza,0,extra\n");
     expect(parsed.diagnostics[0]).toContain("expected 2");
   });

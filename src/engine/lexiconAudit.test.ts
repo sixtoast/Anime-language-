@@ -4,7 +4,7 @@ import { auditLoadedLexicon } from "./lexiconAudit";
 import { loadLexiconCsvText } from "./lexiconCsvLoader";
 
 describe("source lexicon audit report", () => {
-  it("reports counts and known collisions without claiming canon approval", () => {
+  it("[LEX-007] reports counts and known collisions without claiming canon approval", () => {
     const report = auditLoadedLexicon(bundledLexiconLoad);
     expect(report.structurallyValidRows).toBe(255);
     expect(report.acceptedLexicalRows).toBe(249);
@@ -19,7 +19,7 @@ describe("source lexicon audit report", () => {
     expect(report.canonEffect).toBe("none");
   });
 
-  it("blocks parser-experiment readiness when the CSV structure is malformed", () => {
+  it("[LEX-008] blocks parser-experiment readiness when the CSV structure is malformed", () => {
     const loaded = loadLexiconCsvText(
       "form,gloss,cls,register,status,source,note\nza,0,DIGIT,Shared,CANON,v3.0-L,\nza,broken,extra",
       { sourceLabel: "malformed fixture", sourceVersion: "fixture" }
@@ -29,7 +29,7 @@ describe("source lexicon audit report", () => {
     expect(report.findings.some((finding) => finding.code === "CSV_STRUCTURE" && finding.severity === "error")).toBe(true);
   });
 
-  it("flags aliases whose preferred target is absent from the accepted lexicon", () => {
+  it("[LEX-009] flags aliases whose preferred target is absent from the accepted lexicon", () => {
     const loaded = loadLexiconCsvText(
       "form,gloss,cls,register,status,source,note\nza,0,DIGIT,Shared,CANON,v3.0-L,",
       {

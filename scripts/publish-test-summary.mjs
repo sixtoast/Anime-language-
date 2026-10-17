@@ -9,13 +9,19 @@ if (!fs.existsSync(reportPath)) {
 }
 
 const report = JSON.parse(fs.readFileSync(reportPath, "utf8"));
+const registrySource = fs.readFileSync("src/engine/testRegistry.ts", "utf8");
+const registeredIds = new Set(
+  [...registrySource.matchAll(/\\bid:\\s*"((?:PARSE|DIM|SEM|OPC|LEX|FIX|P6G)-\\d{3}|WEB-DOC-REG-\\d{3})"/g)]
+    .map((match) => match[1])
+);
 const tests = [];
 for (const suite of report.testResults ?? []) {
   for (const assertion of suite.assertionResults ?? []) {
     const title = assertion.fullName || assertion.title || "Unnamed test";
-    const match = title.match(/\[((?:PARSE|DIM|SEM|OPC)-\d{3}|WEB-DOC-REG-\d{3})\]/);
+    const match = title.match(/\[((?:PARSE|DIM|SEM|OPC|LEX|FIX|P6G)-\d{3}|WEB-DOC-REG-\d{3})\]/);
+    const candidateId = match?.[1];
     tests.push({
-      id: match?.[1] ?? "UNMAPPED",
+      id: candidateId && registeredIds.has(candidateId) ? candidateId : "UNMAPPED",
       title,
       status: assertion.status,
       durationMs: assertion.duration ?? null,

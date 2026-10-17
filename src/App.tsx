@@ -74,7 +74,7 @@ function App() {
   const [mobileNav, setMobileNav] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState(docs[0].title);
   const [testQuery, setTestQuery] = useState("");
-  const [testGroup, setTestGroup] = useState<"All" | "Parser" | "Dimensions" | "Semantic types" | "Operator contracts">("All");
+  const [testGroup, setTestGroup] = useState<"All" | "Parser" | "Dimensions" | "Semantic types" | "Operator contracts" | "Source lexicon" | "Fixture audit" | "Surface parser">("All");
   const [workflowRuns, setWorkflowRuns] = useState<WorkflowRun[]>([]);
   const [workflowJobs, setWorkflowJobs] = useState<WorkflowJob[]>([]);
   const [workflowLoading, setWorkflowLoading] = useState(true);
@@ -384,7 +384,7 @@ function App() {
           <div className="eyebrow"><span className="eyebrow-line"/> QUALITY & REGRESSION</div><h1 className="page-title">Test suite<span>.</span></h1>
           <p className="page-intro">A traceable explorer for the authored parser and dimensional test cases, paired with live GitHub Actions run and job-step results for the repository. CI status is fetched from GitHub; this page does not execute tests in the browser.</p>
           <div className="test-summary">
-            <div><span>AUTHORED CASES</span><strong>{workbenchTests.length}</strong><small>15 parser · 15 dimensional · 8 semantic · 8 operator-contract</small></div>
+            <div><span>AUTHORED CASES</span><strong>{workbenchTests.length}</strong><small>{workbenchTests.filter((test) => test.group === "Parser").length} audit parser · {workbenchTests.filter((test) => test.group === "Surface parser").length} surface parser · {workbenchTests.filter((test) => test.group === "Dimensions").length} dimensional · {workbenchTests.filter((test) => test.group === "Semantic types").length} semantic · {workbenchTests.filter((test) => test.group === "Operator contracts").length} operator-contract · {workbenchTests.filter((test) => test.group === "Source lexicon").length} lexicon · {workbenchTests.filter((test) => test.group === "Fixture audit").length} fixture audit</small></div>
             <div><span>LATEST CI RESULT</span><strong className={latestCiRun?.conclusion === "success" ? "ci-success-text" : latestCiRun?.conclusion === "failure" ? "ci-failure-text" : "amber-text"}>{workflowLoading ? "Loading…" : latestCiRun ? formatRunStatus(latestCiRun.status, latestCiRun.conclusion) : "Unavailable"}</strong><small>{latestCiRun ? `Run #${latestCiRun.run_number}` : "No run loaded"}</small></div>
             <div><span>WEBSITE BUILD</span><strong className={latestBuildStep?.status === "completed" && latestBuildStep.conclusion === "success" ? "ci-success-text" : latestBuildStep?.status === "completed" && latestBuildStep.conclusion === "failure" ? "ci-failure-text" : "amber-text"}>{workflowLoading ? "Loading…" : workflowError ? "Unavailable" : latestBuildStep ? formatRunStatus(latestBuildStep.status, latestBuildStep.conclusion) : "Unavailable"}</strong><small>{latestCiRun ? `Run #${latestCiRun.run_number} · Type-check and build` : "Build step unavailable"}</small></div>
             <div><span>SPECIFICATION STATUS</span><strong className="amber-text">Prototype</strong><small>Provisional parser and dimensions</small></div>
@@ -419,7 +419,7 @@ function App() {
             <div className="test-explorer-toolbar">
               <div className="test-search"><Search size={16}/><input value={testQuery} onChange={(e) => setTestQuery(e.target.value)} placeholder="Filter by ID, title, rule or description…" aria-label="Filter test cases"/></div>
               <div className="test-filters" aria-label="Filter test group">
-                {(["All", "Parser", "Dimensions", "Semantic types", "Operator contracts"] as const).map((group) => <button key={group} className={testGroup === group ? "test-filter active" : "test-filter"} onClick={() => setTestGroup(group)}>{group}</button>)}
+                {(["All", "Parser", "Surface parser", "Dimensions", "Semantic types", "Operator contracts", "Source lexicon", "Fixture audit"] as const).map((group) => <button key={group} className={testGroup === group ? "test-filter active" : "test-filter"} onClick={() => setTestGroup(group)}>{group}</button>)}
               </div>
             </div>
             <div className="test-explorer-meta"><span>{workbenchTests.filter((test) => (testGroup === "All" || test.group === testGroup) && (test.id + " " + test.title + " " + test.description + " " + test.sourceRule).toLowerCase().includes(testQuery.toLowerCase())).length} cases shown</span><span><span className="status-dot status-dot-pending"/> {registryResults ? `Report for ${registryResults.commit?.slice(0, 7) ?? "unknown commit"} · ${registryResults.counts.passed} passed · ${registryResults.counts.failed} failed · ${registryResults.counts.skipped} skipped` : "Waiting for published per-test results"}</span></div>

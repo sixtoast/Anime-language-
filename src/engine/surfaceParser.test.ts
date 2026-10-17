@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { parseSurfaceExpression } from "./surfaceParser";
 
 describe("parseSurfaceExpression — provisional Phase 6G subset", () => {
-  it("parses an integer numeral closed by a unit", () => {
+  it("[P6G-001] parses an integer numeral closed by a unit", () => {
     const result = parseSurfaceExpression("frapa ki sho to sho");
     expect(result.ok).toBe(true);
     expect(result.ast).toMatchObject({
@@ -15,7 +15,7 @@ describe("parseSurfaceExpression — provisional Phase 6G subset", () => {
     });
   });
 
-  it("parses a decimal numeral with an explicit unit", () => {
+  it("[P6G-002] parses a decimal numeral with an explicit unit", () => {
     const result = parseSurfaceExpression("frapa za shi to ma ki sho");
     expect(result.ok).toBe(true);
     expect(result.ast).toMatchObject({
@@ -27,15 +27,15 @@ describe("parseSurfaceExpression — provisional Phase 6G subset", () => {
     });
   });
 
-  it("rejects an unterminated numeral", () => {
+  it("[P6G-003] rejects an unterminated numeral", () => {
     expect(parseSurfaceExpression("frapa ki to").diagnostics[0]?.code).toBe("UNTERMINATED_NUMERAL");
   });
 
-  it("rejects a decimal marker without fractional digits", () => {
+  it("[P6G-004] rejects a decimal marker without fractional digits", () => {
     expect(parseSurfaceExpression("za shi ma").diagnostics[0]?.code).toBe("MALFORMED_DECIMAL");
   });
 
-  it("parses a binding declaration with a SHO-closed identifier", () => {
+  it("[P6G-005] parses a binding declaration with a SHO-closed identifier", () => {
     const result = parseSurfaceExpression("kwam ki sho frapa ki sho to sho");
     expect(result.ok).toBe(true);
     expect(result.ast).toMatchObject({
@@ -45,25 +45,25 @@ describe("parseSurfaceExpression — provisional Phase 6G subset", () => {
     });
   });
 
-  it("rejects a binding identifier without SHO", () => {
+  it("[P6G-006] rejects a binding identifier without SHO", () => {
     expect(parseSurfaceExpression("kwam ki frapa ki sho to sho").diagnostics[0]?.code).toBe("IDENTIFIER_NOT_CLOSED");
   });
 
-  it("parses a reference to a SHO-closed identifier", () => {
+  it("[P6G-007] parses a reference to a SHO-closed identifier", () => {
     expect(parseSurfaceExpression("kwat to mu sho")).toMatchObject({
       ok: true,
       ast: { kind: "call", operator: "KWAT", args: [{ kind: "identifier", digits: "23" }] }
     });
   });
 
-  it("parses nested fixed-arity arithmetic", () => {
+  it("[P6G-008] parses nested fixed-arity arithmetic", () => {
     expect(parseSurfaceExpression("frapa frama ki sho to sho fraja mu sho za sho")).toMatchObject({
       ok: true,
       ast: { kind: "call", operator: "FRAPA", args: [{ kind: "call", operator: "FRAMA" }, { kind: "call", operator: "FRAJA" }] }
     });
   });
 
-  it("parses an explicit control block while preserving the block node", () => {
+  it("[P6G-009] parses an explicit control block while preserving the block node", () => {
     expect(parseSurfaceExpression("bek dras ki sho to sho gt meto frapa ki sho to sho dogu")).toMatchObject({
       ok: true,
       ast: {
@@ -74,19 +74,19 @@ describe("parseSurfaceExpression — provisional Phase 6G subset", () => {
     });
   });
 
-  it("rejects a control form without METO", () => {
+  it("[P6G-010] rejects a control form without METO", () => {
     expect(parseSurfaceExpression("bek dras ki sho to sho gt frapa ki sho to sho dogu").diagnostics[0]?.code).toBe("MISSING_BLOCK_OPEN");
   });
 
-  it("rejects a control form without DOGU", () => {
+  it("[P6G-011] rejects a control form without DOGU", () => {
     expect(parseSurfaceExpression("bek dras ki sho to sho gt meto frapa ki sho to sho").diagnostics[0]?.code).toBe("MISSING_BLOCK_CLOSE");
   });
 
-  it("rejects more than one top-level expression", () => {
+  it("[P6G-012] rejects more than one top-level expression", () => {
     expect(parseSurfaceExpression("ki sho to sho").diagnostics[0]?.code).toBe("TRAILING_EXPRESSIONS");
   });
 
-  it("rejects unknown lexical forms unless explicitly supplied as known atoms", () => {
+  it("[P6G-013] rejects unknown lexical forms unless explicitly supplied as known atoms", () => {
     expect(parseSurfaceExpression("unknownword").diagnostics[0]?.code).toBe("UNKNOWN_LEXICAL_FORM");
     expect(parseSurfaceExpression("knownword", { knownAtoms: ["knownword"] })).toMatchObject({
       ok: true,
@@ -94,37 +94,37 @@ describe("parseSurfaceExpression — provisional Phase 6G subset", () => {
     });
   });
 
-  it("rejects unresolved operator-like forms rather than guessing their arity", () => {
+  it("[P6G-014] rejects unresolved operator-like forms rather than guessing their arity", () => {
     expect(parseSurfaceExpression("nes ki sho").diagnostics[0]?.code).toBe("UNRESOLVED_OPERATOR");
     expect(parseSurfaceExpression("nes", { knownAtoms: ["nes"] }).diagnostics[0]?.code).toBe("UNRESOLVED_OPERATOR");
   });
 
-  it("fails closed on the known RE/RA homophone ambiguity", () => {
+  it("[P6G-015] fails closed on the known RE/RA homophone ambiguity", () => {
     expect(parseSurfaceExpression("re").diagnostics[0]?.code).toBe("AMBIGUOUS_HOMOPHONE");
     expect(parseSurfaceExpression("ra").diagnostics[0]?.code).toBe("AMBIGUOUS_HOMOPHONE");
     expect(parseSurfaceExpression("re ma").diagnostics[0]?.code).toBe("AMBIGUOUS_HOMOPHONE");
     expect(parseSurfaceExpression("ki ra").diagnostics[0]?.code).toBe("AMBIGUOUS_HOMOPHONE");
   });
 
-  it("does not rewrite canonical-looking operator forms by default", () => {
+  it("[P6G-016] does not rewrite canonical-looking operator forms by default", () => {
     expect(parseSurfaceExpression("frata ki sho to sho").diagnostics[0]?.code).toBe("UNRESOLVED_OPERATOR");
     expect(parseSurfaceExpression("fraka ki sho to sho").diagnostics[0]?.code).toBe("UNRESOLVED_OPERATOR");
     expect(parseSurfaceExpression("drim ki sho to sho").diagnostics[0]?.code).toBe("UNRESOLVED_OPERATOR");
     expect(parseSurfaceExpression("dral ki sho to sho mu sho").diagnostics[0]?.code).toBe("UNRESOLVED_OPERATOR");
   });
 
-  it("normalises legacy aliases only when explicitly enabled", () => {
+  it("[P6G-017] normalises legacy aliases only when explicitly enabled", () => {
     expect(parseSurfaceExpression("frata ki sho to sho", { allowLegacyAliases: true })).toMatchObject({
       ok: true,
       ast: { kind: "call", operator: "FRAJA" }
     });
   });
 
-  it("rejects block delimiters outside a control form", () => {
+  it("[P6G-018] rejects block delimiters outside a control form", () => {
     expect(parseSurfaceExpression("meto ki sho dogu").diagnostics[0]?.code).toBe("BLOCK_DELIMITER_OUTSIDE_CONTROL");
   });
 
-  it("labels output as provisional surface notation, not audit notation", () => {
+  it("[P6G-019] labels output as provisional surface notation, not audit notation", () => {
     expect(parseSurfaceExpression("ki ma").notation).toBe("phase-6g-provisional");
   });
 });
