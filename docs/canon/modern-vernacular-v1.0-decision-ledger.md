@@ -223,3 +223,8 @@ The [Incantations v1.4 specification](arcane-incantations-v1.4-spell-composition
 ## 31. Incantations 1.5 — invocation profiles and execution contracts
 
 The [Incantations v1.5 specification](arcane-incantations-v1.5-invocation-profiles-and-execution-contracts.md) defines request profiles, execution-contract requirements, external authority separation, interruption states, staged result statuses, and auditable invocation records. Forty-two specification fixtures are documented. This is a semantic design, not a runtime, authority service, or claim of actual spell execution.
+
+
+## 32. Incantations 1.6 — typed parameters and value semantics
+
+The [Incantations v1.6 specification](arcane-incantations-v1.6-typed-parameters-and-value-semantics.md) distinguishes values, identifiers, references, snapshots, live references, measurements, unknown/absent/invalid/error states, dimensional quantities, conversions and versioned operation signatures. Forty-six specification fixtures are documented. The type layer does not itself establish feasibility, authority, execution or outcome success.
