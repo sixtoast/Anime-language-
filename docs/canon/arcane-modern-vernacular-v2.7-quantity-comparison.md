@@ -42,7 +42,7 @@ Accepted:
 Rejected:
 - `dori to ma mu se` — LENGTH versus TIME.
 - `nari to ma to ke` — LENGTH versus MASS.
-- `nari to ma to shi za ma` — same dimension but distinct unit-token form is not an issue here; both use `ma`, so this comparison is ACCEPT and FALSE (2 metres is not equal to 2.1 metres).
+- `nari to ma to shi ki ma` — both use `ma`; this comparison is ACCEPT and FALSE (2 metres is not equal to 2.1 metres).
 - Comparing `ra` with a value expressed in degrees is not licensed; degrees are not defined as an Arcane unit here.
 - Comparing kelvins with Celsius values is not licensed.
 
@@ -99,7 +99,7 @@ These are specification-level fixtures, not results from an executed parser or i
 | CMP27-10 | `dori to ma mu se` | REJECT; incompatible dimensions/units |
 | CMP27-11 | `nari to ma to ke` | REJECT; incompatible units |
 | CMP27-12 | `gari mu ra to ra` | ACCEPT; same angle unit, 3 rad > 2 rad |
-| CMP27-13 | `nari to ma to shi za ma` | ACCEPT; well-formed but false (2 m ≠ 2.1 m) |
+| CMP27-13 | `nari to ma to shi ki ma` | ACCEPT; well-formed but false (2 m ≠ 2.1 m) |
 | CMP27-14 | `nari to ma` | REJECT; missing second operand |
 | CMP27-15 | `dori to ma mu ma ki ma` | REJECT; third operand/chained comparison |
 | CMP27-16 | `nari nari to ma to ma` | REJECT; two relation markers |
