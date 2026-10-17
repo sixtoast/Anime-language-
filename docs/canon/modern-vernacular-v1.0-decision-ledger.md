@@ -168,3 +168,8 @@ The [Modern Vernacular v2.1 Temporal Anchor and Event Order specification](arcan
 ## 20. Version 2.2 extension
 
 The [Modern Vernacular v2.2 Qualitative Event Duration specification](arcane-modern-vernacular-v2.2-qualitative-duration.md) introduces `melo` (briefly; short duration) and `runi` (for a long time; long duration) as modern design coinages after an exact-form check against the inspected Mega Pack2 v5 draft lexicon. They occur clause-finally only with affirmative `don` clauses whose eventive verb is licensed by v2.0. Duration with `kok`, negative completion, modal clauses, numeric time quantities, delay, waiting, deadlines, endpoints and repetition remain outside scope. Duration is distinguished from speed, frequency, completion, and event order. Sixteen specification fixtures are documented but have not been parser-executed or independently speaker-tested.
+
+
+## 21. Version 2.3 extension
+
+The [Modern Vernacular v2.3 Waiting and Until specification](arcane-modern-vernacular-v2.3-waiting-and-until.md) introduces `seno` (wait; remain in a waiting state) and `kavi` (until) as modern design coinages after an exact-form check against the inspected Mega Pack2 v5 draft lexicon. Aspect is explicitly extended to `seno`; the only endpoint construction currently licensed is `SUBJECT kok seno kavi ENDPOINT-SUBJECT don zem`. The endpoint event is asserted, and the construction does not entail causation, meeting, or communication. The Formal proposals `kole` (until) and `shasu` (delay/offset before start) remain Formal / PROPOSED. Delay is not yet expressed because a baseline and offset representation are not defined. Eighteen design fixtures are documented but have not been parser-executed or independently speaker-tested.
