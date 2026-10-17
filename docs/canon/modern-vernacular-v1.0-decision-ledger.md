@@ -228,3 +228,8 @@ The [Incantations v1.5 specification](arcane-incantations-v1.5-invocation-profil
 ## 32. Incantations 1.6 — typed parameters and value semantics
 
 The [Incantations v1.6 specification](arcane-incantations-v1.6-typed-parameters-and-value-semantics.md) distinguishes values, identifiers, references, snapshots, live references, measurements, unknown/absent/invalid/error states, dimensional quantities, conversions and versioned operation signatures. Forty-six specification fixtures are documented. The type layer does not itself establish feasibility, authority, execution or outcome success.
+
+
+## 33. Incantations 1.7 — state predicates and preconditions
+
+The [Incantations v1.7 specification](arcane-incantations-v1.7-state-predicates-and-preconditions.md) defines typed predicate results, mandatory preconditions, postconditions, invariants, bounded temporal operators, evidence freshness and condition combination. Forty-eight specification fixtures are documented. The design does not claim a predicate engine, observation apparatus or spell runtime exists.
