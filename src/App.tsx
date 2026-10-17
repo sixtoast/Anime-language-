@@ -12,6 +12,7 @@ import { workbenchTests } from "./engine/testRegistry";
 import { canonAuditItems, auditReadinessLabels } from "./engine/canonAuditRegistry";
 import phase6gFixtureData from "../tests/fixtures/phase6g-surface-parser-cases.json";
 import { auditPhase6GFixtures, type Phase6GFixture } from "./engine/phase6gFixtureAudit";
+import { resourceAccountingFixtures } from "./engine/resourceAccountingFixtures";
 
 type Section = "Overview" | "Documentation" | "Playground" | "Test suite" | "Research & review";
 
@@ -71,6 +72,7 @@ function App() {
   const [analysis, setAnalysis] = useState<SurfaceParseResult | null>(null);
   const [lexiconQuery, setLexiconQuery] = useState("pa");
   const [selectedFixtureId, setSelectedFixtureId] = useState("P6G-FX-001");
+  const [selectedResourceFixtureId, setSelectedResourceFixtureId] = useState("RES19-01");
   const [mobileNav, setMobileNav] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState(docs[0].title);
   const [testQuery, setTestQuery] = useState("");
@@ -205,6 +207,7 @@ function App() {
     };
   }, [lexiconQuery]);
   const selectedPhase6GFixture = useMemo(() => phase6gFixtures.find((fixture) => fixture.id === selectedFixtureId) ?? phase6gFixtures[0], [selectedFixtureId]);
+  const selectedResourceFixture = useMemo(() => resourceAccountingFixtures.find((fixture) => fixture.id === selectedResourceFixtureId) ?? resourceAccountingFixtures[0], [selectedResourceFixtureId]);
 
   const changeSection = (next: Section) => {
     setSection(next);
@@ -345,6 +348,16 @@ function App() {
               <div className="fixture-browser-actions"><button className="secondary-button" onClick={() => { setEditor(selectedPhase6GFixture.input.toLowerCase()); setAnalysis(null); }}>Load fixture into editor</button><span>Loading does not execute the parser.</span></div>
             </div>}
             <p className="fixture-browser-caveat">Historical fixture expectations, archived implementation behaviour, current parser observations and canon status are separate evidence categories. Some fixtures are conditional, context-dependent, or known to diverge from the archived executable prototype.</p>
+          </section>
+          <section className="fixture-browser resource-fixture-browser" aria-labelledby="resource-fixture-browser-title">
+            <div className="fixture-browser-head"><div><span className="detail-kicker">SPECIFICATION FIXTURES · NOT EXECUTABLE TESTS</span><h2 id="resource-fixture-browser-title">Incantation resource-accounting fixtures</h2></div><span>{resourceAccountingFixtures.length} design cases</span></div>
+            <p className="fixture-browser-intro">Browse the 60 expected outcomes defined in Arcane Incantations v1.9. These rows are read directly from the canonical Markdown specification; they are not runs of a resource evaluator and do not demonstrate physical feasibility or spell execution.</p>
+            <label className="fixture-select-label">Choose a specification fixture<select aria-label="Choose resource-accounting specification fixture" value={selectedResourceFixtureId} onChange={(event) => setSelectedResourceFixtureId(event.target.value)}>{resourceAccountingFixtures.map((fixture) => <option key={fixture.id} value={fixture.id}>{fixture.id} — {fixture.caseDescription}</option>)}</select></label>
+            {selectedResourceFixture && <div className="fixture-browser-detail">
+              <div className="fixture-browser-meta"><div><span>Specification fixture ID</span><code>{selectedResourceFixture.id}</code></div><div><span>Fixture category</span><strong>Resource accounting / conservation</strong></div><div className="fixture-browser-meta-wide"><span>Case</span><strong>{selectedResourceFixture.caseDescription}</strong></div><div className="fixture-browser-meta-wide"><span>Expected design outcome</span><strong>{selectedResourceFixture.expectedResult}</strong></div><div className="fixture-browser-meta-wide"><span>Evidence class</span><strong>Normative specification fixture — not executed runtime behaviour</strong></div></div>
+            </div>}
+            <div className="fixture-browser-actions"><a className="secondary-button" href="https://github.com/sixtoast/Anime-language-/blob/main/docs/canon/arcane-incantations-v1.9-resource-accounting-and-conservation-contracts.md" target="_blank" rel="noreferrer">Open full v1.9 specification ↗</a><span>Selection only displays the source expectation; it does not run a spell.</span></div>
+            <p className="fixture-browser-caveat">Resource budgets do not prove a source exists. Reservation does not mean consumption. Dimensional arithmetic does not prove conservation. No universal mana-to-energy conversion or physical resource evaluator is implemented by this browser.</p>
           </section>
           <section className="lexicon-inspector" aria-labelledby="lexicon-inspector-title">
             <div className="lexicon-inspector-head">
