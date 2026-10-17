@@ -45,4 +45,34 @@ test.describe("Playground Phase 6G parser integration", () => {
     await expect(page.getByText("Phase 6G provisional surface parser connected")).toBeVisible();
     await expect(page.locator(".next-step")).toContainText("physical feasibility and spell execution remain separate tasks");
   });
+
+  test("recognises a source-backed lexical atom and reports its lexical class", async ({ page }) => {
+    await openPlayground(page);
+    await page.getByRole("textbox", { name: "Phase 6G surface-like expression editor" }).fill("pa");
+    await page.getByRole("button", { name: "Parse surface-like notation" }).click();
+
+    await expect(page.getByText("Unique structural parse produced")).toBeVisible();
+    await expect(page.locator(".analysis-output pre")).toContainText('"form": "PA"');
+    await expect(page.locator(".analysis-output pre")).toContainText('"lexicalClass": "AXIS"');
+    await expect(page.locator(".engine-banner")).toContainText("v5-draft");
+    await expect(page.locator(".engine-banner")).toContainText("does not promote entries to canon");
+  });
+
+  test("rejects source lexical collisions rather than guessing a meaning", async ({ page }) => {
+    await openPlayground(page);
+    await page.getByRole("textbox", { name: "Phase 6G surface-like expression editor" }).fill("ra");
+    await page.getByRole("button", { name: "Parse surface-like notation" }).click();
+
+    await expect(page.locator(".analysis-output")).toContainText("AMBIGUOUS_HOMOPHONE");
+    await expect(page.locator(".analysis-output")).toContainText("disambiguation is not implemented");
+  });
+
+  test("does not rewrite legacy operator aliases by default", async ({ page }) => {
+    await openPlayground(page);
+    await page.getByRole("textbox", { name: "Phase 6G surface-like expression editor" }).fill("frata ki sho to sho");
+    await page.getByRole("button", { name: "Parse surface-like notation" }).click();
+
+    await expect(page.locator(".analysis-output")).toContainText("UNRESOLVED_OPERATOR");
+    await expect(page.locator(".analysis-output")).toContainText("will not guess");
+  });
 });
