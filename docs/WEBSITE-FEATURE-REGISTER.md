@@ -170,7 +170,7 @@ Playwright run #186 found that the Documentation view exceeded a 360px viewport 
 
 ### Incantation source catalogue expansion — WEB-DOC-04 (2026-10-17)
 
-Added nine versioned incantation design specifications (v1.0–v1.8) to `src/documentationCatalogue.ts`. They use the existing five-section navigation and source-detail panel; no new top-level section or engine behaviour was introduced. Catalogue regression and browser tests were expanded from 19 to 28 entries. The initial browser run exposed a stale filtered-count expectation and 19px horizontal overflow at a 360px viewport. The count expectation and mobile header styles were corrected, and the Overview's acceptance-task wording was updated. Run #492 subsequently passed all four browser tests, including all 28 source links and the 360px viewport check. Its only observed failure was the separate unit-test expectation mismatch in `surfaceParser.test.ts`; the fixture was corrected in commit `5efda89`. The correction is **Implemented — pending fresh CI evidence** until run #493 completes.
+Added nine versioned incantation design specifications (v1.0–v1.8) to `src/documentationCatalogue.ts`. They use the existing five-section navigation and source-detail panel; no new top-level section or engine behaviour was introduced. Catalogue regression and browser tests were expanded from 19 to 28 entries. The initial browser run exposed a stale filtered-count expectation and 19px horizontal overflow at a 360px viewport. The count expectation and mobile header styles were corrected, and the Overview's acceptance-task wording was updated. Run #495 completed successfully on commit `52ad269`: the unit suite, TypeScript/production build and all four Documentation browser checks passed. The Vercel production deployment is READY for the same full commit SHA. The prior decimal-fixture mismatch was corrected in `5efda89` without changing parser behaviour. WEB-DOC-04 is now verified by automated CI; broader live manual accessibility checks remain open.
 
 | ID | Feature | Origin | Priority | Dependencies | Affected files/sections | Acceptance criteria | Verification evidence | Final status |
 |---|---|---|---|---|---|---|---|---|
@@ -179,3 +179,12 @@ Added nine versioned incantation design specifications (v1.0–v1.8) to `src/doc
 ### Website runtime status and deployment evidence — 2026-10-17
 
 The Vercel project exists and the latest inspected production-target deployment was READY on commit `cce1d530f1603b2b245567b2d7dbb77c12612c9e`. This establishes deployment-provider state, not that every live flow has been manually tested. The project reports SSO protection enabled for deployment URLs except custom domains; the public custom domain should be checked separately for actual accessibility. Current production/browser acceptance remains open until the final commit's checks and the live site's primary flows are verified.
+
+
+### Overview health panel browser acceptance — WEB-OV-03 (2026-10-17)
+
+The Overview's next-task card was stale after the Documentation browser suite passed. It now prioritises verifying health signals and recovery states instead of claiming the catalogue browser checks are still pending. Added deterministic Playwright tests that mock GitHub Actions and the per-test report endpoint so the panel can be tested without depending on GitHub availability.
+
+| ID | Feature | Origin | Priority | Dependencies | Affected files/sections | Acceptance criteria | Verification evidence | Final status |
+|---|---|---|---|---|---|---|---|---|
+| WEB-OV-03 | Overview health-signal browser acceptance | Existing Development Cockpit live-health panel and plan's evidence-first policy | High | Existing workflow/report loader and Playwright harness | `src/App.tsx`, `tests/browser/overview.spec.ts`, website implementation plan | Matching run/report commit; stale report explicitly flagged; valid report survives workflow endpoint failure; build failure shown separately; no 360px page overflow | Five deterministic Playwright checks committed in `1e7e089`; pending CI run | Implemented — unverified |
