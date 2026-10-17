@@ -55,6 +55,16 @@ describe("Documentation catalogue website regression checks", () => {
       expect(normalized.split("/"), doc.title + " must not traverse outside the repository").not.toContain("..");
     }
   });
+  it("[WEB-DOC-REG-010] lists the locked v1.9 resource-accounting design without claiming runtime support", () => {
+    const spec = docs.find((doc) => doc.title === "Arcane Incantations v1.9 — Resource Accounting and Conservation Contracts");
+    expect(spec).toMatchObject({
+      status: "Canonical",
+      sourcePath: "docs/canon/arcane-incantations-v1.9-resource-accounting-and-conservation-contracts.md",
+      sourceKind: "Locked modern design specification"
+    });
+    expect(spec?.sourceNote).toContain("not an executable runtime");
+  });
+
   it("[WEB-DOC-REG-008] keeps every catalogue source path resolvable in the repository", () => {
     const sourceFiles = import.meta.glob([
       "../docs/**/*",
