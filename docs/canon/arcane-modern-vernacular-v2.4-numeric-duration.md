@@ -58,7 +58,7 @@ The following remain blocked:
 - placing `nela` after the digit or after `se`;
 - use of `nela` outside a numeric duration phrase in v2.4.
 
-A positive polar question may append `pun) after the complete duration phrase. It asks whether the whole completed-event proposition, including its duration, is true. Negative polar questions remain blocked by v2.0.
+A positive polar question may append `pun` after the complete duration phrase. It asks whether the whole completed-event proposition, including its duration, is true. Negative polar questions remain blocked by v2.0.
 
 ## 4. Number-slot rules
 
