@@ -9,6 +9,8 @@ export interface Phase6GFixture {
   expectedNode?: string;
   expectedErrorFamily?: string | null;
   canonStatus: string;
+  evidence?: string;
+  notes?: string;
 }
 
 export type FixtureComparison =
