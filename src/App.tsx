@@ -19,6 +19,7 @@ const phase6gFixtureAudit = auditPhase6GFixtures(
   phase6gFixtureData.suiteId,
   phase6gFixtureData.cases as Phase6GFixture[]
 );
+const phase6gFixtures = phase6gFixtureData.cases as Phase6GFixture[];
 const navigation: { label: Section; icon: typeof Activity; group: string }[] = [
   { label: "Overview", icon: Layers3, group: "WORKSPACE" },
   { label: "Documentation", icon: BookOpen, group: "LANGUAGE" },
@@ -69,6 +70,7 @@ function App() {
   const [editor, setEditor] = useState("");
   const [analysis, setAnalysis] = useState<SurfaceParseResult | null>(null);
   const [lexiconQuery, setLexiconQuery] = useState("pa");
+  const [selectedFixtureId, setSelectedFixtureId] = useState("P6G-FX-001");
   const [mobileNav, setMobileNav] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState(docs[0].title);
   const [testQuery, setTestQuery] = useState("");
@@ -202,6 +204,7 @@ function App() {
       nonAtomicEntry: bundledLexiconLoad.registry.nonAtomicEntries.get(form)
     };
   }, [lexiconQuery]);
+  const selectedPhase6GFixture = useMemo(() => phase6gFixtures.find((fixture) => fixture.id === selectedFixtureId) ?? phase6gFixtures[0], [selectedFixtureId]);
 
   const changeSection = (next: Section) => {
     setSection(next);
@@ -331,6 +334,18 @@ function App() {
         {section === "Playground" && <section className="page-content">
           <div className="eyebrow"><span className="eyebrow-line"/> EXPRESSION WORKSPACE</div><h1 className="page-title">Playground<span>.</span></h1><p className="page-intro">Parse the implemented provisional Phase 6G surface-like notation. This is a narrow parser subset, not a complete Arcane grammar, spoken-language interpreter, semantic validator, or spell executor.</p>
           <div className="engine-banner"><Activity size={18}/><div><strong>Phase 6G provisional surface parser connected</strong><p>Checks token structure, registered operator arity, numeral closure, explicit control blocks, and selected ambiguity cases. Source atoms use the pinned {BUNDLED_LEXICON_SOURCE.version} draft lexicon ({bundledLexiconLoad.rowCount} rows; {bundledLexiconLoad.aliasRowCount} alias records). Legacy alias rewriting is off by default, lexical collisions fail closed, and loading this source does not promote entries to canon.</p></div><span className="engine-status">SYNTAX ONLY</span></div>
+          <section className="fixture-browser" aria-labelledby="fixture-browser-title">
+            <div className="fixture-browser-head"><div><span className="detail-kicker">FIXTURE-DRIVEN LAB</span><h2 id="fixture-browser-title">Source fixture browser</h2></div><span>{phase6gFixtures.length} source-derived cases</span></div>
+            <p className="fixture-browser-intro">Load a preserved Phase 6G example into the editor. The source-recorded expectation is evidence to compare against, not a current pass/fail claim; selecting a fixture never runs it automatically.</p>
+            <label className="fixture-select-label">Choose a fixture<select aria-label="Choose Phase 6G source fixture" value={selectedFixtureId} onChange={(event) => setSelectedFixtureId(event.target.value)}>{phase6gFixtures.map((fixture) => <option key={fixture.id} value={fixture.id}>{fixture.id} — {fixture.label}</option>)}</select></label>
+            {selectedPhase6GFixture && <div className="fixture-browser-detail">
+              <div className="fixture-browser-meta"><div><span>Fixture ID</span><code>{selectedPhase6GFixture.id}</code></div><div><span>Category</span><strong>{selectedPhase6GFixture.category}</strong></div><div><span>Source-recorded expectation</span><strong>{selectedPhase6GFixture.expected}</strong></div><div><span>Canon status</span><strong>{selectedPhase6GFixture.canonStatus}</strong></div></div>
+              {selectedPhase6GFixture.evidence && <p><strong>Evidence:</strong> {selectedPhase6GFixture.evidence}</p>}
+              {selectedPhase6GFixture.notes && <p><strong>Notes:</strong> {selectedPhase6GFixture.notes}</p>}
+              <div className="fixture-browser-actions"><button className="secondary-button" onClick={() => { setEditor(selectedPhase6GFixture.input.toLowerCase()); setAnalysis(null); }}>Load fixture into editor</button><span>Loading does not execute the parser.</span></div>
+            </div>}
+            <p className="fixture-browser-caveat">Historical fixture expectations, archived implementation behaviour, current parser observations and canon status are separate evidence categories. Some fixtures are conditional, context-dependent, or known to diverge from the archived executable prototype.</p>
+          </section>
           <section className="lexicon-inspector" aria-labelledby="lexicon-inspector-title">
             <div className="lexicon-inspector-head">
               <div><span className="detail-kicker">SOURCE LOOKUP</span><h2 id="lexicon-inspector-title">Lexicon inspector</h2><p>Exact-form lookup against the pinned {BUNDLED_LEXICON_SOURCE.version} source snapshot. This view reports source records; it does not decide canon or change parser alias settings.</p></div>
