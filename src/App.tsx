@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Activity, BookOpen, Braces, CheckCircle2, ChevronDown, CircleHelp,
   Command, FileText, FlaskConical, GitBranch, Layers3, Menu,
@@ -78,49 +78,99 @@ function App() {
   const [registryResults, setRegistryResults] = useState<RegistryResults | null>(null);
   const [registryResultsError, setRegistryResultsError] = useState<string | null>(null);
 
+  const workflowController = useRef<AbortController | null>(null);
+
   const refreshWorkflow = async () => {
+    workflowController.current?.abort();
+    const controller = new AbortController();
+    workflowController.current = controller;
+    const timeout = window.setTimeout(() => controller.abort(), 12000);
+    const isCurrent = () => workflowController.current === controller && !controller.signal.aborted;
+
     setWorkflowLoading(true);
     setWorkflowError(null);
+
+    // Load the CI run list and per-test report independently. A GitHub API
+    // rate limit must not prevent the static report from being displayed.
+    const runsTask = (async () => {
+      const response = await fetch(
+        "https://api.github.com/repos/sixtoast/Anime-language-/actions/runs?branch=main&per_page=10",
+        { headers: { Accept: "application/vnd.github+json" }, cache: "no-store", signal: controller.signal }
+      );
+      if (!response.ok) throw new Error(`GitHub returned HTTP ${response.status} while loading workflow runs.`);
+      const data = await response.json() as WorkflowData;
+      return data.workflow_runs ?? [];
+    })();
+
+    const reportTask = (async () => {
+      const response = await fetch(
+        "https://raw.githubusercontent.com/sixtoast/Anime-language-/ci-results/latest.json",
+        { cache: "no-store", signal: controller.signal }
+      );
+      if (!response.ok) {
+        if (response.status === 404) throw new Error("No published per-test report yet. It appears after a successful main-branch CI report step.");
+        throw new Error(`GitHub returned HTTP ${response.status} while loading the per-test report.`);
+      }
+      return await response.json() as RegistryResults;
+    })();
+
     try {
-      const runsResponse = await fetch("https://api.github.com/repos/sixtoast/Anime-language-/actions/runs?branch=main&per_page=10", {
-        headers: { Accept: "application/vnd.github+json" }
-      });
-      if (!runsResponse.ok) throw new Error(`GitHub returned HTTP ${runsResponse.status} while loading workflow runs.`);
-      const runData = await runsResponse.json() as WorkflowData;
-      setWorkflowRuns(runData.workflow_runs ?? []);
-      try {
-        const resultsResponse = await fetch("https://raw.githubusercontent.com/sixtoast/Anime-language-/ci-results/latest.json?cache=" + Date.now());
-        if (resultsResponse.ok) {
-          const resultsData = await resultsResponse.json() as RegistryResults;
-          setRegistryResults(resultsData);
-          setRegistryResultsError(null);
+      const [runsResult, reportResult] = await Promise.allSettled([runsTask, reportTask]);
+      if (!isCurrent()) return;
+
+      if (runsResult.status === "fulfilled") {
+        const runs = runsResult.value;
+        setWorkflowRuns(runs);
+        setWorkflowError(null);
+        const latest = runs.find((run) => run.name === "CI") ?? runs[0];
+        if (latest) {
+          try {
+            const jobsResponse = await fetch(
+              `https://api.github.com/repos/sixtoast/Anime-language-/actions/runs/${latest.id}/jobs?per_page=100`,
+              { headers: { Accept: "application/vnd.github+json" }, cache: "no-store", signal: controller.signal }
+            );
+            if (!jobsResponse.ok) throw new Error(`GitHub returned HTTP ${jobsResponse.status} while loading job details.`);
+            const jobData = await jobsResponse.json() as { jobs: WorkflowJob[] };
+            if (isCurrent()) setWorkflowJobs(jobData.jobs ?? []);
+          } catch (error) {
+            if (!controller.signal.aborted && isCurrent()) {
+              setWorkflowJobs([]);
+              setWorkflowError(error instanceof Error ? error.message : "Could not load GitHub Actions job details.");
+            }
+          }
         } else {
-          setRegistryResultsError(resultsResponse.status === 404 ? "No published per-test report yet. It will appear after the next successful report-generation step on a main-branch push." : `GitHub returned HTTP ${resultsResponse.status} while loading individual test results.`);
+          setWorkflowJobs([]);
         }
-      } catch {
-        setRegistryResultsError("Could not load the published per-test report. Overall CI status is still available.");
+      } else if (isCurrent()) {
+        setWorkflowError(runsResult.reason instanceof Error ? runsResult.reason.message : "Could not load GitHub Actions results.");
       }
-      const latest = (runData.workflow_runs ?? []).find((run) => run.name === "CI") ?? (runData.workflow_runs ?? [])[0];
-      if (latest) {
-        const jobsResponse = await fetch(`https://api.github.com/repos/sixtoast/Anime-language-/actions/runs/${latest.id}/jobs?per_page=100`, {
-          headers: { Accept: "application/vnd.github+json" }
-        });
-        if (!jobsResponse.ok) throw new Error(`GitHub returned HTTP ${jobsResponse.status} while loading job details.`);
-        const jobData = await jobsResponse.json() as { jobs: WorkflowJob[] };
-        setWorkflowJobs(jobData.jobs ?? []);
-      } else {
-        setWorkflowJobs([]);
+
+      if (reportResult.status === "fulfilled") {
+        if (isCurrent()) {
+          setRegistryResults(reportResult.value);
+          setRegistryResultsError(null);
+        }
+      } else if (isCurrent()) {
+        setRegistryResultsError(reportResult.reason instanceof Error ? reportResult.reason.message : "Could not load the published per-test report.");
       }
-      setWorkflowUpdatedAt(new Date().toISOString());
+
+      if (isCurrent()) setWorkflowUpdatedAt(new Date().toISOString());
     } catch (error) {
-      setWorkflowError(error instanceof Error ? error.message : "Could not load GitHub Actions results.");
+      if (isCurrent()) setWorkflowError(error instanceof Error ? error.message : "Could not load GitHub Actions results.");
     } finally {
-      setWorkflowLoading(false);
+      window.clearTimeout(timeout);
+      if (workflowController.current === controller) {
+        workflowController.current = null;
+        setWorkflowLoading(false);
+      }
     }
   };
 
   useEffect(() => {
     void refreshWorkflow();
+    return () => {
+      workflowController.current?.abort();
+    };
   }, []);
 
   const latestCiRun = workflowRuns.find((run) => run.name === "CI") ?? workflowRuns[0];
@@ -177,7 +227,7 @@ function App() {
       <main className="main-area">
         <header className="topbar">
           <div className="breadcrumbs"><button className="icon-button mobile-menu" onClick={() => setMobileNav(true)} aria-label="Open navigation"><Menu size={19}/></button><span>Anime Language</span><span className="crumb-slash">/</span><strong>{section}</strong></div>
-          <div className="topbar-actions"><span className="version-chip"><span className="pulse-dot"/> SPEC v3.0 · SOURCE INVENTORY INITIAL</span><button className="icon-button" title="Search documentation" onClick={() => { changeSection("Documentation"); document.getElementById("global-search")?.focus(); }}><Search size={18}/></button></div>
+          <div className="topbar-actions"><span className="version-chip"><span className="pulse-dot"/> INCANTATIONS v1.8 · WORKBENCH</span><button className="icon-button" title="Search documentation" onClick={() => { changeSection("Documentation"); document.getElementById("global-search")?.focus(); }}><Search size={18}/></button></div>
         </header>
 
         {section === "Overview" && <section className="page-content">
