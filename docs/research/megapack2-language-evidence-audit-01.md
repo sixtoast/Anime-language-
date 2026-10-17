@@ -179,3 +179,8 @@ The new [Incantations v1.1 Target Resolution and Binding specification](../canon
 ## 16. Incantations v1.2 — preconditions, constraints and failure semantics
 
 [Incantations v1.2](../canon/arcane-incantations-v1.2-preconditions-constraints-and-failure.md) is a new design layer built on the v1.0 operation frame and v1.1 reference-binding model. It defines condition records, preconditions, limits, invariants, resource-budget checks, evaluation order, dependency blocking, conservative abort behaviour, and postcondition checks. These semantics are not claimed as historical source grammar. The 32 fixtures are specification-level, not results from an executed parser or simulator. The source archive still does not establish a universal predicate language, resource accounting model, physical feasibility engine, rollback semantics, or actual execution capability.
+
+
+## 17. Incantations v1.3 — mechanism and effect semantics
+
+[Incantations v1.3](../canon/arcane-incantations-v1.3-mechanism-and-effect-semantics.md) is a modern design extension that distinguishes a desired state, proposed transition, mechanism model, coupling relation, feasibility evidence and observed outcome. The source archive records the broad glosses of `kren`, `trak`, `frem`, `shren`, `bran`, `vare` and coupling categories, but those glosses do not establish complete argument signatures, causal laws, resource units or execution semantics. The v1.3 evidence labels and 36 fixtures are specification-level design, not empirical validation or simulator output.
