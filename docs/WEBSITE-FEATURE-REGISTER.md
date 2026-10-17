@@ -221,9 +221,10 @@ CI #510 passed the full unit suite, TypeScript/production build and browser acce
 |---|---|---|---|---|---|---|---|---|
 | WEB-PLAY-03 | Load source-derived fixtures into the Playground | Development Studio Plan: fixture-driven language laboratory | High | Versioned Phase 6G fixture JSON and provisional parser | `src/App.tsx`, `src/engine/phase6gFixtureAudit.ts`, `src/styles.css`, `tests/browser/playground.spec.ts` | Preserve fixture ID, category, source expectation, canon status, evidence and notes; load without automatic execution; show current parser output independently; highlight conditional and historical divergences | [CI #520](https://github.com/sixtoast/Anime-language-/actions/runs/39016988588) passed unit tests, build and browser acceptance | Verified (automated CI) |
 
-### Next evidence-backed queue item — WEB-TRACE-01
+### WEB-TRACE-01 verification — 2026-10-17
 
-CI reports currently include a significant number of `UNMAPPED` test records. This is a traceability gap, not a test failure. Build explicit mappings from executed test identity to registry entries and source fixtures only where identity is demonstrated. Leave ambiguous cases visibly unmapped, preserve existing IDs, and test both mapped and unmapped cases. Do not reduce the count by fuzzy matching or invented equivalence.
+CI runs [#527](https://github.com/sixtoast/Anime-language-/actions/runs/39017761622) and [#528](https://github.com/sixtoast/Anime-language-/actions/runs/39017829323) verified explicit test-to-registry identity mapping and hardened report validation. Run #528 passed all 105 tests, with 105/105 stable test IDs and zero unmapped results. The reporting script validates candidate IDs against both explicit engine registry IDs and the explicit website catalogue regression IDs; remaining unknown IDs remain UNMAPPED rather than fuzzy-matched. This verifies the current reporting suite, not a universal guarantee that every future test is automatically traceable.
+
 
 
 ### WEB-TRACE-01 — Explicit test-to-source traceability queue (2026-10-17)
@@ -231,3 +232,10 @@ CI reports currently include a significant number of `UNMAPPED` test records. Th
 | ID | Feature | Origin | Priority | Dependencies | Affected files/sections | Acceptance criteria | Verification evidence | Final status |
 |---|---|---|---|---|---|---|---|---|
 | WEB-TRACE-01 | Map executed tests to registry entries and source fixtures where identity is explicit | Development Studio Plan: fixture-driven laboratory, shared record model and implementation evidence | High | Existing `src/engine/testRegistry.ts`, Phase 6G fixture suite, CI report generator | Overview recommendation, test registry, fixture audit, report mapping and tests | Exact identity mappings only; mapped/unmapped counts agree with report records; ambiguous records remain unmapped; every new mapping has a regression test; no fuzzy matching or canon inference | Queued based on CI #520 report showing unmapped records; implementation not yet started | Planned |
+
+
+### WEB-INC-RES-01 — Incantation resource-design fixture browser (next)
+
+| ID | Feature | Origin | Priority | Dependencies | Affected files/sections | Acceptance criteria | Verification evidence | Final status |
+|---|---|---|---|---|---|---|---|---|
+| WEB-INC-RES-01 | Browse v1.9 resource-accounting specification fixtures separately from executable tests | Arcane Incantations v1.9; Development Studio Plan fixture-driven validation | Medium | Locked v1.9 specification and Playground fixture browser | Playground, fixture metadata, tests, documentation catalogue | Expose all 60 RES19 fixtures with IDs and expected outcomes; label them specification fixtures, not executed tests; preserve source link and unresolved/runtime caveat; never make fixture selection appear to run a spell or prove physical feasibility | Queued after v1.9 specification publication; implementation not started | Planned |
