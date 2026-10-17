@@ -224,3 +224,10 @@ CI #510 passed the full unit suite, TypeScript/production build and browser acce
 ### Next evidence-backed queue item — WEB-TRACE-01
 
 CI reports currently include a significant number of `UNMAPPED` test records. This is a traceability gap, not a test failure. Build explicit mappings from executed test identity to registry entries and source fixtures only where identity is demonstrated. Leave ambiguous cases visibly unmapped, preserve existing IDs, and test both mapped and unmapped cases. Do not reduce the count by fuzzy matching or invented equivalence.
+
+
+### WEB-TRACE-01 — Explicit test-to-source traceability queue (2026-10-17)
+
+| ID | Feature | Origin | Priority | Dependencies | Affected files/sections | Acceptance criteria | Verification evidence | Final status |
+|---|---|---|---|---|---|---|---|---|
+| WEB-TRACE-01 | Map executed tests to registry entries and source fixtures where identity is explicit | Development Studio Plan: fixture-driven laboratory, shared record model and implementation evidence | High | Existing `src/engine/testRegistry.ts`, Phase 6G fixture suite, CI report generator | Overview recommendation, test registry, fixture audit, report mapping and tests | Exact identity mappings only; mapped/unmapped counts agree with report records; ambiguous records remain unmapped; every new mapping has a regression test; no fuzzy matching or canon inference | Queued based on CI #520 report showing unmapped records; implementation not yet started | Planned |
