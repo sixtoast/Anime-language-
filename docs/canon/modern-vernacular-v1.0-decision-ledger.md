@@ -233,3 +233,8 @@ The [Incantations v1.6 specification](arcane-incantations-v1.6-typed-parameters-
 ## 33. Incantations 1.7 — state predicates and preconditions
 
 The [Incantations v1.7 specification](arcane-incantations-v1.7-state-predicates-and-preconditions.md) defines typed predicate results, mandatory preconditions, postconditions, invariants, bounded temporal operators, evidence freshness and condition combination. Forty-eight specification fixtures are documented. The design does not claim a predicate engine, observation apparatus or spell runtime exists.
+
+
+## 34. Incantations 1.8 — spatial frames and region semantics
+
+The [Incantations v1.8 specification](arcane-incantations-v1.8-spatial-frames-and-region-semantics.md) formalises frame-aware spatial values, geometry type distinctions, spatial relations, containment/boundary semantics, tolerance and uncertainty, and temporal validity. It retains source-recorded Arcane forms without inferring complete historical signatures. Fifty-two specification fixtures are documented; no geometry engine or spell runtime is claimed.
