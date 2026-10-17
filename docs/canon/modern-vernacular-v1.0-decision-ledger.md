@@ -193,3 +193,8 @@ The [Modern Vernacular v2.6 Typed Measurement Quantities specification](arcane-m
 ## 25. Version 2.7 extension
 
 The [Modern Vernacular v2.7 Quantity Comparison specification](arcane-modern-vernacular-v2.7-quantity-comparison.md) adds the modern relation markers `nari` (equal), `dori` (less than), and `gari` (greater than), verified as absent from the indexed Mega Pack2 text. The frame is `RELATION + QUANTITY-A + QUANTITY-B`; it is truth-evaluable but is not a full sentence or control instruction. Both operands must be exact, positive v2.6 quantities using the same unit token. No conversions, approximate operands, tolerance intervals, chained relations, or Formal-to-Vernacular substitution are licensed. Source forms `nadi`, `dofa`, `guwi`, and `vobi` remain Formal / PROPOSED / Phase 4. Twenty fixtures are specified; parser and independent-speaker validation are not claimed.
+
+
+## 26. Incantations 1.0 foundation (separate Formal branch)
+
+The [Arcane Incantations v1.0 Foundation](arcane-incantations-v1.0-foundation.md) starts a separate Formal Arcane incantation layer. It reuses source-recorded operation vocabulary (`kren`, `trak`, `frem`, `shren`, `bran`, `vare`), coupling categories (`hə`, `he`, `ha`, `hu`, `hi`, `ho`) and spatial role markers (`po`, `fo`, `lo`) without changing their source labels. The incantation frame, operation-slot schemata, validation states and explicit separation of requested effect, mechanism, resource, constraints and outcome are new modern design rules. No parser, spell simulator, physical validation or magical execution is claimed. This branch takes priority for the user's current focus; further ordinary-speech expansion should pause unless requested.
