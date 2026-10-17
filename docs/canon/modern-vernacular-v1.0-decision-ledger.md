@@ -208,3 +208,8 @@ The [Incantations v1.1 Target Resolution and Binding specification](arcane-incan
 ## 28. Incantations 1.2 — preconditions, constraints and failure semantics
 
 The [Incantations v1.2 specification](arcane-incantations-v1.2-preconditions-constraints-and-failure.md) defines typed semantic condition records, preconditions, limits, invariants, resource-bound checks, dependency guards, failure-state precedence, conservative abort handling, and postcondition verification. It explicitly separates language validation, external authorisation, execution, and verified success. Thirty-two fixtures are documented at specification level. No parser, physical simulator, rollback engine, or spell execution is claimed.
+
+
+## 29. Incantations 1.3 — mechanism and effect semantics
+
+The [Incantations v1.3 specification](arcane-incantations-v1.3-mechanism-and-effect-semantics.md) separates desired state, transition, mechanism model, coupling relation, feasibility evidence, authorisation, execution and outcome verification. It reuses source-recorded operation and coupling vocabulary without inferring complete historical argument signatures from glosses. Thirty-six specification fixtures are documented; no parser, physical simulator, or spell execution is claimed.
