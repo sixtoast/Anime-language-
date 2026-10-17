@@ -132,3 +132,10 @@ The inspected v5 draft lexicon labels `kole` (“until”) and `shasu` (“delay
 The only licensed endpoint construction is an ongoing `seno` clause followed by `kavi` and a completed `zem` (“come”) clause. This deliberately narrow rule avoids implying that any arbitrary event can serve as an endpoint before its event structure and completion meaning have been specified. Aspect and qualitative-duration rules are explicitly extended to `seno` within their existing boundaries. The specification includes 18 design fixtures, not parser or independent-speaker results.
 
 Delay is deliberately left unresolved: an offset-before-start needs a baseline/expected start and an offset representation. A word meaning merely “later” would not define these. See [Modern Vernacular v2.3](../canon/arcane-modern-vernacular-v2.3-waiting-and-until.md) and the [decision ledger](../canon/modern-vernacular-v1.0-decision-ledger.md).
+
+
+## 10. Follow-on design decision: Modern Vernacular v2.4 numeric duration
+
+The inspected v5 draft lexicon lists `za`–`pe) as digits and `se` (“second”) as a unit, each Shared / CANON / v3.0-L. It lists `wela` (“duration”) as Formal / PROPOSED / Phase 4. Modern Vernacular v2.4 licenses the existing digit and second-unit forms in one narrow numeric-duration slot; this does not infer a general numeral-composition rule or globally change the forms' register or stratum.
+
+The new `nela` (“about/approximately”) form had no exact entry in the inspected v5 draft lexicon; this is a bounded collision check, not proof of historical absence from every source. The only supported quantity is one through nine whole seconds for affirmative completed-event clauses. Zero, multi-digit values, decimals, fractions, other units, ongoing-duration scope and numeric/qualitative stacking are explicitly blocked. Twenty design fixtures are documented but have not been parser-executed or independently speaker-tested. See [Modern Vernacular v2.4](../canon/arcane-modern-vernacular-v2.4-numeric-duration.md) and the [decision ledger](../canon/modern-vernacular-v1.0-decision-ledger.md).
