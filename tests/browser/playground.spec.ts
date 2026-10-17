@@ -117,4 +117,39 @@ test.describe("Playground Phase 6G parser integration", () => {
     }));
     expect(sizes.page, "Playground and lexicon inspector should not overflow at 360px").toBeLessThanOrEqual(sizes.viewport);
   });
+
+  test("loads a source fixture into the editor and runs it only after explicit action", async ({ page }) => {
+    await openPlayground(page);
+    const fixtureSelect = page.getByRole("combobox", { name: "Choose Phase 6G source fixture" });
+    await expect(fixtureSelect).toHaveValue("P6G-FX-001");
+    await expect(page.locator(".fixture-browser-caveat")).toContainText("current parser observations and canon status are separate");
+    await page.getByRole("button", { name: "Load fixture into editor" }).click();
+
+    const editor = page.getByRole("textbox", { name: "Phase 6G surface-like expression editor" });
+    await expect(editor).toHaveValue("ki to ma");
+    await expect(page.getByText("No analysis has been run")).toBeVisible();
+    await page.getByRole("button", { name: "Parse surface-like notation" }).click();
+    await expect(page.getByText("Unique structural parse produced")).toBeVisible();
+    await expect(page.locator(".analysis-output pre")).toContainText('"value": "12"');
+  });
+
+  test("loads a rejection fixture and exposes the current parser diagnostic separately", async ({ page }) => {
+    await openPlayground(page);
+    const fixtureSelect = page.getByRole("combobox", { name: "Choose Phase 6G source fixture" });
+    await fixtureSelect.selectOption("P6G-FX-003");
+    await expect(page.locator(".fixture-browser-meta")).toContainText("reject");
+    await page.getByRole("button", { name: "Load fixture into editor" }).click();
+    await expect(page.getByRole("textbox", { name: "Phase 6G surface-like expression editor" })).toHaveValue("ki to");
+    await page.getByRole("button", { name: "Parse surface-like notation" }).click();
+    await expect(page.locator(".analysis-output")).toContainText("UNTERMINATED_NUMERAL");
+  });
+
+  test("shows conditional source expectations without relabelling them as canonical", async ({ page }) => {
+    await openPlayground(page);
+    const fixtureSelect = page.getByRole("combobox", { name: "Choose Phase 6G source fixture" });
+    await fixtureSelect.selectOption("P6G-FX-011");
+    await expect(page.locator(".fixture-browser-meta")).toContainText("reject-unless-context-resolves");
+    await expect(page.locator(".fixture-browser-meta")).toContainText("unresolved");
+    await expect(page.locator(".fixture-browser-caveat")).toContainText("known to diverge from the archived executable prototype");
+  });
 });
