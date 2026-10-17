@@ -2,6 +2,8 @@ import { expect, test } from "@playwright/test";
 
 async function openPlayground(page: import("@playwright/test").Page) {
   await page.goto("/");
+  const mobileMenu = page.getByRole("button", { name: "Open navigation" });
+  if (await mobileMenu.isVisible()) await mobileMenu.click();
   await page.getByRole("button", { name: "Playground", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Playground." })).toBeVisible();
 }
