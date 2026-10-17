@@ -189,3 +189,8 @@ The new [Incantations v1.1 Target Resolution and Binding specification](../canon
 ## 18. Incantations v1.4 — spell composition and sequencing
 
 [Incantations v1.4](../canon/arcane-incantations-v1.4-spell-composition-and-sequencing.md) is a new modern design layer defining multi-step plan identity, explicit dependencies, deterministic serial ordering, scoped bindings, intermediate-value invalidation, failure policies, completion verification, and the difference between sequential and transactional plans. These sequencing semantics are not claimed as historical Arcane grammar. The 40 fixtures are specification-level expectations, not results from an executable scheduler or transaction engine. The source material reviewed does not establish universal atomicity, rollback, parallel execution, or a runtime interpreter.
+
+
+## 19. Incantations v1.5 — invocation profiles and execution contracts
+
+[Incantations v1.5](../canon/arcane-incantations-v1.5-invocation-profiles-and-execution-contracts.md) introduces modern design constructs for request profiles, execution contracts, explicit external authority, interruption reporting and invocation audit records. These are not presented as historical source grammar. The 42 fixtures are expected semantic outcomes, not executable tests. The reviewed source material does not establish a universal authority hierarchy, execution runtime, interruption guarantee, or cryptographically trusted audit system.
