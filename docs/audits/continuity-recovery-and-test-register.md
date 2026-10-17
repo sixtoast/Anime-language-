@@ -60,6 +60,7 @@
 | D-011 | CANON | CREATE is not a physical primitive; KWAM creates a binding only. |
 | D-012 | GAP | Specify Logos substrate, memory, energy, bandwidth, and interface costs. |
 | D-013 | UNVERIFIED | Vocabulary completion percentages need measurable coverage criteria. |
+| D-014 | LOCKED DESIGN CANON | Incantations v1.9 defines bounded resource accounting, reservations, conservation contracts and reconciliation; this does not implement physical feasibility or infer spoken syntax. |
 
 ### Change-record template
 
@@ -95,6 +96,7 @@ Defined tests are not claimed passes.
 | T-014 | Conservation | Reject matter/energy without a source or valid conversion. |
 | T-015 | Logos resource accounting | Identify substrate, memory, energy, bandwidth, and interface costs. |
 | T-016 | Numeric feasibility | Choose a simple spell with explicit assumptions and evaluate each feasibility term separately. |
+| T-017 | Resource ledger and conservation | For one approved resource domain, test source provenance, compatible units, reservation races, idempotent debits, balance mismatch, uncertainty, interruption and unknown outcomes against the v1.9 contract. |
 
 **Execution status at recovery:** 16 tests defined; 0 tests executed and evidenced in the recovery pack. No test is claimed to have passed without recorded execution.
 
@@ -104,3 +106,8 @@ Defined tests are not claimed passes.
 - Do not redesign a settled section for stylistic reasons; record changes in the decision ledger.
 - Preserve old forms as aliases unless an inconsistency is demonstrated.
 - Keep source canon, provisional proposals, implementation status, and test evidence as separate fields.
+
+
+## Resource-accounting continuity update — 2026-10-17
+
+Arcane Incantations v1.9 is locked design canon for the bounded modern incantation metalanguage. It adds 60 specification fixtures for resource definitions, accounts, sources, transfers, transformations, budgets, reservations, conservation contracts, transactions, concurrency, interruption and reconciliation. These fixtures are expected outcomes, not executed tests. The older T-014 conservation and T-015 Logos accounting concerns remain implementation/source-recovery work; v1.9 does not resolve the Logos substrate model or establish a universal mana-to-energy conversion. The next executable step is a deliberately narrow resource domain with explicit units, source evidence and contract assumptions.
