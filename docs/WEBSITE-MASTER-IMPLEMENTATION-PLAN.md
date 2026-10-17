@@ -3,7 +3,7 @@
 **Status:** Active planning baseline  
 **Scope:** Development Studio website and its documentation, evidence, reporting, usability, and delivery workflows only  
 **Repository:** [sixtoast/Anime-language-](https://github.com/sixtoast/Anime-language-)  
-**Last reconciled:** 2026-10-13
+**Last reconciled:** 2026-10-17
 
 > **Scope boundary:** This plan is for the website. It does not authorize changes to Arcane canon, vocabulary, grammar, parser/engine behaviour, operator semantics, spell mechanics, or physical-feasibility rules. Those are a separate project workstream and remain out of scope unless the owner explicitly changes this boundary.
 
@@ -131,14 +131,14 @@ Statuses use only these meanings: **Planned** (not implemented), **Implemented**
 - [ ] Verify a successful test run and production build on a recorded commit when the existing test failure is resolved through explicitly authorised scope.
 - [ ] Ensure stale or missing CI data is visibly marked.
 
-**Current evidence:** The latest checked CI run is [#159](https://github.com/sixtoast/Anime-language-/actions/runs/38447949862), commit `69754f461938f2da830fce6bf78c98a5966b8d24`. Dependency installation and “Type-check and build” succeeded; “Run tests and write machine-readable results” and the test-summary step failed; publishing latest results was skipped. The website build step passed, but the overall commit is not fully verified. The language-parser test failure is outside this website-only scope. See the [Website Feature Register](WEBSITE-FEATURE-REGISTER.md) for the current evidence snapshot.
+**Current evidence:** The latest inspected run at reconciliation was [#486](https://github.com/sixtoast/Anime-language-/actions/runs/39014882840), commit `cce1d530f1603b2b245567b2d7dbb77c12612c9e`. Dependency installation and the TypeScript/production build passed. Two browser acceptance tests failed: the catalogue filter test still expected the old 19-entry count, and the 360px viewport test measured 379px document width. Both failures were diagnosed from the actual workflow log; fixes were committed to update the expected filtered count and constrain the mobile header. Runs #487–#488 were still pending/in progress at the time of the next check, and the subsequent catalogue-count wording update triggered another CI run. Do not mark this phase verified until a run covering the final fix commit passes browser acceptance. The separate existing language-parser test failure remains out of website scope. See the [Website Feature Register](WEBSITE-FEATURE-REGISTER.md).
 
 **Exit:** the UI truthfully reports step-level results and a fresh, successful website build is recorded; test failure status is accurately shown even if its cause remains outside scope.
 
 ### Phase 2 — Documentation and source inventory
 - [x] Keep the existing initial source inventory and archive report.
-- [x] Catalogue audit correction: 19 entries total; 14 originally had explicit paths and 5 did not. All five now have grounded links, and all 19 paths exist in the repository tree. Browser interaction and provenance audits remain. See [Documentation Catalogue First-Pass Link Audit](DOCUMENTATION-CATALOGUE-LINK-AUDIT.md).
-- [x] Add Playwright browser acceptance checks for combined search/status/provenance filters, reset, empty-state recovery, all 19 source-link entries, and a 360px viewport; review the CI result tied to the implementation commit before marking the experience Verified.
+- [x] Catalogue audit correction: 19 entries total; 14 originally had explicit paths and 5 did not. All five now have grounded links, and all 28 paths exist in the repository tree. Browser interaction and provenance audits remain. See [Documentation Catalogue First-Pass Link Audit](DOCUMENTATION-CATALOGUE-LINK-AUDIT.md).
+- [x] Add Playwright browser acceptance checks for combined search/status/provenance filters, reset, empty-state recovery, all 28 source-link entries, and a 360px viewport; review the CI result tied to the implementation commit before marking the experience Verified.
 - [x] Extract catalogue data/filtering into `src/documentationCatalogue.ts` and add six catalogue regression tests; all six passed in CI run #167 and type-check/build passed. Overall CI remains failed on the existing out-of-scope surface-parser decimal-with-unit test. UI/browser checks remain.
 - [ ] Identify archive content not represented in the visible catalogue.
 - [ ] Separate original sources from derived summaries, historical prototypes, provisional reports, and generated outputs.
@@ -293,3 +293,8 @@ Added a Playwright-based website browser suite and CI step for the Documentation
 ### Browser-discovered mobile overflow — 2026-10-14
 
 The first Playwright run passed 3/4 Documentation checks and found a real 19px page-level horizontal overflow at a 360px viewport (document width 379px). The responsive Documentation layout now stacks the source list and detail panel into one column at the existing mobile breakpoint. Keep the overflow assertion strict; the fix must pass the same browser test before acceptance is marked verified.
+
+
+## Reconciliation note — 2026-10-17
+
+The active plan was consulted before continuing website work. The documentation catalogue now contains 28 entries, including the nine versioned incantation design specifications (v1.0–v1.8). These are documentation links only: adding them does not change the parser, language-engine behaviour, or source canon. The latest inspected browser run exposed two concrete defects (stale 19-entry test expectation and horizontal overflow at 360px); corrective commits have been made, but the browser acceptance work remains **Implemented — pending fresh CI evidence**, not Verified. Continue with the existing five-section structure and use the feature register for the next acceptance gate.
