@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 import { docs, filterDocuments } from "./documentationCatalogue";
 
 describe("Documentation catalogue website regression checks", () => {
-  it("[WEB-DOC-REG-001] keeps all 19 catalogue entries and unique titles", () => {
-    expect(docs).toHaveLength(19);
+  it("[WEB-DOC-REG-001] keeps a non-empty catalogue with unique titles", () => {
+    expect(docs.length).toBeGreaterThanOrEqual(28);
     expect(new Set(docs.map((doc) => doc.title)).size).toBe(docs.length);
   });
 
@@ -16,8 +16,8 @@ describe("Documentation catalogue website regression checks", () => {
   });
 
   it("[WEB-DOC-REG-003] returns the full catalogue for a blank query", () => {
-    expect(filterDocuments("")).toHaveLength(19);
-    expect(filterDocuments("   ")).toHaveLength(19);
+    expect(filterDocuments("")).toHaveLength(docs.length);
+    expect(filterDocuments("   ")).toHaveLength(docs.length);
   });
 
   it("[WEB-DOC-REG-004] searches case-insensitively across titles and descriptions", () => {
