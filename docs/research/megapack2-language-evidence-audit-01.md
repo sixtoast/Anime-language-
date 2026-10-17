@@ -194,3 +194,8 @@ The new [Incantations v1.1 Target Resolution and Binding specification](../canon
 ## 19. Incantations v1.5 — invocation profiles and execution contracts
 
 [Incantations v1.5](../canon/arcane-incantations-v1.5-invocation-profiles-and-execution-contracts.md) introduces modern design constructs for request profiles, execution contracts, explicit external authority, interruption reporting and invocation audit records. These are not presented as historical source grammar. The 42 fixtures are expected semantic outcomes, not executable tests. The reviewed source material does not establish a universal authority hierarchy, execution runtime, interruption guarantee, or cryptographically trusted audit system.
+
+
+## 20. Incantations v1.6 — typed parameters and value semantics
+
+[Incantations v1.6](../canon/arcane-incantations-v1.6-typed-parameters-and-value-semantics.md) adds a modern typed-value design for operation inputs/outputs, references versus values, snapshots versus live references, missing/unknown/false/invalid/error distinctions, dimensional quantities, conversion contracts and operation signatures. It reuses the separate Modern Vernacular v2.6–v2.7 work only as related design context; it does not promote that branch's lexical forms into Formal incantations. The 46 fixtures are specification-level expectations, not test results from an executable type checker. Historical source glosses do not establish the full signatures of the incantation operations.
