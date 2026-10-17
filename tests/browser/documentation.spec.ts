@@ -10,11 +10,11 @@ test.describe("Documentation catalogue browser acceptance", () => {
   test("search, status and provenance filters combine and reset", async ({ page }) => {
     await expect(page.getByRole("status").filter({ hasText: "28 of 28 sources" })).toBeVisible();
     await page.getByLabel("Filter documentation by source status").selectOption("Canonical");
-    await expect(page.getByRole("status").filter({ hasText: "2 of 19 sources" })).toBeVisible();
+    await expect(page.getByRole("status").filter({ hasText: "2 of 28 sources" })).toBeVisible();
 
     await page.getByLabel("Filter documentation by source status").selectOption("Provisional");
     await page.getByLabel("Filter documentation by provenance type").selectOption("Original historical source file");
-    await expect(page.getByRole("status").filter({ hasText: "2 of 19 sources" })).toBeVisible();
+    await expect(page.getByRole("status").filter({ hasText: "2 of 28 sources" })).toBeVisible();
     await expect(page.getByRole("button", { name: /Phase 4 — ambiguity audit/ })).toBeVisible();
     await expect(page.getByRole("button", { name: /Phase 5 — semantic audit/ })).toBeVisible();
 
