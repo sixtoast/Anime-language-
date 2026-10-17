@@ -334,3 +334,10 @@ The next evidence-backed work item is to connect fixture identities to the execu
 ### Overview queue reconciliation — 2026-10-17
 
 The Overview recommendation has been moved off the completed health-panel task and now points to WEB-TRACE-01, linking executed tests to source fixtures only when identity is explicit. The displayed unmapped count comes from the published per-test report, with a warning that it is current only when the report commit matches the latest CI commit. This keeps the development queue evidence-backed and avoids reducing the unmapped count by guessing. The Overview browser assertion has been updated to protect the recommendation from becoming stale again.
+
+
+### Test traceability closure and next queue — 2026-10-17
+
+WEB-TRACE-01 is verified by [CI #527](https://github.com/sixtoast/Anime-language-/actions/runs/39017761622) and [CI #528](https://github.com/sixtoast/Anime-language-/actions/runs/39017829323). The latter passed 105 tests, with 105/105 stable IDs and zero unmapped results. The report generator validates IDs against the engine test registry and website catalogue regression IDs. This is a current suite result; it does not guarantee that new tests will be mapped automatically or justify fuzzy identity inference.
+
+The language specification has advanced to [Arcane Incantations v1.9 — Resource Accounting and Conservation Contracts](canon/arcane-incantations-v1.9-resource-accounting-and-conservation-contracts.md), a locked modern design layer with 60 normative specification fixtures. It does not implement an evaluator or define universal physical laws. The next website feature is WEB-INC-RES-01: make these specification fixtures browsable separately from executable parser tests, preserving the distinction between expected design outcomes and observed implementation behaviour.
