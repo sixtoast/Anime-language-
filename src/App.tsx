@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { parseSurfaceExpression, type SurfaceParseResult } from "./engine/surfaceParser";
 import { bundledLexiconLoad, BUNDLED_LEXICON_SOURCE } from "./engine/bundledLexicon";
+import { inspectLexiconForm } from "./engine/lexiconRegistry";
 import { docs, filterDocuments, type Status } from "./documentationCatalogue";
 import { workbenchTests } from "./engine/testRegistry";
 import { canonAuditItems, auditReadinessLabels } from "./engine/canonAuditRegistry";
@@ -67,6 +68,7 @@ function App() {
   const [docSourceKind, setDocSourceKind] = useState("All");
   const [editor, setEditor] = useState("");
   const [analysis, setAnalysis] = useState<SurfaceParseResult | null>(null);
+  const [lexiconQuery, setLexiconQuery] = useState("pa");
   const [mobileNav, setMobileNav] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState(docs[0].title);
   const [testQuery, setTestQuery] = useState("");
@@ -191,6 +193,15 @@ function App() {
   const sourceKinds = useMemo(() => Array.from(new Set(docs.map((doc) => doc.sourceKind))).sort(), []);
   const filteredDocs = useMemo(() => filterDocuments(query, docStatus, docSourceKind), [query, docStatus, docSourceKind]);
   const selectedDocument = filteredDocs.find((item) => item.title === selectedDoc) ?? filteredDocs[0] ?? docs[0];
+  const lexiconInspection = useMemo(() => {
+    const form = lexiconQuery.trim().toLowerCase();
+    if (!form) return null;
+    return {
+      ...inspectLexiconForm(bundledLexiconLoad.registry, form),
+      alias: bundledLexiconLoad.registry.aliases.get(form),
+      nonAtomicEntry: bundledLexiconLoad.registry.nonAtomicEntries.get(form)
+    };
+  }, [lexiconQuery]);
 
   const changeSection = (next: Section) => {
     setSection(next);
@@ -320,6 +331,34 @@ function App() {
         {section === "Playground" && <section className="page-content">
           <div className="eyebrow"><span className="eyebrow-line"/> EXPRESSION WORKSPACE</div><h1 className="page-title">Playground<span>.</span></h1><p className="page-intro">Parse the implemented provisional Phase 6G surface-like notation. This is a narrow parser subset, not a complete Arcane grammar, spoken-language interpreter, semantic validator, or spell executor.</p>
           <div className="engine-banner"><Activity size={18}/><div><strong>Phase 6G provisional surface parser connected</strong><p>Checks token structure, registered operator arity, numeral closure, explicit control blocks, and selected ambiguity cases. Source atoms use the pinned {BUNDLED_LEXICON_SOURCE.version} draft lexicon ({bundledLexiconLoad.rowCount} rows; {bundledLexiconLoad.aliasRowCount} alias records). Legacy alias rewriting is off by default, lexical collisions fail closed, and loading this source does not promote entries to canon.</p></div><span className="engine-status">SYNTAX ONLY</span></div>
+          <section className="lexicon-inspector" aria-labelledby="lexicon-inspector-title">
+            <div className="lexicon-inspector-head">
+              <div><span className="detail-kicker">SOURCE LOOKUP</span><h2 id="lexicon-inspector-title">Lexicon inspector</h2><p>Exact-form lookup against the pinned {BUNDLED_LEXICON_SOURCE.version} source snapshot. This view reports source records; it does not decide canon or change parser alias settings.</p></div>
+              <a href="https://github.com/sixtoast/Anime-language-/blob/main/sources/originals/Arcane_Lexicon_v5_draft.csv" target="_blank" rel="noreferrer">Open lexicon CSV ↗</a>
+            </div>
+            <label className="lexicon-query-label">Form or recorded multiword entry<input aria-label="Inspect source lexicon form" value={lexiconQuery} onChange={(event) => setLexiconQuery(event.target.value)} placeholder="e.g. pa, ra, frata"/></label>
+            {!lexiconQuery.trim() ? <p className="lexicon-empty" role="status">Enter a form to inspect its source records.</p> : lexiconInspection?.entry ? <>
+              <div className="lexicon-record-grid">
+                <div><span>Normalised form</span><strong>{lexiconInspection.entry.form}</strong></div>
+                <div><span>Source rows</span><strong>{lexiconInspection.entry.rowCount}</strong></div>
+                <div><span>Glosses</span><strong>{lexiconInspection.entry.glosses.length ? lexiconInspection.entry.glosses.join(" · ") : "Not recorded in this snapshot"}</strong></div>
+                <div><span>Lexical classes</span><strong>{lexiconInspection.entry.classes.length ? lexiconInspection.entry.classes.join(" · ") : "Not recorded in this snapshot"}</strong></div>
+                <div><span>Registers</span><strong>{lexiconInspection.entry.registers.length ? lexiconInspection.entry.registers.join(" · ") : "Not recorded in this snapshot"}</strong></div>
+                <div><span>Source status</span><strong>{lexiconInspection.entry.statuses.length ? lexiconInspection.entry.statuses.join(" · ") : "Not recorded in this snapshot"}</strong></div>
+                <div className="lexicon-record-wide"><span>Source labels</span><strong>{lexiconInspection.entry.sources.length ? lexiconInspection.entry.sources.join(" · ") : "Not recorded in this snapshot"}</strong></div>
+                {lexiconInspection.entry.notes.length > 0 && <div className="lexicon-record-wide"><span>Source notes</span><strong>{lexiconInspection.entry.notes.join(" · ")}</strong></div>}
+              </div>
+              {lexiconInspection.isCollision && <p className="lexicon-warning" role="status">Collision warning: this spelling has multiple source analyses. The parser refuses to choose a meaning without a documented contextual rule.</p>}
+            </> : lexiconInspection?.nonAtomicEntry ? <div className="lexicon-record-grid">
+              <div><span>Recorded form</span><strong>{lexiconInspection.nonAtomicEntry.form}</strong></div>
+              <div><span>Source rows</span><strong>{lexiconInspection.nonAtomicEntry.rowCount}</strong></div>
+              <div><span>Glosses</span><strong>{lexiconInspection.nonAtomicEntry.glosses.join(" · ") || "Not recorded in this snapshot"}</strong></div>
+              <div><span>Source status</span><strong>{lexiconInspection.nonAtomicEntry.statuses.join(" · ") || "Not recorded in this snapshot"}</strong></div>
+              <p className="lexicon-warning" role="status">This source record is preserved as a multiword/editorial form and is not an atomic token in the current parser.</p>
+            </div> : <p className="lexicon-empty" role="status">No exact source entry found for “{lexiconQuery.trim()}”. This does not prove that the form is invalid in every Arcane register or historical source.</p>}
+            {lexiconInspection?.alias && <p className="lexicon-alias" role="status"><strong>Recorded legacy alias:</strong> {lexiconInspection.alias.alias} → {lexiconInspection.alias.preferredForm}. Evidence: {lexiconInspection.alias.evidence}. This is an inspection result only; parsing does not rewrite aliases by default.</p>}
+            <p className="lexicon-provenance">Source: {BUNDLED_LEXICON_SOURCE.label} ({BUNDLED_LEXICON_SOURCE.version}); {bundledLexiconLoad.rowCount} loaded rows. Lexicon and alias CSV snapshots are versioned evidence, not blanket canon promotion.</p>
+          </section>
           <div className="editor-card"><div className="editor-toolbar"><div><span className="editor-dot"/><span className="editor-file">untitled.phase6g</span><span className="editor-language">PROVISIONAL SURFACE-LIKE NOTATION</span></div><button className="secondary-button" onClick={() => { setEditor(""); setAnalysis(null); }}>Clear editor</button></div><div className="editor-body"><div className="line-number">1<br/>2<br/>3<br/>4<br/>5<br/>6<br/>7<br/>8</div><textarea spellCheck={false} value={editor} onChange={(e) => { setEditor(e.target.value); setAnalysis(null); }} placeholder={"Try: frapa ki sho to sho\nLexicon atom: pa\nDecimal: frapa za shi to ma ki sho"} aria-label="Phase 6G surface-like expression editor"/></div><div className="editor-footer"><span>{editor.length} characters</span><span>Provisional syntax only · no semantic execution</span></div></div>
           <div className="playground-actions"><button className="secondary-button run-button" onClick={() => setAnalysis(parseSurfaceExpression(editor, { lexiconRegistry: bundledLexiconLoad.registry }))}><Play size={14}/> Parse surface-like notation</button><span>Registered operators: FRAPA, FRAJA, FRAMA, FRALA, FRASHA, DRAN, DREM, DRUM, DRAS, GRAN, GRAT, GRASH, KWAM, KWAT, KWASH, BEK, ZET, KOLE</span></div>
           <div className="result-panel"><div className="result-heading"><Command size={17}/><strong>Analysis output</strong><span>{analysis ? (analysis.ok ? "PARSE OK" : "DIAGNOSTICS") : "WAITING"}</span></div>{!analysis ? <div className="result-empty"><Braces size={27}/><strong>No analysis has been run</strong><p>Enter a Phase 6G surface-like expression and select Parse surface-like notation to inspect its syntax tree or diagnostics.</p></div> : <div className="analysis-output">{analysis.ok && analysis.ast ? <><div className="analysis-status success"><CheckCircle2 size={16}/> Unique structural parse produced</div><pre>{JSON.stringify(analysis.ast, null, 2)}</pre></> : <><div className="analysis-status failure"><AlertTriangle size={16}/> Expression rejected by the provisional parser</div><ul>{analysis.diagnostics.map((d, i) => <li key={d.code + d.tokenIndex + i}><code>{d.code}</code> — {d.message} <span>(token {d.tokenIndex}{d.token ? ` · ${d.token}` : ""})</span></li>)}</ul></>}<p className="analysis-caveat">A successful parse proves only that this expression fits the implemented provisional surface-like syntax. It does not prove semantic correctness, dimensional compatibility, mana feasibility, or that the form is canonical Arcane.</p></div>}</div>
