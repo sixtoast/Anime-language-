@@ -188,3 +188,8 @@ The [Modern Vernacular v2.5 Compound Numerals and Fractional Seconds specificati
 ## 24. Version 2.6 extension
 
 The [Modern Vernacular v2.6 Typed Measurement Quantities specification](arcane-modern-vernacular-v2.6-typed-measurement-quantities.md) defines a typed quantity phrase `[nela] + numeric value + unit` for the existing Shared / CANON / v3.0-L units `ma` (metre), `se` (second), `ke` (kilogram), `ra` (radian), and `ku` (kelvin). It reuses v2.5 numeric syntax but does not invent full-sentence measurement syntax or unit conversions. Quantity dimensions are LENGTH, TIME, MASS, PLANE ANGLE and THERMODYNAMIC TEMPERATURE; incompatible substitutions and undeclared compound units are rejected. Formal proposals such as `vobi`, `nadi`, `dofa`, and `guwi` remain Formal / PROPOSED. Twenty-two design fixtures are documented; parser, conversion and independent-speaker validation are not claimed.
+
+
+## 25. Version 2.7 extension
+
+The [Modern Vernacular v2.7 Quantity Comparison specification](arcane-modern-vernacular-v2.7-quantity-comparison.md) adds the modern relation markers `nari` (equal), `dori` (less than), and `gari` (greater than), verified as absent from the indexed Mega Pack2 text. The frame is `RELATION + QUANTITY-A + QUANTITY-B`; it is truth-evaluable but is not a full sentence or control instruction. Both operands must be exact, positive v2.6 quantities using the same unit token. No conversions, approximate operands, tolerance intervals, chained relations, or Formal-to-Vernacular substitution are licensed. Source forms `nadi`, `dofa`, `guwi`, and `vobi` remain Formal / PROPOSED / Phase 4. Twenty fixtures are specified; parser and independent-speaker validation are not claimed.
