@@ -174,7 +174,7 @@ Added nine versioned incantation design specifications (v1.0–v1.8) to `src/doc
 
 | ID | Feature | Origin | Priority | Dependencies | Affected files/sections | Acceptance criteria | Verification evidence | Final status |
 |---|---|---|---|---|---|---|---|---|
-| WEB-DOC-04 | Incantation source catalogue coverage | Current incantation design-document series; existing Documentation section | High | Existing source catalogue and valid repository paths | `src/documentationCatalogue.ts`, `src/documentationCatalogue.test.ts`, `tests/browser/documentation.spec.ts`, Documentation UI | All nine specs appear exactly once, retain correct repository paths and visible source-status caveats; filters/search still work; all 28 links open; no mobile horizontal overflow at 360px | Run #492 passed all four browser tests (filters, empty-state recovery, all 28 source links, 360px viewport) and production build; CI unit test exposed an incorrect one-argument expectation for binary FRAPA, corrected in commit `5efda89`; run #493 pending | Implemented — unverified |
+| WEB-DOC-04 | Incantation source catalogue coverage | Current incantation design-document series; existing Documentation section | High | Existing source catalogue and valid repository paths | `src/documentationCatalogue.ts`, `src/documentationCatalogue.test.ts`, `tests/browser/documentation.spec.ts`, Documentation UI | All nine specs appear exactly once, retain correct repository paths and visible source-status caveats; filters/search still work; all 28 links open; no mobile horizontal overflow at 360px | CI #495 passed unit tests, production build and all four Documentation browser tests; subsequent Overview acceptance passed in #499. Current documentation catalogue acceptance is verified by automated CI; live manual accessibility remains separate | Verified (automated CI) |
 
 ### Website runtime status and deployment evidence — 2026-10-17
 
@@ -207,3 +207,20 @@ The Playground previously invoked the Phase 2 audit parser while its copy implie
 ### WEB-PLAY-01 verification — 2026-10-17
 
 CI #510 passed the full unit suite, TypeScript/production build and browser acceptance. The Playground uses the pinned v5 draft source lexicon through the existing registry API. Seven browser cases verify parser success/diagnostics, output reset, explicit scope caveats, source-backed `pa`, ambiguity rejection, and disabled-by-default legacy alias rewriting. Source loading has no canon effect. The Phase 2 audit parser remains preserved as a separate prototype.
+
+
+### WEB-PLAY-02 — Source lexicon inspector (2026-10-17)
+
+| ID | Feature | Origin | Priority | Dependencies | Affected files/sections | Acceptance criteria | Verification evidence | Final status |
+|---|---|---|---|---|---|---|---|---|
+| WEB-PLAY-02 | Provenance-aware exact-form lexicon inspector | Development Studio Plan shared SourceRecord/RuleRecord model; pinned Phase 6G v5-draft lexicon | High | Bundled source CSV loader and lexicon registry | `src/App.tsx`, `src/styles.css`, `src/engine/lexiconRegistry.ts`, `tests/browser/playground.spec.ts` | Show exact source fields and status; preserve collisions; show alias evidence without auto-rewriting; unknown lookup does not declare global invalidity; responsive at 360px | [CI #516](https://github.com/sixtoast/Anime-language-/actions/runs/39016782698) passed unit tests, build and browser acceptance | Verified (automated CI) |
+
+### WEB-PLAY-03 — Source fixture browser (2026-10-17)
+
+| ID | Feature | Origin | Priority | Dependencies | Affected files/sections | Acceptance criteria | Verification evidence | Final status |
+|---|---|---|---|---|---|---|---|---|
+| WEB-PLAY-03 | Load source-derived fixtures into the Playground | Development Studio Plan: fixture-driven language laboratory | High | Versioned Phase 6G fixture JSON and provisional parser | `src/App.tsx`, `src/engine/phase6gFixtureAudit.ts`, `src/styles.css`, `tests/browser/playground.spec.ts` | Preserve fixture ID, category, source expectation, canon status, evidence and notes; load without automatic execution; show current parser output independently; highlight conditional and historical divergences | [CI #520](https://github.com/sixtoast/Anime-language-/actions/runs/39016988588) passed unit tests, build and browser acceptance | Verified (automated CI) |
+
+### Next evidence-backed queue item — WEB-TRACE-01
+
+CI reports currently include a significant number of `UNMAPPED` test records. This is a traceability gap, not a test failure. Build explicit mappings from executed test identity to registry entries and source fixtures only where identity is demonstrated. Leave ambiguous cases visibly unmapped, preserve existing IDs, and test both mapped and unmapped cases. Do not reduce the count by fuzzy matching or invented equivalence.
