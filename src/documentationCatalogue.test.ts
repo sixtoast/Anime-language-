@@ -42,7 +42,7 @@ describe("Documentation catalogue website regression checks", () => {
   });
 
   it("[WEB-DOC-REG-009] filters sources by status and provenance type together", () => {
-    expect(filterDocuments("", "Canonical").map((doc) => doc.title)).toEqual(["Magic system v3.0", "Arcane language v3.0-L", "Arcane Incantations v1.9 — Resource Accounting and Conservation Contracts"]);
+    expect(filterDocuments("", "Canonical").map((doc) => doc.title)).toEqual(["Magic system v3.0", "Arcane language v3.0-L", "Arcane Incantations v1.9 — Resource Accounting and Conservation Contracts", "Arcane Incantations v2.0 — Authority and Authorisation Decision Contracts"]);
     expect(filterDocuments("", "Provisional", "Original historical source file").map((doc) => doc.title)).toEqual(["Phase 4 — ambiguity audit", "Phase 5 — semantic audit"]);
     expect(filterDocuments("phase 6g", "Provisional", "Provisional research audit").map((doc) => doc.title)).toEqual(["Phase 6G — source lexicon audit"]);
     expect(filterDocuments("", "Deprecated")).toEqual([]);
@@ -55,6 +55,17 @@ describe("Documentation catalogue website regression checks", () => {
       expect(normalized.split("/"), doc.title + " must not traverse outside the repository").not.toContain("..");
     }
   });
+  it("[WEB-DOC-REG-011] lists the locked v2.0 authority design without claiming an authority service", () => {
+    const spec = docs.find((doc) => doc.title === "Arcane Incantations v2.0 — Authority and Authorisation Decision Contracts");
+    expect(spec).toMatchObject({
+      status: "Canonical",
+      sourcePath: "docs/canon/arcane-incantations-v2.0-authority-and-authorization-decision-contracts.md",
+      sourceKind: "Locked modern design specification"
+    });
+    expect(spec?.sourceNote).toContain("not a universal authority hierarchy");
+    expect(spec?.sourceNote).toContain("executable authorisation service");
+  });
+
   it("[WEB-DOC-REG-010] lists the locked v1.9 resource-accounting design without claiming runtime support", () => {
     const spec = docs.find((doc) => doc.title === "Arcane Incantations v1.9 — Resource Accounting and Conservation Contracts");
     expect(spec).toMatchObject({

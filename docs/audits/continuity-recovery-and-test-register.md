@@ -111,3 +111,13 @@ Defined tests are not claimed passes.
 ## Resource-accounting continuity update — 2026-10-17
 
 Arcane Incantations v1.9 is locked design canon for the bounded modern incantation metalanguage. It adds 60 specification fixtures for resource definitions, accounts, sources, transfers, transformations, budgets, reservations, conservation contracts, transactions, concurrency, interruption and reconciliation. These fixtures are expected outcomes, not executed tests. The older T-014 conservation and T-015 Logos accounting concerns remain implementation/source-recovery work; v1.9 does not resolve the Logos substrate model or establish a universal mana-to-energy conversion. The next executable step is a deliberately narrow resource domain with explicit units, source evidence and contract assumptions.
+
+
+## Authority-decision continuity update — 2026-10-17
+
+Arcane Incantations v2.0 locks a bounded modern authorisation decision-record contract with 60 specification fixtures. It formalises subject/action/target/scope matching, issuer trust, delegation limits, expiry, revocation, freshness, conditional decisions, independent consent gates, conflict outcomes and audit provenance. It deliberately does not define a universal authority hierarchy, legal/ethical policy, identity infrastructure, or executable authority service. Missing, stale, conflicting, out-of-scope, untrusted or unavailable decisions block the authorisation gate. The next website task is to make AUTH20 fixtures browsable as specification expectations, distinct from executed parser and resource-accounting tests.
+
+| ID | Status | Decision / test requirement |
+|---|---|---|
+| D-015 | LOCKED DESIGN CANON | Incantations v2.0 defines bounded authority-decision records and deny-by-default outcomes; it does not grant a universal authority hierarchy or replace consent, feasibility, resource, or execution checks. |
+| T-018 | DEFINED, NOT YET EXECUTED AS AN AUTHORITY SERVICE | For a configured authority domain, test exact scope matching, issuer trust, delegation bounds, expiry/revocation, condition uncertainty, independent consent gates and audit provenance against AUTH20 fixtures. |

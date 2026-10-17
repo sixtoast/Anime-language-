@@ -10,22 +10,22 @@ test.describe("Documentation catalogue browser acceptance", () => {
   });
 
   test("search, status and provenance filters combine and reset", async ({ page }) => {
-    await expect(page.getByRole("status").filter({ hasText: "29 of 29 sources" })).toBeVisible();
+    await expect(page.getByRole("status").filter({ hasText: "30 of 30 sources" })).toBeVisible();
     await page.getByLabel("Filter documentation by source status").selectOption("Canonical");
-    await expect(page.getByRole("status").filter({ hasText: "3 of 29 sources" })).toBeVisible();
+    await expect(page.getByRole("status").filter({ hasText: "4 of 30 sources" })).toBeVisible();
     await page.getByLabel("Filter documentation by source status").selectOption("Provisional");
     await page.getByLabel("Filter documentation by provenance type").selectOption("Original historical source file");
-    await expect(page.getByRole("status").filter({ hasText: "2 of 29 sources" })).toBeVisible();
+    await expect(page.getByRole("status").filter({ hasText: "2 of 30 sources" })).toBeVisible();
     await expect(page.getByRole("button", { name: /Phase 4 — ambiguity audit/ })).toBeVisible();
     await expect(page.getByRole("button", { name: /Phase 5 — semantic audit/ })).toBeVisible();
     await page.getByRole("button", { name: "Reset filters" }).click();
-    await expect(page.getByRole("status").filter({ hasText: "29 of 29 sources" })).toBeVisible();
+    await expect(page.getByRole("status").filter({ hasText: "30 of 30 sources" })).toBeVisible();
   });
 
   test("shows an understandable empty state and recovers from it", async ({ page }) => {
     const search = page.getByRole("textbox", { name: "Search documentation catalogue" });
     await search.fill("no-source-should-match-this-query-7391");
-    await expect(page.getByRole("status").filter({ hasText: "0 of 29 sources" })).toBeVisible();
+    await expect(page.getByRole("status").filter({ hasText: "0 of 30 sources" })).toBeVisible();
     await expect(page.getByText(/No sources match these filters/)).toBeVisible();
     await search.fill("magic system");
     await expect(page.getByRole("button", { name: /Magic system v3.0/ })).toBeVisible();
@@ -34,8 +34,8 @@ test.describe("Documentation catalogue browser acceptance", () => {
 
   test("every catalogue entry exposes its repository source link", async ({ page }) => {
     const entries = page.locator(".doc-list .doc-row");
-    await expect(entries).toHaveCount(29);
-    for (let i = 0; i < 29; i += 1) {
+    await expect(entries).toHaveCount(30);
+    for (let i = 0; i < 30; i += 1) {
       const entry = entries.nth(i);
       const title = (await entry.locator("strong").innerText()).trim();
       await entry.click();

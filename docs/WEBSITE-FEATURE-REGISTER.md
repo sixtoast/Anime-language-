@@ -249,3 +249,10 @@ Run [#550](https://github.com/sixtoast/Anime-language-/actions/runs/39019851869)
 ### WEB-INC-RES-01 production reconciliation — 2026-10-17
 
 The resource fixture browser is included in Vercel production deployment [`dpl_9GC3cyrAC9GjAyR8WwV8caud4bV5`](https://vercel.com/sixtoast1/anime-language/dpl_9GC3cyrAC9GjAyR8WwV8caud4bV5), state READY, commit `d5883c3`, with alias `https://anime-language.vercel.app/`. CI [#551](https://github.com/sixtoast/Anime-language-/actions/runs/39019993840) passed. Automated checks and deployment status are confirmed; manual live-device review remains a separate task.
+
+
+### WEB-INC-AUTH-01 — Incantation authority-decision fixture browser (planned)
+
+| ID | Feature | Origin | Priority | Dependencies | Affected files/sections | Acceptance criteria | Verification evidence | Final status |
+|---|---|---|---|---|---|---|---|---|
+| WEB-INC-AUTH-01 | Browse v2.0 authority-decision specification fixtures separately from executable tests | Arcane Incantations v2.0; Development Studio Plan fixture-driven validation | High | Locked v2.0 specification and existing Playground specification browser | Playground, authority fixture parser/tests, documentation catalogue, Overview queue | Expose all 60 AUTH20 fixtures with stable IDs and expected outcomes; preserve link to full source; label as design expectations, not executed permission decisions; selecting a fixture does not run parser or authority service; mobile layout remains within 360px; document that all non-permit states block the authorisation gate | Planned after v2.0 specification commit; automated acceptance not yet implemented | Planned |

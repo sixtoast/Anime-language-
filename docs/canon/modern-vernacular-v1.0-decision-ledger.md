@@ -238,3 +238,13 @@ The [Incantations v1.7 specification](arcane-incantations-v1.7-state-predicates-
 ## 34. Incantations 1.8 — spatial frames and region semantics
 
 The [Incantations v1.8 specification](arcane-incantations-v1.8-spatial-frames-and-region-semantics.md) formalises frame-aware spatial values, geometry type distinctions, spatial relations, containment/boundary semantics, tolerance and uncertainty, and temporal validity. It retains source-recorded Arcane forms without inferring complete historical signatures. Fifty-two specification fixtures are documented; no geometry engine or spell runtime is claimed.
+
+
+## 35. Incantations 1.9 — resource accounting and conservation contracts
+
+The [Incantations v1.9 specification](arcane-incantations-v1.9-resource-accounting-and-conservation-contracts.md) defines typed resource definitions, accounts, source/transfer/transformation records, budgets, reservations, conservation boundaries, transaction modes, concurrency, interruption and reconciliation. Sixty specification fixtures are documented; they are normative design expectations, not executed resource-evaluator tests. The layer does not invent a universal mana-to-energy conversion or resolve the Logos substrate model.
+
+
+## 36. Incantations 2.0 — authority and authorisation decision contracts
+
+The [Incantations v2.0 specification](arcane-incantations-v2.0-authority-and-authorization-decision-contracts.md) defines typed authorisation requests and decision records, bounded outcomes, issuer trust, scope matching, delegation, expiry/revocation/freshness, conditional permission, independent consent/safety gates, audit provenance and conservative blocking behaviour. Sixty specification fixtures are documented. This is a locked modern decision-record design, not a universal authority hierarchy, legal-policy engine, spoken grammar, or runtime authorisation service.

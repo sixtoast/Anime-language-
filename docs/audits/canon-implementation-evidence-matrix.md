@@ -48,3 +48,8 @@
 ## Resource-accounting design update — 2026-10-17
 
 The bounded modern incantation design is now documented in [Arcane Incantations v1.9](../canon/arcane-incantations-v1.9-resource-accounting-and-conservation-contracts.md). It closes a specification gap, not the implementation gap. The 60 RES19 fixtures are normative expected outcomes in the design document; they have not been run through a resource evaluator. No universal mana/energy conversion, resource inventory, Logos substrate model, or real spell runtime is claimed. The next implementation step must choose a bounded resource domain and approved source/unit contracts rather than build a generic engine on invented physics.
+
+
+## Authority-decision design update — 2026-10-17
+
+[Arcane Incantations v2.0](../canon/arcane-incantations-v2.0-authority-and-authorization-decision-contracts.md) closes a design gap by specifying 60 expected authority-decision outcomes. It remains design-level only: there is no authority service, universal issuer hierarchy, legal policy engine, identity infrastructure, or executable gate demonstrated by the document. The next implementation step is fixture browsing and source traceability, not automatic permission decisions. Any later executable validator must start with a named, bounded authority domain and trusted test fixtures.
