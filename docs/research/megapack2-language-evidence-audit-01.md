@@ -114,3 +114,12 @@ Modern Vernacular v2.1 makes a separate, explicit design decision: `nemi` means 
 The v2.1 rules intentionally require `don` for both clauses in event ordering and require `don` or `kok` with `nemi`. That makes the new system narrower than the English words “before” and “after” in general use, but prevents an unmarked clause from acquiring an undocumented temporal interpretation. Event ordering does not entail causation; both events are asserted rather than conditionally supposed. The new specification includes 16 acceptance/rejection fixtures; they are design fixtures only and have not been executed by a parser or tested with independent speakers.
 
 See [Modern Vernacular v2.1](../canon/arcane-modern-vernacular-v2.1-temporal-anchor-and-event-order.md) and the [decision ledger](../canon/modern-vernacular-v1.0-decision-ledger.md). No Formal Arcane or historical source entry was rewritten by this decision.
+
+
+## 8. Follow-on design decision: Modern Vernacular v2.2
+
+The v5 draft lexicon labels `wela` (“duration”) Formal / PROPOSED / Phase 4. As with the other Phase 4 temporal forms, its presence in Phase 5's shared mapping does not resolve the register/status mismatch. Modern Vernacular v2.2 therefore introduces two separate forms, `melo` (“briefly; short duration”) and `runi` (“for a long time; long duration”), after an exact-form check against the inspected v5 draft lexicon found no exact entries for either form. This check does not establish historical absence outside the inspected file.
+
+The new grammar deliberately covers qualitative duration only for affirmative completed-event clauses. It does not assign numeric units, a universal threshold for “short” or “long”, or a duration-so-far reading for ongoing events. It blocks combinations with negation in this version to avoid unanalysed scope readings. The specification includes 16 design fixtures, not parser or independent-speaker results.
+
+See [Modern Vernacular v2.2](../canon/arcane-modern-vernacular-v2.2-qualitative-duration.md) and the [decision ledger](../canon/modern-vernacular-v1.0-decision-ledger.md). No Formal Arcane or historical source entry was rewritten.
