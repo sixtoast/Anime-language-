@@ -244,3 +244,8 @@ CI runs [#527](https://github.com/sixtoast/Anime-language-/actions/runs/39017761
 ### WEB-INC-RES-01 verification — 2026-10-17
 
 Run [#550](https://github.com/sixtoast/Anime-language-/actions/runs/39019851869) passed. The resource browser reads all 60 fixture rows directly from the v1.9 canonical Markdown, shows stable IDs/case/expected outcome, links to the full specification, labels records as design fixtures rather than executed tests, and keeps the non-runtime caveat visible. Browser acceptance confirms fixture selection does not run a spell and the layout remains within a 360px viewport. A duplicated fragment in the Documentation browser test file was removed before the successful run.
+
+
+### WEB-INC-RES-01 production reconciliation — 2026-10-17
+
+The resource fixture browser is included in Vercel production deployment [`dpl_9GC3cyrAC9GjAyR8WwV8caud4bV5`](https://vercel.com/sixtoast1/anime-language/dpl_9GC3cyrAC9GjAyR8WwV8caud4bV5), state READY, commit `d5883c3`, with alias `https://anime-language.vercel.app/`. CI [#551](https://github.com/sixtoast/Anime-language-/actions/runs/39019993840) passed. Automated checks and deployment status are confirmed; manual live-device review remains a separate task.
