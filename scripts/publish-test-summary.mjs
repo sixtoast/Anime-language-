@@ -10,10 +10,13 @@ if (!fs.existsSync(reportPath)) {
 
 const report = JSON.parse(fs.readFileSync(reportPath, "utf8"));
 const registrySource = fs.readFileSync("src/engine/testRegistry.ts", "utf8");
-const registeredIds = new Set(
-  [...registrySource.matchAll(/\\bid:\\s*"((?:PARSE|DIM|SEM|OPC|LEX|FIX|P6G)-\\d{3}|WEB-DOC-REG-\\d{3})"/g)]
+const documentationTestSource = fs.readFileSync("src/documentationCatalogue.test.ts", "utf8");
+const registeredIds = new Set([
+  ...[...registrySource.matchAll(/\bid:\s*"((?:PARSE|DIM|SEM|OPC|LEX|FIX|P6G)-\d{3})"/g)]
+    .map((match) => match[1]),
+  ...[...documentationTestSource.matchAll(/\[(WEB-DOC-REG-\d{3})\]/g)]
     .map((match) => match[1])
-);
+]);
 const tests = [];
 for (const suite of report.testResults ?? []) {
   for (const assertion of suite.assertionResults ?? []) {
