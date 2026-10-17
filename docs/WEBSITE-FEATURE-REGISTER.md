@@ -187,4 +187,9 @@ The Overview's next-task card was stale after the Documentation browser suite pa
 
 | ID | Feature | Origin | Priority | Dependencies | Affected files/sections | Acceptance criteria | Verification evidence | Final status |
 |---|---|---|---|---|---|---|---|---|
-| WEB-OV-03 | Overview health-signal browser acceptance | Existing Development Cockpit live-health panel and plan's evidence-first policy | High | Existing workflow/report loader and Playwright harness | `src/App.tsx`, `tests/browser/overview.spec.ts`, website implementation plan | Matching run/report commit; stale report explicitly flagged; valid report survives workflow endpoint failure; build failure shown separately; no 360px page overflow | Five deterministic Playwright checks committed in `1e7e089`; pending CI run | Implemented — unverified |
+| WEB-OV-03 | Overview health-signal browser acceptance | Existing Development Cockpit live-health panel and plan's evidence-first policy | High | Existing workflow/report loader and Playwright harness | `src/App.tsx`, `tests/browser/overview.spec.ts`, website implementation plan | Matching run/report commit; stale report explicitly flagged; valid report survives workflow endpoint failure; build failure shown separately; no 360px page overflow | Five deterministic Playwright checks in `tests/browser/overview.spec.ts` passed in [CI #499](https://github.com/sixtoast/Anime-language-/actions/runs/39015800969), commit `9f02494`; unit tests and production build also passed. Live manual review remains separate | Verified (automated CI) |
+
+
+### WEB-OV-03 verification result — 2026-10-17
+
+CI #499 passed all five Overview browser checks: matching health signals, stale-report detection, independent report availability during workflow API failure, separate build failure state, and no horizontal overflow at 360px. Unit tests and the production build also passed. These tests use deterministic mocked endpoints; they validate UI state handling but do not test the availability of GitHub's live APIs.
