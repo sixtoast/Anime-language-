@@ -203,3 +203,8 @@ The [Arcane Incantations v1.0 Foundation](arcane-incantations-v1.0-foundation.md
 ## 27. Incantations 1.1 — target resolution and binding
 
 The [Incantations v1.1 Target Resolution and Binding specification](arcane-incantations-v1.1-target-resolution-and-binding.md) defines a bounded reference model with reference classes SELF, FIELD and TARGET; geometry scopes; unique-label binding; CURRENT-STEP and SPELL lifetimes; explicit resolution outcomes; and stale-reference handling. It uses source-recorded Formal forms `kwat` (reference binding), `kwam` (bind), and geometry terms while keeping performed fused references in the Performed stratum. The detailed binding semantics are new incantation-layer design rules. Twenty-four fixtures are documented; no parser, target-tracking simulation, or independent-speaker validation is claimed.
+
+
+## 28. Incantations 1.2 — preconditions, constraints and failure semantics
+
+The [Incantations v1.2 specification](arcane-incantations-v1.2-preconditions-constraints-and-failure.md) defines typed semantic condition records, preconditions, limits, invariants, resource-bound checks, dependency guards, failure-state precedence, conservative abort handling, and postcondition verification. It explicitly separates language validation, external authorisation, execution, and verified success. Thirty-two fixtures are documented at specification level. No parser, physical simulator, rollback engine, or spell execution is claimed.
