@@ -272,22 +272,22 @@ function App() {
           </div>
           <section className="next-task-panel" aria-labelledby="next-task-title">
             <div className="next-task-heading">
-              <div><div className="eyebrow"><CheckCircle2 size={13}/> RECOMMENDED NEXT · WEB-OV-03 / WEB-UX-02</div><h2 id="next-task-title">Verify live health signals and recovery states</h2></div>
+              <div><div className="eyebrow"><CheckCircle2 size={13}/> RECOMMENDED NEXT · WEB-TRACE-01</div><h2 id="next-task-title">Link executed tests to source fixtures</h2></div>
               <span className="next-task-priority">HIGH PRIORITY</span>
             </div>
-            <p className="next-task-summary">The source catalogue and its browser acceptance suite now pass in CI. The next reliability gap is the Overview cockpit: confirm it reports the correct commit, separates workflow/build/report health, and remains useful when one external status endpoint fails.</p>
+            <p className="next-task-summary">The Playground now has source-aware lexical inspection and a source-fixture browser. The next evidence-backed gap is traceability: map only demonstrated test identities to registry entries and source fixtures; never use fuzzy matching to make the unmapped count look better.</p>
             <div className="next-task-grid">
-              <div><span>WHY THIS IS NEXT</span><p>The last CI run passed the test suite, production build and catalogue browser checks. This task extends browser acceptance to the live-health panel so stale reports and partial network failures cannot be mistaken for a healthy, current release.</p></div>
-              <div><span>DEPENDENCIES</span><p>Existing GitHub Actions status loader, per-test report endpoint and Playwright browser harness. No Arcane grammar or parser changes are needed.</p></div>
-              <div><span>FILES / SURFACES</span><p><code>src/App.tsx</code>, <code>src/documentationCatalogue.ts</code>, <code>src/styles.css</code>, and <code>src/documentationCatalogue.test.ts</code>.</p></div>
-              <div><span>ACCEPTANCE CRITERIA</span><p>A successful workflow and matching report show the same commit; a stale report is explicitly flagged; a failed workflow endpoint does not hide a valid per-test report; failed build state is distinct from workflow state; Overview remains usable at 360px.</p></div>
+              <div><span>WHY THIS IS NEXT</span><p>The latest report lists {registryResults?.counts.unmapped ?? "an unknown number of"} unmapped test results. Treat that count as current only when the report commit matches the latest CI commit. Traceability work must preserve uncertainty and leave unsupported mappings visibly unmapped.</p></div>
+              <div><span>DEPENDENCIES</span><p>Existing test registry, CI per-test report, source-derived Phase 6G fixtures and traceability tests. No Arcane grammar or parser changes are needed.</p></div>
+              <div><span>FILES / SURFACES</span><p><code>src/engine/testRegistry.ts</code>, <code>tests/fixtures/phase6g-surface-parser-cases.json</code>, CI report mapping and traceability tests.</p></div>
+              <div><span>ACCEPTANCE CRITERIA</span><p>Every mapping cites an explicit test/registry identity; known source fixtures are linked only when equivalent; ambiguous tests remain unmapped; counts are computed from verified mappings; unit and browser tests cover both mapped and unmapped cases.</p></div>
             </div>
             <div className="next-task-actions">
-              <button className="secondary-button" onClick={() => changeSection("Test suite")}>Inspect status evidence <span aria-hidden="true">→</span></button>
-              <button className="secondary-button" onClick={() => changeSection("Test suite")}>Review CI evidence <span aria-hidden="true">→</span></button>
+              <button className="secondary-button" onClick={() => changeSection("Test suite")}>Inspect test registry <span aria-hidden="true">→</span></button>
+              <button className="secondary-button" onClick={() => changeSection("Playground")}>Open Playground fixtures <span aria-hidden="true">→</span></button>
               <a className="secondary-button" href="https://github.com/sixtoast/Anime-language-/blob/main/docs/WEBSITE-FEATURE-REGISTER.md" target="_blank" rel="noreferrer">Open feature register <span aria-hidden="true">↗</span></a>
             </div>
-            <p className="next-task-caveat">Status: next acceptance task. Catalogue browser checks passed in CI; the new Overview-specific checks must pass before the cockpit is marked verified.</p>
+            <p className="next-task-caveat">Status: queued next task. CI health display and Playground evidence tools have automated acceptance; traceability must improve without invented equivalence or loss of uncertainty.</p>
           </section>
           <div className="section-heading"><div><div className="eyebrow">WORKSPACE</div><h2>Everything in one place</h2></div><span className="section-caption">SOURCE RECOVERY · PHASE 01</span></div>
           <div className="feature-grid">
