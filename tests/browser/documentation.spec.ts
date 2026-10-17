@@ -3,6 +3,8 @@ import { expect, test } from "@playwright/test";
 test.describe("Documentation catalogue browser acceptance", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
+    const mobileMenu = page.getByRole("button", { name: "Open navigation" });
+    if (await mobileMenu.isVisible()) await mobileMenu.click();
     await page.getByRole("button", { name: "Documentation", exact: true }).click();
     await expect(page.getByRole("heading", { name: "Documentation." })).toBeVisible();
   });
@@ -11,13 +13,11 @@ test.describe("Documentation catalogue browser acceptance", () => {
     await expect(page.getByRole("status").filter({ hasText: "29 of 29 sources" })).toBeVisible();
     await page.getByLabel("Filter documentation by source status").selectOption("Canonical");
     await expect(page.getByRole("status").filter({ hasText: "3 of 29 sources" })).toBeVisible();
-
     await page.getByLabel("Filter documentation by source status").selectOption("Provisional");
     await page.getByLabel("Filter documentation by provenance type").selectOption("Original historical source file");
     await expect(page.getByRole("status").filter({ hasText: "2 of 29 sources" })).toBeVisible();
     await expect(page.getByRole("button", { name: /Phase 4 — ambiguity audit/ })).toBeVisible();
     await expect(page.getByRole("button", { name: /Phase 5 — semantic audit/ })).toBeVisible();
-
     await page.getByRole("button", { name: "Reset filters" }).click();
     await expect(page.getByRole("status").filter({ hasText: "29 of 29 sources" })).toBeVisible();
   });
