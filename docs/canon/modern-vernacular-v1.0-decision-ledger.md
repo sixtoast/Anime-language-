@@ -218,3 +218,8 @@ The [Incantations v1.3 specification](arcane-incantations-v1.3-mechanism-and-eff
 ## 30. Incantations 1.4 — spell composition and sequencing
 
 The [Incantations v1.4 specification](arcane-incantations-v1.4-spell-composition-and-sequencing.md) defines plan/step identity, acyclic dependencies, deterministic serial ordering, binding scope, intermediate values, failure propagation, completion tests, and the distinction between sequential plans and transactional all-or-nothing requests. Forty specification fixtures are documented. No scheduler, transaction engine, rollback mechanism, or spell execution is claimed.
+
+
+## 31. Incantations 1.5 — invocation profiles and execution contracts
+
+The [Incantations v1.5 specification](arcane-incantations-v1.5-invocation-profiles-and-execution-contracts.md) defines request profiles, execution-contract requirements, external authority separation, interruption states, staged result statuses, and auditable invocation records. Forty-two specification fixtures are documented. This is a semantic design, not a runtime, authority service, or claim of actual spell execution.
