@@ -75,4 +75,44 @@ test.describe("Playground Phase 6G parser integration", () => {
     await expect(page.locator(".analysis-output")).toContainText("UNRESOLVED_OPERATOR");
     await expect(page.locator(".analysis-output")).toContainText("has no usable signature");
   });
+
+  test("shows source gloss, lexical class and source status for an exact entry", async ({ page }) => {
+    await openPlayground(page);
+    await expect(page.getByRole("heading", { name: "Lexicon inspector" })).toBeVisible();
+    await expect(page.getByRole("textbox", { name: "Inspect source lexicon form" })).toHaveValue("pa");
+    await expect(page.locator(".lexicon-record-grid")).toContainText("Lexical classes");
+    await expect(page.locator(".lexicon-record-grid")).toContainText("AXIS");
+    await expect(page.locator(".lexicon-record-grid")).toContainText("Source status");
+    await expect(page.locator(".lexicon-provenance")).toContainText("Arcane_Lexicon_v5_draft.csv");
+  });
+
+  test("explains collisions in the inspector without selecting one analysis", async ({ page }) => {
+    await openPlayground(page);
+    await page.getByRole("textbox", { name: "Inspect source lexicon form" }).fill("ra");
+    await expect(page.getByRole("status").filter({ hasText: "Collision warning" })).toContainText("refuses to choose a meaning");
+  });
+
+  test("shows documented alias evidence without enabling parser rewrites", async ({ page }) => {
+    await openPlayground(page);
+    await page.getByRole("textbox", { name: "Inspect source lexicon form" }).fill("frata");
+    await expect(page.getByRole("status").filter({ hasText: "Recorded legacy alias" })).toContainText("frata → fraja");
+    await expect(page.getByRole("status").filter({ hasText: "Recorded legacy alias" })).toContainText("parsing does not rewrite aliases by default");
+  });
+
+  test("reports an unknown exact form without declaring it invalid in all registers", async ({ page }) => {
+    await openPlayground(page);
+    await page.getByRole("textbox", { name: "Inspect source lexicon form" }).fill("not-a-word");
+    await expect(page.getByRole("status").filter({ hasText: "No exact source entry found" })).toContainText("does not prove that the form is invalid");
+  });
+
+  test("keeps the lexicon inspector within a 360px viewport", async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 800 });
+    await openPlayground(page);
+    await page.getByRole("textbox", { name: "Inspect source lexicon form" }).fill("frata");
+    const sizes = await page.evaluate(() => ({
+      viewport: document.documentElement.clientWidth,
+      page: document.documentElement.scrollWidth
+    }));
+    expect(sizes.page, "Playground and lexicon inspector should not overflow at 360px").toBeLessThanOrEqual(sizes.viewport);
+  });
 });
