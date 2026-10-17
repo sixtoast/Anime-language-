@@ -308,3 +308,10 @@ The full CI run #495 succeeded on commit `52ad269`, including dependency install
 ### WEB-OV-03 verification — 2026-10-17
 
 [CI run #499](https://github.com/sixtoast/Anime-language-/actions/runs/39015800969) passed on commit `9f02494`. Unit tests, type-check/build, and the complete browser acceptance suite succeeded. The Overview tests confirm that matching workflow/report commits are presented as current, stale reports are flagged, the report remains visible during a workflow API outage, build failure is distinct from workflow conclusion, and the Overview fits a 360px viewport. This is deterministic browser acceptance with mocked external responses; it does not prove external GitHub availability or replace a live manual review.
+
+
+## Playground parser integration — 2026-10-17
+
+The Playground was still calling the older Phase 2 audit parser even though the repository contains a separately tested Phase 6G surface-like parser. The UI has now been connected to `parseSurfaceExpression` and its real result/diagnostic types. The editor examples, supported-operator notice, diagnostic token positions, scope warnings, and Overview feature-card description have been aligned to that implementation. The Phase 2 parser module and its tests are preserved; this change does not delete historical audit notation or promote either parser to canonical Arcane grammar.
+
+Four Playwright browser checks have been added in `tests/browser/playground.spec.ts`: parse a binary expression with two unit-closed numerals, report the specific unclosed-numeral diagnostic, clear stale output, and retain explicit provisional/syntax-only scope warnings. [CI run #504](https://github.com/sixtoast/Anime-language-/actions/runs/39016108655) is pending at the time of this note. Do not call the integration verified until the final commit's complete CI run passes. The next development task, after that gate, is source-aware lexical integration using the existing registry APIs, with collision and alias behaviour remaining fail-closed and explicitly tested.
