@@ -193,3 +193,12 @@ The Overview's next-task card was stale after the Documentation browser suite pa
 ### WEB-OV-03 verification result — 2026-10-17
 
 CI #499 passed all five Overview browser checks: matching health signals, stale-report detection, independent report availability during workflow API failure, separate build failure state, and no horizontal overflow at 360px. Unit tests and the production build also passed. These tests use deterministic mocked endpoints; they validate UI state handling but do not test the availability of GitHub's live APIs.
+
+
+### Playground Phase 6G parser integration — WEB-PLAY-01 (2026-10-17)
+
+The Playground previously invoked the Phase 2 audit parser while its copy implied that it was the active expression workbench. It now invokes `parseSurfaceExpression` from `src/engine/surfaceParser.ts`; the old audit parser and tests remain available as a distinct historical/provisional notation. UI examples, operator list, diagnostic token positions, and the syntax-only caveat were updated. Four browser tests were added to verify valid binary syntax, a specific malformed-numeral diagnostic, clearing prior output, and visible scope boundaries.
+
+| ID | Feature | Origin | Priority | Dependencies | Affected files/sections | Acceptance criteria | Verification evidence | Final status |
+|---|---|---|---|---|---|---|---|---|
+| WEB-PLAY-01 | Connect Playground to implemented Phase 6G parser | Development Studio Plan: staged validation pipeline and truthful engine support | High | Existing `parseSurfaceExpression`, Playwright harness | `src/App.tsx`, `tests/browser/playground.spec.ts` | UI calls the surface parser; displays actual AST/diagnostics; no stale Phase 2 wording; scope caveat remains visible; browser acceptance passes | Four Playwright checks committed in `b496284`; [CI run #504](https://github.com/sixtoast/Anime-language-/actions/runs/39016108655) pending at note creation | Implemented — unverified |
