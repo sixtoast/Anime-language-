@@ -73,6 +73,6 @@ test.describe("Playground Phase 6G parser integration", () => {
     await page.getByRole("button", { name: "Parse surface-like notation" }).click();
 
     await expect(page.locator(".analysis-output")).toContainText("UNRESOLVED_OPERATOR");
-    await expect(page.locator(".analysis-output")).toContainText("will not guess");
+    await expect(page.locator(".analysis-output")).toContainText("has no usable signature");
   });
 });
