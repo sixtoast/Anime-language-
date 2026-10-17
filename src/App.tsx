@@ -84,8 +84,17 @@ function App() {
     workflowController.current?.abort();
     const controller = new AbortController();
     workflowController.current = controller;
-    const timeout = window.setTimeout(() => controller.abort(), 12000);
-    const isCurrent = () => workflowController.current === controller && !controller.signal.aborted;
+    let timedOut = false;
+    const timeout = window.setTimeout(() => {
+      timedOut = true;
+      controller.abort();
+    }, 12000);
+    // A timed-out request is still the active refresh and must report a useful
+    // error; a request superseded by a newer refresh must remain silent.
+    const isCurrent = () => workflowController.current === controller && (timedOut || !controller.signal.aborted);
+    const requestError = (error: unknown, fallback: string) => timedOut
+      ? "Status refresh timed out after 12 seconds. Try refreshing again."
+      : error instanceof Error ? error.message : fallback;
 
     setWorkflowLoading(true);
     setWorkflowError(null);
@@ -135,14 +144,14 @@ function App() {
           } catch (error) {
             if (!controller.signal.aborted && isCurrent()) {
               setWorkflowJobs([]);
-              setWorkflowError(error instanceof Error ? error.message : "Could not load GitHub Actions job details.");
+              setWorkflowError(requestError(error, "Could not load GitHub Actions job details."));
             }
           }
         } else {
           setWorkflowJobs([]);
         }
       } else if (isCurrent()) {
-        setWorkflowError(runsResult.reason instanceof Error ? runsResult.reason.message : "Could not load GitHub Actions results.");
+        setWorkflowError(requestError(runsResult.reason, "Could not load GitHub Actions results."));
       }
 
       if (reportResult.status === "fulfilled") {
@@ -151,12 +160,12 @@ function App() {
           setRegistryResultsError(null);
         }
       } else if (isCurrent()) {
-        setRegistryResultsError(reportResult.reason instanceof Error ? reportResult.reason.message : "Could not load the published per-test report.");
+        setRegistryResultsError(requestError(reportResult.reason, "Could not load the published per-test report."));
       }
 
       if (isCurrent()) setWorkflowUpdatedAt(new Date().toISOString());
     } catch (error) {
-      if (isCurrent()) setWorkflowError(error instanceof Error ? error.message : "Could not load GitHub Actions results.");
+      if (isCurrent()) setWorkflowError(requestError(error, "Could not load GitHub Actions results."));
     } finally {
       window.clearTimeout(timeout);
       if (workflowController.current === controller) {
