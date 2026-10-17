@@ -198,3 +198,8 @@ The [Modern Vernacular v2.7 Quantity Comparison specification](arcane-modern-ver
 ## 26. Incantations 1.0 foundation (separate Formal branch)
 
 The [Arcane Incantations v1.0 Foundation](arcane-incantations-v1.0-foundation.md) starts a separate Formal Arcane incantation layer. It reuses source-recorded operation vocabulary (`kren`, `trak`, `frem`, `shren`, `bran`, `vare`), coupling categories (`hə`, `he`, `ha`, `hu`, `hi`, `ho`) and spatial role markers (`po`, `fo`, `lo`) without changing their source labels. The incantation frame, operation-slot schemata, validation states and explicit separation of requested effect, mechanism, resource, constraints and outcome are new modern design rules. No parser, spell simulator, physical validation or magical execution is claimed. This branch takes priority for the user's current focus; further ordinary-speech expansion should pause unless requested.
+
+
+## 27. Incantations 1.1 — target resolution and binding
+
+The [Incantations v1.1 Target Resolution and Binding specification](arcane-incantations-v1.1-target-resolution-and-binding.md) defines a bounded reference model with reference classes SELF, FIELD and TARGET; geometry scopes; unique-label binding; CURRENT-STEP and SPELL lifetimes; explicit resolution outcomes; and stale-reference handling. It uses source-recorded Formal forms `kwat` (reference binding), `kwam` (bind), and geometry terms while keeping performed fused references in the Performed stratum. The detailed binding semantics are new incantation-layer design rules. Twenty-four fixtures are documented; no parser, target-tracking simulation, or independent-speaker validation is claimed.
