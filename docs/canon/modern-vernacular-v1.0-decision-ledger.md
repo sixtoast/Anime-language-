@@ -213,3 +213,8 @@ The [Incantations v1.2 specification](arcane-incantations-v1.2-preconditions-con
 ## 29. Incantations 1.3 — mechanism and effect semantics
 
 The [Incantations v1.3 specification](arcane-incantations-v1.3-mechanism-and-effect-semantics.md) separates desired state, transition, mechanism model, coupling relation, feasibility evidence, authorisation, execution and outcome verification. It reuses source-recorded operation and coupling vocabulary without inferring complete historical argument signatures from glosses. Thirty-six specification fixtures are documented; no parser, physical simulator, or spell execution is claimed.
+
+
+## 30. Incantations 1.4 — spell composition and sequencing
+
+The [Incantations v1.4 specification](arcane-incantations-v1.4-spell-composition-and-sequencing.md) defines plan/step identity, acyclic dependencies, deterministic serial ordering, binding scope, intermediate values, failure propagation, completion tests, and the distinction between sequential plans and transactional all-or-nothing requests. Forty specification fixtures are documented. No scheduler, transaction engine, rollback mechanism, or spell execution is claimed.
