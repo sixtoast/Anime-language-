@@ -37,7 +37,7 @@ Do not interpret “implemented” as “verified”. A file existing or a histo
 
 ## First-pass source-link audit
 
-The documentation catalogue in `src/App.tsx` has **19 entries total**. The initial scan found 14 explicit `sourcePath` values and 5 entries without a path. The five missing paths have now been filled with grounded repository links, so all 19 entries have an explicit path; all 19 paths were checked against the current repository tree. See [Documentation Catalogue First-Pass Link Audit](DOCUMENTATION-CATALOGUE-LINK-AUDIT.md).
+The original documentation catalogue had **19 entries** at the time of the first-pass audit; it now has **28 entries** after adding nine incantation specification records. The initial scan found 14 explicit `sourcePath` values and 5 entries without a path. The five missing paths have now been filled with grounded repository links, so all 19 original entries had explicit paths after the audit correction; the nine newer incantation entries were added with repository paths checked against the tree. The current catalogue has 28 entries; browser acceptance is the remaining link/UI check. See [Documentation Catalogue First-Pass Link Audit](DOCUMENTATION-CATALOGUE-LINK-AUDIT.md).
 
 The 14 checked paths are:
 
@@ -62,7 +62,7 @@ The initial note incorrectly said 19 entries lacked an explicit `sourcePath`; th
 
 ## Required next audits
 
-1. Verify all 19 catalogue source links in the browser and review the new source-type/provenance notes for accuracy; do not treat a link as proof that its content is canonical or complete.
+1. Verify all 28 catalogue source links in the browser and review the new source-type/provenance notes for accuracy; do not treat a link as proof that its content is canonical or complete.
 2. Test catalogue search, selection, empty results, status labels, and source-link opening in the actual UI.
 3. Audit the Overview's displayed status and task recommendation against current repository/CI data.
 4. Exercise CI statuses: successful, failed, queued, running, skipped, cancelled, missing, and stale.
@@ -160,9 +160,22 @@ The Overview now presents one prioritized website task: perform browser-level ac
 
 ## Browser-level acceptance coverage (WEB-DOC-03)
 
-A Playwright browser suite is now part of CI for the Documentation catalogue. It exercises combined search/status/provenance filtering, reset behaviour, the empty state and recovery, source links for all 19 entries, and a narrow 360px viewport. The browser suite runs even when the existing Vitest suite reports an unrelated engine failure, provided Chromium installation succeeds. Its results must be assessed independently from the Vitest test step and production build. The suite's existence is not proof that it has passed; use the CI run tied to the commit as evidence.
+A Playwright browser suite is now part of CI for the Documentation catalogue. It exercises combined search/status/provenance filtering, reset behaviour, the empty state and recovery, source links for all 28 entries, and a narrow 360px viewport. The browser suite runs even when the existing Vitest suite reports an unrelated engine failure, provided Chromium installation succeeds. Its results must be assessed independently from the Vitest test step and production build. The suite's existence is not proof that it has passed; use the CI run tied to the commit as evidence.
 
 
 ### Browser finding — mobile overflow (2026-10-14)
 
 Playwright run #186 found that the Documentation view exceeded a 360px viewport by 19px. The responsive source-list/detail layout has been changed to a single column at the mobile breakpoint. The fix remains Implemented — unverified until the strict 360px browser assertion passes on a recorded commit.
+
+
+### Incantation source catalogue expansion — WEB-DOC-04 (2026-10-17)
+
+Added nine versioned incantation design specifications (v1.0–v1.8) to `src/documentationCatalogue.ts`. They use the existing five-section navigation and source-detail panel; no new top-level section or engine behaviour was introduced. Catalogue regression and browser tests were expanded from 19 to 28 entries. The initial browser run exposed a stale filtered-count expectation and 19px horizontal overflow at a 360px viewport. The count expectation and mobile header styles were corrected, and the Overview's acceptance-task wording was updated. The current fix is **Implemented — pending fresh CI evidence**; do not mark Verified until the browser suite passes on the final commit.
+
+| ID | Feature | Origin | Priority | Dependencies | Affected files/sections | Acceptance criteria | Verification evidence | Final status |
+|---|---|---|---|---|---|---|---|---|
+| WEB-DOC-04 | Incantation source catalogue coverage | Current incantation design-document series; existing Documentation section | High | Existing source catalogue and valid repository paths | `src/documentationCatalogue.ts`, `src/documentationCatalogue.test.ts`, `tests/browser/documentation.spec.ts`, Documentation UI | All nine specs appear exactly once, retain correct repository paths and visible source-status caveats; filters/search still work; all 28 links open; no mobile horizontal overflow at 360px | Catalogue and browser tests updated; CI #486 exposed two concrete browser failures, fixes committed, fresh final-commit result pending | Implemented — unverified |
+
+### Website runtime status and deployment evidence — 2026-10-17
+
+The Vercel project exists and the latest inspected production-target deployment was READY on commit `cce1d530f1603b2b245567b2d7dbb77c12612c9e`. This establishes deployment-provider state, not that every live flow has been manually tested. The project reports SSO protection enabled for deployment URLs except custom domains; the public custom domain should be checked separately for actual accessibility. Current production/browser acceptance remains open until the final commit's checks and the live site's primary flows are verified.
