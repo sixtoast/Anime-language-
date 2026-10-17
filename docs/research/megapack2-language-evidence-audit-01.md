@@ -204,3 +204,8 @@ The new [Incantations v1.1 Target Resolution and Binding specification](../canon
 ## 21. Incantations v1.7 — state predicates and preconditions
 
 [Incantations v1.7](../canon/arcane-incantations-v1.7-state-predicates-and-preconditions.md) introduces modern predicate and condition semantics: TRUE/FALSE/UNKNOWN/ERROR/INVALID outcomes; preconditions, postconditions and invariants; bounded temporal operators; evidence freshness and uncertainty; and condition combination. This is a modern design layer, not a claim of historical spoken syntax or actual execution. The 48 fixtures are expected outcomes, not executable test results. A predicate declaration or passing result does not establish physical feasibility, authority or successful execution.
+
+
+## 22. Incantations v1.8 — spatial frames and region semantics
+
+[Incantations v1.8](../canon/arcane-incantations-v1.8-spatial-frames-and-region-semantics.md) anchors its source vocabulary to Arcane v3.0-L §§3–5, including MI/NI/RI/SU/WO/FE, PA/BA/TA/DA/KA/GA, JO/JUR/JA/JE/JI, PI/LEN/PLA/SUR/VOM/PAR/REN/NET and PALA. Its frame, geometry, boundary, tolerance and predicate contracts are modern design additions. The 52 fixtures are specification expectations, not executable geometry tests. Source glosses do not establish complete argument signatures, transformations or physical feasibility.
