@@ -184,3 +184,8 @@ The new [Incantations v1.1 Target Resolution and Binding specification](../canon
 ## 17. Incantations v1.3 — mechanism and effect semantics
 
 [Incantations v1.3](../canon/arcane-incantations-v1.3-mechanism-and-effect-semantics.md) is a modern design extension that distinguishes a desired state, proposed transition, mechanism model, coupling relation, feasibility evidence and observed outcome. The source archive records the broad glosses of `kren`, `trak`, `frem`, `shren`, `bran`, `vare` and coupling categories, but those glosses do not establish complete argument signatures, causal laws, resource units or execution semantics. The v1.3 evidence labels and 36 fixtures are specification-level design, not empirical validation or simulator output.
+
+
+## 18. Incantations v1.4 — spell composition and sequencing
+
+[Incantations v1.4](../canon/arcane-incantations-v1.4-spell-composition-and-sequencing.md) is a new modern design layer defining multi-step plan identity, explicit dependencies, deterministic serial ordering, scoped bindings, intermediate-value invalidation, failure policies, completion verification, and the difference between sequential and transactional plans. These sequencing semantics are not claimed as historical Arcane grammar. The 40 fixtures are specification-level expectations, not results from an executable scheduler or transaction engine. The source material reviewed does not establish universal atomicity, rollback, parallel execution, or a runtime interpreter.
