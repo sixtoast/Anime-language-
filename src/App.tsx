@@ -315,22 +315,22 @@ function App() {
           </div>
           <section className="next-task-panel" aria-labelledby="next-task-title">
             <div className="next-task-heading">
-              <div><div className="eyebrow"><CheckCircle2 size={13}/> RECOMMENDED NEXT · WEB-INC-AUTH-21</div><h2 id="next-task-title">Browse policy-profile composition fixtures</h2></div>
+              <div><div className="eyebrow"><CheckCircle2 size={13}/> RECOMMENDED NEXT · WEB-INC-GATE-01</div><h2 id="next-task-title">Explore the incantation gate sequence</h2></div>
               <span className="next-task-priority">HIGH PRIORITY</span>
             </div>
-            <p className="next-task-summary">Arcane Incantations v2.1 now defines 60 locked policy-composition design fixtures. The next website task is to expose those source-recorded outcomes beside the existing authority cases, without presenting them as executed policy decisions or a functioning permission service.</p>
+            <p className="next-task-summary">The v2.1 policy-composition fixture browser is now verified by CI. The next step is to make the incantation lifecycle easier to reason about by exposing the v1.2 validation sequence and v1.5 invocation contract as separate, source-linked sequences.</p>
             <div className="next-task-grid">
-              <div><span>WHY THIS IS NEXT</span><p>The v2.1 contract defines six explicit composition strategies and distinct conflict, unavailability, trust and freshness failures. Browsing the 60 fixtures will make those distinctions reviewable without simulating a policy engine.</p></div>
-              <div><span>DEPENDENCIES</span><p>Locked v2.1 policy-profile composition contract and v2.0 authority-decision records. This is a modern specification browser, not historical grammar or a universal legal/ethical policy.</p></div>
-              <div><span>FILES / SURFACES</span><p><code>docs/canon/arcane-incantations-v2.1-policy-profile-composition-and-conflict-resolution.md</code>, <code>src/engine/policyProfileCompositionFixtures.ts</code>, Playground and acceptance tests.</p></div>
-              <div><span>ACCEPTANCE CRITERIA</span><p>Expose all 60 POL21 fixtures and expected outcomes; preserve stable IDs and the full source link; label them as design fixtures, not executed policy decisions; preserve conflict versus explicit denial; no policy service or parser execution; 360px layout passes.</p></div>
+              <div><span>WHY THIS IS NEXT</span><p>v1.2 defines the validation and execution gate sequence; v1.5 distinguishes validation, external authorisation, contract acceptance, attempt, observation and verified outcome. They are related but not identical, so the explorer must preserve each source's own sequence.</p></div>
+              <div><span>DEPENDENCIES</span><p>Locked Incantations v1.2 precondition/failure semantics and v1.5 invocation profiles/execution contracts. The explorer is explanatory documentation, not an executable workflow or live runtime trace.</p></div>
+              <div><span>FILES / SURFACES</span><p><code>docs/canon/arcane-incantations-v1.2-preconditions-constraints-and-failure.md</code>, <code>docs/canon/arcane-incantations-v1.5-invocation-profiles-and-execution-contracts.md</code>, Playground and browser acceptance tests.</p></div>
+              <div><span>ACCEPTANCE CRITERIA</span><p>Show both sequences separately with source links; selecting a stage exposes its responsibility and non-substitution limits; do not infer live state or execution; preserve stage order and source wording; responsive at 360px.</p></div>
             </div>
             <div className="next-task-actions">
-              <button className="secondary-button" onClick={() => changeSection("Playground")}>Open policy fixtures <span aria-hidden="true">→</span></button>
+              <button className="secondary-button" onClick={() => changeSection("Playground")}>Open gate sequence <span aria-hidden="true">→</span></button>
               <button className="secondary-button" onClick={() => changeSection("Playground")}>Open incantation worksheet <span aria-hidden="true">→</span></button>
               <a className="secondary-button" href="https://github.com/sixtoast/Anime-language-/blob/main/docs/WEBSITE-FEATURE-REGISTER.md" target="_blank" rel="noreferrer">Open feature register <span aria-hidden="true">↗</span></a>
             </div>
-            <p className="next-task-caveat">Status: queued website task. v2.1 is locked design canon with 60 normative fixtures; this browser will display source expectations only and call no policy service.</p>
+            <p className="next-task-caveat">Status: queued website task. This is a source-linked explainer for two related but non-identical specifications, not a workflow engine or a claim about live execution.</p>
           </section>
           <div className="section-heading"><div><div className="eyebrow">WORKSPACE</div><h2>Everything in one place</h2></div><span className="section-caption">SOURCE RECOVERY · PHASE 01</span></div>
           <div className="feature-grid">

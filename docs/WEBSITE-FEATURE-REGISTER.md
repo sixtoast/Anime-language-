@@ -280,4 +280,11 @@ The source parser, unit tests, Playground browser, responsive styling and browse
 
 | ID | Feature | Origin | Priority | Dependencies | Affected files/sections | Acceptance criteria | Verification evidence | Final status |
 |---|---|---|---|---|---|---|---|---|
-| WEB-INC-AUTH-21 | Browse v2.1 policy-profile composition specification fixtures | Arcane Incantations v2.1; fixture-driven design validation | High | Locked v2.1 specification, existing v1.9/v2.0 fixture browsers | src/App.tsx, src/engine/policyProfileCompositionFixtures.ts, src/styles.css, tests/browser/playground.spec.ts, tests/browser/overview.spec.ts | Expose all 60 POL21 rows from canonical Markdown; stable IDs; distinguish explicit denial from conflict/indeterminate; preserve source link; no policy-service or parser execution; responsive at 360px | Implementation committed; awaiting current CI | Implemented — CI pending |
+| WEB-INC-AUTH-21 | Browse v2.1 policy-profile composition specification fixtures | Arcane Incantations v2.1; fixture-driven design validation | High | Locked v2.1 specification, existing v1.9/v2.0 fixture browsers | src/App.tsx, src/engine/policyProfileCompositionFixtures.ts, src/styles.css, tests/browser/playground.spec.ts, tests/browser/overview.spec.ts | Expose all 60 POL21 rows from canonical Markdown; stable IDs; distinguish explicit denial from conflict/indeterminate; preserve source link; no policy-service or parser execution; responsive at 360px | [CI #573](https://github.com/sixtoast/Anime-language-/actions/runs/39148690035) passed 132 unit tests, build and all 38 browser tests; 132/132 stable IDs and zero unmapped; production deployment READY for commit f3daca7 | Verified (automated CI; live-device review separate) |
+
+
+### WEB-INC-GATE-01 — Incantation gate sequence explorer (planned)
+
+| ID | Feature | Origin | Priority | Dependencies | Affected files/sections | Acceptance criteria | Verification evidence | Final status |
+|---|---|---|---|---|---|---|---|---|
+| WEB-INC-GATE-01 | Explore the v1.2 validation sequence and v1.5 invocation lifecycle without simulating execution | Arcane Incantations v1.2 and v1.5; non-substitution and execution-boundary requirements | High | Locked v1.2/v1.5 specifications and existing Playground | src/App.tsx, src/styles.css, tests/browser/playground.spec.ts, tests/browser/overview.spec.ts | Preserve both source sequences separately; source links and exact stage order; selected-stage responsibility and non-substitution notes; no live state or execution claims; responsive at 360px | Planned | Planned |
