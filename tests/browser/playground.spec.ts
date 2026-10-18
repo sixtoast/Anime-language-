@@ -334,4 +334,55 @@ test.describe("Playground Phase 6G parser integration", () => {
     expect(sizes.page, "Policy-profile fixture browser should not overflow at 360px").toBeLessThanOrEqual(sizes.viewport);
   });
 
+
+  test("shows the v1.2 and v1.5 gate sequences separately with source links", async ({ page }) => {
+    await openPlayground(page);
+    const explorer = page.locator(".gate-sequence-explorer");
+    await expect(explorer.getByRole("heading", { name: "Incantation gate sequence explorer" })).toBeVisible();
+    await expect(explorer.getByRole("combobox", { name: "Choose a v1.2 validation gate" }).locator("option")).toHaveCount(9);
+    await expect(explorer.getByRole("combobox", { name: "Choose v1.5 invocation lifecycle stage" }).locator("option")).toHaveCount(7);
+    await expect(explorer.getByRole("link", { name: "Open v1.2 source" })).toHaveAttribute("href", /arcane-incantations-v1.2-preconditions-constraints-and-failure/);
+    await expect(explorer.getByRole("link", { name: "Open v1.5 source" })).toHaveAttribute("href", /arcane-incantations-v1.5-invocation-profiles-and-execution-contracts/);
+    await expect(explorer).toContainText("two source-defined sequences separately");
+    await expect(explorer).toContainText("not an execution timeline");
+  });
+
+  test("explains a selected v1.2 gate without implying later gates passed", async ({ page }) => {
+    await openPlayground(page);
+    const explorer = page.locator(".gate-sequence-explorer");
+    await explorer.getByRole("combobox", { name: "Choose a v1.2 validation gate" }).selectOption("CON12-07");
+    await expect(explorer.locator(".gate-sequence-lane").first().locator(".fixture-browser-detail")).toContainText("External authorisation");
+    await expect(explorer.locator(".gate-sequence-lane").first().locator(".fixture-browser-detail")).toContainText("confirm the execution environment independently permits the operation");
+    await expect(explorer.locator(".gate-sequence-lane").first().locator(".fixture-browser-detail")).toContainText("does not replace consent");
+  });
+
+  test("explains contract acceptance as distinct from authority and execution", async ({ page }) => {
+    await openPlayground(page);
+    const explorer = page.locator(".gate-sequence-explorer");
+    await explorer.getByRole("combobox", { name: "Choose v1.5 invocation lifecycle stage" }).selectOption("INV15-04");
+    await expect(explorer.locator(".gate-sequence-lane").nth(1).locator(".fixture-browser-detail")).toContainText("execution contract accepted");
+    await expect(explorer.locator(".gate-sequence-lane").nth(1).locator(".fixture-browser-detail")).toContainText("does not mean the request was authorised or executed");
+  });
+
+  test("surfaces the v1.5 summary/worked-example order note without rewriting canon", async ({ page }) => {
+    await openPlayground(page);
+    const note = page.locator(".gate-sequence-order-note");
+    await expect(note).toContainText("Source-order note — preserve, do not reconcile by assumption");
+    await expect(note).toContainText("does not explicitly reconcile these two descriptions");
+    await expect(note).toContainText("Neither source passage is rewritten here");
+  });
+
+  test("keeps the gate sequence explorer within a 360px viewport", async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 800 });
+    await openPlayground(page);
+    const explorer = page.locator(".gate-sequence-explorer");
+    await explorer.getByRole("combobox", { name: "Choose a v1.2 validation gate" }).selectOption("CON12-09");
+    await explorer.getByRole("combobox", { name: "Choose v1.5 invocation lifecycle stage" }).selectOption("INV15-07");
+    const sizes = await page.evaluate(() => ({
+      viewport: document.documentElement.clientWidth,
+      page: document.documentElement.scrollWidth
+    }));
+    expect(sizes.page, "Gate sequence explorer should not overflow at 360px").toBeLessThanOrEqual(sizes.viewport);
+  });
+
 });

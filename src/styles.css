@@ -166,3 +166,19 @@
 .policy-profile-fixture-browser .fixture-browser-caveat{border-color:#413b4b;color:#c0b3d6}
 .policy-profile-fixture-browser .fixture-browser-meta strong{overflow-wrap:anywhere;white-space:pre-wrap}
 @media(max-width:520px){.policy-profile-fixture-browser .fixture-browser-meta .fixture-browser-meta-wide{grid-column:auto}.policy-profile-fixture-browser .fixture-browser-actions a.secondary-button{width:100%;text-align:center;white-space:normal}}
+
+/* Two distinct source sequences; no selected stage is represented as passed or executed. */
+.gate-sequence-explorer{border-color:#3c3847;background:#17161b}
+.gate-sequence-explorer .fixture-browser-head h2{max-width:560px}
+.gate-sequence-grid{align-items:start;margin-top:12px}
+.gate-sequence-lane{min-width:0}
+.gate-sequence-lane h3{font:600 12px var(--display);letter-spacing:-.15px;color:#ddd5e9;margin:4px 0 8px}
+.gate-sequence-lane>.fixture-browser-intro{margin:0 0 10px}
+.gate-sequence-explorer .fixture-select-label{margin:10px 0}
+.gate-sequence-explorer .fixture-browser-meta .gate-sequence-meta-wide{grid-column:1/-1}
+.gate-sequence-explorer .fixture-browser-meta strong{overflow-wrap:anywhere;white-space:pre-wrap}
+.gate-sequence-order-note{margin-top:12px;border-color:#4a3e54;background:#1b1820}
+.gate-sequence-order-note>strong{font-size:11px;color:#e0d2f1}
+.gate-sequence-order-note>p{margin:8px 0 0}
+.gate-sequence-explorer .fixture-browser-caveat{border-color:#413b4b;color:#c0b3d6}
+@media(max-width:520px){.gate-sequence-explorer .fixture-browser-meta .gate-sequence-meta-wide{grid-column:auto}.gate-sequence-explorer .fixture-browser-actions a.secondary-button{width:100%;text-align:center;white-space:normal}.gate-sequence-grid{grid-template-columns:minmax(0,1fr)}}

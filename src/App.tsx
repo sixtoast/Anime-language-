@@ -15,6 +15,7 @@ import { auditPhase6GFixtures, type Phase6GFixture } from "./engine/phase6gFixtu
 import { resourceAccountingFixtures } from "./engine/resourceAccountingFixtures";
 import { authorityDecisionFixtures } from "./engine/authorityDecisionFixtures";
 import { policyProfileCompositionFixtures } from "./engine/policyProfileCompositionFixtures";
+import { invocationLifecycleSequence, invocationOrderNote, validationGateSequence } from "./engine/incantationGateSequence";
 
 type Section = "Overview" | "Documentation" | "Playground" | "Test suite" | "Research & review";
 
@@ -77,6 +78,8 @@ function App() {
   const [selectedResourceFixtureId, setSelectedResourceFixtureId] = useState("RES19-01");
   const [selectedAuthorityFixtureId, setSelectedAuthorityFixtureId] = useState("AUTH20-01");
   const [selectedPolicyFixtureId, setSelectedPolicyFixtureId] = useState("POL21-01");
+  const [selectedValidationGateId, setSelectedValidationGateId] = useState("CON12-01");
+  const [selectedInvocationStageId, setSelectedInvocationStageId] = useState("INV15-01");
   const [contractOperation, setContractOperation] = useState("kren");
   const [contractTarget, setContractTarget] = useState("");
   const [contractDesiredOutcome, setContractDesiredOutcome] = useState("");
@@ -224,6 +227,8 @@ function App() {
   const selectedResourceFixture = useMemo(() => resourceAccountingFixtures.find((fixture) => fixture.id === selectedResourceFixtureId) ?? resourceAccountingFixtures[0], [selectedResourceFixtureId]);
   const selectedAuthorityFixture = useMemo(() => authorityDecisionFixtures.find((fixture) => fixture.id === selectedAuthorityFixtureId) ?? authorityDecisionFixtures[0], [selectedAuthorityFixtureId]);
   const selectedPolicyFixture = useMemo(() => policyProfileCompositionFixtures.find((fixture) => fixture.id === selectedPolicyFixtureId) ?? policyProfileCompositionFixtures[0], [selectedPolicyFixtureId]);
+  const selectedValidationGate = useMemo(() => validationGateSequence.find((stage) => stage.id === selectedValidationGateId) ?? validationGateSequence[0], [selectedValidationGateId]);
+  const selectedInvocationStage = useMemo(() => invocationLifecycleSequence.find((stage) => stage.id === selectedInvocationStageId) ?? invocationLifecycleSequence[0], [selectedInvocationStageId]);
   const contractWorksheet = useMemo(() => ({
     recordType: "ARCANE-INCANTATION-CONTRACT-WORKSHEET",
     specificationLayer: "Modern incantation design v1.0–v2.0",
@@ -419,6 +424,38 @@ function App() {
             </div>}
             <div className="fixture-browser-actions"><a className="secondary-button" href="https://github.com/sixtoast/Anime-language-/blob/main/docs/canon/arcane-incantations-v2.1-policy-profile-composition-and-conflict-resolution.md" target="_blank" rel="noreferrer">Open full v2.1 specification ↗</a><span>Selection displays source expectations only; no policy service or parser is called.</span></div>
             <p className="fixture-browser-caveat">Policy names, issuer prestige, file order and recency are not implicit precedence. An unresolved conflict, unknown applicability, unavailable required profile or untrusted policy blocks without being mislabelled as an explicit denial. A composed permit still does not bypass v2.0 scope, consent, resource, feasibility or execution gates.</p>
+          </section>
+
+          <section className="fixture-browser gate-sequence-explorer" aria-labelledby="gate-sequence-explorer-title">
+            <div className="fixture-browser-head"><div><span className="detail-kicker">SOURCE-LINKED EXPLAINER · NOT LIVE STATE</span><h2 id="gate-sequence-explorer-title">Incantation gate sequence explorer</h2></div><span>{validationGateSequence.length} validation gates · {invocationLifecycleSequence.length} lifecycle stages</span></div>
+            <p className="fixture-browser-intro">Explore the two source-defined sequences separately. v1.2 lists ordered validation/execution checks; v1.5 summarises invocation milestones. This explorer explains the source text only: selecting a stage does not mean that stage has run, passed, or authorised an operation.</p>
+            <div className="contract-worksheet-grid gate-sequence-grid">
+              <div className="gate-sequence-lane">
+                <h3>v1.2 — Validation and execution checks</h3>
+                <p className="fixture-browser-intro">The nine-step order in §7 is preserved as written.</p>
+                <label className="fixture-select-label">Choose a v1.2 validation gate<select aria-label="Choose a v1.2 validation gate" value={selectedValidationGateId} onChange={(event) => setSelectedValidationGateId(event.target.value)}>{validationGateSequence.map((stage) => <option key={stage.id} value={stage.id}>{stage.ordinal}. {stage.label}</option>)}</select></label>
+                {selectedValidationGate && <div className="fixture-browser-detail">
+                  <div className="fixture-browser-meta"><div><span>Source stage</span><strong>{selectedValidationGate.ordinal}. {selectedValidationGate.label}</strong></div><div className="gate-sequence-meta-wide"><span>Source description</span><strong>{selectedValidationGate.sourceDescription}</strong></div><div className="gate-sequence-meta-wide"><span>What this does not prove</span><strong>{selectedValidationGate.boundaryNote}</strong></div></div>
+                </div>}
+                <div className="fixture-browser-actions"><a className="secondary-button" href="https://github.com/sixtoast/Anime-language-/blob/main/docs/canon/arcane-incantations-v1.2-preconditions-constraints-and-failure.md#7-check-order-and-dependency-guards" target="_blank" rel="noreferrer">Open v1.2 source ↗</a></div>
+              </div>
+              <div className="gate-sequence-lane">
+                <h3>v1.5 — Invocation lifecycle summary</h3>
+                <p className="fixture-browser-intro">The seven lifecycle labels are preserved in their summary order.</p>
+                <label className="fixture-select-label">Choose a v1.5 lifecycle stage<select aria-label="Choose v1.5 invocation lifecycle stage" value={selectedInvocationStageId} onChange={(event) => setSelectedInvocationStageId(event.target.value)}>{invocationLifecycleSequence.map((stage) => <option key={stage.id} value={stage.id}>{stage.ordinal}. {stage.label}</option>)}</select></label>
+                {selectedInvocationStage && <div className="fixture-browser-detail">
+                  <div className="fixture-browser-meta"><div><span>Source stage</span><strong>{selectedInvocationStage.ordinal}. {selectedInvocationStage.label}</strong></div><div className="gate-sequence-meta-wide"><span>Source note</span><strong>{selectedInvocationStage.sourceDescription}</strong></div><div className="gate-sequence-meta-wide"><span>What this does not prove</span><strong>{selectedInvocationStage.boundaryNote}</strong></div></div>
+                </div>}
+                <div className="fixture-browser-actions"><a className="secondary-button" href="https://github.com/sixtoast/Anime-language-/blob/main/docs/canon/arcane-incantations-v1.5-invocation-profiles-and-execution-contracts.md" target="_blank" rel="noreferrer">Open v1.5 source ↗</a></div>
+              </div>
+            </div>
+            <div className="fixture-browser-detail gate-sequence-order-note">
+              <strong>{invocationOrderNote.title}</strong>
+              <p>{invocationOrderNote.summary}</p>
+              <p>{invocationOrderNote.rule}</p>
+              <p><strong>Review status:</strong> unresolved source-order question. Neither source passage is rewritten here.</p>
+            </div>
+            <p className="fixture-browser-caveat">This is an explainer, not an execution timeline, workflow engine, status monitor or proof that any gate has passed. VALIDATED is not authorised; authorised is not executed; executed is not outcome-verified.</p>
           </section>
 
           <section className="contract-worksheet" aria-labelledby="contract-worksheet-title">

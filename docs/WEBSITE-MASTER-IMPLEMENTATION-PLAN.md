@@ -386,3 +386,8 @@ The Playground exposes a policy-profile composition fixture browser sourced dire
 ### WEB-INC-GATE-01 — Incantation gate sequence explorer queued — 2026-10-18
 
 The next website task is a source-linked explainer that displays the v1.2 validation/execution sequence and v1.5 invocation lifecycle separately. It must not flatten their different stages into one invented canonical sequence, infer that a stage ran, or make the worksheet into an execution request. Selecting a stage should explain its scope, source wording, required evidence and what it does not prove. The planned acceptance includes source links, ordered stage presentation, non-substitution notes, and a 360px layout check.
+
+
+### WEB-INC-GATE-01 implementation — 2026-10-18
+
+The Playground now contains a source-linked gate-sequence explorer. It parses the nine ordered checks in v1.2 §7 and the seven-stage summary lifecycle in v1.5 separately, with stage-specific non-substitution notes and links to both specifications. The explorer also surfaces an unresolved source-order note: the v1.5 summary chain places external authorisation before contract acceptance, while its worked example describes checking the contract before obtaining external authority. Neither passage is silently rewritten, and the UI does not infer a merged total order. Unit and browser acceptance are pending; mark verified only after CI passes.
