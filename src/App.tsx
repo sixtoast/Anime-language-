@@ -75,6 +75,16 @@ function App() {
   const [selectedFixtureId, setSelectedFixtureId] = useState("P6G-FX-001");
   const [selectedResourceFixtureId, setSelectedResourceFixtureId] = useState("RES19-01");
   const [selectedAuthorityFixtureId, setSelectedAuthorityFixtureId] = useState("AUTH20-01");
+  const [contractOperation, setContractOperation] = useState("kren");
+  const [contractTarget, setContractTarget] = useState("");
+  const [contractDesiredOutcome, setContractDesiredOutcome] = useState("");
+  const [contractMechanism, setContractMechanism] = useState("");
+  const [contractSpatialRole, setContractSpatialRole] = useState("unresolved");
+  const [contractPreconditions, setContractPreconditions] = useState("");
+  const [contractConstraints, setContractConstraints] = useState("");
+  const [contractResourceNotes, setContractResourceNotes] = useState("");
+  const [contractAuthorityReference, setContractAuthorityReference] = useState("");
+  const [contractConsentRequirement, setContractConsentRequirement] = useState("unresolved");
   const [mobileNav, setMobileNav] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState(docs[0].title);
   const [testQuery, setTestQuery] = useState("");
@@ -211,6 +221,30 @@ function App() {
   const selectedPhase6GFixture = useMemo(() => phase6gFixtures.find((fixture) => fixture.id === selectedFixtureId) ?? phase6gFixtures[0], [selectedFixtureId]);
   const selectedResourceFixture = useMemo(() => resourceAccountingFixtures.find((fixture) => fixture.id === selectedResourceFixtureId) ?? resourceAccountingFixtures[0], [selectedResourceFixtureId]);
   const selectedAuthorityFixture = useMemo(() => authorityDecisionFixtures.find((fixture) => fixture.id === selectedAuthorityFixtureId) ?? authorityDecisionFixtures[0], [selectedAuthorityFixtureId]);
+  const contractWorksheet = useMemo(() => ({
+    recordType: "ARCANE-INCANTATION-CONTRACT-WORKSHEET",
+    specificationLayer: "Modern incantation design v1.0–v2.0",
+    state: "DRAFT — NOT VALIDATED",
+    operation: { token: contractOperation, status: "Operation-class selection only; a complete spoken signature is not established here." },
+    target: contractTarget.trim() ? { reference: contractTarget.trim(), status: "User-supplied reference; resolution not checked." } : { status: "UNSPECIFIED" },
+    requestedOutcome: contractDesiredOutcome.trim() || null,
+    mechanism: contractMechanism.trim() || null,
+    spatialRole: contractSpatialRole === "unresolved" ? { status: "UNRESOLVED" } : { token: contractSpatialRole, status: "User-selected role; geometry and feasibility not checked." },
+    preconditions: contractPreconditions.trim() || null,
+    constraints: contractConstraints.trim() || null,
+    resources: { notes: contractResourceNotes.trim() || null, status: "NOT-ASSESSED", rule: "No unit, budget, reservation, conservation or physical feasibility check is performed." },
+    authority: { decisionReference: contractAuthorityReference.trim() || null, status: "NOT-ASSESSED", rule: "A reference is not proof of a trusted, current, in-scope permit." },
+    consent: { requesterDeclaration: contractConsentRequirement, status: "NOT-ASSESSED", rule: "This selection is not evidence of consent or authorisation." },
+    validation: "NOT-PERFORMED",
+    feasibility: "NOT-ASSESSED",
+    execution: "NOT-EXECUTED",
+    limitations: [
+      "This is a design worksheet, not spoken Arcane syntax.",
+      "No parser, evaluator, authority service, consent service or executor is called.",
+      "Empty fields remain unresolved; they are not inferred from context.",
+      "Validation, mechanism feasibility, resources, authority, consent and execution are independent gates."
+    ]
+  }), [contractOperation, contractTarget, contractDesiredOutcome, contractMechanism, contractSpatialRole, contractPreconditions, contractConstraints, contractResourceNotes, contractAuthorityReference, contractConsentRequirement]);
 
   const changeSection = (next: Section) => {
     setSection(next);
@@ -278,22 +312,22 @@ function App() {
           </div>
           <section className="next-task-panel" aria-labelledby="next-task-title">
             <div className="next-task-heading">
-              <div><div className="eyebrow"><CheckCircle2 size={13}/> RECOMMENDED NEXT · WEB-INC-AUTH-01</div><h2 id="next-task-title">Expose authority-decision specification fixtures</h2></div>
+              <div><div className="eyebrow"><CheckCircle2 size={13}/> RECOMMENDED NEXT · INC-AUTH-21</div><h2 id="next-task-title">Define policy-profile composition and conflict rules</h2></div>
               <span className="next-task-priority">HIGH PRIORITY</span>
             </div>
-            <p className="next-task-summary">The source registry maps the current test suite to stable IDs, and the v2.0 authority contract now defines 60 source-backed decision fixtures. Expose these as browsable design expectations while keeping permission, consent, feasibility, resource readiness and execution as separate gates.</p>
+            <p className="next-task-summary">The v2.0 authority fixtures are now browsable and tested, with all 122 unit-test results mapped to stable IDs. The next language-design gap is policy-profile composition: define how explicitly configured, domain-scoped policies are bound and how conflicts fail closed—without inventing a universal authority hierarchy.</p>
             <div className="next-task-grid">
-              <div><span>WHY THIS IS NEXT</span><p>The v2.0 contract distinguishes explicit permit, denial, conditional decisions, uncertainty, unavailable authority, expiry, revocation, scope mismatch, issuer trust and delegation. Every non-permit outcome blocks the authorisation gate; permission never substitutes for consent, feasibility, resource readiness or execution.</p></div>
-              <div><span>DEPENDENCIES</span><p>Locked v2.0 specification and source-backed AUTH20 fixture table. No new spoken Arcane tokens, universal authority hierarchy or executable permission service is introduced.</p></div>
-              <div><span>FILES / SURFACES</span><p><code>src/engine/resourceAccountingFixtures.ts</code>, <code>src/engine/resourceAccountingFixtures.ts</code>, Playground and acceptance tests.</p></div>
-              <div><span>ACCEPTANCE CRITERIA</span><p>All 60 AUTH20 fixtures are browsable from the canonical source table; each shows its stable ID, case and expected design outcome; the interface labels them as specification fixtures, not executed permission decisions; selection calls no authority service; the source link and non-substitution caveat remain visible; the interface fits a 360px viewport.</p></div>
+              <div><span>WHY THIS IS NEXT</span><p>A conflict-resolution layer must preserve policy provenance, version, scope, freshness and explicit precedence. If applicable policies conflict and no configured rule resolves them, the result remains INDETERMINATE and blocks; no default authority ranking is invented.</p></div>
+              <div><span>DEPENDENCIES</span><p>Locked v2.0 authority-decision contract and its explicitly unresolved policy-composition boundary. This is a new modern design layer, not historical grammar or a universal legal/ethical policy.</p></div>
+              <div><span>FILES / SURFACES</span><p><code>docs/canon/arcane-incantations-v2.0-authority-and-authorization-decision-contracts.md</code>, <code>src/engine/authorityDecisionFixtures.ts</code>, Playground and acceptance tests.</p></div>
+              <div><span>ACCEPTANCE CRITERIA</span><p>Define policy-profile identity and trust, applicability, version pinning, explicit precedence/combination, conflict states, freshness/revocation interactions and audit provenance; cover at least 50 positive and negative fixtures; preserve INDETERMINATE when no explicit conflict rule applies; do not define a universal authority hierarchy or legal policy.</p></div>
             </div>
             <div className="next-task-actions">
               <button className="secondary-button" onClick={() => changeSection("Test suite")}>Open Playground fixtures <span aria-hidden="true">→</span></button>
-              <button className="secondary-button" onClick={() => changeSection("Playground")}>Open authority fixtures <span aria-hidden="true">→</span></button>
+              <button className="secondary-button" onClick={() => changeSection("Playground")}>Open incantation worksheet <span aria-hidden="true">→</span></button>
               <a className="secondary-button" href="https://github.com/sixtoast/Anime-language-/blob/main/docs/WEBSITE-FEATURE-REGISTER.md" target="_blank" rel="noreferrer">Open feature register <span aria-hidden="true">↗</span></a>
             </div>
-            <p className="next-task-caveat">Status: implementation committed; automated CI pending. Authority fixture expectations remain separate from executed tests and real-world permission decisions.</p>
+            <p className="next-task-caveat">Status: queued next language-design task. The authority fixture browser passed automated CI; the next version must remain a bounded policy-composition contract, not an executable authority service.</p>
           </section>
           <div className="section-heading"><div><div className="eyebrow">WORKSPACE</div><h2>Everything in one place</h2></div><span className="section-caption">SOURCE RECOVERY · PHASE 01</span></div>
           <div className="feature-grid">
@@ -371,6 +405,31 @@ function App() {
             </div>}
             <div className="fixture-browser-actions"><a className="secondary-button" href="https://github.com/sixtoast/Anime-language-/blob/main/docs/canon/arcane-incantations-v2.0-authority-and-authorization-decision-contracts.md" target="_blank" rel="noreferrer">Open full v2.0 specification ↗</a><span>Selection only displays the source expectation; no authorisation service is called.</span></div>
             <p className="fixture-browser-caveat">Only an explicitly permitted, current, trusted, in-scope decision can pass the authorisation gate when every required check succeeds. All non-permit, uncertain, unavailable, expired, revoked, malformed, or scope-mismatched outcomes block. Authority does not replace consent, feasibility, resource readiness, validation, or execution; passing this gate does not mean a spell ran.</p>
+          </section>
+
+          <section className="contract-worksheet" aria-labelledby="contract-worksheet-title">
+            <div className="contract-worksheet-head">
+              <div><span className="detail-kicker">INCANTATION DESIGN LAB · NON-EXECUTABLE</span><h2 id="contract-worksheet-title">Incantation contract worksheet</h2></div>
+              <span className="contract-draft-status">DRAFT · NOT VALIDATED</span>
+            </div>
+            <p className="contract-worksheet-intro">Assemble a structured review record for an incantation idea. The output is a worksheet JSON record—not a spoken spell, parser input, permission decision or execution request. No operation is run.</p>
+            <div className="contract-worksheet-grid">
+              <label>Operation class<select aria-label="Operation class" value={contractOperation} onChange={(event) => setContractOperation(event.target.value)}>
+                <option value="kren">kren — establish</option><option value="trak">trak — alter</option><option value="frem">frem — maintain</option><option value="shren">shren — release</option><option value="bran">bran — couple</option><option value="vare">vare — prefer</option>
+              </select><span>Class label only; complete argument signatures remain unresolved.</span></label>
+              <label>Target reference<input aria-label="Target reference" value={contractTarget} onChange={(event) => setContractTarget(event.target.value)} placeholder="e.g. target-01"/></label>
+              <label className="contract-worksheet-wide">Requested outcome<textarea aria-label="Requested outcome" rows={2} value={contractDesiredOutcome} onChange={(event) => setContractDesiredOutcome(event.target.value)} placeholder="Describe the desired end state; this does not specify its mechanism."/></label>
+              <label className="contract-worksheet-wide">Proposed mechanism<textarea aria-label="Proposed mechanism" rows={2} value={contractMechanism} onChange={(event) => setContractMechanism(event.target.value)} placeholder="Describe the proposed causal mechanism or leave unresolved."/></label>
+              <label>Spatial role<select aria-label="Spatial role" value={contractSpatialRole} onChange={(event) => setContractSpatialRole(event.target.value)}><option value="unresolved">Unresolved</option><option value="po">po — position role</option><option value="fo">fo — direction role</option><option value="lo">lo — movement role</option></select></label>
+              <label>Consent requirement declaration<select aria-label="Consent requirement declaration" value={contractConsentRequirement} onChange={(event) => setContractConsentRequirement(event.target.value)}><option value="unresolved">Unresolved</option><option value="required">Required</option><option value="not-required-requester-assertion">Not required (requester assertion only)</option></select><span>Declaration only; consent is not verified.</span></label>
+              <label className="contract-worksheet-wide">Preconditions<textarea aria-label="Preconditions" rows={2} value={contractPreconditions} onChange={(event) => setContractPreconditions(event.target.value)} placeholder="Conditions that must hold before an attempt."/></label>
+              <label className="contract-worksheet-wide">Constraints<textarea aria-label="Constraints" rows={2} value={contractConstraints} onChange={(event) => setContractConstraints(event.target.value)} placeholder="Limits, boundaries and required invariants."/></label>
+              <label className="contract-worksheet-wide">Resource notes<textarea aria-label="Resource notes" rows={2} value={contractResourceNotes} onChange={(event) => setContractResourceNotes(event.target.value)} placeholder="Describe declared resources, units or budgets; none are checked here."/></label>
+              <label className="contract-worksheet-wide">Authority decision reference<input aria-label="Authority decision reference" value={contractAuthorityReference} onChange={(event) => setContractAuthorityReference(event.target.value)} placeholder="Reference only; leave blank if no decision exists."/></label>
+            </div>
+            <div className="contract-worksheet-output-head"><div><span className="detail-kicker">GENERATED REVIEW RECORD</span><h3>Structured worksheet JSON</h3></div><span>Execution: NOT-EXECUTED</span></div>
+            <textarea className="contract-worksheet-json" aria-label="Generated contract worksheet JSON" readOnly rows={20} value={JSON.stringify(contractWorksheet, null, 2)}/>
+            <p className="contract-worksheet-caveat">This worksheet does not certify that the target exists, the mechanism works, the requested outcome is physically possible, resources are sufficient, authority is valid, consent exists or execution occurred. Those checks require separate evidence and implementations.</p>
           </section>
           <section className="lexicon-inspector" aria-labelledby="lexicon-inspector-title">
             <div className="lexicon-inspector-head">

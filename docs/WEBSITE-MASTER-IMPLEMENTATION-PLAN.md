@@ -365,3 +365,12 @@ Arcane Incantations v2.0 is now locked design canon with 60 AUTH20 specification
 ### WEB-INC-AUTH-01 implementation — 2026-10-18
 
 The authority-decision fixture browser has been implemented in the Playground. `src/engine/authorityDecisionFixtures.ts` reads the 60 AUTH20 rows directly from the locked v2.0 Markdown; its regression tests validate row count, stable IDs, malformed/duplicate row rejection and the distinction among permit, denial, uncertainty, unavailable authority and not-executed outcomes. The UI exposes the selected case and expected outcome, links to the full specification, and states that no authority service is called. Browser acceptance covers all 60 options, deny/unavailable/not-executed outcomes, conditional permission, non-substitution principles and 360px layout. The Overview next-task card and its browser assertion now point to the next authority-fixture work item only after this feature is verified. This commit is awaiting CI; do not mark it verified until unit tests, production build and browser acceptance pass.
+
+
+### WEB-INC-AUTH-01 verified and INC-AUTH-21 queued — 2026-10-18
+
+[CI run #566](https://github.com/sixtoast/Anime-language-/actions/runs/39147443858) passed all 122 unit tests, the TypeScript/production build, and all 31 website browser acceptance tests. The report mapped 122/122 test results to stable IDs with zero unmapped. The v2.0 authority fixture browser is deployed to Vercel production: deployment dpl_CZysbW8AeRtyYP1MzWRJTt5JfZSZ, state READY, for commit 5e76123. This confirms deployment readiness and automated acceptance, not manual cross-device review.
+
+The Playground now includes an Incantation contract worksheet. It generates a structured review record only; it does not emit spoken Arcane syntax, invoke the parser, validate signatures, evaluate physical feasibility, call an authority/consent service, or execute a spell. All unresolved fields remain explicit, and authority, consent, resource readiness, feasibility and execution remain separate.
+
+The next language-design task is INC-AUTH-21: define bounded, domain-scoped policy-profile composition and conflict-resolution contracts. Preserve explicit policy provenance, version, applicability, trust, freshness and configured precedence. If policies conflict and no explicit rule resolves them, return INDETERMINATE and block. Do not invent a universal authority hierarchy or legal/ethical policy.

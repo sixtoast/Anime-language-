@@ -229,6 +229,53 @@ test.describe("Playground Phase 6G parser integration", () => {
     expect(sizes.page, "Authority specification browser should not overflow at 360px").toBeLessThanOrEqual(sizes.viewport);
   });
 
+
+  test("builds a non-executable incantation worksheet without invoking the parser", async ({ page }) => {
+    await openPlayground(page);
+    const worksheet = page.locator(".contract-worksheet");
+    await expect(worksheet.getByRole("heading", { name: "Incantation contract worksheet" })).toBeVisible();
+    await expect(worksheet.getByRole("combobox", { name: "Operation class" }).locator("option")).toHaveCount(6);
+    await expect(worksheet.getByRole("textbox", { name: "Generated contract worksheet JSON" })).toContainText("NOT-EXECUTED");
+    await expect(worksheet.getByRole("textbox", { name: "Generated contract worksheet JSON" })).toContainText("NOT-ASSESSED");
+    await expect(worksheet).toContainText("not a spoken spell");
+    await expect(worksheet).not.toContainText("Execute incantation");
+  });
+
+  test("updates the structured worksheet while keeping authority, resources and consent unverified", async ({ page }) => {
+    await openPlayground(page);
+    const worksheet = page.locator(".contract-worksheet");
+    await worksheet.getByRole("combobox", { name: "Operation class" }).selectOption("trak");
+    await worksheet.getByRole("textbox", { name: "Target reference" }).fill("target-17");
+    await worksheet.getByRole("textbox", { name: "Requested outcome" }).fill("state becomes sealed");
+    await worksheet.getByRole("textbox", { name: "Proposed mechanism" }).fill("declared field coupling");
+    await worksheet.getByRole("combobox", { name: "Spatial role" }).selectOption("fo");
+    await worksheet.getByRole("textbox", { name: "Preconditions" }).fill("target is resolved");
+    await worksheet.getByRole("textbox", { name: "Constraints" }).fill("remain within region R");
+    await worksheet.getByRole("textbox", { name: "Resource notes" }).fill("reserve four units of resource X");
+    await worksheet.getByRole("textbox", { name: "Authority decision reference" }).fill("AUTH-REF-01");
+    await worksheet.getByRole("combobox", { name: "Consent requirement declaration" }).selectOption("required");
+    const output = worksheet.getByRole("textbox", { name: "Generated contract worksheet JSON" });
+    await expect(output).toContainText('"token": "trak"');
+    await expect(output).toContainText('"reference": "target-17"');
+    await expect(output).toContainText("state becomes sealed");
+    await expect(output).toContainText('"token": "fo"');
+    await expect(output).toContainText("AUTH-REF-01");
+    await expect(output).toContainText('"status": "NOT-ASSESSED"');
+    await expect(output).toContainText('"execution": "NOT-EXECUTED"');
+  });
+
+  test("keeps the incantation worksheet within a 360px viewport", async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 800 });
+    await openPlayground(page);
+    const worksheet = page.locator(".contract-worksheet");
+    await worksheet.getByRole("textbox", { name: "Requested outcome" }).fill("A long requested outcome for narrow screens.");
+    const sizes = await page.evaluate(() => ({
+      viewport: document.documentElement.clientWidth,
+      page: document.documentElement.scrollWidth
+    }));
+    expect(sizes.page, "Incantation worksheet should not overflow at 360px").toBeLessThanOrEqual(sizes.viewport);
+  });
+
   test("shows conditional source expectations without relabelling them as canonical", async ({ page }) => {
     await openPlayground(page);
     const fixtureSelect = page.getByRole("combobox", { name: "Choose Phase 6G source fixture" });

@@ -138,3 +138,22 @@
 .authority-fixture-browser .fixture-browser-caveat{border-color:#44374f;color:#c4b2df}
 .authority-fixture-browser .fixture-browser-meta strong{overflow-wrap:anywhere;white-space:pre-wrap}
 @media(max-width:520px){.authority-fixture-browser .fixture-browser-meta .fixture-browser-meta-wide{grid-column:auto}.authority-fixture-browser .fixture-browser-actions a.secondary-button{width:100%;text-align:center;white-space:normal}}
+
+/* Structured incantation worksheet: record composition only, never execution. */
+.contract-worksheet{margin-top:16px;padding:16px;border:1px solid #3b3546;border-radius:8px;background:#17151b;min-width:0}
+.contract-worksheet-head,.contract-worksheet-output-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.contract-worksheet-head h2,.contract-worksheet-output-head h3{font:600 17px var(--display);color:#e6e0ef;margin:5px 0 0}
+.contract-draft-status,.contract-worksheet-output-head>span{font:9px var(--mono);color:#c7b6f0;border:1px solid #4a3c5d;border-radius:4px;padding:6px 8px;white-space:nowrap}
+.contract-worksheet-intro,.contract-worksheet-caveat{font-size:10px;line-height:1.75;color:#aaa2b4;margin:10px 0 14px}
+.contract-worksheet-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.contract-worksheet-grid label{display:flex;flex-direction:column;gap:6px;min-width:0;font:9px var(--mono);letter-spacing:.35px;color:#b3aabd}
+.contract-worksheet-grid input,.contract-worksheet-grid select,.contract-worksheet-grid textarea,.contract-worksheet-json{width:100%;min-width:0;max-width:100%;box-sizing:border-box;background:#101113;border:1px solid #393640;border-radius:5px;color:#e7e2ef;padding:9px 10px;font:11px var(--mono);letter-spacing:0;line-height:1.6}
+.contract-worksheet-grid textarea{resize:vertical}
+.contract-worksheet-grid input:focus,.contract-worksheet-grid select:focus,.contract-worksheet-grid textarea:focus{outline:2px solid #8270b566;border-color:#8270b5}
+.contract-worksheet-grid label>span{font:9px var(--sans);letter-spacing:0;color:#898392;line-height:1.55}
+.contract-worksheet-wide{grid-column:1/-1}
+.contract-worksheet-output-head{align-items:flex-end;margin:18px 0 9px;padding-top:13px;border-top:1px solid #302d36}
+.contract-worksheet-output-head>span{white-space:normal;text-align:right}
+.contract-worksheet-json{display:block;min-height:280px;resize:vertical;white-space:pre;overflow:auto;color:#d7c9ec}
+.contract-worksheet-caveat{margin-bottom:0;padding-top:10px;border-top:1px solid #302d36;color:#c0aede}
+@media(max-width:520px){.contract-worksheet{padding:12px}.contract-worksheet-head{flex-direction:column}.contract-worksheet-grid{grid-template-columns:1fr}.contract-worksheet-wide{grid-column:auto}.contract-worksheet-output-head{flex-direction:column;align-items:flex-start}.contract-draft-status{white-space:normal}.contract-worksheet-output-head>span{text-align:left}}

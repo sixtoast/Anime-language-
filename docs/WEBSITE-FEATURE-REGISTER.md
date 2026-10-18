@@ -255,9 +255,22 @@ The resource fixture browser is included in Vercel production deployment [`dpl_9
 
 | ID | Feature | Origin | Priority | Dependencies | Affected files/sections | Acceptance criteria | Verification evidence | Final status |
 |---|---|---|---|---|---|---|---|---|
-| WEB-INC-AUTH-01 | Browse v2.0 authority-decision specification fixtures separately from executable tests | Arcane Incantations v2.0; Development Studio Plan fixture-driven validation | High | Locked v2.0 specification and existing Playground specification browser | Playground, authority fixture parser/tests, documentation catalogue, Overview queue | Expose all 60 AUTH20 fixtures with stable IDs and expected outcomes; preserve link to full source; label as design expectations, not executed permission decisions; selecting a fixture does not run parser or authority service; mobile layout remains within 360px; document that all non-permit states block the authorisation gate | Implemented in the Playground; awaiting CI for unit tests, production build and browser acceptance. Tests cover stable IDs, distinct outcomes, non-substitution and 360px layout. | Implemented — CI pending |
+| WEB-INC-AUTH-01 | Browse v2.0 authority-decision specification fixtures separately from executable tests | Arcane Incantations v2.0; Development Studio Plan fixture-driven validation | High | Locked v2.0 specification and existing Playground specification browser | Playground, authority fixture parser/tests, documentation catalogue, Overview queue | Expose all 60 AUTH20 fixtures with stable IDs and expected outcomes; preserve link to full source; label as design expectations, not executed permission decisions; selecting a fixture does not run parser or authority service; mobile layout remains within 360px; document that all non-permit states block the authorisation gate | [CI #566](https://github.com/sixtoast/Anime-language-/actions/runs/39147443858) passed 122 unit tests, production build and 31 browser tests; report mapped 122/122 IDs with zero unmapped. Vercel production deployment is READY for commit 5e76123. | Verified (automated CI; live-device review separate) |
 
 
 ### WEB-INC-AUTH-01 implementation note — 2026-10-18
 
 The source parser, unit tests, Playground browser, responsive styling and browser acceptance tests have been committed. The Overview recommendation card now points at this feature and the browser assertion guards that task label. The browser deliberately displays the canonical source's expected outcomes without executing an authority decision. Mark verified only after the current CI run succeeds.
+
+
+### WEB-INC-COMP-01 — Non-executable incantation contract worksheet (2026-10-18)
+
+| ID | Feature | Origin | Priority | Dependencies | Affected files/sections | Acceptance criteria | Verification evidence | Final status |
+|---|---|---|---|---|---|---|---|---|
+| WEB-INC-COMP-01 | Compose a structured incantation review record without emitting executable syntax | Incantations v1.0–v2.0; typed contract and gate separation | High | Existing Playground, v1.6 typed-value boundary, v1.9 resource contracts, v2.0 authority contracts | src/App.tsx, src/styles.css, tests/browser/playground.spec.ts | Six operation-class choices; editable target/outcome/mechanism/role/preconditions/constraints/resource notes/authority reference/consent declaration; output remains structured worksheet JSON; unknown fields stay unresolved; authority, consent, resources, feasibility and execution are explicitly not assessed; no parser or execution call; 360px layout passes | Implementation committed; awaiting CI | Implemented — CI pending |
+
+### INC-AUTH-21 — Policy-profile composition and conflict resolution (queued language design)
+
+| ID | Feature | Origin | Priority | Dependencies | Acceptance criteria | Final status |
+|---|---|---|---|---|---|---|
+| INC-AUTH-21 | Define bounded policy-profile composition and conflict-resolution contracts | v2.0 §16 explicitly leaves policy language and authority conflict resolution unresolved | High | Locked v2.0 decision contracts, v1.7 temporal evidence, v2.0 provenance and trust requirements | Domain-scoped profiles; explicit applicability and precedence; pinned policy versions; trust/freshness/revocation; deterministic outcomes only where configured; unresolved conflict yields INDETERMINATE and blocks; at least 50 positive/negative fixtures; no universal authority hierarchy or legal policy | Planned |
