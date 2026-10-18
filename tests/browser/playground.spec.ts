@@ -179,6 +179,56 @@ test.describe("Playground Phase 6G parser integration", () => {
     expect(sizes.page, "Resource specification browser should not overflow at 360px").toBeLessThanOrEqual(sizes.viewport);
   });
 
+  test("browses all authority-decision specification fixtures without calling an authority service", async ({ page }) => {
+    await openPlayground(page);
+    const browser = page.locator(".authority-fixture-browser");
+    await expect(browser.getByRole("heading", { name: "Incantation authority-decision fixtures" })).toBeVisible();
+    await expect(browser.getByText("60 design cases")).toBeVisible();
+    await expect(browser).toContainText("not executed permission decisions");
+    await expect(browser.getByRole("link", { name: "Open full v2.0 specification" })).toHaveAttribute("href", /arcane-incantations-v2.0-authority-and-authorization-decision-contracts/);
+    await expect(browser.getByRole("combobox", { name: "Choose authority-decision specification fixture" }).locator("option")).toHaveCount(60);
+    await expect(browser).not.toContainText("Run authority decision");
+    await expect(browser).not.toContainText("PERMISSION GRANTED");
+  });
+
+  test("preserves deny, unavailable and not-executed outcomes as distinct design expectations", async ({ page }) => {
+    await openPlayground(page);
+    const browser = page.locator(".authority-fixture-browser");
+    const select = browser.getByRole("combobox", { name: "Choose authority-decision specification fixture" });
+    await select.selectOption("AUTH20-07");
+    await expect(browser.locator(".fixture-browser-meta").first()).toContainText("AUTH20-07");
+    await expect(browser.locator(".fixture-browser-meta").first()).toContainText("DENY; block");
+    await select.selectOption("AUTH20-54");
+    await expect(browser.locator(".fixture-browser-meta").first()).toContainText("UNAVAILABLE; block");
+    await select.selectOption("AUTH20-60");
+    await expect(browser.locator(".fixture-browser-meta").first()).toContainText("execution remains NOT-EXECUTED");
+    await expect(browser).toContainText("Authority does not replace consent, feasibility, resource readiness");
+  });
+
+  test("shows conditional permit as conditional and preserves uncertainty blocking", async ({ page }) => {
+    await openPlayground(page);
+    const browser = page.locator(".authority-fixture-browser");
+    const select = browser.getByRole("combobox", { name: "Choose authority-decision specification fixture" });
+    await select.selectOption("AUTH20-27");
+    await expect(browser.locator(".fixture-browser-meta").first()).toContainText("CONDITIONAL-PERMIT may pass the gate");
+    await select.selectOption("AUTH20-29");
+    await expect(browser.locator(".fixture-browser-meta").first()).toContainText("unknown");
+    await expect(browser.locator(".fixture-browser-meta").first()).toContainText("Block");
+    await expect(browser).toContainText("All non-permit, uncertain, unavailable, expired, revoked, malformed, or scope-mismatched outcomes block");
+  });
+
+  test("keeps the authority specification browser within a 360px viewport", async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 800 });
+    await openPlayground(page);
+    const browser = page.locator(".authority-fixture-browser");
+    await browser.getByRole("combobox", { name: "Choose authority-decision specification fixture" }).selectOption("AUTH20-60");
+    const sizes = await page.evaluate(() => ({
+      viewport: document.documentElement.clientWidth,
+      page: document.documentElement.scrollWidth
+    }));
+    expect(sizes.page, "Authority specification browser should not overflow at 360px").toBeLessThanOrEqual(sizes.viewport);
+  });
+
   test("shows conditional source expectations without relabelling them as canonical", async ({ page }) => {
     await openPlayground(page);
     const fixtureSelect = page.getByRole("combobox", { name: "Choose Phase 6G source fixture" });
