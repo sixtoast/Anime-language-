@@ -24,7 +24,7 @@ describe("Arcane Incantations v2.0 authority-decision specification fixtures", (
 
   it("[AUTH20-TEST-004] retains the non-substitution rule for resources, authority, consent and execution", () => {
     expect(authorityDecisionFixtures.find((fixture) => fixture.id === "AUTH20-46")?.expectedOutcome).toContain("resource success does not override it");
-    expect(authorityDecisionFixtures.find((fixture) => fixture.id === "AUTH20-48")?.expectedOutcome).toContain("required consent gate is absent");
+    expect(authorityDecisionFixtures.find((fixture) => fixture.id === "AUTH20-48")).toMatchObject({ caseDescription: expect.stringContaining("required consent gate is absent"), expectedOutcome: "Block" });
     expect(authorityDecisionFixtures.find((fixture) => fixture.id === "AUTH20-60")?.expectedOutcome).toContain("execution remains NOT-EXECUTED");
     expect(authorityDecisionSpec).toContain("not evidence of a runtime");
     expect(authorityDecisionSpec).toContain("does not define a universal authority hierarchy");
