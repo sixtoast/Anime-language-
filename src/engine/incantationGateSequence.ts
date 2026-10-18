@@ -38,7 +38,7 @@ export function parseValidationGateSequence(markdown: string): GateSequenceStage
   const stages: GateSequenceStage[] = [];
   for (const line of lines.slice(start + 1)) {
     if (/^##\s/.test(line.trim())) break;
-    const match = line.trim().match(/^(\d+)\.\s+\*\*(.+?)\*\*:\s*(.+)$/);
+    const match = line.trim().match(/^(\d+)\.\s+\*\*(.+?):\*\*\s*(.+)$/);
     if (!match) continue;
     const ordinal = Number(match[1]);
     const label = match[2].trim();
