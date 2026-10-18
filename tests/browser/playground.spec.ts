@@ -235,8 +235,8 @@ test.describe("Playground Phase 6G parser integration", () => {
     const worksheet = page.locator(".contract-worksheet");
     await expect(worksheet.getByRole("heading", { name: "Incantation contract worksheet" })).toBeVisible();
     await expect(worksheet.getByRole("combobox", { name: "Operation class" }).locator("option")).toHaveCount(6);
-    await expect(worksheet.getByRole("textbox", { name: "Generated contract worksheet JSON" })).toContainText("NOT-EXECUTED");
-    await expect(worksheet.getByRole("textbox", { name: "Generated contract worksheet JSON" })).toContainText("NOT-ASSESSED");
+    await expect(worksheet.getByRole("textbox", { name: "Generated contract worksheet JSON" })).toHaveValue(/NOT-EXECUTED/);
+    await expect(worksheet.getByRole("textbox", { name: "Generated contract worksheet JSON" })).toHaveValue(/NOT-ASSESSED/);
     await expect(worksheet).toContainText("not a spoken spell");
     await expect(worksheet).not.toContainText("Execute incantation");
   });
@@ -255,13 +255,13 @@ test.describe("Playground Phase 6G parser integration", () => {
     await worksheet.getByRole("textbox", { name: "Authority decision reference" }).fill("AUTH-REF-01");
     await worksheet.getByRole("combobox", { name: "Consent requirement declaration" }).selectOption("required");
     const output = worksheet.getByRole("textbox", { name: "Generated contract worksheet JSON" });
-    await expect(output).toContainText('"token": "trak"');
-    await expect(output).toContainText('"reference": "target-17"');
-    await expect(output).toContainText("state becomes sealed");
-    await expect(output).toContainText('"token": "fo"');
-    await expect(output).toContainText("AUTH-REF-01");
-    await expect(output).toContainText('"status": "NOT-ASSESSED"');
-    await expect(output).toContainText('"execution": "NOT-EXECUTED"');
+    await expect(output).toHaveValue(/"token": "trak"/);
+    await expect(output).toHaveValue(/"reference": "target-17"/);
+    await expect(output).toHaveValue(/state becomes sealed/);
+    await expect(output).toHaveValue(/"token": "fo"/);
+    await expect(output).toHaveValue(/AUTH-REF-01/);
+    await expect(output).toHaveValue(/"status": "NOT-ASSESSED"/);
+    await expect(output).toHaveValue(/"execution": "NOT-EXECUTED"/);
   });
 
   test("keeps the incantation worksheet within a 360px viewport", async ({ page }) => {
