@@ -284,4 +284,54 @@ test.describe("Playground Phase 6G parser integration", () => {
     await expect(page.locator(".fixture-browser:not(.resource-fixture-browser):not(.authority-fixture-browser) .fixture-browser-meta")).toContainText("unresolved");
     await expect(page.locator(".fixture-browser:not(.resource-fixture-browser):not(.authority-fixture-browser) .fixture-browser-caveat")).toContainText("known to diverge from the archived executable prototype");
   });
+
+  test("browses all policy-profile composition fixtures as specification records only", async ({ page }) => {
+    await openPlayground(page);
+    const browser = page.locator(".policy-profile-fixture-browser");
+    await expect(browser.getByRole("heading", { name: "Policy-profile composition fixtures" })).toBeVisible();
+    const select = browser.getByRole("combobox", { name: "Choose policy-profile composition specification fixture" });
+    await expect(select.locator("option")).toHaveCount(60);
+    await expect(browser.getByRole("link", { name: "Open full v2.1 specification" })).toHaveAttribute("href", /arcane-incantations-v2.1-policy-profile-composition-and-conflict-resolution/);
+    await expect(browser).toContainText("not executed policy decisions");
+    await select.selectOption("POL21-32");
+    await expect(browser.locator(".fixture-browser-meta").first()).toContainText("POL21-32");
+    await expect(browser.locator(".fixture-browser-meta").first()).toContainText("INDETERMINATE");
+    await select.selectOption("POL21-23");
+    await expect(browser.locator(".fixture-browser-meta").first()).toContainText("COMPOSED-DENY");
+    await select.selectOption("POL21-60");
+    await expect(browser.locator(".fixture-browser-meta").first()).toContainText("execution remains NOT-EXECUTED");
+    await expect(browser).not.toContainText("Execute policy");
+  });
+
+  test("preserves profile conflicts separately from explicit denial", async ({ page }) => {
+    await openPlayground(page);
+    const browser = page.locator(".policy-profile-fixture-browser");
+    const select = browser.getByRole("combobox", { name: "Choose policy-profile composition specification fixture" });
+    await select.selectOption("POL21-32");
+    await expect(browser.locator(".fixture-browser-meta").first()).toContainText("PROFILE-CONFLICT / INDETERMINATE");
+    await select.selectOption("POL21-27");
+    await expect(browser.locator(".fixture-browser-meta").first()).toContainText("COMPOSED-DENY");
+  });
+
+  test("does not execute the parser or policy service when selecting a composition fixture", async ({ page }) => {
+    await openPlayground(page);
+    const browser = page.locator(".policy-profile-fixture-browser");
+    await browser.getByRole("combobox", { name: "Choose policy-profile composition specification fixture" }).selectOption("POL21-52");
+    await expect(browser.locator(".fixture-browser-meta").first()).toContainText("PROFILE-STALE");
+    await expect(page.getByText("No analysis has been run")).toBeVisible();
+    await expect(browser).toContainText("no policy service or parser is called");
+  });
+
+  test("keeps policy-profile composition fixtures within a 360px viewport", async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 800 });
+    await openPlayground(page);
+    const browser = page.locator(".policy-profile-fixture-browser");
+    await browser.getByRole("combobox", { name: "Choose policy-profile composition specification fixture" }).selectOption("POL21-60");
+    const sizes = await page.evaluate(() => ({
+      viewport: document.documentElement.clientWidth,
+      page: document.documentElement.scrollWidth
+    }));
+    expect(sizes.page, "Policy-profile fixture browser should not overflow at 360px").toBeLessThanOrEqual(sizes.viewport);
+  });
+
 });

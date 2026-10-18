@@ -14,6 +14,7 @@ import phase6gFixtureData from "../tests/fixtures/phase6g-surface-parser-cases.j
 import { auditPhase6GFixtures, type Phase6GFixture } from "./engine/phase6gFixtureAudit";
 import { resourceAccountingFixtures } from "./engine/resourceAccountingFixtures";
 import { authorityDecisionFixtures } from "./engine/authorityDecisionFixtures";
+import { policyProfileCompositionFixtures } from "./engine/policyProfileCompositionFixtures";
 
 type Section = "Overview" | "Documentation" | "Playground" | "Test suite" | "Research & review";
 
@@ -75,6 +76,7 @@ function App() {
   const [selectedFixtureId, setSelectedFixtureId] = useState("P6G-FX-001");
   const [selectedResourceFixtureId, setSelectedResourceFixtureId] = useState("RES19-01");
   const [selectedAuthorityFixtureId, setSelectedAuthorityFixtureId] = useState("AUTH20-01");
+  const [selectedPolicyFixtureId, setSelectedPolicyFixtureId] = useState("POL21-01");
   const [contractOperation, setContractOperation] = useState("kren");
   const [contractTarget, setContractTarget] = useState("");
   const [contractDesiredOutcome, setContractDesiredOutcome] = useState("");
@@ -221,6 +223,7 @@ function App() {
   const selectedPhase6GFixture = useMemo(() => phase6gFixtures.find((fixture) => fixture.id === selectedFixtureId) ?? phase6gFixtures[0], [selectedFixtureId]);
   const selectedResourceFixture = useMemo(() => resourceAccountingFixtures.find((fixture) => fixture.id === selectedResourceFixtureId) ?? resourceAccountingFixtures[0], [selectedResourceFixtureId]);
   const selectedAuthorityFixture = useMemo(() => authorityDecisionFixtures.find((fixture) => fixture.id === selectedAuthorityFixtureId) ?? authorityDecisionFixtures[0], [selectedAuthorityFixtureId]);
+  const selectedPolicyFixture = useMemo(() => policyProfileCompositionFixtures.find((fixture) => fixture.id === selectedPolicyFixtureId) ?? policyProfileCompositionFixtures[0], [selectedPolicyFixtureId]);
   const contractWorksheet = useMemo(() => ({
     recordType: "ARCANE-INCANTATION-CONTRACT-WORKSHEET",
     specificationLayer: "Modern incantation design v1.0–v2.0",
@@ -312,22 +315,22 @@ function App() {
           </div>
           <section className="next-task-panel" aria-labelledby="next-task-title">
             <div className="next-task-heading">
-              <div><div className="eyebrow"><CheckCircle2 size={13}/> RECOMMENDED NEXT · INC-AUTH-21</div><h2 id="next-task-title">Define policy-profile composition and conflict rules</h2></div>
+              <div><div className="eyebrow"><CheckCircle2 size={13}/> RECOMMENDED NEXT · WEB-INC-AUTH-21</div><h2 id="next-task-title">Browse policy-profile composition fixtures</h2></div>
               <span className="next-task-priority">HIGH PRIORITY</span>
             </div>
-            <p className="next-task-summary">The v2.0 authority fixtures are now browsable and tested, with all 122 unit-test results mapped to stable IDs. The next language-design gap is policy-profile composition: define how explicitly configured, domain-scoped policies are bound and how conflicts fail closed—without inventing a universal authority hierarchy.</p>
+            <p className="next-task-summary">Arcane Incantations v2.1 now defines 60 locked policy-composition design fixtures. The next website task is to expose those source-recorded outcomes beside the existing authority cases, without presenting them as executed policy decisions or a functioning permission service.</p>
             <div className="next-task-grid">
-              <div><span>WHY THIS IS NEXT</span><p>A conflict-resolution layer must preserve policy provenance, version, scope, freshness and explicit precedence. If applicable policies conflict and no configured rule resolves them, the result remains INDETERMINATE and blocks; no default authority ranking is invented.</p></div>
-              <div><span>DEPENDENCIES</span><p>Locked v2.0 authority-decision contract and its explicitly unresolved policy-composition boundary. This is a new modern design layer, not historical grammar or a universal legal/ethical policy.</p></div>
-              <div><span>FILES / SURFACES</span><p><code>docs/canon/arcane-incantations-v2.0-authority-and-authorization-decision-contracts.md</code>, <code>src/engine/authorityDecisionFixtures.ts</code>, Playground and acceptance tests.</p></div>
-              <div><span>ACCEPTANCE CRITERIA</span><p>Define policy-profile identity and trust, applicability, version pinning, explicit precedence/combination, conflict states, freshness/revocation interactions and audit provenance; cover at least 50 positive and negative fixtures; preserve INDETERMINATE when no explicit conflict rule applies; do not define a universal authority hierarchy or legal policy.</p></div>
+              <div><span>WHY THIS IS NEXT</span><p>The v2.1 contract defines six explicit composition strategies and distinct conflict, unavailability, trust and freshness failures. Browsing the 60 fixtures will make those distinctions reviewable without simulating a policy engine.</p></div>
+              <div><span>DEPENDENCIES</span><p>Locked v2.1 policy-profile composition contract and v2.0 authority-decision records. This is a modern specification browser, not historical grammar or a universal legal/ethical policy.</p></div>
+              <div><span>FILES / SURFACES</span><p><code>docs/canon/arcane-incantations-v2.1-policy-profile-composition-and-conflict-resolution.md</code>, <code>src/engine/policyProfileCompositionFixtures.ts</code>, Playground and acceptance tests.</p></div>
+              <div><span>ACCEPTANCE CRITERIA</span><p>Expose all 60 POL21 fixtures and expected outcomes; preserve stable IDs and the full source link; label them as design fixtures, not executed policy decisions; preserve conflict versus explicit denial; no policy service or parser execution; 360px layout passes.</p></div>
             </div>
             <div className="next-task-actions">
-              <button className="secondary-button" onClick={() => changeSection("Test suite")}>Open Playground fixtures <span aria-hidden="true">→</span></button>
+              <button className="secondary-button" onClick={() => changeSection("Playground")}>Open policy fixtures <span aria-hidden="true">→</span></button>
               <button className="secondary-button" onClick={() => changeSection("Playground")}>Open incantation worksheet <span aria-hidden="true">→</span></button>
               <a className="secondary-button" href="https://github.com/sixtoast/Anime-language-/blob/main/docs/WEBSITE-FEATURE-REGISTER.md" target="_blank" rel="noreferrer">Open feature register <span aria-hidden="true">↗</span></a>
             </div>
-            <p className="next-task-caveat">Status: queued next language-design task. The authority fixture browser passed automated CI; the next version must remain a bounded policy-composition contract, not an executable authority service.</p>
+            <p className="next-task-caveat">Status: queued website task. v2.1 is locked design canon with 60 normative fixtures; this browser will display source expectations only and call no policy service.</p>
           </section>
           <div className="section-heading"><div><div className="eyebrow">WORKSPACE</div><h2>Everything in one place</h2></div><span className="section-caption">SOURCE RECOVERY · PHASE 01</span></div>
           <div className="feature-grid">
@@ -405,6 +408,17 @@ function App() {
             </div>}
             <div className="fixture-browser-actions"><a className="secondary-button" href="https://github.com/sixtoast/Anime-language-/blob/main/docs/canon/arcane-incantations-v2.0-authority-and-authorization-decision-contracts.md" target="_blank" rel="noreferrer">Open full v2.0 specification ↗</a><span>Selection only displays the source expectation; no authorisation service is called.</span></div>
             <p className="fixture-browser-caveat">Only an explicitly permitted, current, trusted, in-scope decision can pass the authorisation gate when every required check succeeds. All non-permit, uncertain, unavailable, expired, revoked, malformed, or scope-mismatched outcomes block. Authority does not replace consent, feasibility, resource readiness, validation, or execution; passing this gate does not mean a spell ran.</p>
+          </section>
+
+          <section className="fixture-browser policy-profile-fixture-browser" aria-labelledby="policy-profile-fixture-browser-title">
+            <div className="fixture-browser-head"><div><span className="detail-kicker">SPECIFICATION FIXTURES · NOT EXECUTABLE TESTS</span><h2 id="policy-profile-fixture-browser-title">Policy-profile composition fixtures</h2></div><span>{policyProfileCompositionFixtures.length} design cases</span></div>
+            <p className="fixture-browser-intro">Browse the 60 expected outcomes defined in Arcane Incantations v2.1. The records are parsed directly from the locked specification. They are not executed policy decisions and do not establish a working permission service, legal compliance, identity, consent, physical feasibility, or spell execution.</p>
+            <label className="fixture-select-label">Choose a policy-composition specification fixture<select aria-label="Choose policy-profile composition specification fixture" value={selectedPolicyFixtureId} onChange={(event) => setSelectedPolicyFixtureId(event.target.value)}>{policyProfileCompositionFixtures.map((fixture) => <option key={fixture.id} value={fixture.id}>{fixture.id} — {fixture.caseDescription}</option>)}</select></label>
+            {selectedPolicyFixture && <div className="fixture-browser-detail">
+              <div className="fixture-browser-meta"><div><span>Specification fixture ID</span><code>{selectedPolicyFixture.id}</code></div><div><span>Fixture category</span><strong>Policy-profile composition</strong></div><div className="fixture-browser-meta-wide"><span>Case</span><strong>{selectedPolicyFixture.caseDescription}</strong></div><div className="fixture-browser-meta-wide"><span>Expected design outcome</span><strong>{selectedPolicyFixture.expectedOutcome}</strong></div><div className="fixture-browser-meta-wide"><span>Evidence class</span><strong>Normative specification fixture — not an executed policy decision</strong></div></div>
+            </div>}
+            <div className="fixture-browser-actions"><a className="secondary-button" href="https://github.com/sixtoast/Anime-language-/blob/main/docs/canon/arcane-incantations-v2.1-policy-profile-composition-and-conflict-resolution.md" target="_blank" rel="noreferrer">Open full v2.1 specification ↗</a><span>Selection displays source expectations only; no policy service or parser is called.</span></div>
+            <p className="fixture-browser-caveat">Policy names, issuer prestige, file order and recency are not implicit precedence. An unresolved conflict, unknown applicability, unavailable required profile or untrusted policy blocks without being mislabelled as an explicit denial. A composed permit still does not bypass v2.0 scope, consent, resource, feasibility or execution gates.</p>
           </section>
 
           <section className="contract-worksheet" aria-labelledby="contract-worksheet-title">

@@ -53,3 +53,8 @@ The bounded modern incantation design is now documented in [Arcane Incantations 
 ## Authority-decision design update — 2026-10-17
 
 [Arcane Incantations v2.0](../canon/arcane-incantations-v2.0-authority-and-authorization-decision-contracts.md) closes a design gap by specifying 60 expected authority-decision outcomes. It remains design-level only: there is no authority service, universal issuer hierarchy, legal policy engine, identity infrastructure, or executable gate demonstrated by the document. The next implementation step is fixture browsing and source traceability, not automatic permission decisions. Any later executable validator must start with a named, bounded authority domain and trusted test fixtures.
+
+
+## Policy-profile composition design update — 2026-10-18
+
+[Arcane Incantations v2.1](../canon/arcane-incantations-v2.1-policy-profile-composition-and-conflict-resolution.md) closes the specification gap left explicit by v2.0 §16. It defines 60 normative POL21 outcomes for profile identity/versioning, applicability, trust, configured composition strategies, conflict handling, constraint intersection and audit records. This is a design contract only: no policy engine, identity service, universal authority hierarchy, legal policy, or real-world authorisation decision is implemented. The next website work is a source-linked fixture browser; executable policy validation remains blocked on selecting a bounded, governed domain and trusted test data.

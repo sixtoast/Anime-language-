@@ -121,3 +121,13 @@ Arcane Incantations v2.0 locks a bounded modern authorisation decision-record co
 |---|---|---|
 | D-015 | LOCKED DESIGN CANON | Incantations v2.0 defines bounded authority-decision records and deny-by-default outcomes; it does not grant a universal authority hierarchy or replace consent, feasibility, resource, or execution checks. |
 | T-018 | DEFINED, NOT YET EXECUTED AS AN AUTHORITY SERVICE | For a configured authority domain, test exact scope matching, issuer trust, delegation bounds, expiry/revocation, condition uncertainty, independent consent gates and audit provenance against AUTH20 fixtures. |
+
+
+## Policy-profile composition continuity update — 2026-10-18
+
+Arcane Incantations v2.1 locks a bounded policy-profile composition contract with 60 POL21 specification fixtures. It defines pinned profile and plan versions, applicability uncertainty, issuer/trust checks, explicit strategy selection, acyclic precedence graphs, constraint-only intersection, conflict taxonomy and audit provenance. It does not define a universal authority hierarchy or executable policy engine. A composed permit remains subordinate to v2.0 scope, freshness, revocation and consent checks, and does not bypass resource readiness, feasibility or execution.
+
+| ID | Status | Decision / test requirement |
+|---|---|---|
+| D-016 | LOCKED DESIGN CANON | Policy profiles compose only under an explicitly trusted, version-pinned plan; missing or unresolved conflict blocks without being silently converted to approval or explicit denial. |
+| T-019 | DEFINED, NOT YET EXECUTED AS A POLICY ENGINE | For a named bounded domain, test profile applicability, version pinning, trust, each supported strategy, precedence DAG validation, conflict preservation, constraint intersection, freshness and non-substitution against POL21 fixtures. |

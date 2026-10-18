@@ -157,3 +157,12 @@
 .contract-worksheet-json{display:block;min-height:280px;resize:vertical;white-space:pre;overflow:auto;color:#d7c9ec}
 .contract-worksheet-caveat{margin-bottom:0;padding-top:10px;border-top:1px solid #302d36;color:#c0aede}
 @media(max-width:520px){.contract-worksheet{padding:12px}.contract-worksheet-head{flex-direction:column}.contract-worksheet-grid{grid-template-columns:1fr}.contract-worksheet-wide{grid-column:auto}.contract-worksheet-output-head{flex-direction:column;align-items:flex-start}.contract-draft-status{white-space:normal}.contract-worksheet-output-head>span{text-align:left}}
+
+/* v2.1 policy-profile composition records remain source expectations, not evaluated decisions. */
+.policy-profile-fixture-browser{border-color:#3b3948;background:#17161b}
+.policy-profile-fixture-browser .fixture-browser-head h2{max-width:560px}
+.policy-profile-fixture-browser .fixture-browser-meta .fixture-browser-meta-wide{grid-column:1/-1}
+.policy-profile-fixture-browser .fixture-browser-actions a.secondary-button{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;min-height:32px}
+.policy-profile-fixture-browser .fixture-browser-caveat{border-color:#413b4b;color:#c0b3d6}
+.policy-profile-fixture-browser .fixture-browser-meta strong{overflow-wrap:anywhere;white-space:pre-wrap}
+@media(max-width:520px){.policy-profile-fixture-browser .fixture-browser-meta .fixture-browser-meta-wide{grid-column:auto}.policy-profile-fixture-browser .fixture-browser-actions a.secondary-button{width:100%;text-align:center;white-space:normal}}
