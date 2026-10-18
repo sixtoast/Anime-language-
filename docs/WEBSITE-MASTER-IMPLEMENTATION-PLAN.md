@@ -360,3 +360,8 @@ Next language work should review authority semantics as a separate bounded desig
 ### Authority-decision fixture browser queue — 2026-10-17
 
 Arcane Incantations v2.0 is now locked design canon with 60 AUTH20 specification fixtures. The next website feature, WEB-INC-AUTH-01, is to expose those fixtures in the Playground as a separate specification browser. It must preserve source-derived expectations and must not present them as executed authority checks or a working permission service. The authority design distinguishes PERMIT from conditional permission, explicit denial, indeterminate evidence, unavailable authority, expiry, revocation, scope mismatch and untrusted issuers; all non-permit outcomes block the authorisation gate.
+
+
+### WEB-INC-AUTH-01 implementation — 2026-10-18
+
+The authority-decision fixture browser has been implemented in the Playground. `src/engine/authorityDecisionFixtures.ts` reads the 60 AUTH20 rows directly from the locked v2.0 Markdown; its regression tests validate row count, stable IDs, malformed/duplicate row rejection and the distinction among permit, denial, uncertainty, unavailable authority and not-executed outcomes. The UI exposes the selected case and expected outcome, links to the full specification, and states that no authority service is called. Browser acceptance covers all 60 options, deny/unavailable/not-executed outcomes, conditional permission, non-substitution principles and 360px layout. The Overview next-task card and its browser assertion now point to the next authority-fixture work item only after this feature is verified. This commit is awaiting CI; do not mark it verified until unit tests, production build and browser acceptance pass.

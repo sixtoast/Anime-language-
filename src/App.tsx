@@ -278,22 +278,22 @@ function App() {
           </div>
           <section className="next-task-panel" aria-labelledby="next-task-title">
             <div className="next-task-heading">
-              <div><div className="eyebrow"><CheckCircle2 size={13}/> RECOMMENDED NEXT · WEB-INC-RES-01</div><h2 id="next-task-title">Expose incantation resource-accounting fixtures</h2></div>
+              <div><div className="eyebrow"><CheckCircle2 size={13}/> RECOMMENDED NEXT · WEB-INC-AUTH-01</div><h2 id="next-task-title">Expose authority-decision specification fixtures</h2></div>
               <span className="next-task-priority">HIGH PRIORITY</span>
             </div>
-            <p className="next-task-summary">The source registry now maps all 105 current test results to stable IDs, with zero unmapped results in CI #528. Arcane Incantations v1.9 now defines 60 resource-accounting specification fixtures. The next step is to expose them as browsable design expectations without pretending that a resource evaluator or spell runtime exists.</p>
+            <p className="next-task-summary">The source registry maps the current test suite to stable IDs, and the v2.0 authority contract now defines 60 source-backed decision fixtures. Expose these as browsable design expectations while keeping permission, consent, feasibility, resource readiness and execution as separate gates.</p>
             <div className="next-task-grid">
-              <div><span>WHY THIS IS NEXT</span><p>The v1.9 resource model distinguishes sources, transfers, transformations, reservations, consumption, budgets, conservation boundaries and reconciliation. The website must preserve the distinction between normative specification fixtures and executed parser tests, and must not imply that resource accounting proves physical feasibility.</p></div>
-              <div><span>DEPENDENCIES</span><p>Locked v1.9 specification and source-backed fixture table. No new Arcane spoken tokens, parser signatures or physical laws are required.</p></div>
-              <div><span>FILES / SURFACES</span><p><code>docs/canon/arcane-incantations-v1.9-resource-accounting-and-conservation-contracts.md</code>, <code>src/engine/resourceAccountingFixtures.ts</code>, Playground and acceptance tests.</p></div>
-              <div><span>ACCEPTANCE CRITERIA</span><p>All 60 RES19 fixtures are browsable from the canonical source table; each shows its stable ID, case and expected design outcome; the interface labels them as specification fixtures, not executed tests; selecting one never claims to run a spell; the source link and unresolved/runtime caveat remain visible.</p></div>
+              <div><span>WHY THIS IS NEXT</span><p>The v2.0 contract distinguishes explicit permit, denial, conditional decisions, uncertainty, unavailable authority, expiry, revocation, scope mismatch, issuer trust and delegation. Every non-permit outcome blocks the authorisation gate; permission never substitutes for consent, feasibility, resource readiness or execution.</p></div>
+              <div><span>DEPENDENCIES</span><p>Locked v2.0 specification and source-backed AUTH20 fixture table. No new spoken Arcane tokens, universal authority hierarchy or executable permission service is introduced.</p></div>
+              <div><span>FILES / SURFACES</span><p><code>src/engine/resourceAccountingFixtures.ts</code>, <code>src/engine/resourceAccountingFixtures.ts</code>, Playground and acceptance tests.</p></div>
+              <div><span>ACCEPTANCE CRITERIA</span><p>All 60 AUTH20 fixtures are browsable from the canonical source table; each shows its stable ID, case and expected design outcome; the interface labels them as specification fixtures, not executed permission decisions; selection calls no authority service; the source link and non-substitution caveat remain visible; the interface fits a 360px viewport.</p></div>
             </div>
             <div className="next-task-actions">
               <button className="secondary-button" onClick={() => changeSection("Test suite")}>Open Playground fixtures <span aria-hidden="true">→</span></button>
-              <button className="secondary-button" onClick={() => changeSection("Playground")}>Open resource fixtures <span aria-hidden="true">→</span></button>
+              <button className="secondary-button" onClick={() => changeSection("Playground")}>Open authority fixtures <span aria-hidden="true">→</span></button>
               <a className="secondary-button" href="https://github.com/sixtoast/Anime-language-/blob/main/docs/WEBSITE-FEATURE-REGISTER.md" target="_blank" rel="noreferrer">Open feature register <span aria-hidden="true">↗</span></a>
             </div>
-            <p className="next-task-caveat">Status: queued next task. CI #528 reports 105/105 stable test IDs; the new resource fixture browser must keep design expectations distinct from executed behaviour and physical feasibility.</p>
+            <p className="next-task-caveat">Status: implementation committed; automated CI pending. Authority fixture expectations remain separate from executed tests and real-world permission decisions.</p>
           </section>
           <div className="section-heading"><div><div className="eyebrow">WORKSPACE</div><h2>Everything in one place</h2></div><span className="section-caption">SOURCE RECOVERY · PHASE 01</span></div>
           <div className="feature-grid">
