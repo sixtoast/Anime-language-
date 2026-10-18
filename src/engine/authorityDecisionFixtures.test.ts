@@ -27,7 +27,7 @@ describe("Arcane Incantations v2.0 authority-decision specification fixtures", (
     expect(authorityDecisionFixtures.find((fixture) => fixture.id === "AUTH20-48")).toMatchObject({ caseDescription: expect.stringContaining("required consent gate is absent"), expectedOutcome: "Block" });
     expect(authorityDecisionFixtures.find((fixture) => fixture.id === "AUTH20-60")?.expectedOutcome).toContain("execution remains NOT-EXECUTED");
     expect(authorityDecisionSpec).toContain("not evidence of a runtime");
-    expect(authorityDecisionSpec).toContain("does not define a universal authority hierarchy");
+    expect(authorityDecisionSpec).toContain("without selecting a universal authority hierarchy");
   });
 
   it("[AUTH20-TEST-005] rejects a missing fixture table", () => {
