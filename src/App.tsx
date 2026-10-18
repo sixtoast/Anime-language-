@@ -13,6 +13,7 @@ import { canonAuditItems, auditReadinessLabels } from "./engine/canonAuditRegist
 import phase6gFixtureData from "../tests/fixtures/phase6g-surface-parser-cases.json";
 import { auditPhase6GFixtures, type Phase6GFixture } from "./engine/phase6gFixtureAudit";
 import { resourceAccountingFixtures } from "./engine/resourceAccountingFixtures";
+import { authorityDecisionFixtures } from "./engine/authorityDecisionFixtures";
 
 type Section = "Overview" | "Documentation" | "Playground" | "Test suite" | "Research & review";
 
@@ -73,6 +74,7 @@ function App() {
   const [lexiconQuery, setLexiconQuery] = useState("pa");
   const [selectedFixtureId, setSelectedFixtureId] = useState("P6G-FX-001");
   const [selectedResourceFixtureId, setSelectedResourceFixtureId] = useState("RES19-01");
+  const [selectedAuthorityFixtureId, setSelectedAuthorityFixtureId] = useState("AUTH20-01");
   const [mobileNav, setMobileNav] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState(docs[0].title);
   const [testQuery, setTestQuery] = useState("");
@@ -208,6 +210,7 @@ function App() {
   }, [lexiconQuery]);
   const selectedPhase6GFixture = useMemo(() => phase6gFixtures.find((fixture) => fixture.id === selectedFixtureId) ?? phase6gFixtures[0], [selectedFixtureId]);
   const selectedResourceFixture = useMemo(() => resourceAccountingFixtures.find((fixture) => fixture.id === selectedResourceFixtureId) ?? resourceAccountingFixtures[0], [selectedResourceFixtureId]);
+  const selectedAuthorityFixture = useMemo(() => authorityDecisionFixtures.find((fixture) => fixture.id === selectedAuthorityFixtureId) ?? authorityDecisionFixtures[0], [selectedAuthorityFixtureId]);
 
   const changeSection = (next: Section) => {
     setSection(next);
@@ -358,6 +361,16 @@ function App() {
             </div>}
             <div className="fixture-browser-actions"><a className="secondary-button" href="https://github.com/sixtoast/Anime-language-/blob/main/docs/canon/arcane-incantations-v1.9-resource-accounting-and-conservation-contracts.md" target="_blank" rel="noreferrer">Open full v1.9 specification ↗</a><span>Selection only displays the source expectation; it does not run a spell.</span></div>
             <p className="fixture-browser-caveat">Resource budgets do not prove a source exists. Reservation does not mean consumption. Dimensional arithmetic does not prove conservation. No universal mana-to-energy conversion or physical resource evaluator is implemented by this browser.</p>
+          </section>
+          <section className="fixture-browser authority-fixture-browser" aria-labelledby="authority-fixture-browser-title">
+            <div className="fixture-browser-head"><div><span className="detail-kicker">SPECIFICATION FIXTURES · NOT EXECUTABLE TESTS</span><h2 id="authority-fixture-browser-title">Incantation authority-decision fixtures</h2></div><span>{authorityDecisionFixtures.length} design cases</span></div>
+            <p className="fixture-browser-intro">Browse the 60 expected outcomes defined in Arcane Incantations v2.0. These cases are parsed from the locked specification. They are not executed permission decisions and do not establish legal compliance, identity, real-world authority, consent, feasibility, or spell execution.</p>
+            <label className="fixture-select-label">Choose an authority specification fixture<select aria-label="Choose authority-decision specification fixture" value={selectedAuthorityFixtureId} onChange={(event) => setSelectedAuthorityFixtureId(event.target.value)}>{authorityDecisionFixtures.map((fixture) => <option key={fixture.id} value={fixture.id}>{fixture.id} — {fixture.caseDescription}</option>)}</select></label>
+            {selectedAuthorityFixture && <div className="fixture-browser-detail">
+              <div className="fixture-browser-meta"><div><span>Specification fixture ID</span><code>{selectedAuthorityFixture.id}</code></div><div><span>Fixture category</span><strong>Authority / authorisation decision</strong></div><div className="fixture-browser-meta-wide"><span>Case</span><strong>{selectedAuthorityFixture.caseDescription}</strong></div><div className="fixture-browser-meta-wide"><span>Expected design outcome</span><strong>{selectedAuthorityFixture.expectedOutcome}</strong></div><div className="fixture-browser-meta-wide"><span>Evidence class</span><strong>Normative specification fixture — not an executed authority check</strong></div></div>
+            </div>}
+            <div className="fixture-browser-actions"><a className="secondary-button" href="https://github.com/sixtoast/Anime-language-/blob/main/docs/canon/arcane-incantations-v2.0-authority-and-authorization-decision-contracts.md" target="_blank" rel="noreferrer">Open full v2.0 specification ↗</a><span>Selection only displays the source expectation; no authorisation service is called.</span></div>
+            <p className="fixture-browser-caveat">Only an explicitly permitted, current, trusted, in-scope decision can pass the authorisation gate when every required check succeeds. All non-permit, uncertain, unavailable, expired, revoked, malformed, or scope-mismatched outcomes block. Authority does not replace consent, feasibility, resource readiness, validation, or execution; passing this gate does not mean a spell ran.</p>
           </section>
           <section className="lexicon-inspector" aria-labelledby="lexicon-inspector-title">
             <div className="lexicon-inspector-head">
