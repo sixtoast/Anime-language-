@@ -42,7 +42,7 @@ describe("Documentation catalogue website regression checks", () => {
   });
 
   it("[WEB-DOC-REG-009] filters sources by status and provenance type together", () => {
-    expect(filterDocuments("", "Canonical").map((doc) => doc.title)).toEqual(["Magic system v3.0", "Arcane language v3.0-L", "Arcane Incantations v1.9 — Resource Accounting and Conservation Contracts", "Arcane Incantations v2.0 — Authority and Authorisation Decision Contracts"]);
+    expect(filterDocuments("", "Canonical").map((doc) => doc.title)).toEqual(["Magic system v3.0", "Arcane language v3.0-L", "Arcane Incantations v1.9 — Resource Accounting and Conservation Contracts", "Arcane Incantations v2.0 — Authority and Authorisation Decision Contracts", "Arcane Incantations v2.1 — Policy-Profile Composition and Conflict Resolution"]);
     expect(filterDocuments("", "Provisional", "Original historical source file").map((doc) => doc.title)).toEqual(["Phase 4 — ambiguity audit", "Phase 5 — semantic audit"]);
     expect(filterDocuments("phase 6g", "Provisional", "Provisional research audit").map((doc) => doc.title)).toEqual(["Phase 6G — source lexicon audit"]);
     expect(filterDocuments("", "Deprecated")).toEqual([]);
@@ -55,6 +55,17 @@ describe("Documentation catalogue website regression checks", () => {
       expect(normalized.split("/"), doc.title + " must not traverse outside the repository").not.toContain("..");
     }
   });
+  it("[WEB-DOC-REG-013] lists the locked v2.1 policy-composition design without claiming a policy engine", () => {
+    const spec = docs.find((doc) => doc.title === "Arcane Incantations v2.1 — Policy-Profile Composition and Conflict Resolution");
+    expect(spec).toMatchObject({
+      status: "Canonical",
+      sourcePath: "docs/canon/arcane-incantations-v2.1-policy-profile-composition-and-conflict-resolution.md",
+      sourceKind: "Locked modern design specification"
+    });
+    expect(spec?.sourceNote).toContain("not a universal authority hierarchy");
+    expect(spec?.sourceNote).toContain("executable policy service");
+  });
+
   it("[WEB-DOC-REG-011] lists the locked v2.0 authority design without claiming an authority service", () => {
     const spec = docs.find((doc) => doc.title === "Arcane Incantations v2.0 — Authority and Authorisation Decision Contracts");
     expect(spec).toMatchObject({
