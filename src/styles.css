@@ -128,3 +128,13 @@
 .resource-fixture-browser .fixture-browser-actions a.secondary-button{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;min-height:32px}
 .resource-fixture-browser .fixture-browser-caveat{color:#b6a5d8}
 @media(max-width:520px){.resource-fixture-browser .fixture-browser-meta .fixture-browser-meta-wide{grid-column:auto}.resource-fixture-browser .fixture-browser-actions a.secondary-button{width:100%;text-align:center;white-space:normal}}
+
+
+/* Authority-decision fixtures retain the permit-gate boundary explicitly. */
+.authority-fixture-browser{border-color:#3e3548;background:#17151a}
+.authority-fixture-browser .fixture-browser-head h2{max-width:540px}
+.authority-fixture-browser .fixture-browser-meta .fixture-browser-meta-wide{grid-column:1/-1}
+.authority-fixture-browser .fixture-browser-actions a.secondary-button{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;min-height:32px}
+.authority-fixture-browser .fixture-browser-caveat{border-color:#44374f;color:#c4b2df}
+.authority-fixture-browser .fixture-browser-meta strong{overflow-wrap:anywhere;white-space:pre-wrap}
+@media(max-width:520px){.authority-fixture-browser .fixture-browser-meta .fixture-browser-meta-wide{grid-column:auto}.authority-fixture-browser .fixture-browser-actions a.secondary-button{width:100%;text-align:center;white-space:normal}}
