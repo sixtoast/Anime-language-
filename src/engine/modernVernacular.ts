@@ -553,7 +553,7 @@ export function parseModernVernacularV13(input: string): ModernVernacularV13Pars
  */
 export type ModernVernacularV14Modal = "fam" | "kong" | "tek";
 export type ModernVernacularV14Action =
-  | { version: "1.0"; ast: ModernVernacularAst }
+  | { version: "1.0"; ast: Extract<ModernVernacularAst, { kind: "clause" }> }
   | { version: "1.1"; ast: ModernVernacularV11Ast }
   | { version: "1.2"; ast: ModernVernacularV12Ast }
   | { version: "1.3"; ast: ModernVernacularV13Ast };
@@ -647,7 +647,7 @@ export function parseModernVernacularV14(input: string): ModernVernacularV14Pars
 
   if (verb === "wish") {
     const parsed = parseModernVernacularV1(actionInput);
-    if (parsed.ok && parsed.ast) action = { version: "1.0", ast: parsed.ast };
+    if (parsed.ok && parsed.ast?.kind === "clause") action = { version: "1.0", ast: parsed.ast };
     else diagnostics = parsed.diagnostics;
   } else if (["nak", "zir", "shus", "mos", "mol", "tut"].includes(verb)) {
     const parsed = parseModernVernacularV11(actionInput);
