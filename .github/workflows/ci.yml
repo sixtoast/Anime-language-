@@ -46,10 +46,26 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
       - name: Type-check and build
+        id: build
         if: ${{ always() }}
-        run: npm run build
+        run: |
+          mkdir -p test-results
+          set +e
+          npm run build > test-results/build.log 2>&1
+          build_status=$?
+          cat test-results/build.log
+          echo "Build exit code: $build_status"
+          exit "$build_status"
+      - name: Upload build diagnostics
+        if: ${{ always() && hashFiles('test-results/build.log') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}
+          path: test-results/build.log
+          if-no-files-found: warn
+          retention-days: 30
       - name: Run website browser acceptance
-        if: ${{ always() && steps.browser-install.outcome == 'success' }}
+        if: ${{ success() && steps.browser-install.outcome == 'success' && steps.build.outcome == 'success' }}
         run: npm run test:browser
       - name: Publish latest results for the public workbench
         if: ${{ success() && github.event_name == 'push' && github.ref == 'refs/heads/main' && hashFiles('test-results/registry-results.json') != '' }}
