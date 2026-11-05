@@ -68,4 +68,10 @@ describe("Modern Vernacular v1.1 locked verb expansion", () => {
     expect(parseModernVernacularV11("teshi love rawu").diagnostics[0]?.code).toBe("MV1_UNKNOWN_FORM");
   });
 });
-\n\ndescribe("Modern Vernacular v1.1 question scope", () => {\n  it("blocks slot-A information questions combined with pun", () => {\n    expect(parseModernVernacularV11("shuk nak rawu pun").diagnostics[0]?.code).toBe("MV1_BLOCKED_INFORMATION_POLAR");\n  });\n});\n
+
+
+describe("Modern Vernacular v1.1 question scope", () => {
+  it("blocks slot-A information questions combined with pun", () => {
+    expect(parseModernVernacularV11("shuk nak rawu pun").diagnostics[0]?.code).toBe("MV1_BLOCKED_INFORMATION_POLAR");
+  });
+});
