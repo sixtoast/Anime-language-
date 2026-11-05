@@ -374,8 +374,8 @@ export function parseModernVernacularV12(input: string): ModernVernacularV12Pars
     polarity = "negative";
     body = [body[0], ...body.slice(2)];
   }
-  if (body.length !== 7 || body[2] !== "li") {
-    return v12Rejected("MV12_INVALID_TRANSFER_FRAME", "A v1.2 transfer clause requires: participant + [nava] + bul/lil + li + item + ka/du + participant.");
+  if (body.length !== 6 || body[2] !== "li") {
+    return v12Rejected("MV12_INVALID_TRANSFER_FRAME", "A v1.2 transfer clause requires exactly six tokens: participant + [nava] + bul/lil + li + item + ka/du + participant.");
   }
   [subject, predicate, , item, marker, participant] = body;
 
