@@ -716,3 +716,90 @@ export function parseModernVernacular(input: string): ModernVernacularUnifiedPar
   if (predicate === "ful" || predicate === "zem") return parseModernVernacularV13(input);
   return parseModernVernacularV1(input);
 }
+
+
+/** Modern Vernacular v1.5–v1.6: permission and explicit modal scope. */
+export type ModernVernacularV15Ast = {
+  kind: "permission-clause"; grammarVersion: "1.5"; subject: "teshi" | "fezo" | "shuk";
+  action: ModernVernacularV14Action; polarity: "positive"; question: "none" | "polar" | "information";
+};
+export type ModernVernacularV16Ast = {
+  kind: "modal-scope-clause" | "prohibition-clause"; grammarVersion: "1.6";
+  operator: "fam" | "kong" | "tek" | "yemi" | "zami";
+  subject: "teshi" | "fezo" | "shuk";
+  scope: "modal" | "action" | "prohibition";
+  action: ModernVernacularV14Action;
+  polarity: "positive" | "negative";
+  question: "none" | "polar" | "information";
+};
+export type ModernVernacularV15ParseResult = { ok: boolean; grammar: "modern-vernacular-v1.5-locked"; ast?: ModernVernacularV15Ast; diagnostics: ModernVernacularDiagnostic[] };
+export type ModernVernacularV16ParseResult = { ok: boolean; grammar: "modern-vernacular-v1.6-locked"; ast?: ModernVernacularV16Ast; diagnostics: ModernVernacularDiagnostic[] };
+
+function parseLicensedAction(subject: string, actionTokens: string[]): { action?: ModernVernacularV14Action; diagnostics: ModernVernacularDiagnostic[] } {
+  const input = [subject, ...actionTokens].join(" ");
+  const verb = actionTokens.find(token => V14_ACTION_VERBS.has(token));
+  if (!verb) return { diagnostics: [{ code: "MV1_UNSUPPORTED_CONSTRUCTION", message: "A licensed action verb is required." }] };
+  if (verb === "wish") {
+    const p = parseModernVernacularV1(input);
+    return p.ok && p.ast?.kind === "clause" ? { action: { version: "1.0", ast: p.ast }, diagnostics: [] } : { diagnostics: p.diagnostics };
+  }
+  if (["nak","zir","shus","mos","mol","tut"].includes(verb)) {
+    const p = parseModernVernacularV11(input);
+    return p.ok && p.ast ? { action: { version: "1.1", ast: p.ast }, diagnostics: [] } : { diagnostics: p.diagnostics };
+  }
+  if (verb === "bul" || verb === "lil") {
+    const p = parseModernVernacularV12(input);
+    return p.ok && p.ast ? { action: { version: "1.2", ast: p.ast }, diagnostics: [] } : { diagnostics: p.diagnostics };
+  }
+  const p = parseModernVernacularV13(input);
+  return p.ok && p.ast ? { action: { version: "1.3", ast: p.ast }, diagnostics: [] } : { diagnostics: p.diagnostics };
+}
+
+function v15Rejected(message: string): ModernVernacularV15ParseResult {
+  return { ok: false, grammar: "modern-vernacular-v1.5-locked", diagnostics: [{ code: "MV1_UNSUPPORTED_CONSTRUCTION", message }] };
+}
+export function parseModernVernacularV15(input: string): ModernVernacularV15ParseResult {
+  const t = input.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  if (t.length < 3 || t[1] !== "yemi") return v15Rejected("v1.5 requires subject + yemi + a licensed action frame.");
+  if (t.includes("nava") || t.includes("fam") || t.includes("kong") || t.includes("tek") || t.includes("zami")) return v15Rejected("v1.5 blocks permission negation and modal stacking; those distinctions are handled only by later canon.");
+  const subject = t[0];
+  if (!["teshi","fezo","shuk"].includes(subject)) return v15Rejected("The permission subject slot accepts teshi, fezo or shuk.");
+  const question = t[t.length-1] === "pun" ? "polar" : "none";
+  const body = question === "polar" ? t.slice(2,-1) : t.slice(2);
+  const parsed = parseLicensedAction(subject, body);
+  if (!parsed.action) return { ok:false, grammar:"modern-vernacular-v1.5-locked", diagnostics:parsed.diagnostics };
+  const actionQuestion = parsed.action.version === "1.0" ? parsed.action.ast.question : parsed.action.ast.question;
+  return { ok:true, grammar:"modern-vernacular-v1.5-locked", ast:{kind:"permission-clause",grammarVersion:"1.5",subject:subject as ModernVernacularV15Ast["subject"],action:parsed.action,polarity:"positive",question:question === "polar" ? "polar" : actionQuestion},diagnostics:[] };
+}
+
+function v16Rejected(message: string): ModernVernacularV16ParseResult {
+  return { ok:false, grammar:"modern-vernacular-v1.6-locked", diagnostics:[{code:"MV1_UNSUPPORTED_CONSTRUCTION",message}] };
+}
+export function parseModernVernacularV16(input: string): ModernVernacularV16ParseResult {
+  const t=input.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  if(t.length<3) return v16Rejected("A v1.6 modal or prohibition requires a subject and licensed action frame.");
+  const subject=t[0];
+  if(!["teshi","fezo","shuk"].includes(subject)) return v16Rejected("The subject slot accepts teshi, fezo or shuk.");
+  const polar=t[t.length-1]==="pun";
+  const core=polar?t.slice(0,-1):t;
+  const operatorIndex=core[1]==="nava"?2:1;
+  const operator=core[operatorIndex];
+  if(operator==="zami"){
+    if(core.includes("nava") || core.includes("yemi")) return v16Rejected("zami cannot be negated or combined with yemi in v1.6.");
+    const parsed=parseLicensedAction(subject,core.slice(2));
+    if(!parsed.action) return {ok:false,grammar:"modern-vernacular-v1.6-locked",diagnostics:parsed.diagnostics};
+    const q=parsed.action.version==="1.0"?parsed.action.ast.question:parsed.action.ast.question;
+    return {ok:true,grammar:"modern-vernacular-v1.6-locked",ast:{kind:"prohibition-clause",grammarVersion:"1.6",operator:"zami",subject:subject as ModernVernacularV16Ast["subject"],scope:"prohibition",action:parsed.action,polarity:"positive",question:polar?"polar":q},diagnostics:[]};
+  }
+  if(!["fam","kong","tek","yemi"].includes(operator)) return v16Rejected("v1.6 requires fam, kong, tek, yemi or zami.");
+  if(core.includes("fam",operatorIndex+1) || core.includes("kong",operatorIndex+1) || core.includes("tek",operatorIndex+1) || core.includes("yemi",operatorIndex+1)) return v16Rejected("Modal stacking is blocked in v1.6.");
+  const modalNegated=core[1]==="nava";
+  const actionNegated=core[operatorIndex+1]==="nava";
+  if(modalNegated && actionNegated) return v16Rejected("Only one nava scope position is licensed per v1.6 clause.");
+  const actionStart=operatorIndex+1+(actionNegated?1:0);
+  const actionTokens=core.slice(actionStart);
+  const parsed=parseLicensedAction(subject,actionNegated?["nava",...actionTokens]:actionTokens);
+  if(!parsed.action) return {ok:false,grammar:"modern-vernacular-v1.6-locked",diagnostics:parsed.diagnostics};
+  const q=parsed.action.version==="1.0"?parsed.action.ast.question:parsed.action.ast.question;
+  return {ok:true,grammar:"modern-vernacular-v1.6-locked",ast:{kind:"modal-scope-clause",grammarVersion:"1.6",operator:operator as ModernVernacularV16Ast["operator"],subject:subject as ModernVernacularV16Ast["subject"],scope:modalNegated?"modal":actionNegated?"action":"modal",action:parsed.action,polarity:modalNegated?"negative": "positive",question:polar?"polar":q},diagnostics:[]};
+}
