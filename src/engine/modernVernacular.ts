@@ -105,11 +105,16 @@ export function parseModernVernacularV1(input: string): ModernVernacularParseRes
   }
 
   if (tokens.length === 1 && Object.hasOwn(RESPONSES, tokens[0])) {
-    const form = tokens[0] as keyof typeof RESPONSES;
+    const form = tokens[0] as "wang" | "kor" | "gep";
+    const responseAst: Extract<ModernVernacularAst, { kind: "response" }> = {
+      kind: "response",
+      form,
+      meaning: RESPONSES[form]
+    };
     return {
       ok: true,
       grammar: "modern-vernacular-v1.0-locked",
-      ast: { kind: "response", form, meaning: RESPONSES[form] },
+      ast: responseAst,
       diagnostics: []
     };
   }
