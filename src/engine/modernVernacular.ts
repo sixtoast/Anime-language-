@@ -687,3 +687,32 @@ export function parseModernVernacularV14(input: string): ModernVernacularV14Pars
     diagnostics: []
   };
 }
+
+
+/**
+ * Unified entry point for the locked Modern Vernacular grammar family.
+ * Dispatch is based only on the overt modal/verb form; it never repairs an
+ * expression or upgrades an unknown form into a licensed construction.
+ */
+export type ModernVernacularUnifiedParseResult =
+  | ModernVernacularParseResult
+  | ModernVernacularV11ParseResult
+  | ModernVernacularV12ParseResult
+  | ModernVernacularV13ParseResult
+  | ModernVernacularV14ParseResult;
+
+export function parseModernVernacular(input: string): ModernVernacularUnifiedParseResult {
+  const tokens = input.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  if (tokens.length >= 2 && (tokens[1] === "fam" || tokens[1] === "kong" || tokens[1] === "tek")) {
+    return parseModernVernacularV14(input);
+  }
+
+  const predicateIndex = tokens[1] === "nava" ? 2 : 1;
+  const predicate = tokens[predicateIndex];
+  if (predicate === "nak" || predicate === "zir" || predicate === "shus" || predicate === "mos" || predicate === "mol" || predicate === "tut") {
+    return parseModernVernacularV11(input);
+  }
+  if (predicate === "bul" || predicate === "lil") return parseModernVernacularV12(input);
+  if (predicate === "ful" || predicate === "zem") return parseModernVernacularV13(input);
+  return parseModernVernacularV1(input);
+}
