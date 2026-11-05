@@ -85,7 +85,7 @@ function argumentB(form: string): ModernVernacularArgument | undefined {
 }
 
 export function parseModernVernacularV1(input: string): ModernVernacularParseResult {
-  const tokens = input.trim().toLowerCase().split(/\\s+/).filter(Boolean);
+  const tokens = input.trim().toLowerCase().split(/\s+/).filter(Boolean);
   if (tokens.length === 0) {
     return rejected("MV1_EMPTY_INPUT", "Enter a Modern Vernacular v1.0 expression.");
   }
