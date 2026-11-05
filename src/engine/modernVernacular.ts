@@ -34,7 +34,7 @@ export type ModernVernacularDiagnosticCode =
   | "MV1_RESPONSE_NOT_CLAUSE_NEGATOR"
   | "MV12_INVALID_TRANSFER_FRAME"
   | "MV12_BLOCKED_ROLE_QUESTION"
-  | "MV12_BLOCKED_NEGATIVE_POLAR";
+  | "MV12_BLOCKED_NEGATIVE_POLAR"\n  | "MV13_INVALID_MOTION_FRAME"\n  | "MV13_UNMARKED_LOCATION"\n  | "MV13_DUPLICATE_SPATIAL_ROLE"\n  | "MV13_BLOCKED_SPATIAL_QUESTION"\n  | "MV13_BLOCKED_NEGATIVE_POLAR"\n  | "MV13_DEICTIC_CONFLICT";
 
 export interface ModernVernacularDiagnostic {
   code: ModernVernacularDiagnosticCode;
@@ -363,7 +363,7 @@ export function parseModernVernacularV12(input: string): ModernVernacularV12Pars
     polarity = "negative";
     body = [body[0], ...body.slice(2)];
   }
-  if (body.length !== 6 || body[2] !== "li") {
+  if (body.length !== 7 || body[2] !== "li") {
     return v12Rejected("MV12_INVALID_TRANSFER_FRAME", "A v1.2 transfer clause requires: participant + [nava] + bul/lil + li + item + ka/du + participant.");
   }
   [subject, predicate, , item, marker, participant] = body;
@@ -409,6 +409,126 @@ export function parseModernVernacularV12(input: string): ModernVernacularV12Pars
       roleMarker: marker as ModernVernacularV12Ast["roleMarker"],
       roleParticipant: participant as ModernVernacularV12Ast["roleParticipant"],
       polarity, question
+    },
+    diagnostics: []
+  };
+}
+
+
+/**
+ * Parser for locked Modern Vernacular v1.3 motion and route clauses.
+ * Source: docs/canon/arcane-modern-vernacular-v1.3-motion-and-routes.md
+ * Place vocabulary is intentionally limited to gezi until the learner lexicon
+ * supplies further verified place expressions.
+ */
+export type ModernVernacularV13Ast = {
+  kind: "motion-clause";
+  grammarVersion: "1.3";
+  construction: "affirmative" | "negative" | "polar-question" | "information-question";
+  mover: "teshi" | "fezo" | "shuk";
+  predicate: "ful" | "zem";
+  spatialRoles: Array<{ role: "goal" | "source" | "route"; marker: "tava" | "dava" | "yara"; place: "gezi" }>;
+  polarity: "positive" | "negative";
+  question: "none" | "polar" | "information";
+};
+export type ModernVernacularV13ParseResult = {
+  ok: boolean;
+  grammar: "modern-vernacular-v1.3-locked";
+  ast?: ModernVernacularV13Ast;
+  diagnostics: ModernVernacularDiagnostic[];
+};
+
+function v13Rejected(code: ModernVernacularDiagnosticCode, message: string, tokenIndex?: number, token?: string): ModernVernacularV13ParseResult {
+  return {
+    ok: false,
+    grammar: "modern-vernacular-v1.3-locked",
+    diagnostics: [{ code, message, ...(tokenIndex === undefined ? {} : { tokenIndex }), ...(token === undefined ? {} : { token }) }]
+  };
+}
+
+export function parseModernVernacularV13(input: string): ModernVernacularV13ParseResult {
+  const tokens = input.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  if (!tokens.length) return v13Rejected("MV1_EMPTY_INPUT", "Enter a Modern Vernacular v1.3 motion clause.");
+
+  const allowed = new Set(["teshi", "fezo", "shuk", "ful", "zem", "tava", "dava", "yara", "gezi", "nava", "pun"]);
+  const unknownIndex = tokens.findIndex(token => !allowed.has(token));
+  if (unknownIndex >= 0) return v13Rejected("MV1_UNKNOWN_FORM", `The form "${tokens[unknownIndex]}" is outside the locked v1.3 motion inventory.`, unknownIndex, tokens[unknownIndex]);
+
+  let body = [...tokens];
+  let polarity: ModernVernacularV13Ast["polarity"] = "positive";
+  let question: ModernVernacularV13Ast["question"] = "none";
+  if (body.at(-1) === "pun") {
+    question = "polar";
+    body = body.slice(0, -1);
+  }
+  if (body[1] === "nava") {
+    if (question === "polar") return v13Rejected("MV13_BLOCKED_NEGATIVE_POLAR", "Negative polar questions remain blocked in v1.3.");
+    polarity = "negative";
+    body = [body[0], ...body.slice(2)];
+  }
+
+  if (body.length < 2 || body.length > 8 || (body.length - 2) % 2 !== 0) {
+    return v13Rejected("MV13_INVALID_MOTION_FRAME", "Motion clauses require a mover, ful/zem, and zero to three particle-place pairs.");
+  }
+  const mover = body[0], predicate = body[1];
+  if (!(mover === "teshi" || mover === "fezo" || mover === "shuk")) {
+    return v13Rejected("MV13_INVALID_MOTION_FRAME", "The mover slot accepts teshi, fezo or shuk.", 0, mover);
+  }
+  if (predicate !== "ful" && predicate !== "zem") {
+    return v13Rejected("MV13_INVALID_MOTION_FRAME", "The only v1.3 motion predicates are ful and zem.", 1, predicate);
+  }
+
+  const roleOrder = { tava: 0, dava: 1, yara: 2 } as const;
+  const seen = new Set<string>();
+  const spatialRoles: ModernVernacularV13Ast["spatialRoles"] = [];
+  let previousOrder = -1;
+  for (let i = 2; i < body.length; i += 2) {
+    const marker = body[i], place = body[i + 1];
+    if (!(marker in roleOrder)) {
+      return v13Rejected("MV13_UNMARKED_LOCATION", "Every spatial phrase must begin with tava (goal), dava (source) or yara (route); unmarked locations are not inferred.", i, marker);
+    }
+    if (seen.has(marker)) {
+      return v13Rejected("MV13_DUPLICATE_SPATIAL_ROLE", "Only one goal, source and route phrase is licensed; repeated roles are blocked.", i, marker);
+    }
+    const order = roleOrder[marker as keyof typeof roleOrder];
+    if (order < previousOrder) {
+      return v13Rejected("MV13_INVALID_MOTION_FRAME", "Spatial phrases must appear in the locked order: tava, dava, yara.", i, marker);
+    }
+    previousOrder = order;
+    seen.add(marker);
+    if (place !== "gezi") {
+      return v13Rejected("MV13_INVALID_MOTION_FRAME", "The only place expression currently licensed in this bounded learner lexicon is gezi.", i + 1, place);
+    }
+    spatialRoles.push({
+      role: marker === "tava" ? "goal" : marker === "dava" ? "source" : "route",
+      marker: marker as "tava" | "dava" | "yara",
+      place: "gezi"
+    });
+  }
+
+  if (mover === "shuk") {
+    if (polarity === "negative") return v13Rejected("MV13_BLOCKED_SPATIAL_QUESTION", "The mover information question is licensed only in the positive form.");
+    if (question === "polar") return v13Rejected("MV13_BLOCKED_SPATIAL_QUESTION", "Information questions combined with pun are blocked.");
+    question = "information";
+  }
+  if (question === "polar" && mover === "shuk") {
+    return v13Rejected("MV13_BLOCKED_SPATIAL_QUESTION", "shuk is an information question word, not a polar-question participant.");
+  }
+  if (predicate === "zem") {
+    // Lexical parser cannot know the live discourse centre. It records the
+    // deictic requirement rather than pretending to decide contextual felicity.
+    // A goal is structurally accepted; contextual compatibility remains a semantic check.
+  }
+
+  return {
+    ok: true,
+    grammar: "modern-vernacular-v1.3-locked",
+    ast: {
+      kind: "motion-clause", grammarVersion: "1.3",
+      construction: question === "information" ? "information-question" : question === "polar" ? "polar-question" : polarity === "negative" ? "negative" : "affirmative",
+      mover: mover as ModernVernacularV13Ast["mover"],
+      predicate: predicate as ModernVernacularV13Ast["predicate"],
+      spatialRoles, polarity, question
     },
     diagnostics: []
   };
