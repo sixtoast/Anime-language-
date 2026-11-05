@@ -281,7 +281,7 @@ export function parseModernVernacularV11(input: string): ModernVernacularV11Pars
     return v11Rejected("MV1_BLOCKED_INFORMATION_POLAR", "Combining an information question with pun is blocked.");
   }
 
-  if (object === "zosh") {
+  if (subject === "shuk" && construction !== "negative") {\n    construction = "information-question";\n    question = "information";\n  }\n\n  if (object === "zosh") {
     if (construction === "negative") return v11Rejected("MV1_INVALID_ARGUMENT_SLOT", "Question-word replacement is not licensed in the v1.1 simple-negation pattern.", 3, object);
     if (construction === "polar-question") return v11Rejected("MV1_BLOCKED_INFORMATION_POLAR", "Information questions combined with pun remain blocked.");
     construction = "information-question"; question = "information";
