@@ -18,7 +18,7 @@ test.describe("Playground Phase 6G parser integration", () => {
     await expect(page.locator(".result-panel").first().locator(".analysis-output pre")).toContainText('"operator": "FRAPA"');
     await expect(page.locator(".result-panel").first().locator(".analysis-output pre")).toContainText('"value": "1"');
     await expect(page.locator(".result-panel").first().locator(".analysis-output pre")).toContainText('"value": "2"');
-    await expect(page.locator(".analysis-caveat")).toContainText("does not prove semantic correctness");
+    await expect(page.locator(".result-panel").first().locator(".analysis-caveat")).toContainText("does not prove semantic correctness");
   });
 
   test("shows the surface parser's specific diagnostic for an unclosed numeral", async ({ page }) => {
@@ -28,7 +28,7 @@ test.describe("Playground Phase 6G parser integration", () => {
 
     await expect(page.getByText("Expression rejected by the provisional parser")).toBeVisible();
     await expect(page.locator(".result-panel").first().locator(".analysis-output")).toContainText("UNTERMINATED_NUMERAL");
-    await expect(page.locator(".analysis-caveat")).toContainText("does not prove semantic correctness");
+    await expect(page.locator(".result-panel").first().locator(".analysis-caveat")).toContainText("does not prove semantic correctness");
   });
 
   test("clearing the editor also clears stale parser output", async ({ page }) => {
