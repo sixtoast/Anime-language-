@@ -701,11 +701,14 @@ export type ModernVernacularUnifiedParseResult =
   | ModernVernacularV13ParseResult
   | ModernVernacularV14ParseResult;
 
-export function parseModernVernacular(input: string): ModernVernacularUnifiedParseResult {
+export function parseModernVernacular(input: string): ModernVernacularUnifiedParseResult | ModernVernacularV15ParseResult | ModernVernacularV16ParseResult {
   const tokens = input.trim().toLowerCase().split(/\s+/).filter(Boolean);
-  if (tokens.length >= 2 && (tokens[1] === "fam" || tokens[1] === "kong" || tokens[1] === "tek")) {
-    return parseModernVernacularV14(input);
-  }
+  const modalAtOne = ["fam","kong","tek","yemi","zami"].includes(tokens[1]);
+  const modalAtTwo = tokens[1] === "nava" && ["fam","kong","tek","yemi","zami"].includes(tokens[2]);
+  const actionNegated = ["fam","kong","tek","yemi"].includes(tokens[1]) && tokens[2] === "nava";
+  if (tokens.includes("zami") || modalAtTwo || actionNegated) return parseModernVernacularV16(input);
+  if (tokens[1] === "yemi") return parseModernVernacularV15(input);
+  if (modalAtOne && ["fam","kong","tek"].includes(tokens[1])) return parseModernVernacularV14(input);
 
   const predicateIndex = tokens[1] === "nava" ? 2 : 1;
   const predicate = tokens[predicateIndex];
