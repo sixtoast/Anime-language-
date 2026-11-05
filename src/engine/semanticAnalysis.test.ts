@@ -21,9 +21,14 @@ describe("Phase 6H-A conservative semantic analysis", () => {
   });
 
   it("[SEM-A-003] keeps RA as the registered dimensionless quantity, not a SHO scalar", () => {
-    const result = analyseSurfaceParse(parseSurfaceExpression("ki ra"));
-    expect(result.status).toBe("invalid"); // Phase 6G intentionally rejects the RE/RA collision.
-    expect(result.diagnostics[0]?.code).toBe("SEMANTIC_PARSE_REQUIRED");
+    // The Phase 6G parser intentionally rejects the RE/RA homophone collision;
+    // exercise the semantic unit mapping directly without bypassing that gate.
+    const result = analyseSurfaceAst({ kind: "quantity", value: "1", unit: "RA", rawNumber: "1" });
+    expect(result.status).toBe("valid");
+    expect(result.typedAst?.type).toMatchObject({
+      kind: "quantity",
+      dimension: { length: 0, time: 0, mass: 0, temperature: 0, angle: 0 }
+    });
   });
 
   it("[SEM-A-004] leaves an unknown unit unresolved without guessing its dimension", () => {
