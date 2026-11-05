@@ -544,3 +544,137 @@ export function parseModernVernacularV13(input: string): ModernVernacularV13Pars
     diagnostics: []
   };
 }
+
+
+/**
+ * Parser for locked Modern Vernacular v1.4 modality and intention.
+ * Modal meanings are deliberately separate from permission, obligation,
+ * negation scope, tense, aspect, completion and execution.
+ */
+export type ModernVernacularV14Modal = "fam" | "kong" | "tek";
+export type ModernVernacularV14Action =
+  | { version: "1.0"; ast: ModernVernacularAst }
+  | { version: "1.1"; ast: ModernVernacularV11Ast }
+  | { version: "1.2"; ast: ModernVernacularV12Ast }
+  | { version: "1.3"; ast: ModernVernacularV13Ast };
+export type ModernVernacularV14Ast = {
+  kind: "modal-clause";
+  grammarVersion: "1.4";
+  modal: ModernVernacularV14Modal;
+  subject: "teshi" | "fezo" | "shuk";
+  complementKind: "action" | "entity";
+  action?: ModernVernacularV14Action;
+  entity?: "fape" | "losa" | "fezo";
+  polarity: "positive";
+  question: "none" | "polar" | "information";
+};
+export type ModernVernacularV14ParseResult = {
+  ok: boolean;
+  grammar: "modern-vernacular-v1.4-locked";
+  ast?: ModernVernacularV14Ast;
+  diagnostics: ModernVernacularDiagnostic[];
+};
+
+function v14Rejected(code: ModernVernacularDiagnosticCode, message: string, tokenIndex?: number, token?: string): ModernVernacularV14ParseResult {
+  return {
+    ok: false,
+    grammar: "modern-vernacular-v1.4-locked",
+    diagnostics: [{ code, message, ...(tokenIndex === undefined ? {} : { tokenIndex }), ...(token === undefined ? {} : { token }) }]
+  };
+}
+
+const V14_ENTITY_COMPLEMENTS = new Set(["fape", "losa", "fezo"]);
+const V14_ACTION_VERBS = new Set(["wish", "nak", "zir", "shus", "mos", "mol", "tut", "bul", "lil", "ful", "zem"]);
+
+export function parseModernVernacularV14(input: string): ModernVernacularV14ParseResult {
+  const tokens = input.trim().toLowerCase().split(/\\s+/).filter(Boolean);
+  if (!tokens.length) return v14Rejected("MV1_EMPTY_INPUT", "Enter a Modern Vernacular v1.4 modal construction.");
+
+  const allowed = new Set([
+    "teshi", "fezo", "shuk", "fam", "kong", "tek", "nava", "pun",
+    ...V14_ACTION_VERBS, "rawu", "gisho", "losa", "fape", "zosh",
+    "li", "ka", "du", "tava", "dava", "yara", "gezi"
+  ]);
+  const unknownIndex = tokens.findIndex(token => !allowed.has(token));
+  if (unknownIndex >= 0) return v14Rejected("MV1_UNKNOWN_FORM", `The form "${tokens[unknownIndex]}" is outside the locked v1.4 inventory.`, unknownIndex, tokens[unknownIndex]);
+
+  const subject = tokens[0];
+  if (subject !== "teshi" && subject !== "fezo" && subject !== "shuk") {
+    return v14Rejected("MV1_INVALID_ARGUMENT_SLOT", "The modal subject slot accepts teshi, fezo or shuk.", 0, subject);
+  }
+  const modal = tokens[1];
+  if (modal !== "fam" && modal !== "kong" && modal !== "tek") {
+    return v14Rejected("MV1_UNSUPPORTED_CONSTRUCTION", "A v1.4 modal must immediately follow the subject: fam, kong or tek.", 1, modal);
+  }
+  const complement = tokens.slice(2);
+  if (complement.includes("nava")) {
+    return v14Rejected("MV1_UNSUPPORTED_CONSTRUCTION", "Negation with modal constructions is deliberately blocked in v1.4; nava has no licensed modal scope.");
+  }
+  if (!complement.length) {
+    return v14Rejected("MV1_UNSUPPORTED_CONSTRUCTION", "A modal requires a licensed action frame, or a noun complement for kong and tek.");
+  }
+
+  if (complement.length === 1) {
+    if (modal === "fam") {
+      return v14Rejected("MV1_UNSUPPORTED_CONSTRUCTION", "fam requires an action frame; a bare noun complement is not licensed.", 2, complement[0]);
+    }
+    if (!V14_ENTITY_COMPLEMENTS.has(complement[0])) {
+      return v14Rejected("MV1_UNSUPPORTED_CONSTRUCTION", "kong and tek accept only the bounded v1.4 entity complements fape, losa and fezo.", 2, complement[0]);
+    }
+    if (subject === "shuk") {
+      return v14Rejected("MV1_INVALID_ARGUMENT_SLOT", "shuk questions replace the modal subject only in an otherwise licensed action frame; bare entity questions are not specified.");
+    }
+    return {
+      ok: true, grammar: "modern-vernacular-v1.4-locked",
+      ast: { kind: "modal-clause", grammarVersion: "1.4", modal, subject, complementKind: "entity", entity: complement[0] as ModernVernacularV14Ast["entity"], polarity: "positive", question: "none" },
+      diagnostics: []
+    };
+  }
+
+  const actionInput = [subject, ...complement].join(" ");
+  const verb = complement[0];
+  let action: ModernVernacularV14Action | undefined;
+  let diagnostics: ModernVernacularDiagnostic[] = [];
+
+  if (verb === "wish") {
+    const parsed = parseModernVernacularV1(actionInput);
+    if (parsed.ok && parsed.ast) action = { version: "1.0", ast: parsed.ast };
+    else diagnostics = parsed.diagnostics;
+  } else if (["nak", "zir", "shus", "mos", "mol", "tut"].includes(verb)) {
+    const parsed = parseModernVernacularV11(actionInput);
+    if (parsed.ok && parsed.ast) action = { version: "1.1", ast: parsed.ast };
+    else diagnostics = parsed.diagnostics;
+  } else if (verb === "bul" || verb === "lil") {
+    const parsed = parseModernVernacularV12(actionInput);
+    if (parsed.ok && parsed.ast) action = { version: "1.2", ast: parsed.ast };
+    else diagnostics = parsed.diagnostics;
+  } else if (verb === "ful" || verb === "zem") {
+    const parsed = parseModernVernacularV13(actionInput);
+    if (parsed.ok && parsed.ast) action = { version: "1.3", ast: parsed.ast };
+    else diagnostics = parsed.diagnostics;
+  } else {
+    return v14Rejected("MV1_UNSUPPORTED_CONSTRUCTION", "The action verb is not part of the v1.4 licensed complement inventory.", 2, verb);
+  }
+
+  if (!action) {
+    const detail = diagnostics[0];
+    return v14Rejected(detail?.code ?? "MV1_UNSUPPORTED_CONSTRUCTION", detail?.message ?? "The embedded action frame is not licensed; modality cannot repair it.", detail?.tokenIndex === undefined ? undefined : detail.tokenIndex + 2, detail?.token);
+  }
+
+  const actionQuestion = action.version === "1.0" ? action.ast.question
+    : action.version === "1.1" ? action.ast.question
+    : action.version === "1.2" ? action.ast.question
+    : action.ast.question;
+  const actionPolarity = action.version === "1.0" ? action.ast.polarity
+    : action.version === "1.1" ? action.ast.polarity
+    : action.version === "1.2" ? action.ast.polarity
+    : action.ast.polarity;
+  if (actionPolarity === "negative") {
+    return v14Rejected("MV1_UNSUPPORTED_CONSTRUCTION", "A modal cannot take a negatively marked action frame in v1.4.");
+  }
+  return {
+    ok: true, grammar: "modern-vernacular-v1.4-locked",
+    ast: { kind: "modal-clause", grammarVersion: "1.4", modal, subject, complementKind: "action", action, polarity: "positive", question: actionQuestion },
+    diagnostics: []
+  };
+}
