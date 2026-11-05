@@ -701,7 +701,9 @@ export type ModernVernacularUnifiedParseResult =
   | ModernVernacularV13ParseResult
   | ModernVernacularV14ParseResult
   | ModernVernacularV15ParseResult
-  | ModernVernacularV16ParseResult;
+  | ModernVernacularV16ParseResult
+  | ModernVernacularV17ParseResult
+  | ModernVernacularV18ParseResult;
 
 export function parseModernVernacular(input: string): ModernVernacularUnifiedParseResult {
   const tokens = input.trim().toLowerCase().split(/\s+/).filter(Boolean);
@@ -807,4 +809,53 @@ export function parseModernVernacularV16(input: string): ModernVernacularV16Pars
   if(!parsed.action) return {ok:false,grammar:"modern-vernacular-v1.6-locked",diagnostics:parsed.diagnostics};
   const q=parsed.action.version==="1.0"?parsed.action.ast.question:parsed.action.ast.question;
   return {ok:true,grammar:"modern-vernacular-v1.6-locked",ast:{kind:"modal-scope-clause",grammarVersion:"1.6",operator:operator as ModernVernacularV16Ast["operator"],subject:subject as ModernVernacularV16Ast["subject"],scope:modalNegated?"modal":actionNegated?"action":"modal",action:parsed.action,polarity:modalNegated?"negative": "positive",question:polar?"polar":q},diagnostics:[]};
+}
+
+
+/** Modern Vernacular v1.7 directive speech acts and v1.8 clause relations. */
+export type ModernVernacularV17Ast = {
+  kind: "directive-clause"; grammarVersion: "1.7";
+  directive: "dema" | "sori" | "mira" | "toku";
+  actor: "addressee"; action: ModernVernacularV14Action;
+};
+export type ModernVernacularV18Ast = {
+  kind: "linked-clauses"; grammarVersion: "1.8";
+  relation: "coordination" | "reason" | "consequence";
+  linker: "lena" | "savi" | "doru";
+  left: ModernVernacularUnifiedParseResult;
+  right: ModernVernacularUnifiedParseResult;
+};
+export type ModernVernacularV17ParseResult = { ok:boolean; grammar:"modern-vernacular-v1.7-locked"; ast?:ModernVernacularV17Ast; diagnostics:ModernVernacularDiagnostic[] };
+export type ModernVernacularV18ParseResult = { ok:boolean; grammar:"modern-vernacular-v1.8-locked"; ast?:ModernVernacularV18Ast; diagnostics:ModernVernacularDiagnostic[] };
+
+function v17Rejected(message:string):ModernVernacularV17ParseResult {
+  return {ok:false,grammar:"modern-vernacular-v1.7-locked",diagnostics:[{code:"MV1_UNSUPPORTED_CONSTRUCTION",message}]};
+}
+export function parseModernVernacularV17(input:string):ModernVernacularV17ParseResult {
+  const t=input.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const directive=t[0];
+  if(!["dema","sori","mira","toku"].includes(directive)) return v17Rejected("v1.7 utterances begin with dema, sori, mira or toku.");
+  if(t.includes("pun") || t.includes("nava") || t.some(x=>["fam","kong","tek","yemi","zami","dema","sori","mira","toku"].includes(x) && x!==directive)) return v17Rejected("Directive questions, negation, modal combinations and directive stacking are blocked in v1.7.");
+  const parsed=parseLicensedAction("teshi",t.slice(1));
+  if(!parsed.action) return {ok:false,grammar:"modern-vernacular-v1.7-locked",diagnostics:parsed.diagnostics};
+  return {ok:true,grammar:"modern-vernacular-v1.7-locked",ast:{kind:"directive-clause",grammarVersion:"1.7",directive:directive as ModernVernacularV17Ast["directive"],actor:"addressee",action:parsed.action},diagnostics:[]};
+}
+function v18Rejected(message:string):ModernVernacularV18ParseResult {
+  return {ok:false,grammar:"modern-vernacular-v1.8-locked",diagnostics:[{code:"MV1_UNSUPPORTED_CONSTRUCTION",message}]};
+}
+export function parseModernVernacularV18(input:string):ModernVernacularV18ParseResult {
+  const t=input.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const linkers=t.filter(x=>x==="lena"||x==="savi"||x==="doru");
+  if(linkers.length!==1) return v18Rejected("v1.8 requires exactly one linker between two complete clauses; nested or missing linkers are not licensed.");
+  if(t.includes("pun")||t.includes("shuk")||t.includes("zosh")) return v18Rejected("Clause-wide polar or information-question scope is unresolved in v1.8.");
+  const linker=linkers[0];
+  const at=t.indexOf(linker);
+  if(at===0||at===t.length-1) return v18Rejected("A clause linker must have a complete clause on both sides.");
+  const leftInput=t.slice(0,at).join(" ");
+  const rightInput=t.slice(at+1).join(" ");
+  const left=parseModernVernacular(leftInput);
+  const right=parseModernVernacular(rightInput);
+  if(!left.ok||!right.ok) return v18Rejected("Both sides of a v1.8 linker must independently parse as complete licensed clauses.");
+  if(left.grammar==="modern-vernacular-v1.7-locked"||right.grammar==="modern-vernacular-v1.7-locked") return v18Rejected("Directive utterances cannot be coordinated or causally linked in v1.8.");
+  return {ok:true,grammar:"modern-vernacular-v1.8-locked",ast:{kind:"linked-clauses",grammarVersion:"1.8",relation:linker==="lena"?"coordination":linker==="savi"?"reason":"consequence",linker:linker as ModernVernacularV18Ast["linker"],left,right},diagnostics:[]};
 }
