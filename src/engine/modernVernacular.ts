@@ -59,7 +59,7 @@ export interface ModernVernacularParseResult {
 const PARTICIPANTS = new Set(["teshi", "fezo"]);
 const QUESTION_A = "shuk";
 const QUESTION_B = "zosh";
-const RESPONSES: Record<string, "yes" | "no" | "maybe"> = {
+const RESPONSES: Record<"wang" | "kor" | "gep", "yes" | "no" | "maybe"> = {
   wang: "yes",
   kor: "no",
   gep: "maybe"
