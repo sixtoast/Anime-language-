@@ -274,7 +274,11 @@ export function parseModernVernacularV11(input: string): ModernVernacularV11Pars
   const spec = V11_FRAMES[predicate as ModernVernacularV11Verb];
   if (!spec) return v11Rejected("MV1_UNSUPPORTED_CONSTRUCTION", "The predicate is not one of the six locked v1.1 verbs.", 1, predicate);
 
-  if (subject === "shuk" && construction === "polar-question") {\n    return v11Rejected("MV1_BLOCKED_INFORMATION_POLAR", "Combining an information question with pun is blocked.");\n  }\n\n  if (object === "zosh") {
+  if (subject === "shuk" && construction === "polar-question") {
+    return v11Rejected("MV1_BLOCKED_INFORMATION_POLAR", "Combining an information question with pun is blocked.");
+  }
+
+  if (object === "zosh") {
     if (construction === "negative") return v11Rejected("MV1_INVALID_ARGUMENT_SLOT", "Question-word replacement is not licensed in the v1.1 simple-negation pattern.", 3, object);
     if (construction === "polar-question") return v11Rejected("MV1_BLOCKED_INFORMATION_POLAR", "Information questions combined with pun remain blocked.");
     construction = "information-question"; question = "information";
