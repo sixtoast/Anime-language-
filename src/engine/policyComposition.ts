@@ -55,7 +55,7 @@ export interface PolicyCompositionResult {
 
 const LIMITATIONS = [
   "Inputs are assumed to be the outputs of separately implemented evidence evaluators; this module does not validate their truth.",
-  "A composed permit is only a candidate v2.0 authority outcome. Scope, decision integrity, freshness, expiry, revocation, conditions and independent consent/resource/safety gates still require their own checks.",
+  "A composed permit is only a candidate v2.0 authority outcome. This module does not execute an invocation or establish that an effect occurred. Scope, decision integrity, freshness, expiry, revocation, conditions and independent consent/resource/safety gates still require their own checks.",
   "No strategy other than SINGLE-APPLICABLE, ALL-MUST-PERMIT and DENY-OVERRIDES is executable in this implementation."
 ];
 
