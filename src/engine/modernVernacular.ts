@@ -587,7 +587,7 @@ const V14_ENTITY_COMPLEMENTS = new Set(["fape", "losa", "fezo"]);
 const V14_ACTION_VERBS = new Set(["wish", "nak", "zir", "shus", "mos", "mol", "tut", "bul", "lil", "ful", "zem"]);
 
 export function parseModernVernacularV14(input: string): ModernVernacularV14ParseResult {
-  const tokens = input.trim().toLowerCase().split(/\\s+/).filter(Boolean);
+  const tokens = input.trim().toLowerCase().split(/\s+/).filter(Boolean);
   if (!tokens.length) return v14Rejected("MV1_EMPTY_INPUT", "Enter a Modern Vernacular v1.4 modal construction.");
 
   const allowed = new Set([
