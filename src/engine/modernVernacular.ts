@@ -231,7 +231,7 @@ function v11Rejected(code: ModernVernacularDiagnosticCode, message: string, toke
 }
 
 export function parseModernVernacularV11(input: string): ModernVernacularV11ParseResult {
-  const tokens = input.trim().toLowerCase().split(/\\s+/).filter(Boolean);
+  const tokens = input.trim().toLowerCase().split(/\s+/).filter(Boolean);
   if (tokens.length === 0) return v11Rejected("MV1_EMPTY_INPUT", "Enter a Modern Vernacular v1.1 expression.");
 
   // Keep the v1.0 grammar intact and expose a consistent v1.1 entry point.
