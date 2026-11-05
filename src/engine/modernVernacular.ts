@@ -774,10 +774,12 @@ export function parseModernVernacularV15(input: string): ModernVernacularV15Pars
   const subject = t[0];
   if (!["teshi","fezo","shuk"].includes(subject)) return v15Rejected("The permission subject slot accepts teshi, fezo or shuk.");
   const question = t[t.length-1] === "pun" ? "polar" : "none";
+  if (subject === "shuk" && question === "polar") return v15Rejected("An in-situ subject information question cannot be combined with pun.");
   const body = question === "polar" ? t.slice(2,-1) : t.slice(2);
   const parsed = parseLicensedAction(subject, body);
   if (!parsed.action) return { ok:false, grammar:"modern-vernacular-v1.5-locked", diagnostics:parsed.diagnostics };
-  const actionQuestion = parsed.action.version === "1.0" ? parsed.action.ast.question : parsed.action.ast.question;
+  const actionQuestion = parsed.action.ast.question; 
+  if (question === "polar" && actionQuestion === "information") return v15Rejected("An information question cannot be combined with pun.");
   return { ok:true, grammar:"modern-vernacular-v1.5-locked", ast:{kind:"permission-clause",grammarVersion:"1.5",subject:subject as ModernVernacularV15Ast["subject"],action:parsed.action,polarity:"positive",question:question === "polar" ? "polar" : actionQuestion},diagnostics:[] };
 }
 
@@ -795,9 +797,11 @@ export function parseModernVernacularV16(input: string): ModernVernacularV16Pars
   const operator=core[operatorIndex];
   if(operator==="zami"){
     if(core.includes("nava") || core.includes("yemi")) return v16Rejected("zami cannot be negated or combined with yemi in v1.6.");
+    if(subject==="shuk" && polar) return v16Rejected("An in-situ subject information question cannot be combined with pun.");
     const parsed=parseLicensedAction(subject,core.slice(2));
     if(!parsed.action) return {ok:false,grammar:"modern-vernacular-v1.6-locked",diagnostics:parsed.diagnostics};
-    const q=parsed.action.version==="1.0"?parsed.action.ast.question:parsed.action.ast.question;
+    const q=parsed.action.ast.question;
+    if(polar && q==="information") return v16Rejected("An information question cannot be combined with pun.");
     return {ok:true,grammar:"modern-vernacular-v1.6-locked",ast:{kind:"prohibition-clause",grammarVersion:"1.6",operator:"zami",subject:subject as ModernVernacularV16Ast["subject"],scope:"prohibition",action:parsed.action,polarity:"positive",question:polar?"polar":q},diagnostics:[]};
   }
   if(!["fam","kong","tek","yemi"].includes(operator)) return v16Rejected("v1.6 requires fam, kong, tek, yemi or zami.");
@@ -807,18 +811,25 @@ export function parseModernVernacularV16(input: string): ModernVernacularV16Pars
   if(modalNegated && actionNegated) return v16Rejected("Only one nava scope position is licensed per v1.6 clause.");
   const actionStart=operatorIndex+1+(actionNegated?1:0);
   const actionTokens=core.slice(actionStart);
+  if(subject==="shuk" && polar) return v16Rejected("An in-situ subject information question cannot be combined with pun.");
   const parsed=parseLicensedAction(subject,actionNegated?["nava",...actionTokens]:actionTokens);
   if(!parsed.action) return {ok:false,grammar:"modern-vernacular-v1.6-locked",diagnostics:parsed.diagnostics};
-  const q=parsed.action.version==="1.0"?parsed.action.ast.question:parsed.action.ast.question;
+  const q=parsed.action.ast.question;
+  if(polar && q==="information") return v16Rejected("An information question cannot be combined with pun.");
   return {ok:true,grammar:"modern-vernacular-v1.6-locked",ast:{kind:"modal-scope-clause",grammarVersion:"1.6",operator:operator as ModernVernacularV16Ast["operator"],subject:subject as ModernVernacularV16Ast["subject"],scope:modalNegated?"modal":actionNegated?"action":"modal",action:parsed.action,polarity:modalNegated?"negative": "positive",question:polar?"polar":q},diagnostics:[]};
 }
 
 
 /** Modern Vernacular v1.7 directive speech acts and v1.8 clause relations. */
+export type ModernVernacularV17Action =
+  | { version: "1.0"; ast: Omit<Extract<ModernVernacularAst, { kind: "clause" }>, "participantA"> & { participantA: { kind: "participant"; form: "addressee" } } }
+  | { version: "1.1"; ast: Omit<ModernVernacularV11Ast, "subject"> & { subject: "addressee" } }
+  | { version: "1.2"; ast: Omit<ModernVernacularV12Ast, "subject"> & { subject: "addressee" } }
+  | { version: "1.3"; ast: Omit<ModernVernacularV13Ast, "mover"> & { mover: "addressee" } };
 export type ModernVernacularV17Ast = {
   kind: "directive-clause"; grammarVersion: "1.7";
   directive: "dema" | "sori" | "mira" | "toku";
-  actor: "addressee"; action: ModernVernacularV14Action;
+  actor: "addressee"; action: ModernVernacularV17Action;
 };
 export type ModernVernacularV18Ast = {
   kind: "linked-clauses"; grammarVersion: "1.8";
@@ -830,6 +841,23 @@ export type ModernVernacularV18Ast = {
 export type ModernVernacularV17ParseResult = { ok:boolean; grammar:"modern-vernacular-v1.7-locked"; ast?:ModernVernacularV17Ast; diagnostics:ModernVernacularDiagnostic[] };
 export type ModernVernacularV18ParseResult = { ok:boolean; grammar:"modern-vernacular-v1.8-locked"; ast?:ModernVernacularV18Ast; diagnostics:ModernVernacularDiagnostic[] };
 
+function toDirectiveAction(action: ModernVernacularV14Action): ModernVernacularV17Action {
+  if (action.version === "1.0") {
+    const { participantA: _participantA, ...rest } = action.ast;
+    return { version: "1.0", ast: { ...rest, participantA: { kind: "participant", form: "addressee" } } };
+  }
+  if (action.version === "1.1") {
+    const { subject: _subject, ...rest } = action.ast;
+    return { version: "1.1", ast: { ...rest, subject: "addressee" } };
+  }
+  if (action.version === "1.2") {
+    const { subject: _subject, ...rest } = action.ast;
+    return { version: "1.2", ast: { ...rest, subject: "addressee" } };
+  }
+  const { mover: _mover, ...rest } = action.ast;
+  return { version: "1.3", ast: { ...rest, mover: "addressee" } };
+}
+
 function v17Rejected(message:string):ModernVernacularV17ParseResult {
   return {ok:false,grammar:"modern-vernacular-v1.7-locked",diagnostics:[{code:"MV1_UNSUPPORTED_CONSTRUCTION",message}]};
 }
@@ -840,7 +868,7 @@ export function parseModernVernacularV17(input:string):ModernVernacularV17ParseR
   if(t.includes("pun") || t.includes("nava") || t.some(x=>["fam","kong","tek","yemi","zami","dema","sori","mira","toku"].includes(x) && x!==directive)) return v17Rejected("Directive questions, negation, modal combinations and directive stacking are blocked in v1.7.");
   const parsed=parseLicensedAction("teshi",t.slice(1));
   if(!parsed.action) return {ok:false,grammar:"modern-vernacular-v1.7-locked",diagnostics:parsed.diagnostics};
-  return {ok:true,grammar:"modern-vernacular-v1.7-locked",ast:{kind:"directive-clause",grammarVersion:"1.7",directive:directive as ModernVernacularV17Ast["directive"],actor:"addressee",action:parsed.action},diagnostics:[]};
+  return {ok:true,grammar:"modern-vernacular-v1.7-locked",ast:{kind:"directive-clause",grammarVersion:"1.7",directive:directive as ModernVernacularV17Ast["directive"],actor:"addressee",action:toDirectiveAction(parsed.action)},diagnostics:[]};
 }
 function v18Rejected(message:string):ModernVernacularV18ParseResult {
   return {ok:false,grammar:"modern-vernacular-v1.8-locked",diagnostics:[{code:"MV1_UNSUPPORTED_CONSTRUCTION",message}]};
@@ -849,12 +877,15 @@ export function parseModernVernacularV18(input:string):ModernVernacularV18ParseR
   const t=input.trim().toLowerCase().split(/\s+/).filter(Boolean);
   const linkers=t.filter(x=>x==="lena"||x==="savi"||x==="doru");
   if(linkers.length!==1) return v18Rejected("v1.8 requires exactly one linker between two complete clauses; nested or missing linkers are not licensed.");
-  if(t.includes("pun")||t.includes("shuk")||t.includes("zosh")) return v18Rejected("Clause-wide polar or information-question scope is unresolved in v1.8.");
+  if(t.includes("shuk")||t.includes("zosh")) return v18Rejected("Information-question scope across linked clauses is unresolved in v1.8.");
   const linker=linkers[0];
   const at=t.indexOf(linker);
   if(at===0||at===t.length-1) return v18Rejected("A clause linker must have a complete clause on both sides.");
-  const leftInput=t.slice(0,at).join(" ");
-  const rightInput=t.slice(at+1).join(" ");
+  const leftTokens=t.slice(0,at);
+  const rightTokens=t.slice(at+1);
+  if(rightTokens.includes("pun")) return v18Rejected("A final pun would ambiguously scope over the linked construction; only a clause-local question before the linker is licensed.");
+  const leftInput=leftTokens.join(" ");
+  const rightInput=rightTokens.join(" ");
   const left=parseModernVernacular(leftInput);
   const right=parseModernVernacular(rightInput);
   if(!left.ok||!right.ok) return v18Rejected("Both sides of a v1.8 linker must independently parse as complete licensed clauses.");
