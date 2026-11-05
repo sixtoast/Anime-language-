@@ -31,7 +31,7 @@ export type ModernVernacularDiagnosticCode =
   | "MV1_BLOCKED_NEGATIVE_POLAR"
   | "MV1_BLOCKED_INFORMATION_POLAR"
   | "MV1_INVALID_ARGUMENT_SLOT"
-  | "MV1_RESPONSE_NOT_CLAUSE_NEGATOR";
+  | "MV1_RESPONSE_NOT_CLAUSE_NEGATOR"\n  | "MV12_INVALID_TRANSFER_FRAME"\n  | "MV12_BLOCKED_ROLE_QUESTION"\n  | "MV12_BLOCKED_NEGATIVE_POLAR";
 
 export interface ModernVernacularDiagnostic {
   code: ModernVernacularDiagnosticCode;
@@ -298,6 +298,114 @@ export function parseModernVernacularV11(input: string): ModernVernacularV11Pars
       predicate: predicate as ModernVernacularV11Verb,
       object: object as ModernVernacularV11Ast["object"],
       polarity, question, frame: spec.frame
+    },
+    diagnostics: []
+  };
+}
+
+
+/**
+ * Parser for the locked Modern Vernacular v1.2 transfer frames.
+ * Source: docs/canon/arcane-modern-vernacular-v1.2-transfer-and-recipients.md
+ * This is a deliberately narrow parser; ka/du/li have no global case-marker status.
+ */
+export type ModernVernacularV12Ast = {
+  kind: "transfer-clause";
+  grammarVersion: "1.2";
+  construction: "give" | "receive" | "take";
+  subject: "teshi" | "fezo" | "shuk";
+  predicate: "bul" | "lil";
+  item: "fape" | "gisho" | "zosh";
+  roleMarker: "ka" | "du";
+  roleParticipant: "teshi" | "fezo";
+  polarity: "positive" | "negative";
+  question: "none" | "polar" | "information";
+};
+export type ModernVernacularV12ParseResult = {
+  ok: boolean;
+  grammar: "modern-vernacular-v1.2-locked";
+  ast?: ModernVernacularV12Ast;
+  diagnostics: ModernVernacularDiagnostic[];
+};
+
+function v12Rejected(code: ModernVernacularDiagnosticCode, message: string, tokenIndex?: number, token?: string): ModernVernacularV12ParseResult {
+  return {
+    ok: false,
+    grammar: "modern-vernacular-v1.2-locked",
+    diagnostics: [{ code, message, ...(tokenIndex === undefined ? {} : { tokenIndex }), ...(token === undefined ? {} : { token }) }]
+  };
+}
+
+export function parseModernVernacularV12(input: string): ModernVernacularV12ParseResult {
+  const tokens = input.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  if (!tokens.length) return v12Rejected("MV1_EMPTY_INPUT", "Enter a Modern Vernacular v1.2 transfer clause.");
+
+  const allowed = new Set(["teshi", "fezo", "shuk", "bul", "lil", "li", "fape", "gisho", "zosh", "ka", "du", "nava", "pun"]);
+  const unknown = tokens.findIndex(token => !allowed.has(token));
+  if (unknown >= 0) return v12Rejected("MV1_UNKNOWN_FORM", `The form "${tokens[unknown]}" is outside the locked v1.2 transfer inventory.`, unknown, tokens[unknown]);
+
+  let subject: string, predicate: string, item: string, marker: string, participant: string;
+  let polarity: ModernVernacularV12Ast["polarity"] = "positive";
+  let question: ModernVernacularV12Ast["question"] = "none";
+  let construction: ModernVernacularV12Ast["construction"];
+
+  // Canonical surface shape: A [nava] VERB li ITEM ROLE-PARTICLE PARTICIPANT [pun].
+  let body = [...tokens];
+  if (body.at(-1) === "pun") {
+    question = "polar";
+    body = body.slice(0, -1);
+  }
+  if (body[1] === "nava") {
+    if (question === "polar") return v12Rejected("MV12_BLOCKED_NEGATIVE_POLAR", "Negative polar questions remain blocked in v1.2.");
+    polarity = "negative";
+    body = [body[0], ...body.slice(2)];
+  }
+  if (body.length !== 6 || body[2] !== "li") {
+    return v12Rejected("MV12_INVALID_TRANSFER_FRAME", "A v1.2 transfer clause requires: participant + [nava] + bul/lil + li + item + ka/du + participant.");
+  }
+  [subject, predicate, , item, marker, participant] = body;
+
+  if (!(subject === "teshi" || subject === "fezo" || subject === "shuk")) {
+    return v12Rejected("MV12_INVALID_TRANSFER_FRAME", "The first slot accepts teshi, fezo or shuk.", 0, subject);
+  }
+  if (!(participant === "teshi" || participant === "fezo")) {
+    return v12Rejected("MV12_INVALID_TRANSFER_FRAME", "The marked recipient/source must be teshi or fezo.", 5, participant);
+  }
+  if (item !== "fape" && item !== "gisho" && item !== "zosh") {
+    return v12Rejected("MV12_INVALID_TRANSFER_FRAME", "The transferred-item slot accepts fape, gisho or the question replacement zosh.", 3, item);
+  }
+  if (predicate !== "bul" && predicate !== "lil") {
+    return v12Rejected("MV12_INVALID_TRANSFER_FRAME", "The v1.2 transfer predicates are bul and lil.", 1, predicate);
+  }
+  if (marker !== "ka" && marker !== "du") {
+    return v12Rejected("MV12_INVALID_TRANSFER_FRAME", "The give frame requires ka; receive/take frames require du.", 4, marker);
+  }
+
+  if (predicate === "bul" && marker === "ka") construction = "give";
+  else if (predicate === "bul" && marker === "du") construction = "receive";
+  else if (predicate === "lil" && marker === "du") construction = "take";
+  else return v12Rejected("MV12_INVALID_TRANSFER_FRAME", "lil requires du to mark the source; ka is not licensed in the take frame.", 4, marker);
+
+  if (subject === "shuk" || item === "zosh") {
+    if (polarity === "negative") return v12Rejected("MV12_INVALID_TRANSFER_FRAME", "Information-slot replacement is not licensed with v1.2 simple negation.");
+    if (question === "polar") return v12Rejected("MV12_BLOCKED_ROLE_QUESTION", "Information questions combined with pun are blocked.");
+    question = "information";
+  }
+  if (subject === "shuk" && question !== "information") {
+    return v12Rejected("MV12_BLOCKED_ROLE_QUESTION", "shuk is licensed only as an information question replacing the first participant.");
+  }
+
+  return {
+    ok: true,
+    grammar: "modern-vernacular-v1.2-locked",
+    ast: {
+      kind: "transfer-clause", grammarVersion: "1.2", construction,
+      subject: subject as ModernVernacularV12Ast["subject"],
+      predicate: predicate as ModernVernacularV12Ast["predicate"],
+      item: item as ModernVernacularV12Ast["item"],
+      roleMarker: marker as ModernVernacularV12Ast["roleMarker"],
+      roleParticipant: participant as ModernVernacularV12Ast["roleParticipant"],
+      polarity, question
     },
     diagnostics: []
   };
