@@ -160,3 +160,19 @@ These are specification tasks, not merely programming tasks. Record decisions in
 ## 10. Completion definition
 
 Phase 6H is not complete when a few expressions produce types. It is complete only when the supported semantic subset is explicitly bounded, source-traceable, tested for positive/negative/boundary cases, integrated into the Playground without conflating later magic-system gates, and all required verification evidence is recorded.
+
+
+## 11. Critical integration audit — parser/operator identity drift
+
+The inspected parser and operator-contract registry do not currently share one stable operator identity vocabulary:
+
+- `surfaceParser.ts` uses parser arity keys including `FRAJA`, `FRAMA`, `DRUM`, `DRAS` and `GRASH`.
+- Its optional legacy alias map resolves `FRATA → FRAJA`, `FRAKA → FRAMA`, `DRIM → DRUM`, `DRAL → DRAS` and `GRAK → GRASH` only when alias rewriting is explicitly enabled.
+- `operatorContracts.ts` records the Phase 2 provisional signatures under `FRATA`, `FRAKA`, `DRIM`, `DRAL` and `GRAK`.
+- Existing parser tests deliberately require canonical-looking forms such as FRATA, FRAKA, DRIM and DRAL to remain unresolved by default, while the parser's accepted internal forms use the alternative spellings.
+
+This may reflect a historical/lexical alias policy, a prototype vocabulary, or a source reconciliation issue. The available evidence does not justify choosing one explanation or silently equating the names.
+
+**Required action before operator semantic integration:** create a reviewed, source-traceable identity/alias mapping that records preferred form, historical form, evidence, status and whether the mapping is enabled in each parser profile. Until then, the semantic analyser must use the exact AST operator string and return unresolved if no exact contract exists. It must not automatically map FRAJA to FRATA or any other near-form.
+
+Add regression cases proving that default parsing preserves current behaviour, explicit alias mode reports the alias provenance, and semantic lookup does not silently canonicalise unresolved identities. This is a specification/registry alignment blocker, not a reason to weaken parser tests.
