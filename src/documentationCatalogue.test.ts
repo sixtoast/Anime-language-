@@ -42,7 +42,7 @@ describe("Documentation catalogue website regression checks", () => {
   });
 
   it("[WEB-DOC-REG-009] filters sources by status and provenance type together", () => {
-    expect(filterDocuments("", "Canonical").map((doc) => doc.title)).toEqual(["Modern Vernacular v1.0 — locked core", "Modern Vernacular v1.1 — core verb expansion", "Modern Vernacular v1.2 — transfer and recipients", "Modern Vernacular v1.3 — motion and routes", "Magic system v3.0", "Arcane language v3.0-L", "Arcane Incantations v1.9 — Resource Accounting and Conservation Contracts", "Arcane Incantations v2.0 — Authority and Authorisation Decision Contracts", "Arcane Incantations v2.1 — Policy-Profile Composition and Conflict Resolution"]);
+    expect(filterDocuments("", "Canonical").map((doc) => doc.title)).toEqual(["Modern Vernacular v1.0 — locked core", "Modern Vernacular v1.1 — core verb expansion", "Modern Vernacular v1.2 — transfer and recipients", "Modern Vernacular v1.3 — motion and routes", "Modern Vernacular v1.5 — permission", "Modern Vernacular v1.6 — modal negation and prohibition", "Magic system v3.0", "Arcane language v3.0-L", "Arcane Incantations v1.9 — Resource Accounting and Conservation Contracts", "Arcane Incantations v2.0 — Authority and Authorisation Decision Contracts", "Arcane Incantations v2.1 — Policy-Profile Composition and Conflict Resolution"]);
     expect(filterDocuments("", "Provisional", "Original historical source file").map((doc) => doc.title)).toEqual(["Phase 4 — ambiguity audit", "Phase 5 — semantic audit"]);
     expect(filterDocuments("phase 6g", "Provisional", "Provisional research audit").map((doc) => doc.title)).toEqual(["Phase 6G — source lexicon audit"]);
     expect(filterDocuments("", "Deprecated")).toEqual([]);
