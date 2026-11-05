@@ -15,9 +15,9 @@ test.describe("Playground Phase 6G parser integration", () => {
     await page.getByRole("button", { name: "Parse surface-like notation" }).click();
 
     await expect(page.getByText("Unique structural parse produced")).toBeVisible();
-    await expect(page.locator(".analysis-output pre")).toContainText('"operator": "FRAPA"');
-    await expect(page.locator(".analysis-output pre")).toContainText('"value": "1"');
-    await expect(page.locator(".analysis-output pre")).toContainText('"value": "2"');
+    await expect(page.locator(".result-panel").first().locator(".analysis-output pre")).toContainText('"operator": "FRAPA"');
+    await expect(page.locator(".result-panel").first().locator(".analysis-output pre")).toContainText('"value": "1"');
+    await expect(page.locator(".result-panel").first().locator(".analysis-output pre")).toContainText('"value": "2"');
     await expect(page.locator(".analysis-caveat")).toContainText("does not prove semantic correctness");
   });
 
@@ -27,7 +27,7 @@ test.describe("Playground Phase 6G parser integration", () => {
     await page.getByRole("button", { name: "Parse surface-like notation" }).click();
 
     await expect(page.getByText("Expression rejected by the provisional parser")).toBeVisible();
-    await expect(page.locator(".analysis-output")).toContainText("UNTERMINATED_NUMERAL");
+    await expect(page.locator(".result-panel").first().locator(".analysis-output")).toContainText("UNTERMINATED_NUMERAL");
     await expect(page.locator(".analysis-caveat")).toContainText("does not prove semantic correctness");
   });
 
@@ -39,7 +39,7 @@ test.describe("Playground Phase 6G parser integration", () => {
 
     await page.getByRole("button", { name: "Clear editor" }).click();
     await expect(page.getByRole("textbox", { name: "Phase 6G surface-like expression editor" })).toHaveValue("");
-    await expect(page.getByText("No analysis has been run")).toBeVisible();
+    await expect(page.locator(".result-panel").first().getByText("No analysis has been run")).toBeVisible();
   });
 
   test("labels the implementation as a provisional syntax-only parser", async ({ page }) => {
@@ -54,8 +54,8 @@ test.describe("Playground Phase 6G parser integration", () => {
     await page.getByRole("button", { name: "Parse surface-like notation" }).click();
 
     await expect(page.getByText("Unique structural parse produced")).toBeVisible();
-    await expect(page.locator(".analysis-output pre")).toContainText('"form": "PA"');
-    await expect(page.locator(".analysis-output pre")).toContainText('"lexicalClass": "AXIS"');
+    await expect(page.locator(".result-panel").first().locator(".analysis-output pre")).toContainText('"form": "PA"');
+    await expect(page.locator(".result-panel").first().locator(".analysis-output pre")).toContainText('"lexicalClass": "AXIS"');
     await expect(page.locator(".engine-banner")).toContainText("v5-draft");
     await expect(page.locator(".engine-banner")).toContainText("does not promote entries to canon");
   });
@@ -65,8 +65,8 @@ test.describe("Playground Phase 6G parser integration", () => {
     await page.getByRole("textbox", { name: "Phase 6G surface-like expression editor" }).fill("ra");
     await page.getByRole("button", { name: "Parse surface-like notation" }).click();
 
-    await expect(page.locator(".analysis-output")).toContainText("AMBIGUOUS_HOMOPHONE");
-    await expect(page.locator(".analysis-output")).toContainText("disambiguation is not implemented");
+    await expect(page.locator(".result-panel").first().locator(".analysis-output")).toContainText("AMBIGUOUS_HOMOPHONE");
+    await expect(page.locator(".result-panel").first().locator(".analysis-output")).toContainText("disambiguation is not implemented");
   });
 
   test("does not rewrite legacy operator aliases by default", async ({ page }) => {
@@ -74,8 +74,8 @@ test.describe("Playground Phase 6G parser integration", () => {
     await page.getByRole("textbox", { name: "Phase 6G surface-like expression editor" }).fill("frata ki sho to sho");
     await page.getByRole("button", { name: "Parse surface-like notation" }).click();
 
-    await expect(page.locator(".analysis-output")).toContainText("UNRESOLVED_OPERATOR");
-    await expect(page.locator(".analysis-output")).toContainText("has no usable signature");
+    await expect(page.locator(".result-panel").first().locator(".analysis-output")).toContainText("UNRESOLVED_OPERATOR");
+    await expect(page.locator(".result-panel").first().locator(".analysis-output")).toContainText("has no usable signature");
   });
 
   test("shows source gloss, lexical class and source status for an exact entry", async ({ page }) => {
@@ -127,10 +127,10 @@ test.describe("Playground Phase 6G parser integration", () => {
 
     const editor = page.getByRole("textbox", { name: "Phase 6G surface-like expression editor" });
     await expect(editor).toHaveValue("ki to ma");
-    await expect(page.getByText("No analysis has been run")).toBeVisible();
+    await expect(page.locator(".result-panel").first().getByText("No analysis has been run")).toBeVisible();
     await page.getByRole("button", { name: "Parse surface-like notation" }).click();
     await expect(page.getByText("Unique structural parse produced")).toBeVisible();
-    await expect(page.locator(".analysis-output pre")).toContainText('"value": "12"');
+    await expect(page.locator(".result-panel").first().locator(".analysis-output pre")).toContainText('"value": "12"');
   });
 
   test("loads a rejection fixture and exposes the current parser diagnostic separately", async ({ page }) => {
@@ -141,7 +141,7 @@ test.describe("Playground Phase 6G parser integration", () => {
     await page.getByRole("button", { name: "Load fixture into editor" }).click();
     await expect(page.getByRole("textbox", { name: "Phase 6G surface-like expression editor" })).toHaveValue("ki to");
     await page.getByRole("button", { name: "Parse surface-like notation" }).click();
-    await expect(page.locator(".analysis-output")).toContainText("UNTERMINATED_NUMERAL");
+    await expect(page.locator(".result-panel").first().locator(".analysis-output")).toContainText("UNTERMINATED_NUMERAL");
   });
 
   test("browses all resource-accounting design fixtures without running a spell", async ({ page }) => {
@@ -318,7 +318,7 @@ test.describe("Playground Phase 6G parser integration", () => {
     const browser = page.locator(".policy-profile-fixture-browser");
     await browser.getByRole("combobox", { name: "Choose policy-profile composition specification fixture" }).selectOption("POL21-52");
     await expect(browser.locator(".fixture-browser-meta").first()).toContainText("PROFILE-STALE");
-    await expect(page.getByText("No analysis has been run")).toBeVisible();
+    await expect(page.locator(".result-panel").first().getByText("No analysis has been run")).toBeVisible();
     await expect(browser).toContainText("no policy service or parser is called");
   });
 
