@@ -75,9 +75,10 @@ describe("source-grounded incantation contract record validation", () => {
     expect(mapCompositionOutcomeToAuthority("COMPOSED-DENY")).toBe("DENY");
     expect(mapCompositionOutcomeToAuthority("PROFILE-UNAVAILABLE")).toBe("UNAVAILABLE");
     expect(mapCompositionOutcomeToAuthority("PROFILE-UNTRUSTED")).toBe("ISSUER-UNTRUSTED");
+    expect(mapCompositionOutcomeToAuthority("PROFILE-EXPIRED")).toBe("EXPIRED");
     for (const outcome of [
       "INDETERMINATE", "PROFILE-CONFLICT", "NO-APPLICABLE-PROFILE",
-      "PROFILE-STALE", "PROFILE-EXPIRED", "COMPOSITION-ERROR"
+      "PROFILE-STALE", "COMPOSITION-ERROR"
     ] as const) {
       expect(mapCompositionOutcomeToAuthority(outcome)).toBe("INDETERMINATE");
     }
