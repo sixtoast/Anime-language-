@@ -699,9 +699,11 @@ export type ModernVernacularUnifiedParseResult =
   | ModernVernacularV11ParseResult
   | ModernVernacularV12ParseResult
   | ModernVernacularV13ParseResult
-  | ModernVernacularV14ParseResult;
+  | ModernVernacularV14ParseResult
+  | ModernVernacularV15ParseResult
+  | ModernVernacularV16ParseResult;
 
-export function parseModernVernacular(input: string): ModernVernacularUnifiedParseResult | ModernVernacularV15ParseResult | ModernVernacularV16ParseResult {
+export function parseModernVernacular(input: string): ModernVernacularUnifiedParseResult {
   const tokens = input.trim().toLowerCase().split(/\s+/).filter(Boolean);
   const modalAtOne = ["fam","kong","tek","yemi","zami"].includes(tokens[1]);
   const modalAtTwo = tokens[1] === "nava" && ["fam","kong","tek","yemi","zami"].includes(tokens[2]);
