@@ -41,6 +41,14 @@ describe("Modern Vernacular v1.8 clause linking", () => {
     expect(result.ok).toBe(true);
     expect(result.ast).toMatchObject({relation,linker});
   });
+  it("keeps a polar question local when pun appears before the linker", () => {
+    const result = parseModernVernacularV18("teshi wish fezo pun lena fezo nak rawu");
+    expect(result.ok).toBe(true);
+    expect(result.ast?.left.grammar).toBe("modern-vernacular-v1.0-locked");
+    if (result.ast?.left.grammar === "modern-vernacular-v1.0-locked" && result.ast.left.ok && result.ast.left.ast?.kind === "clause") {
+      expect(result.ast.left.ast.question).toBe("polar");
+    }
+  });
   it.each([
     "teshi wish lena fezo",
     "teshi lena wish fezo",
