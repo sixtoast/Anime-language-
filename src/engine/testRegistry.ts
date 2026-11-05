@@ -2,7 +2,7 @@ export type TestExecutionStatus = "authored-unverified" | "blocked-by-specificat
 
 export interface WorkbenchTest {
   id: string;
-  group: "Parser" | "Dimensions" | "Semantic types" | "Operator contracts" | "Source lexicon" | "Fixture audit" | "Surface parser";
+  group: "Parser" | "Dimensions" | "Semantic types" | "Operator contracts" | "Source lexicon" | "Fixture audit" | "Surface parser" | "Incantation contracts";
   title: string;
   description: string;
   status: TestExecutionStatus;
@@ -139,5 +139,13 @@ export const workbenchTests: WorkbenchTest[] = [
   { id: "GATE-TEST-005", group: "Fixture audit", title: "Keeps gate non-substitution boundaries explicit", description: "Validation, authority, contract acceptance, execution and outcome verification remain distinct.", status: "authored-unverified", file: "src/engine/incantationGateSequence.test.ts", sourceRule: "CON12 §7–9; INV15 §8–9" },
   { id: "GATE-TEST-006", group: "Fixture audit", title: "Rejects missing source sequences", description: "A missing gate section or invocation chain is not guessed.", status: "authored-unverified", file: "src/engine/incantationGateSequence.test.ts", sourceRule: "CON12 §7; INV15 §1" },
   { id: "GATE-TEST-007", group: "Fixture audit", title: "Rejects altered invocation lifecycle shape", description: "Unexpected v1.5 lifecycle stages are rejected rather than silently normalised.", status: "authored-unverified", file: "src/engine/incantationGateSequence.test.ts", sourceRule: "INV15 §1" },
+  { id: "CONTRACT-REC-001", group: "Incantation contracts", title: "Validates all v1.9–v2.1 record families", description: "Checks structural field coverage for resource, authority and policy records.", status: "authored-unverified", file: "src/engine/incantationContractRecords.test.ts", sourceRule: "v1.9 §2; v2.0 §§3–4; v2.1 §3" },
+  { id: "CONTRACT-REC-002", group: "Incantation contracts", title: "Reports missing required record fields", description: "Missing fields are reported explicitly and never filled by inference.", status: "authored-unverified", file: "src/engine/incantationContractRecords.test.ts", sourceRule: "v1.9 §2; v2.0 §§3–4; v2.1 §3" },
+  { id: "CONTRACT-REC-003", group: "Incantation contracts", title: "Rejects non-object and empty required values", description: "Malformed record containers and empty required strings are rejected.", status: "authored-unverified", file: "src/engine/incantationContractRecords.test.ts", sourceRule: "v1.9 §2; v2.0 §§3–4; v2.1 §3" },
+  { id: "CONTRACT-REC-004", group: "Incantation contracts", title: "Allows explicit empty collections", description: "Empty condition/delegation collections remain distinct from absent fields.", status: "authored-unverified", file: "src/engine/incantationContractRecords.test.ts", sourceRule: "v2.0 §4" },
+  { id: "CONTRACT-REC-005", group: "Incantation contracts", title: "Preserves distinct authority decision outcomes", description: "PERMIT, DENY, CONDITIONAL-PERMIT, INDETERMINATE and status outcomes remain distinct.", status: "authored-unverified", file: "src/engine/incantationContractRecords.test.ts", sourceRule: "v2.0 §5" },
+  { id: "CONTRACT-REC-006", group: "Incantation contracts", title: "Requires satisfied conditions for conditional permit eligibility", description: "Only PERMIT or currently satisfied CONDITIONAL-PERMIT is outcome-eligible.", status: "authored-unverified", file: "src/engine/incantationContractRecords.test.ts", sourceRule: "v2.0 §5" },
+  { id: "CONTRACT-REC-007", group: "Incantation contracts", title: "Translates policy composition outcomes conservatively", description: "Conflict and uncertainty never become DENY or PERMIT by default.", status: "authored-unverified", file: "src/engine/incantationContractRecords.test.ts", sourceRule: "v2.1 §8" },
+  { id: "CONTRACT-REC-008", group: "Incantation contracts", title: "States structural validation limitations", description: "Record completeness is not trust, feasibility, authorisation or execution validation.", status: "authored-unverified", file: "src/engine/incantationContractRecords.test.ts", sourceRule: "v1.9 §§1, 4–5; v2.0 §§2, 16; v2.1 §§2, 13" },
 
 ];
