@@ -13,6 +13,9 @@ describe("Modern Vernacular v1.7 directives", () => {
     expect(result.ok).toBe(true);
     expect(result.ast?.directive).toBe(directive);
     expect(result.ast?.actor).toBe("addressee");
+    if (result.ast?.action.version === "1.0") expect(result.ast.action.ast.participantA).toMatchObject({kind:"participant",form:"addressee"});
+    if (result.ast?.action.version === "1.1" || result.ast?.action.version === "1.2") expect(result.ast.action.ast.subject).toBe("addressee");
+    if (result.ast?.action.version === "1.3") expect(result.ast.action.ast.mover).toBe("addressee");
   });
   it.each([
     "dema nava ful tava gezi",
