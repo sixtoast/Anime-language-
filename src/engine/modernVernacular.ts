@@ -843,19 +843,15 @@ export type ModernVernacularV18ParseResult = { ok:boolean; grammar:"modern-verna
 
 function toDirectiveAction(action: ModernVernacularV14Action): ModernVernacularV17Action {
   if (action.version === "1.0") {
-    const { participantA: _participantA, ...rest } = action.ast;
-    return { version: "1.0", ast: { ...rest, participantA: { kind: "participant", form: "addressee" } } };
+    return { version: "1.0", ast: { ...action.ast, participantA: { kind: "participant", form: "addressee" } } };
   }
   if (action.version === "1.1") {
-    const { subject: _subject, ...rest } = action.ast;
-    return { version: "1.1", ast: { ...rest, subject: "addressee" } };
+    return { version: "1.1", ast: { ...action.ast, subject: "addressee" } };
   }
   if (action.version === "1.2") {
-    const { subject: _subject, ...rest } = action.ast;
-    return { version: "1.2", ast: { ...rest, subject: "addressee" } };
+    return { version: "1.2", ast: { ...action.ast, subject: "addressee" } };
   }
-  const { mover: _mover, ...rest } = action.ast;
-  return { version: "1.3", ast: { ...rest, mover: "addressee" } };
+  return { version: "1.3", ast: { ...action.ast, mover: "addressee" } };
 }
 
 function v17Rejected(message:string):ModernVernacularV17ParseResult {
