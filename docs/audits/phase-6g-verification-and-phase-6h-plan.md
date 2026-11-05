@@ -98,3 +98,29 @@ A missing source definition is a visible gap, not an invitation to invent a conv
 5. Add the semantic fixture browser only after its fixtures and diagnostic contract are stable.
 6. Update the documentation catalogue, test registry, and development plan together.
 7. Verify CI and production deployment before calling the slice complete.
+
+
+## 7. Phase 6H foundation already present — continuity update (2026-11-05)
+
+A follow-up inspection found that Phase 6H is not starting from zero. The repository already contains:
+
+- `src/engine/semanticTypes.ts` — semantic value kinds and conservative compatibility;
+- `src/engine/dimensions.ts` — unit definitions and dimension-vector arithmetic;
+- `src/engine/operatorContracts.ts` — source-traceable operator metadata that separates proposed arity from semantic contracts;
+- `src/engine/semanticTypes.test.ts` — tests for semantic-kind separation, dimension compatibility, unknown types and unresolved binding payloads.
+
+These are foundations, not an integrated semantic analyser. The Phase 6G AST is not yet connected to these modules. The next task is therefore integration, not replacement or duplication.
+
+The detailed integration boundary and acceptance rules are recorded in [Phase 6H — Semantic Analysis Integration Contract](phase-6h-semantic-analysis-integration-contract.md).
+
+Updated implementation order:
+
+1. Close Phase 6G verification with actual CI evidence.
+2. Preserve the existing semantic type, dimension and operator-contract modules; audit them for consistency rather than rewriting them wholesale.
+3. Define AST-to-type inference for literals only, with explicit treatment of registered units and the provisional SHO dimensionless convention.
+4. Keep atoms, identifiers, bindings, control blocks and operators unresolved until their source-backed contracts are complete.
+5. Add contract-driven operator analysis only for operators with sufficiently complete signatures.
+6. Integrate a separate semantic result panel in the Playground.
+7. Run the full unit, build and browser suites and record the exact commit and results.
+
+No semantic implementation or test suite is marked verified by this documentation update.
