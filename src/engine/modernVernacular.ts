@@ -105,6 +105,10 @@ export function parseModernVernacularV1(input: string): ModernVernacularParseRes
     };
   }
 
+  if (tokens.length === 3 && tokens[0] === "kor" && tokens[1] === "wish") {
+    return rejected("MV1_RESPONSE_NOT_CLAUSE_NEGATOR", "kor is a standalone response meaning no; it is not a clause negator.");
+  }
+
   if (tokens.length === 3 && tokens[1] === "wish") {
     const a = argumentA(tokens[0]);
     const b = argumentB(tokens[2]);
@@ -177,10 +181,6 @@ export function parseModernVernacularV1(input: string): ModernVernacularParseRes
 
   if (tokens.length === 5 && tokens[1] === "nava" && tokens[2] === "wish" && tokens[4] === "pun") {
     return rejected("MV1_BLOCKED_NEGATIVE_POLAR", "Negative polar questions are blocked in Modern Vernacular v1.0.");
-  }
-
-  if (tokens.length === 3 && tokens[0] === "kor" && tokens[1] === "wish") {
-    return rejected("MV1_RESPONSE_NOT_CLAUSE_NEGATOR", "kor is a standalone response meaning no; it is not a clause negator.");
   }
 
   return rejected("MV1_UNSUPPORTED_CONSTRUCTION", "This token sequence is not licensed by the locked Modern Vernacular v1.0 core.");
