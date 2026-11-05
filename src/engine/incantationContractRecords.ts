@@ -123,7 +123,7 @@ const REQUIRED_FIELDS: Readonly<Record<ContractRecordKind, readonly string[]>> =
 };
 
 const LIMITATION =
-  "Structural validation only: a complete record does not prove that its values, evidence, trust, policy, scope, or real-world effects are valid.";
+  "Structural validation only: a complete record does not prove that its values, evidence, trust, policy, scope, or real-world effects are valid, and does not establish execution or a verified outcome.";
 
 export function getRequiredContractFields(kind: ContractRecordKind): readonly string[] {
   return REQUIRED_FIELDS[kind];
