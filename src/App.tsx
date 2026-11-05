@@ -82,7 +82,9 @@ function App() {
   const [vernacularV12Editor, setVernacularV12Editor] = useState("teshi bul li fape ka fezo");
   const [vernacularV12Result, setVernacularV12Result] = useState<ModernVernacularV12ParseResult | null>(null);
   const [vernacularV13Editor, setVernacularV13Editor] = useState("teshi ful tava gezi");
-  const [vernacularV13Result, setVernacularV13Result] = useState<ModernVernacularV13ParseResult | null>(null);\n  const [vernacularV14Editor, setVernacularV14Editor] = useState("teshi fam ful tava gezi");\n  const [vernacularV14Result, setVernacularV14Result] = useState<ModernVernacularV14ParseResult | null>(null);
+  const [vernacularV13Result, setVernacularV13Result] = useState<ModernVernacularV13ParseResult | null>(null);
+  const [vernacularV14Editor, setVernacularV14Editor] = useState("teshi fam ful tava gezi");
+  const [vernacularV14Result, setVernacularV14Result] = useState<ModernVernacularV14ParseResult | null>(null);
   const semanticAnalysis = useMemo(() => analysis ? analyseSurfaceParse(analysis) : null, [analysis]);
   const [lexiconQuery, setLexiconQuery] = useState("pa");
   const [selectedFixtureId, setSelectedFixtureId] = useState("P6G-FX-001");
