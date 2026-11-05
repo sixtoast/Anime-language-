@@ -614,6 +614,15 @@ export function parseModernVernacularV14(input: string): ModernVernacularV14Pars
     return v14Rejected("MV1_UNSUPPORTED_CONSTRUCTION", "A modal requires a licensed action frame, or a noun complement for kong and tek.");
   }
 
+  if (complement.length === 2 && complement[1] === "pun" && (modal === "kong" || modal === "tek") && V14_ENTITY_COMPLEMENTS.has(complement[0])) {
+    if (subject === "shuk") return v14Rejected("MV1_INVALID_ARGUMENT_SLOT", "shuk is not licensed as a bare entity-modal question in v1.4.");
+    return {
+      ok: true, grammar: "modern-vernacular-v1.4-locked",
+      ast: { kind: "modal-clause", grammarVersion: "1.4", modal, subject, complementKind: "entity", entity: complement[0] as ModernVernacularV14Ast["entity"], polarity: "positive", question: "polar" },
+      diagnostics: []
+    };
+  }
+
   if (complement.length === 1) {
     if (modal === "fam") {
       return v14Rejected("MV1_UNSUPPORTED_CONSTRUCTION", "fam requires an action frame; a bare noun complement is not licensed.", 2, complement[0]);
