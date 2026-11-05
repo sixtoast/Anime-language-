@@ -707,6 +707,8 @@ export type ModernVernacularUnifiedParseResult =
 
 export function parseModernVernacular(input: string): ModernVernacularUnifiedParseResult {
   const tokens = input.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  if (tokens.some(token => token === "lena" || token === "savi" || token === "doru")) return parseModernVernacularV18(input);
+  if (["dema","sori","mira","toku"].includes(tokens[0])) return parseModernVernacularV17(input);
   const modalAtOne = ["fam","kong","tek","yemi","zami"].includes(tokens[1]);
   const modalAtTwo = tokens[1] === "nava" && ["fam","kong","tek","yemi","zami"].includes(tokens[2]);
   const actionNegated = ["fam","kong","tek","yemi"].includes(tokens[1]) && tokens[2] === "nava";
