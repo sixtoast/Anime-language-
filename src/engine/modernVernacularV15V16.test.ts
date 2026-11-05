@@ -16,7 +16,8 @@ describe("Modern Vernacular v1.5 permission", () => {
     "teshi nava yemi ful tava gezi",
     "teshi yemi nava ful tava gezi",
     "teshi yemi fam ful tava gezi",
-    "teshi yemi fape"
+    "teshi yemi fape",
+    "shuk yemi ful tava gezi pun"
   ])("rejects v1.5 blocked construction: %s", input => {
     expect(parseModernVernacularV15(input).ok).toBe(false);
   });
@@ -50,7 +51,9 @@ describe("Modern Vernacular v1.6 modal scope and prohibition", () => {
     "teshi nava zami ful tava gezi",
     "teshi nava fam yemi ful tava gezi",
     "teshi zami yemi ful tava gezi",
-    "teshi zami fape"
+    "teshi zami fape",
+    "shuk zami ful tava gezi pun",
+    "shuk nava fam ful tava gezi pun"
   ])("rejects blocked scope or stacking: %s", input => {
     expect(parseModernVernacularV16(input).ok).toBe(false);
   });
