@@ -801,7 +801,7 @@ function parseV27Quantity(tokens: string[], offset: number): {
 }
 
 export function parseModernVernacularV27(input: string): ModernVernacularV27ParseResult {
-  const tokens = input.trim().toLowerCase().split(/\\s+/).filter(Boolean);
+  const tokens = input.trim().toLowerCase().split(/\s+/).filter(Boolean);
   if (!tokens.length) return v27Rejected("Enter a v2.7 quantity comparison.");
   const operator = tokens[0];
   if (operator !== "nari" && operator !== "dori" && operator !== "gari") {
