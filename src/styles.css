@@ -214,3 +214,15 @@
 .gate-architecture-grid>div>span,.gate-architecture-support>div>span{display:block}
 @media(max-width:900px){.gate-architecture-grid{grid-template-columns:1fr}}
 @media(max-width:760px){.gate-architecture-support{grid-template-columns:1fr}}
+
+
+/* Evidence-aware Construction inspector. */
+.construction-stage-list{display:flex;flex-direction:column;gap:8px;margin:14px 0}
+.construction-stage-row{display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;align-items:start;padding:10px;border:1px solid #36313d;border-radius:6px;background:#131216}
+.construction-stage-number{display:grid;place-items:center;width:25px;height:25px;border:1px solid #57476a;border-radius:50%;font:10px var(--mono);color:#c9b6df}
+.construction-stage-fields{display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:7px;min-width:0}
+.construction-stage-label{grid-column:1/-1;font:600 11px var(--display);color:#e4ddec}
+.construction-stage-fields input,.construction-stage-fields select{width:100%;min-width:0;background:#0f0e12;border:1px solid #393440;border-radius:4px;padding:9px;color:#e4ddec;font:10px var(--sans)}
+.construction-review-panel{margin-top:14px;padding:13px;border:1px solid #494052;border-radius:6px;background:#17151b}
+.construction-findings{padding-left:18px;color:#c5b6d5;font:10px var(--sans);line-height:1.65}
+@media(max-width:560px){.construction-stage-fields{grid-template-columns:1fr}.construction-stage-label{grid-column:1}.construction-review-panel .fixture-browser-meta{grid-template-columns:repeat(2,minmax(0,1fr))}}

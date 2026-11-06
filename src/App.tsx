@@ -119,7 +119,6 @@ function App() {
   const constructionRecord: ConstructionRecord = {
     id: "playground-construction-record",
     elements: constructionStageLabels
-      .filter(({ stage }) => constructionEvidence[stage].status !== "NOT-SUPPLIED" || constructionEvidence[stage].content.trim().length > 0)
       .map(({ stage }) => ({ stage, status: constructionEvidence[stage].status, content: constructionEvidence[stage].content }))
   };
   const constructionReview = useMemo(() => reviewConstructionRecord(constructionRecord), [constructionEvidence]);
