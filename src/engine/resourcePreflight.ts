@@ -56,7 +56,7 @@ export interface ResourcePreflightResult {
 const LIMITATIONS = [
   "Evidence states and quantities are supplied by callers; this evaluator does not authenticate or measure them.",
   "Only exact unit-string matches are accepted. No implicit or inferred unit conversion is performed.",
-  "The evaluator does not create or hold reservations, mutate accounts, debit resources, or execute an operation.",
+  "This evaluator does not execute an operation, create or hold reservations, mutate accounts, or debit resources.",
   "RESOURCE-READY is a preflight result only; it is not evidence of execution, consumption, conservation or a successful effect."
 ];
 

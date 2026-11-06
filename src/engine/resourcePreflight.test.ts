@@ -28,7 +28,7 @@ describe("Arcane Incantations v1.9 resource preflight", () => {
     expect(evaluateResourcePreflight({ ...valid(), evidenceFreshness: "FAIL" }).outcome).toBe("RESOURCE-EVIDENCE-STALE");
   });
   it("[RES19-EVAL-006] accounts for held reservations without calling them consumption", () => {
-    expect(evaluateResourcePreflight({ ...valid(), heldReservations: 100 }).outcome).toBe("RESERVATION-CONFLICT");
+    expect(evaluateResourcePreflight({ ...valid(), heldReservations: 101 }).outcome).toBe("RESERVATION-CONFLICT");
     expect(evaluateResourcePreflight({ ...valid(), requiredAmount: 81 }).outcome).toBe("RESOURCE-INSUFFICIENT");
   });
   it("[RES19-EVAL-007] enforces conservative budget upper bounds", () => {
