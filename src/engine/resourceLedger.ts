@@ -162,6 +162,8 @@ export function projectResourceLedger(
       continue;
     }
     seenIds.add(event.eventId);
+    const issueCountBeforeEvent = issues.length;
+    const resultCountBeforeEvent = eventResults.length;
     const fp = fingerprint(event);
     const previous = idempotency.get(event.idempotencyKey);
     if (previous !== undefined) {
@@ -174,9 +176,10 @@ export function projectResourceLedger(
         "Only confirmed events with passing evidence can alter the projected ledger.");
       continue;
     }
-    idempotency.set(event.idempotencyKey, fp);
-
-    const apply = () => eventResults.push({ eventId: event.eventId, applied: true, duplicate: false });
+    const apply = () => {
+      idempotency.set(event.idempotencyKey, fp);
+      eventResults.push({ eventId: event.eventId, applied: true, duplicate: false });
+    };
     const debit = (account: LedgerAccount, amount: number) => {
       const available = balances[account.accountId] - reserved[account.accountId];
       if (available < amount) return false;
@@ -224,9 +227,12 @@ export function projectResourceLedger(
       }
       case "RESERVATION-RELEASE": {
         const reservation = event.reservationId ? reservations.get(event.reservationId) : undefined;
-        if (!reservation || reservation.status === "RELEASED" || event.amountTicks > reservation.amountTicks) {
+        if (!reservation || reservation.status === "RELEASED" || reservation.status === "SETTLED" ||
+            event.amountTicks > reservation.amountTicks) {
           fail("RESERVATION-INVALID", "Release must reference a held reservation and cannot exceed its remaining amount."); break;
         }
+        const reservationAccount = getAccount(reservation.accountId, event);
+        if (!reservationAccount) break;
         reservation.amountTicks -= event.amountTicks;
         reserved[reservation.accountId] -= event.amountTicks;
         if (reservation.amountTicks === 0) reservation.status = "RELEASED";
@@ -277,9 +283,19 @@ export function projectResourceLedger(
       default:
         fail("EVENT-KIND-UNSUPPORTED", "This event kind requires a dedicated source, transformation, exchange or reconciliation contract and is not applied by this ledger projection.");
     }
+    if (eventResults.length === resultCountBeforeEvent) {
+      const eventIssues = issues.slice(issueCountBeforeEvent);
+      const lastIssue = eventIssues[eventIssues.length - 1];
+      if (lastIssue) eventResults.push({
+        eventId: event.eventId,
+        applied: false,
+        duplicate: false,
+        issue: lastIssue
+      });
+    }
   }
 
-  const available: Record<string, number> = {};
+  const available: Record<string, number> = {}
   for (const id of Object.keys(balances)) available[id] = balances[id] - reserved[id];
   const failed = issues.length > 0;
   const unresolved = issues.some(item => item.code === "EVIDENCE-UNRESOLVED");
