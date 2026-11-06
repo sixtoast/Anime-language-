@@ -19,6 +19,7 @@ import { authorityDecisionFixtures } from "./engine/authorityDecisionFixtures";
 import { policyProfileCompositionFixtures } from "./engine/policyProfileCompositionFixtures";
 import { invocationLifecycleSequence, invocationOrderNote, validationGateSequence } from "./engine/incantationGateSequence";
 import { evaluateIncantationRuntimePreview, runtimePreviewScenarios, type RuntimePreviewScenario } from "./engine/incantationRuntimePreview";
+import { reviewConstructionRecord, type ConstructionRecord, type ConstructionStage, type ConstructionEvidenceStatus } from "./engine/constructionRecordReview";
 
 type Section = "Overview" | "Documentation" | "Playground" | "Test suite" | "Research & review";
 
@@ -97,6 +98,31 @@ function App() {
   const [selectedValidationGateId, setSelectedValidationGateId] = useState("CON12-01");
   const [selectedInvocationStageId, setSelectedInvocationStageId] = useState("INV15-01");
   const [runtimePreviewScenario, setRuntimePreviewScenario] = useState<RuntimePreviewScenario>("READY-SAMPLE");
+  const constructionStageLabels: { stage: ConstructionStage; label: string }[] = [
+    { stage: "reference", label: "Reference" },
+    { stage: "spatial-role-vector", label: "Spatial role / vector" },
+    { stage: "construction-feet", label: "Construction Feet" },
+    { stage: "couplings", label: "Couplings" },
+    { stage: "quantity", label: "Quantity" },
+    { stage: "control", label: "Control" },
+    { stage: "release", label: "Release" }
+  ];
+  const [constructionEvidence, setConstructionEvidence] = useState<Record<ConstructionStage, { status: ConstructionEvidenceStatus; content: string }>>({
+    reference: { status: "NOT-SUPPLIED", content: "" },
+    "spatial-role-vector": { status: "NOT-SUPPLIED", content: "" },
+    "construction-feet": { status: "NOT-SUPPLIED", content: "" },
+    couplings: { status: "NOT-SUPPLIED", content: "" },
+    quantity: { status: "NOT-SUPPLIED", content: "" },
+    control: { status: "NOT-SUPPLIED", content: "" },
+    release: { status: "NOT-SUPPLIED", content: "" }
+  });
+  const constructionRecord: ConstructionRecord = {
+    id: "playground-construction-record",
+    elements: constructionStageLabels
+      .filter(({ stage }) => constructionEvidence[stage].status !== "NOT-SUPPLIED" || constructionEvidence[stage].content.trim().length > 0)
+      .map(({ stage }) => ({ stage, status: constructionEvidence[stage].status, content: constructionEvidence[stage].content }))
+  };
+  const constructionReview = useMemo(() => reviewConstructionRecord(constructionRecord), [constructionEvidence]);
   const [contractOperation, setContractOperation] = useState("kren");
   const [contractTarget, setContractTarget] = useState("");
   const [contractDesiredOutcome, setContractDesiredOutcome] = useState("");
@@ -403,6 +429,35 @@ function App() {
         {section === "Playground" && <section className="page-content">
           <div className="eyebrow"><span className="eyebrow-line"/> EXPRESSION WORKSPACE</div><h1 className="page-title">Playground<span>.</span></h1><p className="page-intro">Parse the implemented provisional Phase 6G surface-like notation. This is a narrow parser subset, not a complete Arcane grammar, spoken-language interpreter, semantic validator, or spell executor.</p>
           <div className="engine-banner"><Activity size={18}/><div><strong>Phase 6G provisional surface parser connected</strong><p>Checks token structure, registered operator arity, numeral closure, explicit control blocks, and selected ambiguity cases. Source atoms use the pinned {BUNDLED_LEXICON_SOURCE.version} draft lexicon ({bundledLexiconLoad.rowCount} rows; {bundledLexiconLoad.aliasRowCount} alias records). Legacy alias rewriting is off by default, lexical collisions fail closed, and loading this source does not promote entries to canon.</p></div><span className="engine-status">SYNTAX ONLY</span></div>
+          <section className="fixture-browser construction-inspector" aria-labelledby="construction-inspector-title">
+            <div className="fixture-browser-head"><div><span className="detail-kicker">MANA CONSTRUCTION · EVIDENCE-AWARE WORKSPACE</span><h2 id="construction-inspector-title">Construction record inspector</h2></div><span>7 recovered stages</span></div>
+            <p className="fixture-browser-intro">Enter a record against the recovered performed order. Each field is an evidence note, not a token parser. Choose the evidence status honestly; the inspector will not infer missing grammar, physical meaning or spell validity.</p>
+            <div className="construction-stage-list">
+              {constructionStageLabels.map(({ stage, label }, index) => <div className="construction-stage-row" key={stage}>
+                <div className="construction-stage-number">{index + 1}</div>
+                <div className="construction-stage-fields">
+                  <label className="construction-stage-label" htmlFor={"construction-content-" + stage}>{label}</label>
+                  <input id={"construction-content-" + stage} value={constructionEvidence[stage].content} onChange={event => setConstructionEvidence(current => ({ ...current, [stage]: { ...current[stage], content: event.target.value, status: current[stage].status === "NOT-SUPPLIED" && event.target.value.trim() ? "UNRESOLVED" : current[stage].status } }))} placeholder="Add supplied source text or an evidence note…" />
+                  <select aria-label={label + " evidence status"} value={constructionEvidence[stage].status} onChange={event => setConstructionEvidence(current => ({ ...current, [stage]: { ...current[stage], status: event.target.value as ConstructionEvidenceStatus } }))}>
+                    <option value="NOT-SUPPLIED">Not supplied</option><option value="UNRESOLVED">Unresolved</option><option value="PROVISIONAL">Provisional</option><option value="ATTESTED">Attested</option>
+                  </select>
+                </div>
+              </div>)}
+            </div>
+            <div className="construction-review-panel">
+              <div className="fixture-browser-meta">
+                <div><span>Record review</span><strong>{constructionReview.status.replaceAll("-", " ")}</strong></div>
+                <div><span>Order check</span><strong>{constructionReview.order.status.replaceAll("_", " ")}</strong></div>
+                <div><span>Attested fields</span><strong>{constructionReview.evidenceCounts.ATTESTED}</strong></div>
+                <div><span>Provisional fields</span><strong>{constructionReview.evidenceCounts.PROVISIONAL}</strong></div>
+                <div><span>Unresolved fields</span><strong>{constructionReview.evidenceCounts.UNRESOLVED}</strong></div>
+                <div><span>Not supplied</span><strong>{constructionReview.evidenceCounts["NOT-SUPPLIED"]}</strong></div>
+              </div>
+              {constructionReview.findings.length > 0 ? <ul className="construction-findings">{constructionReview.findings.map((finding, index) => <li key={index}>{finding}</li>)}</ul> : <p>All supplied fields are marked attested and in the recovered relative order.</p>}
+              <p className="fixture-browser-caveat"><strong>Important limitation:</strong> {constructionReview.limitation}</p>
+              <button className="secondary-button" onClick={() => setConstructionEvidence(Object.fromEntries(constructionStageLabels.map(({ stage }) => [stage, { status: "NOT-SUPPLIED", content: "" }])) as typeof constructionEvidence)}>Clear Construction record</button>
+            </div>
+          </section>
           <section className="fixture-browser" aria-labelledby="fixture-browser-title">
             <div className="fixture-browser-head"><div><span className="detail-kicker">FIXTURE-DRIVEN LAB</span><h2 id="fixture-browser-title">Source fixture browser</h2></div><span>{phase6gFixtures.length} source-derived cases</span></div>
             <p className="fixture-browser-intro">Load a preserved Phase 6G example into the editor. The source-recorded expectation is evidence to compare against, not a current pass/fail claim; selecting a fixture never runs it automatically.</p>
