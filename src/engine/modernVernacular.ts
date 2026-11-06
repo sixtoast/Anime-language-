@@ -757,7 +757,7 @@ function parseV27Quantity(tokens: string[], offset: number): {
   const start = offset;
   if (tokens[offset] === "nela") return { next: offset, error: "Approximate quantities are not licensed in exact v2.7 comparisons." };
   const integerStart = offset;
-  while (offset < tokens.length && Object.hasOwn(MV27_DIGITS, tokens[offset])) offset++;
+  while (offset < tokens.length && Object.prototype.hasOwnProperty.call(MV27_DIGITS, tokens[offset])) offset++;
   const integerDigits = tokens.slice(integerStart, offset);
   if (integerDigits.length < 1 || integerDigits.length > 4) {
     return { next: offset, error: "A comparison operand requires one to four integer digit tokens." };
@@ -770,7 +770,7 @@ function parseV27Quantity(tokens: string[], offset: number): {
   if (tokens[offset] === "shi") {
     offset++;
     const fractionStart = offset;
-    while (offset < tokens.length && Object.hasOwn(MV27_DIGITS, tokens[offset])) offset++;
+    while (offset < tokens.length && Object.prototype.hasOwnProperty.call(MV27_DIGITS, tokens[offset])) offset++;
     fractionalDigits = tokens.slice(fractionStart, offset);
     if (fractionalDigits.length < 1 || fractionalDigits.length > 3) {
       return { next: offset, error: "The decimal separator shi requires one to three fractional digit tokens." };
