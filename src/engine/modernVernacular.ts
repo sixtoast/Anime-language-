@@ -709,6 +709,7 @@ export type ModernVernacularUnifiedParseResult =
   | ModernVernacularV16ParseResult
   | ModernVernacularV17ParseResult
   | ModernVernacularV18ParseResult
+  | ModernVernacularV20ParseResult
   | ModernVernacularV26ParseResult
   | ModernVernacularV27ParseResult;
 
@@ -743,7 +744,7 @@ function v20Rejected(message: string, tokenIndex?: number, token?: string): Mode
 
 /** Validates aspect scope first, then delegates the underlying argument frame to the existing clause parser. */
 export function parseModernVernacularV20(input: string): ModernVernacularV20ParseResult {
-  const tokens = input.trim().toLowerCase().split(/\\s+/).filter(Boolean);
+  const tokens = input.trim().toLowerCase().split(/\s+/).filter(Boolean);
   if (!tokens.length) return v20Rejected("Enter a complete v2.0 aspect-marked action clause.");
   let aspectIndex = tokens.indexOf("don");
   if (aspectIndex < 0) aspectIndex = tokens.indexOf("kok");
@@ -1026,6 +1027,7 @@ export function parseModernVernacularV27(input: string): ModernVernacularV27Pars
 
 export function parseModernVernacular(input: string): ModernVernacularUnifiedParseResult {
   const tokens = input.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  if (tokens.includes("don") || tokens.includes("kok")) return parseModernVernacularV20(input);
   if (["nari", "dori", "gari"].includes(tokens[0])) return parseModernVernacularV27(input);
   if (tokens[0] === "nela" || ["za","ki","to","mu","re","sa","fi","du","go","pe"].includes(tokens[0])) return parseModernVernacularV26(input);
   if (tokens.some(token => token === "lena" || token === "savi" || token === "doru")) return parseModernVernacularV18(input);
