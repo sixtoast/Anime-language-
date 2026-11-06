@@ -25,7 +25,7 @@ for (const suite of report.testResults ?? []) {
   const suiteFile = suite.name?.replace(process.cwd() + "/", "");
   if (suiteFile && fs.existsSync(suiteFile)) {
     const source = fs.readFileSync(suiteFile, "utf8");
-    for (const match of source.matchAll(/\\[([A-Z][A-Z0-9-]*-\\d{3})\\]/g)) {
+    for (const match of source.matchAll(/\[([A-Z][A-Z0-9-]*-\d{3})\]/g)) {
       registeredIds.add(match[1]);
     }
   }
