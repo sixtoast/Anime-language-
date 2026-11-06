@@ -11,6 +11,10 @@ export interface WorkbenchTest {
 }
 
 export const workbenchTests: WorkbenchTest[] = [
+  { id: "MV22-001", group: "Parser", title: "Parses qualitative duration", description: "melo marks a brief completed event and runi marks a long completed event after all complements.", status: "authored-unverified", file: "src/engine/modernVernacularV22.test.ts", sourceRule: "docs/canon/arcane-modern-vernacular-v2.2-qualitative-duration.md §§1–2" },
+  { id: "MV22-002", group: "Parser", title: "Allows positive duration polar questions", description: "A positive polar question may append pun after the duration marker.", status: "authored-unverified", file: "src/engine/modernVernacularV22.test.ts", sourceRule: "Modern Vernacular v2.2 §3" },
+  { id: "MV22-003", group: "Parser", title: "Rejects unlicensed duration scope", description: "Rejects ongoing, negative, modal, stative, misplaced, repeated and incomplete duration constructions.", status: "authored-unverified", file: "src/engine/modernVernacularV22.test.ts", sourceRule: "Modern Vernacular v2.2 §§3–6" },
+
   { id: "MV21-001", group: "Parser", title: "Anchors aspect clauses to the present", description: "nemi requires a complete v2.0 aspect clause and fixes its reference time to now.", status: "authored-unverified", file: "src/engine/modernVernacularV21.test.ts", sourceRule: "docs/canon/arcane-modern-vernacular-v2.1-temporal-anchor-and-event-order.md §2" },
   { id: "MV21-002", group: "Parser", title: "Parses binary completed-event ordering", description: "pavo and sula distinguish before and after between two positive completed clauses.", status: "authored-unverified", file: "src/engine/modernVernacularV21.test.ts", sourceRule: "Modern Vernacular v2.1 §3" },
   { id: "MV21-003", group: "Parser", title: "Rejects unsupported temporal scope", description: "Rejects missing clauses, ongoing/negative ordered events, repeated relations, chains and modal clauses.", status: "authored-unverified", file: "src/engine/modernVernacularV21.test.ts", sourceRule: "Modern Vernacular v2.1 §§2–5" },

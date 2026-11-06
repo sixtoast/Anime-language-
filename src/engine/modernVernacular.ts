@@ -711,6 +711,7 @@ export type ModernVernacularUnifiedParseResult =
   | ModernVernacularV18ParseResult
   | ModernVernacularV20ParseResult
   | ModernVernacularV21ParseResult
+  | ModernVernacularV22ParseResult
   | ModernVernacularV26ParseResult
   | ModernVernacularV27ParseResult;
 
@@ -836,6 +837,58 @@ export function parseModernVernacularV21(input: string): ModernVernacularV21Pars
     ok: true,
     grammar: "modern-vernacular-v2.1-locked",
     ast: { kind: "event-order", grammarVersion: "2.1", relation: tokens[relationIndex] === "pavo" ? "before" : "after", first, second },
+    diagnostics: []
+  };
+}
+
+/** Modern Vernacular v2.2: qualitative duration on affirmative completed events. */
+export type ModernVernacularV22Ast = {
+  kind: "qualitative-duration";
+  grammarVersion: "2.2";
+  duration: "brief" | "long";
+  clause: ModernVernacularV20Ast;
+  polarQuestion: boolean;
+};
+export type ModernVernacularV22ParseResult = {
+  ok: boolean;
+  grammar: "modern-vernacular-v2.2-locked";
+  ast?: ModernVernacularV22Ast;
+  diagnostics: ModernVernacularDiagnostic[];
+};
+function v22Rejected(message: string, tokenIndex?: number, token?: string): ModernVernacularV22ParseResult {
+  return { ok: false, grammar: "modern-vernacular-v2.2-locked", diagnostics: [{
+    code: "MV1_UNSUPPORTED_CONSTRUCTION", message,
+    ...(tokenIndex === undefined ? {} : { tokenIndex }),
+    ...(token === undefined ? {} : { token })
+  }] };
+}
+export function parseModernVernacularV22(input: string): ModernVernacularV22ParseResult {
+  const tokens = input.trim().toLowerCase().split(/\\s+/).filter(Boolean);
+  if (!tokens.length) return v22Rejected("Enter a complete v2.2 qualitative-duration clause.");
+  const markers = tokens.reduce<number[]>((out, token, index) => token === "melo" || token === "runi" ? [...out, index] : out, []);
+  if (markers.length !== 1) return v22Rejected("A v2.2 duration clause requires exactly one clause-final marker: melo or runi.");
+  const markerIndex = markers[0];
+  const marker = tokens[markerIndex];
+  const polarQuestion = tokens[tokens.length - 1] === "pun";
+  const expectedMarkerIndex = tokens.length - (polarQuestion ? 2 : 1);
+  if (markerIndex !== expectedMarkerIndex) return v22Rejected("melo or runi must follow every licensed complement and immediately precede an optional pun.", markerIndex, marker);
+  if (tokens.includes("nava")) return v22Rejected("Negative completion is not licensed with qualitative duration in v2.2.");
+  const clauseTokens = tokens.slice(0, markerIndex);
+  const clause = parseModernVernacularV20(clauseTokens.join(" "));
+  if (!clause.ok || !clause.ast || clause.ast.aspect !== "completed" || clause.ast.polarity !== "positive") {
+    return v22Rejected("Qualitative duration requires a complete affirmative don clause with a v2.0-licensed eventive verb.");
+  }
+  if (polarQuestion && tokens.includes("nava")) return v22Rejected("Negative polar questions remain blocked.");
+  return {
+    ok: true,
+    grammar: "modern-vernacular-v2.2-locked",
+    ast: {
+      kind: "qualitative-duration",
+      grammarVersion: "2.2",
+      duration: marker === "melo" ? "brief" : "long",
+      clause: clause.ast,
+      polarQuestion
+    },
     diagnostics: []
   };
 }
@@ -1078,6 +1131,7 @@ export function parseModernVernacularV27(input: string): ModernVernacularV27Pars
 
 export function parseModernVernacular(input: string): ModernVernacularUnifiedParseResult {
   const tokens = input.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  if (tokens.includes("melo") || tokens.includes("runi")) return parseModernVernacularV22(input);
   if (tokens.includes("nemi") || tokens.includes("pavo") || tokens.includes("sula")) return parseModernVernacularV21(input);
   if (tokens.includes("don") || tokens.includes("kok")) return parseModernVernacularV20(input);
   if (["nari", "dori", "gari"].includes(tokens[0])) return parseModernVernacularV27(input);
