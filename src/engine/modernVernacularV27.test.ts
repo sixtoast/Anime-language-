@@ -12,7 +12,10 @@ describe("Modern Vernacular v2.7 quantity comparison", () => {
     ["nari to shi za ma to ma", "equal", true],
     ["dori to shi sa ma mu ma", "less-than", true],
     ["nari to shi za ma to ma", "equal", true],
-    ["nari to shi za ke to shi za ke", "equal", true]
+    ["nari to shi za ke to shi za ke", "equal", true],
+    ["nari to ma to shi ki ma", "equal", false],
+    ["gari mu ra to ra", "greater-than", true],
+    ["nari to ku to ku", "equal", true]
   ] as const)("parses %s and evaluates its relation", (input, relation, truth) => {
     const result = parseModernVernacularV27(input);
     expect(result.ok).toBe(true);
