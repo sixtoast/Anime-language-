@@ -97,7 +97,8 @@ test.describe("Overview live health browser acceptance", () => {
     await expect(metrics.nth(2).locator("strong")).toHaveText("Report loaded");
     await expect(metrics.nth(2)).toContainText("40 passed · 0 failed · 0 unmapped");
     await expect(page.locator(".cockpit-note")).toContainText("Workflow state comes from GitHub Actions");
-    await expect(page.getByRole("heading", { name: "Explore the incantation gate sequence" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Inspect the incantation runtime" })).toBeVisible();
+    await expect(page.locator(".version-chip")).toContainText("INCANTATIONS v2.1 · WORKBENCH");
   });
 
   test("flags a per-test report from a different commit", async ({ page }) => {
