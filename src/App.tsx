@@ -23,6 +23,7 @@ import { reviewConstructionRecord, type ConstructionRecord, type ConstructionEvi
 import type { ConstructionStage } from "./engine/constructionOrderAudit";
 import { bindConstructionReference, type ConstructionReferenceToken } from "./engine/constructionReferenceContext";
 import { reviewConstructionFootShape } from "./engine/constructionFootShape";
+import { reviewConstructionCoupling } from "./engine/constructionCouplingEvidence";
 
 type Section = "Overview" | "Documentation" | "Playground" | "Test suite" | "Research & review";
 
@@ -123,6 +124,8 @@ function App() {
   const [constructionReferenceId, setConstructionReferenceId] = useState("");
   const [constructionFootInput, setConstructionFootInput] = useState("pa");
   const constructionFootReview = useMemo(() => reviewConstructionFootShape(constructionFootInput.trim()), [constructionFootInput]);
+  const [constructionCouplingInput, setConstructionCouplingInput] = useState("ha");
+  const constructionCouplingReview = useMemo(() => reviewConstructionCoupling(constructionCouplingInput), [constructionCouplingInput]);
   const constructionReference = useMemo(
     () => bindConstructionReference(constructionReferenceToken, constructionReferenceId),
     [constructionReferenceToken, constructionReferenceId]
@@ -473,6 +476,19 @@ function App() {
                 <ul>{constructionFootReview.notes.map((note, index) => <li key={index}>{note}</li>)}</ul>
               </div>
               <p className="fixture-browser-caveat">{constructionFootReview.limitation}</p>
+            </div>
+            <div className="construction-coupling-review">
+              <div className="detail-kicker">V2.0 H-SERIES · EVIDENCE LOOKUP ONLY</div>
+              <p>The recovered registry records six coupling glosses. This lookup identifies source vocabulary; it does not define argument order, coupling direction, physical mappings or an executable BRAN operation.</p>
+              <label htmlFor="construction-coupling-input">H-series form</label>
+              <input id="construction-coupling-input" value={constructionCouplingInput} onChange={event => setConstructionCouplingInput(event.target.value)} placeholder="e.g. ha" spellCheck={false} />
+              <div className="construction-coupling-result" role="status" aria-live="polite">
+                <strong>{constructionCouplingReview.status.replaceAll("-", " ")}</strong>
+                {constructionCouplingReview.entry && <div className="construction-coupling-gloss"><span>{constructionCouplingReview.entry.form}</span><span>{constructionCouplingReview.entry.gloss}</span><span>{constructionCouplingReview.entry.sourceVersion}</span></div>}
+                <p>{constructionCouplingReview.message}</p>
+                {constructionCouplingReview.entry && <p>{constructionCouplingReview.entry.limitation}</p>}
+              </div>
+              <p className="fixture-browser-caveat">All six entries have unresolved signatures and provisional physical mappings. No combination of these labels is treated as a valid or feasible coupling.</p>
             </div>
             <div className="construction-stage-list">
               {constructionStageLabels.map(({ stage, label }, index) => <div className="construction-stage-row" key={stage}>

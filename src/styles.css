@@ -247,3 +247,13 @@
 .construction-foot-parts small{font:9px var(--display);color:#a99bb5}
 .construction-foot-result ul{padding-left:18px;color:#c5b6d5;font:10px/1.65 var(--sans)}
 @media(max-width:560px){.construction-foot-parts{grid-template-columns:1fr}}
+
+.construction-coupling-review{margin:12px 0;padding:13px;border:1px solid #51445f;border-radius:6px;background:#17141b}
+.construction-coupling-review>p{font:10px/1.6 var(--sans);color:#b9afc4}
+.construction-coupling-review>label{display:block;margin:10px 0 6px;font:600 10px var(--display);color:#ded3e8}
+.construction-coupling-review>input{width:100%;background:#0f0e12;border:1px solid #393440;border-radius:4px;padding:10px;color:#e4ddec;font:12px var(--mono)}
+.construction-coupling-result{margin-top:10px;padding:10px;border:1px solid #494052;border-radius:5px;background:#100e13}
+.construction-coupling-result>strong{font:700 10px var(--display);letter-spacing:.08em;color:#e2c8f4}
+.construction-coupling-result>p{font:10px/1.6 var(--sans);color:#c5b6d5}
+.construction-coupling-gloss{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin:10px 0}
+.construction-coupling-gloss span{padding:8px;background:#1b1820;border-radius:4px;color:#f0e8f6;font:12px var(--mono)}
