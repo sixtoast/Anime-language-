@@ -23,7 +23,9 @@ export interface ResourcePreflightInput {
   resourceKind: string;
   accountId: string;
   unit: string;
+  requiredUnit: string;
   unitContractId?: string;
+  budgetUnit?: string;
   openingBalance: number | null;
   openingBalanceEvidence: EvidenceState;
   sourceEvidence: EvidenceState;
@@ -80,7 +82,7 @@ export function evaluateResourcePreflight(input: ResourcePreflightInput): Resour
   const diagnostics: ResourcePreflightDiagnostic[] = [];
   const add = (code: string, message: string) => diagnostics.push({ code, message });
 
-  if (!input.resourceKind.trim() || !input.accountId.trim() || !input.unit.trim() ||
+  if (!input.resourceKind.trim() || !input.accountId.trim() || !input.unit.trim() || !input.requiredUnit.trim() ||
       !input.unitContractId?.trim() || !validNonNegative(input.requiredAmount) ||
       !validNonNegative(input.heldReservations)) {
     add("RESOURCE-SPEC-UNDERSPECIFIED", "Resource identity, account, unit contract, and finite non-negative quantities are required.");
@@ -103,6 +105,10 @@ export function evaluateResourcePreflight(input: ResourcePreflightInput): Resour
     return result(input.evidenceFreshness === "FAIL" ? "RESOURCE-EVIDENCE-STALE" : "RESOURCE-OUTCOME-UNKNOWN", "RESOURCE-OUTCOME-UNKNOWN", input.requiredAmount, diagnostics);
   }
 
+  if (input.requiredUnit !== input.unit) {
+    add("UNIT-CONTRACT-MISSING", "Required quantity unit does not exactly match the account unit; no conversion is inferred.");
+    return result("UNIT-CONTRACT-MISSING", "SPECIFICATION-CHECKED", input.requiredAmount, diagnostics);
+  }
   const sourceAmount = input.sourceAvailableAmount ?? input.openingBalance;
   if (!validNonNegative(sourceAmount)) {
     add("SOURCE-AMOUNT-INVALID", "Verified source amount must be finite and non-negative.");
@@ -119,11 +125,11 @@ export function evaluateResourcePreflight(input: ResourcePreflightInput): Resour
     return result("RESERVATION-CONFLICT", "RESERVATIONS-CHECKED", input.requiredAmount, diagnostics, availableAmount);
   }
   if (input.budgetLimit !== undefined || input.conservativeConsumptionUpperBound !== undefined) {
-    if (input.budgetEvidence !== "PASS" || input.budgetLimit === undefined ||
+    if (input.budgetEvidence !== "PASS" || input.budgetUnit !== input.unit || input.budgetLimit === undefined ||
         input.conservativeConsumptionUpperBound === undefined ||
         !validNonNegative(input.budgetLimit) ||
         !validNonNegative(input.conservativeConsumptionUpperBound)) {
-      add("BUDGET-EVIDENCE-UNRESOLVED", "A budget requires a verified limit and conservative upper bound under a defined policy.");
+      add("BUDGET-EVIDENCE-UNRESOLVED", "A budget requires a verified limit, matching unit, and conservative upper bound under a defined policy.");
       return result("RESOURCE-OUTCOME-UNKNOWN", "RESOURCE-OUTCOME-UNKNOWN", input.requiredAmount, diagnostics, availableAmount);
     }
     if (input.conservativeConsumptionUpperBound > input.budgetLimit) {
