@@ -708,7 +708,9 @@ export type ModernVernacularUnifiedParseResult =
   | ModernVernacularV15ParseResult
   | ModernVernacularV16ParseResult
   | ModernVernacularV17ParseResult
-  | ModernVernacularV18ParseResult\n  | ModernVernacularV26ParseResult\n  | ModernVernacularV27ParseResult;
+  | ModernVernacularV18ParseResult
+  | ModernVernacularV26ParseResult
+  | ModernVernacularV27ParseResult;
 
 
 /** Modern Vernacular v2.6: standalone typed measurement quantity. */
