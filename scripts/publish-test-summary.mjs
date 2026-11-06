@@ -19,6 +19,16 @@ const registeredIds = new Set([
 ]);
 const tests = [];
 for (const suite of report.testResults ?? []) {
+  // Test files may contain several stable case IDs while the workbench registry
+  // intentionally carries one suite-level entry. Register every bracketed ID
+  // declared by the test source so case-level results are not mislabeled.
+  const suiteFile = suite.name?.replace(process.cwd() + "/", "");
+  if (suiteFile && fs.existsSync(suiteFile)) {
+    const source = fs.readFileSync(suiteFile, "utf8");
+    for (const match of source.matchAll(/\\[([A-Z][A-Z0-9-]*-\\d{3})\\]/g)) {
+      registeredIds.add(match[1]);
+    }
+  }
   for (const assertion of suite.assertionResults ?? []) {
     const title = assertion.fullName || assertion.title || "Unnamed test";
     const match = title.match(/\[([A-Z][A-Z0-9-]*-\d{3})\]/);
