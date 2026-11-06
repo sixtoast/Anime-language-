@@ -26,10 +26,6 @@ jobs:
           node-version: 22
       - name: Install dependencies
         run: npm install
-      - name: Install Chromium for browser acceptance
-        id: browser-install
-        if: ${{ always() }}
-        run: npx playwright install --with-deps chromium
       - name: Run tests and write machine-readable results
         run: |
           mkdir -p test-results
@@ -64,6 +60,10 @@ jobs:
           path: test-results/build.log
           if-no-files-found: warn
           retention-days: 30
+      - name: Install Chromium for browser acceptance
+        id: browser-install
+        if: ${{ success() }}
+        run: npx playwright install --with-deps chromium
       - name: Run website browser acceptance
         if: ${{ success() && steps.browser-install.outcome == 'success' && steps.build.outcome == 'success' }}
         run: npm run test:browser
