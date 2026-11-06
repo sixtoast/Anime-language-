@@ -714,6 +714,7 @@ export type ModernVernacularUnifiedParseResult =
   | ModernVernacularV22ParseResult
   | ModernVernacularV23ParseResult
   | ModernVernacularV24ParseResult
+  | ModernVernacularV25ParseResult
   | ModernVernacularV26ParseResult
   | ModernVernacularV27ParseResult;
 
@@ -789,7 +790,7 @@ export function parseModernVernacularV20(input: string): ModernVernacularV20Pars
     };
   } else {
     const parsedBase = parseModernVernacular(baseTokens.join(" "));
-    base = { ok: parsedBase.ok, ast: parsedBase.ast, diagnostics: parsedBase.diagnostics };
+    base = { ok: parsedBase.ok, ast: parsedBase.ast as ModernVernacularV20Ast["base"], diagnostics: parsedBase.diagnostics };
   }
   if (!base.ok) return v20Rejected("The underlying clause is not independently licensed by the existing Modern Vernacular parser.", base.diagnostics[0]?.tokenIndex, base.diagnostics[0]?.token);
   if (tokens[tokens.length - 1] === "pun" && tokens.includes("nava")) {
@@ -1030,6 +1031,79 @@ export function parseModernVernacularV24(input: string): ModernVernacularV24Pars
       unit: "se",
       polarQuestion
     },
+    diagnostics: []
+  };
+}
+
+/** Modern Vernacular v2.5: positional integer and fractional-second duration. */
+export type ModernVernacularV25Ast = {
+  kind: "numeric-duration";
+  grammarVersion: "2.5";
+  clause: ModernVernacularV20Ast;
+  integerDigits: number[];
+  fractionalDigits: number[];
+  durationSeconds: number;
+  approximate: boolean;
+  unit: "se";
+  polarQuestion: boolean;
+};
+export type ModernVernacularV25ParseResult = {
+  ok: boolean;
+  grammar: "modern-vernacular-v2.5-locked";
+  ast?: ModernVernacularV25Ast;
+  diagnostics: ModernVernacularDiagnostic[];
+};
+const MV25_DIGITS: Record<string, number> = {
+  za: 0, ki: 1, to: 2, mu: 3, re: 4, sa: 5, fi: 6, du: 7, go: 8, pe: 9
+};
+function v25Rejected(message: string, tokenIndex?: number, token?: string): ModernVernacularV25ParseResult {
+  return { ok: false, grammar: "modern-vernacular-v2.5-locked", diagnostics: [{
+    code: "MV1_UNSUPPORTED_CONSTRUCTION", message,
+    ...(tokenIndex === undefined ? {} : { tokenIndex }),
+    ...(token === undefined ? {} : { token })
+  }] };
+}
+export function parseModernVernacularV25(input: string): ModernVernacularV25ParseResult {
+  const tokens = input.trim().toLowerCase().split(/\\s+/).filter(Boolean);
+  if (!tokens.length) return v25Rejected("Enter a complete v2.5 completed-event numeric-duration clause.");
+  const polarQuestion = tokens[tokens.length - 1] === "pun";
+  const end = tokens.length - (polarQuestion ? 1 : 0);
+  if (end < 4 || tokens[end - 1] !== "se") return v25Rejected("A v2.5 duration must end with a numeric quantity followed by se.");
+  const approximate = tokens[end - 2] === "nela" || tokens[end - 3] === "nela" || tokens[end - 4] === "nela" || tokens[end - 5] === "nela";
+  const numberStart = approximate ? tokens.indexOf("nela", 0) : end - 2;
+  const numericStart = approximate ? numberStart + 1 : end - (tokens.slice(0, end).includes("shi") ? tokens.slice(tokens.slice(0, end).lastIndexOf("shi") + 1, end - 1).length + tokens.slice(0, end).slice(0, tokens.slice(0, end).lastIndexOf("shi")).length + 1 : 2);
+  const quantity = tokens.slice(numericStart, end - 1);
+  if (approximate && (numberStart !== numericStart - 1 || tokens.slice(numericStart, end - 1).includes("nela"))) {
+    return v25Rejected("nela must occur exactly once immediately before the complete numeric quantity.");
+  }
+  const shiPositions = quantity.map((token, index) => token === "shi" ? index : -1).filter(index => index >= 0);
+  if (shiPositions.length > 1) return v25Rejected("Only one shi decimal separator is licensed in v2.5.");
+  const decimalIndex = shiPositions.length ? shiPositions[0] : -1;
+  const integerTokens = decimalIndex < 0 ? quantity : quantity.slice(0, decimalIndex);
+  const fractionalTokens = decimalIndex < 0 ? [] : quantity.slice(decimalIndex + 1);
+  if (integerTokens.length < 1 || integerTokens.length > 4) return v25Rejected("The integer part must contain one to four digit tokens.");
+  if (fractionalTokens.length > 3 || (decimalIndex >= 0 && fractionalTokens.length === 0)) return v25Rejected("A decimal part must contain one to three digit tokens.");
+  if (integerTokens.length > 1 && integerTokens[0] === "za") return v25Rejected("Leading zeroes are not licensed in the integer part.");
+  const allDigits = [...integerTokens, ...fractionalTokens];
+  const invalid = allDigits.findIndex(token => !Object.prototype.hasOwnProperty.call(MV25_DIGITS, token));
+  if (invalid >= 0) return v25Rejected("Numeric positions accept only the canonical digit tokens za through pe.", numericStart + invalid, allDigits[invalid]);
+  const integerDigits = integerTokens.map(token => MV25_DIGITS[token]);
+  const fractionalDigits = fractionalTokens.map(token => MV25_DIGITS[token]);
+  const integerValue = integerDigits.reduce((value, digit) => value * 10 + digit, 0);
+  const fractionalValue = fractionalDigits.reduce((value, digit, index) => value + digit / (10 ** (index + 1)), 0);
+  const durationSeconds = integerValue + fractionalValue;
+  if (durationSeconds <= 0) return v25Rejected("Zero-second duration is not licensed.");
+  const clauseTokens = tokens.slice(0, approximate ? numberStart : numericStart);
+  if (!clauseTokens.length) return v25Rejected("Numeric duration must modify a complete affirmative completed-event clause.");
+  if (tokens.includes("melo") || tokens.includes("runi")) return v25Rejected("Numeric and qualitative duration markers cannot be stacked.");
+  if (tokens.includes("nava")) return v25Rejected("Negative completion and numeric duration are not licensed.");
+  const clause = parseModernVernacularV20(clauseTokens.join(" "));
+  if (!clause.ok || !clause.ast || clause.ast.aspect !== "completed" || clause.ast.polarity !== "positive") {
+    return v25Rejected("Numeric duration requires a complete affirmative don clause licensed for completed eventive aspect.");
+  }
+  return {
+    ok: true, grammar: "modern-vernacular-v2.5-locked",
+    ast: { kind: "numeric-duration", grammarVersion: "2.5", clause: clause.ast, integerDigits, fractionalDigits, durationSeconds, approximate, unit: "se", polarQuestion },
     diagnostics: []
   };
 }
@@ -1277,6 +1351,7 @@ export function parseModernVernacular(input: string): ModernVernacularUnifiedPar
   if (tokens.includes("nemi") || tokens.includes("pavo") || tokens.includes("sula")) return parseModernVernacularV21(input);
   if (tokens.includes("melo") || tokens.includes("runi")) return parseModernVernacularV22(input);
   if (tokens.includes("seno")) return parseModernVernacularV23(input);
+  if (tokens.includes("shi") || tokens.includes("se")) return parseModernVernacularV25(input);
   if (tokens.includes("don") || tokens.includes("kok")) return parseModernVernacularV20(input);
   if (["nari", "dori", "gari"].includes(tokens[0])) return parseModernVernacularV27(input);
   if (tokens[0] === "nela" || ["za","ki","to","mu","re","sa","fi","du","go","pe"].includes(tokens[0])) return parseModernVernacularV26(input);
