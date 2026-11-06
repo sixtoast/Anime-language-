@@ -11,6 +11,10 @@ export interface WorkbenchTest {
 }
 
 export const workbenchTests: WorkbenchTest[] = [
+  { id: "MV21-001", group: "Parser", title: "Anchors aspect clauses to the present", description: "nemi requires a complete v2.0 aspect clause and fixes its reference time to now.", status: "authored-unverified", file: "src/engine/modernVernacularV21.test.ts", sourceRule: "docs/canon/arcane-modern-vernacular-v2.1-temporal-anchor-and-event-order.md §2" },
+  { id: "MV21-002", group: "Parser", title: "Parses binary completed-event ordering", description: "pavo and sula distinguish before and after between two positive completed clauses.", status: "authored-unverified", file: "src/engine/modernVernacularV21.test.ts", sourceRule: "Modern Vernacular v2.1 §3" },
+  { id: "MV21-003", group: "Parser", title: "Rejects unsupported temporal scope", description: "Rejects missing clauses, ongoing/negative ordered events, repeated relations, chains and modal clauses.", status: "authored-unverified", file: "src/engine/modernVernacularV21.test.ts", sourceRule: "Modern Vernacular v2.1 §§2–5" },
+
   { id: "MV20-001", group: "Parser", title: "Parses completed and ongoing aspect", description: "don and kok are recognised in their locked positions and return distinct aspect values.", status: "authored-unverified", file: "src/engine/modernVernacularV20.test.ts", sourceRule: "docs/canon/arcane-modern-vernacular-v2.0-completion-and-ongoing-aspect.md §§2–3" },
   { id: "MV20-002", group: "Parser", title: "Preserves clause-local negative aspect scope", description: "nava don means not completed by reference time; nava kok means not in progress at reference time.", status: "authored-unverified", file: "src/engine/modernVernacularV20.test.ts", sourceRule: "Modern Vernacular v2.0 §4" },
   { id: "MV20-003", group: "Parser", title: "Rejects unlicensed aspect combinations", description: "Aspect stacking, unsupported verbs, modal/directive combinations and negative polar questions are rejected.", status: "authored-unverified", file: "src/engine/modernVernacularV20.test.ts", sourceRule: "Modern Vernacular v2.0 §§3–5" },

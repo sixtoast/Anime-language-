@@ -710,6 +710,7 @@ export type ModernVernacularUnifiedParseResult =
   | ModernVernacularV17ParseResult
   | ModernVernacularV18ParseResult
   | ModernVernacularV20ParseResult
+  | ModernVernacularV21ParseResult
   | ModernVernacularV26ParseResult
   | ModernVernacularV27ParseResult;
 
@@ -785,6 +786,56 @@ export function parseModernVernacularV20(input: string): ModernVernacularV20Pars
       clause: tokens.join(" "),
       base: base.ast
     },
+    diagnostics: []
+  };
+}
+
+/** Modern Vernacular v2.1: explicit current-time anchoring and binary completed-event ordering. */
+export type ModernVernacularV21Ast =
+  | { kind: "temporal-anchor"; grammarVersion: "2.1"; anchor: "now"; clause: ModernVernacularV20Ast }
+  | { kind: "event-order"; grammarVersion: "2.1"; relation: "before" | "after"; first: ModernVernacularV20Ast; second: ModernVernacularV20Ast };
+export type ModernVernacularV21ParseResult = {
+  ok: boolean;
+  grammar: "modern-vernacular-v2.1-locked";
+  ast?: ModernVernacularV21Ast;
+  diagnostics: ModernVernacularDiagnostic[];
+};
+function v21Rejected(message: string, tokenIndex?: number, token?: string): ModernVernacularV21ParseResult {
+  return { ok: false, grammar: "modern-vernacular-v2.1-locked", diagnostics: [{
+    code: "MV1_UNSUPPORTED_CONSTRUCTION", message,
+    ...(tokenIndex === undefined ? {} : { tokenIndex }),
+    ...(token === undefined ? {} : { token })
+  }] };
+}
+function parseV21CompletedClause(input: string): ModernVernacularV20Ast | undefined {
+  const parsed = parseModernVernacularV20(input);
+  if (!parsed.ok || !parsed.ast || parsed.ast.aspect !== "completed" || parsed.ast.polarity !== "positive") return undefined;
+  return parsed.ast;
+}
+export function parseModernVernacularV21(input: string): ModernVernacularV21ParseResult {
+  const tokens = input.trim().toLowerCase().split(/\\s+/).filter(Boolean);
+  if (!tokens.length) return v21Rejected("Enter a complete v2.1 temporal construction.");
+  const anchors = tokens.reduce<number[]>((out, token, index) => (token === "nemi" ? [...out, index] : out), []);
+  const relations = tokens.reduce<number[]>((out, token, index) => (token === "pavo" || token === "sula" ? [...out, index] : out), []);
+  if (anchors.length) {
+    if (anchors.length !== 1 || anchors[0] !== 0 || relations.length) return v21Rejected("nemi must occur exactly once at the start of a single clause and cannot combine with an event-order relation.");
+    const clause = parseModernVernacularV20(tokens.slice(1).join(" "));
+    if (!clause.ok || !clause.ast) return v21Rejected("nemi requires a complete, independently licensed v2.0 aspect clause.");
+    return { ok: true, grammar: "modern-vernacular-v2.1-locked", ast: { kind: "temporal-anchor", grammarVersion: "2.1", anchor: "now", clause: clause.ast }, diagnostics: [] };
+  }
+  if (relations.length !== 1) return v21Rejected("A v2.1 event-order construction requires exactly one pavo or sula between two clauses.");
+  const relationIndex = relations[0];
+  const firstText = tokens.slice(0, relationIndex).join(" ");
+  const secondText = tokens.slice(relationIndex + 1).join(" ");
+  if (!firstText || !secondText) return v21Rejected("Both sides of the temporal relation must be complete clauses.", relationIndex, tokens[relationIndex]);
+  const first = parseV21CompletedClause(firstText);
+  if (!first) return v21Rejected("The first event must be a complete, positive v2.0 don clause with a licensed eventive verb.", 0, tokens[0]);
+  const second = parseV21CompletedClause(secondText);
+  if (!second) return v21Rejected("The second event must be a complete, positive v2.0 don clause with a licensed eventive verb.", relationIndex + 1, tokens[relationIndex + 1]);
+  return {
+    ok: true,
+    grammar: "modern-vernacular-v2.1-locked",
+    ast: { kind: "event-order", grammarVersion: "2.1", relation: tokens[relationIndex] === "pavo" ? "before" : "after", first, second },
     diagnostics: []
   };
 }
@@ -1027,6 +1078,7 @@ export function parseModernVernacularV27(input: string): ModernVernacularV27Pars
 
 export function parseModernVernacular(input: string): ModernVernacularUnifiedParseResult {
   const tokens = input.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  if (tokens.includes("nemi") || tokens.includes("pavo") || tokens.includes("sula")) return parseModernVernacularV21(input);
   if (tokens.includes("don") || tokens.includes("kok")) return parseModernVernacularV20(input);
   if (["nari", "dori", "gari"].includes(tokens[0])) return parseModernVernacularV27(input);
   if (tokens[0] === "nela" || ["za","ki","to","mu","re","sa","fi","du","go","pe"].includes(tokens[0])) return parseModernVernacularV26(input);
