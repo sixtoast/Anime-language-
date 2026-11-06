@@ -45,7 +45,7 @@ export interface LedgerReservation {
   reservationId: string;
   accountId: string;
   amountTicks: number;
-  status: "HELD" | "PARTIALLY-CONSUMED" | "RELEASED";
+  status: "HELD" | "PARTIALLY-CONSUMED" | "SETTLED" | "RELEASED";
 }
 
 export type LedgerIssueCode =
@@ -169,12 +169,12 @@ export function projectResourceLedger(
       else fail("IDEMPOTENCY-COLLISION", "The same idempotency key was reused with different event content.");
       continue;
     }
-    idempotency.set(event.idempotencyKey, fp);
     if (event.status !== "CONFIRMED" || event.evidence !== "PASS") {
       fail(event.evidence === "FAIL" ? "EVIDENCE-FAILED" : "EVIDENCE-UNRESOLVED",
         "Only confirmed events with passing evidence can alter the projected ledger.");
       continue;
     }
+    idempotency.set(event.idempotencyKey, fp);
 
     const apply = () => eventResults.push({ eventId: event.eventId, applied: true, duplicate: false });
     const debit = (account: LedgerAccount, amount: number) => {
@@ -245,7 +245,7 @@ export function projectResourceLedger(
           balances[account.accountId] -= event.amountTicks;
           reserved[account.accountId] -= event.amountTicks;
           reservation.amountTicks -= event.amountTicks;
-          reservation.status = reservation.amountTicks === 0 ? "RELEASED" : "PARTIALLY-CONSUMED";
+          reservation.status = reservation.amountTicks === 0 ? "SETTLED" : "PARTIALLY-CONSUMED";
         } else if (!debit(account, event.amountTicks)) {
           fail("INSUFFICIENT-AVAILABLE", "Consumption exceeds unreserved account balance."); break;
         }
