@@ -930,7 +930,7 @@ function v23Rejected(message: string, tokenIndex?: number, token?: string): Mode
   }] };
 }
 export function parseModernVernacularV23(input: string): ModernVernacularV23ParseResult {
-  const tokens = input.trim().toLowerCase().split(/\\s+/).filter(Boolean);
+  const tokens = input.trim().toLowerCase().split(/\s+/).filter(Boolean);
   if (!tokens.length) return v23Rejected("Enter a complete v2.3 waiting or waiting-until construction.");
   const endpointMarkers = tokens.reduce<number[]>((out, token, index) => token === "kavi" ? [...out, index] : out, []);
   if (endpointMarkers.length > 1) return v23Rejected("Nested or chained kavi endpoints are not licensed in v2.3.");
