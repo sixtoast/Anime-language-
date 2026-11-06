@@ -314,7 +314,7 @@ function App() {
       <main className="main-area">
         <header className="topbar">
           <div className="breadcrumbs"><button className="icon-button mobile-menu" onClick={() => setMobileNav(true)} aria-label="Open navigation"><Menu size={19}/></button><span>Anime Language</span><span className="crumb-slash">/</span><strong>{section}</strong></div>
-          <div className="topbar-actions"><span className="version-chip"><span className="pulse-dot"/> INCANTATIONS v1.8 · WORKBENCH</span><button className="icon-button" title="Search documentation" onClick={() => { changeSection("Documentation"); document.getElementById("global-search")?.focus(); }}><Search size={18}/></button></div>
+          <div className="topbar-actions"><span className="version-chip"><span className="pulse-dot"/> INCANTATIONS v2.1 · WORKBENCH</span><button className="icon-button" title="Search documentation" onClick={() => { changeSection("Documentation"); document.getElementById("global-search")?.focus(); }}><Search size={18}/></button></div>
         </header>
 
         {section === "Overview" && <section className="page-content">
@@ -335,22 +335,22 @@ function App() {
           </div>
           <section className="next-task-panel" aria-labelledby="next-task-title">
             <div className="next-task-heading">
-              <div><div className="eyebrow"><CheckCircle2 size={13}/> RECOMMENDED NEXT · WEB-INC-GATE-01</div><h2 id="next-task-title">Explore the incantation gate sequence</h2></div>
+              <div><div className="eyebrow"><CheckCircle2 size={13}/> RECOMMENDED NEXT · WEB-INC-RUNTIME-01</div><h2 id="next-task-title">Inspect the incantation runtime</h2></div>
               <span className="next-task-priority">HIGH PRIORITY</span>
             </div>
-            <p className="next-task-summary">The v2.1 policy-composition fixture browser is now verified by CI. The next step is to make the incantation lifecycle easier to reason about by exposing the v1.2 validation sequence and v1.5 invocation contract as separate, source-linked sequences.</p>
+            <p className="next-task-summary">The Playground now exposes the v1.2/v1.5 gate sequence, v1.9 resource fixtures, v2.0 authority fixtures and v2.1 policy fixtures. The engine has also gained bounded resource preflight, ledger projection, authority, policy-composition and invocation-gate evaluators. The next website step is to connect these existing evaluators to a read-only runtime diagnostics panel using explicit, labelled sample inputs.</p>
             <div className="next-task-grid">
-              <div><span>WHY THIS IS NEXT</span><p>v1.2 defines the validation and execution gate sequence; v1.5 distinguishes validation, external authorisation, contract acceptance, attempt, observation and verified outcome. They are related but not identical, so the explorer must preserve each source's own sequence.</p></div>
-              <div><span>DEPENDENCIES</span><p>Locked Incantations v1.2 precondition/failure semantics and v1.5 invocation profiles/execution contracts. The explorer is explanatory documentation, not an executable workflow or live runtime trace.</p></div>
+              <div><span>WHY THIS IS NEXT</span><p>The current Playground mostly displays specification fixtures and a non-executable worksheet. The evaluator modules exist, but their outputs are not yet inspectable together from the website. A read-only panel would show what the current TypeScript implementation actually evaluates, and where its evidence assumptions and limitations remain.</p></div>
+              <div><span>DEPENDENCIES</span><p>Existing pure modules: src/engine/resourcePreflight.ts, resourceLedger.ts, authorityGate.ts, policyComposition.ts and invocationGates.ts, with their unit fixtures/tests. The panel must not create real resources, authenticate external evidence, execute spells or imply physical feasibility.</p></div>
               <div><span>FILES / SURFACES</span><p><code>docs/canon/arcane-incantations-v1.2-preconditions-constraints-and-failure.md</code>, <code>docs/canon/arcane-incantations-v1.5-invocation-profiles-and-execution-contracts.md</code>, Playground and browser acceptance tests.</p></div>
-              <div><span>ACCEPTANCE CRITERIA</span><p>Show both sequences separately with source links; selecting a stage exposes its responsibility and non-substitution limits; do not infer live state or execution; preserve stage order and source wording; responsive at 360px.</p></div>
+              <div><span>ACCEPTANCE CRITERIA</span><p>Expose evaluator outputs from deterministic, explicit sample records; show each independent gate state and diagnostic; preserve UNRESOLVED/UNAVAILABLE/BLOCK distinctly; show evaluator limitations and input provenance; never claim a spell was executed; test representative pass, block and unresolved paths plus 360px layout.</p></div>
             </div>
             <div className="next-task-actions">
-              <button className="secondary-button" onClick={() => changeSection("Playground")}>Open gate sequence <span aria-hidden="true">→</span></button>
-              <button className="secondary-button" onClick={() => changeSection("Playground")}>Open incantation worksheet <span aria-hidden="true">→</span></button>
+              <button className="secondary-button" onClick={() => changeSection("Playground")}>Open runtime diagnostics <span aria-hidden="true">→</span></button>
+              <button className="secondary-button" onClick={() => changeSection("Playground")}>Open specification fixtures <span aria-hidden="true">→</span></button>
               <a className="secondary-button" href="https://github.com/sixtoast/Anime-language-/blob/main/docs/WEBSITE-FEATURE-REGISTER.md" target="_blank" rel="noreferrer">Open feature register <span aria-hidden="true">↗</span></a>
             </div>
-            <p className="next-task-caveat">Status: queued website task. This is a source-linked explainer for two related but non-identical specifications, not a workflow engine or a claim about live execution.</p>
+            <p className="next-task-caveat">Status: queued website task. This will visualise existing bounded evaluators only; it will not be an execution engine, external evidence verifier, or claim about real-world effects.</p>
           </section>
           <div className="section-heading"><div><div className="eyebrow">WORKSPACE</div><h2>Everything in one place</h2></div><span className="section-caption">SOURCE RECOVERY · PHASE 01</span></div>
           <div className="feature-grid">
