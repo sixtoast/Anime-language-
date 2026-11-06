@@ -285,8 +285,9 @@ export function projectResourceLedger(
     }
     if (eventResults.length === resultCountBeforeEvent) {
       const eventIssues = issues.slice(issueCountBeforeEvent);
-      const lastIssue = eventIssues[eventIssues.length - 1];
-      if (lastIssue) eventResults.push({
+      const lastIssue = eventIssues[eventIssues.length - 1] ??
+        issue(event.eventId, "EVENT-MALFORMED", "The event does not identify a valid account for its event kind.");
+      eventResults.push({
         eventId: event.eventId,
         applied: false,
         duplicate: false,
@@ -295,7 +296,7 @@ export function projectResourceLedger(
     }
   }
 
-  const available: Record<string, number> = {}
+  const available: Record<string, number> = {};
   for (const id of Object.keys(balances)) available[id] = balances[id] - reserved[id];
   const failed = issues.length > 0;
   const unresolved = issues.some(item => item.code === "EVIDENCE-UNRESOLVED");
