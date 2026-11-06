@@ -3,7 +3,7 @@
 **Status:** Active planning baseline  
 **Scope:** Development Studio website and its documentation, evidence, reporting, usability, and delivery workflows only  
 **Repository:** [sixtoast/Anime-language-](https://github.com/sixtoast/Anime-language-)  
-**Last reconciled:** 2026-10-17
+**Last reconciled:** 2026-11-06
 
 > **Scope boundary:** This plan is for the website. It does not authorize changes to Arcane canon, vocabulary, grammar, parser/engine behaviour, operator semantics, spell mechanics, or physical-feasibility rules. Those are a separate project workstream and remain out of scope unless the owner explicitly changes this boundary.
 
@@ -391,3 +391,16 @@ The next website task is a source-linked explainer that displays the v1.2 valida
 ### WEB-INC-GATE-01 implementation — 2026-10-18
 
 The Playground now contains a source-linked gate-sequence explorer. It parses the nine ordered checks in v1.2 §7 and the seven-stage summary lifecycle in v1.5 separately, with stage-specific non-substitution notes and links to both specifications. The explorer also surfaces an unresolved source-order note: the v1.5 summary chain places external authorisation before contract acceptance, while its worked example describes checking the contract before obtaining external authority. Neither passage is silently rewritten, and the UI does not infer a merged total order. Unit and browser acceptance are pending; mark verified only after CI passes.
+
+
+## Repository reconciliation — 2026-11-06
+
+The 2026-10-17 planning baseline is materially out of date. A new inspection of the live `main` branch confirms the website now includes the Phase 6G source fixture browser, source-aware lexicon inspector, v1.9 resource specification browser, v2.0 authority specification browser, v2.1 policy-composition browser, v1.2/v1.5 gate-sequence explorer, and non-executable incantation contract worksheet. The Documentation catalogue now reaches v2.1 incantation design and v2.7 modern vernacular.
+
+The engine also now contains bounded v1.9 resource preflight and ledger projection, v2.0 authority decision evaluation, v2.1 policy composition and invocation-gate coordination. The website must distinguish these implemented pure evaluators from the specification-only fixture browsers and from any real spell execution. The existing five-section product structure remains in force; no new top-level section is required.
+
+Latest inspected main commit: `1a66fd8b`. GitHub Actions [#692](https://github.com/sixtoast/Anime-language-/actions/runs/42270895535) passed tests, report mapping, type-check/build and website browser acceptance. The final public-report publication step was skipped. Vercel production deployment [dpl_7FzHJLv3MrhZAFGJda8WchjcMQ6W](https://vercel.com/sixtoast1/anime-language/dpl_7FzHJLv3MrhZAFGJda8WchjcMQ6W) is READY for that commit.
+
+The Overview workbench badge has been corrected from v1.8 to v2.1. Its next-task recommendation now points to WEB-INC-RUNTIME-01: a read-only Playground panel that invokes only existing pure evaluator modules with explicit deterministic sample inputs and displays their independent results, diagnostics and limitations. It must not call external identity/policy services, mutate resource state, or imply that a spell has been executed. The Overview browser assertion has been updated to protect the version badge and recommendation.
+
+GitHub Actions usage is currently limited according to the project owner. Do not deliberately trigger new workflows until the limit resets. Changes after commit `1a66fd8b` therefore remain unverified by CI unless the owner reports that Actions are available again or an alternative local verification environment is used. See the current [Website Feature Register](WEBSITE-FEATURE-REGISTER.md).
