@@ -37,8 +37,10 @@ export interface AuthorityGateDiagnostic {
   message: string;
 }
 
+export type AuthorityGateOutcome = AuthorityDecisionOutcome | "MALFORMED-REQUEST" | "INSUFFICIENT-CONTEXT";
+
 export interface AuthorityGateResult {
-  outcome: AuthorityDecisionOutcome;
+  outcome: AuthorityGateOutcome;
   gateSatisfied: boolean;
   diagnostics: AuthorityGateDiagnostic[];
   limitations: string[];
@@ -52,7 +54,7 @@ const LIMITATIONS = [
 ];
 
 function block(
-  outcome: AuthorityDecisionOutcome,
+  outcome: AuthorityGateOutcome,
   diagnostics: AuthorityGateDiagnostic[]
 ): AuthorityGateResult {
   return { outcome, gateSatisfied: false, diagnostics, limitations: [...LIMITATIONS] };
@@ -65,7 +67,7 @@ export function evaluateAuthorityGate(input: AuthorityGateInput): AuthorityGateR
 
   if (input.requestWellFormed === false) {
     add("REQUEST", "MALFORMED-REQUEST", "The authorisation request is not well formed.");
-    return block("MALFORMED-DECISION", diagnostics);
+    return block("MALFORMED-REQUEST", diagnostics);
   }
   if (input.requestWellFormed === "UNKNOWN" || input.decisionWellFormed === "UNKNOWN") {
     add("REQUEST", "VALIDATION-UNKNOWN", "Request or decision validation is unresolved.");
