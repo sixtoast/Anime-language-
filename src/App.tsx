@@ -18,6 +18,7 @@ import { resourceAccountingFixtures } from "./engine/resourceAccountingFixtures"
 import { authorityDecisionFixtures } from "./engine/authorityDecisionFixtures";
 import { policyProfileCompositionFixtures } from "./engine/policyProfileCompositionFixtures";
 import { invocationLifecycleSequence, invocationOrderNote, validationGateSequence } from "./engine/incantationGateSequence";
+import { evaluateIncantationRuntimePreview, runtimePreviewScenarios, type RuntimePreviewScenario } from "./engine/incantationRuntimePreview";
 
 type Section = "Overview" | "Documentation" | "Playground" | "Test suite" | "Research & review";
 
@@ -95,6 +96,7 @@ function App() {
   const [selectedPolicyFixtureId, setSelectedPolicyFixtureId] = useState("POL21-01");
   const [selectedValidationGateId, setSelectedValidationGateId] = useState("CON12-01");
   const [selectedInvocationStageId, setSelectedInvocationStageId] = useState("INV15-01");
+  const [runtimePreviewScenario, setRuntimePreviewScenario] = useState<RuntimePreviewScenario>("READY-SAMPLE");
   const [contractOperation, setContractOperation] = useState("kren");
   const [contractTarget, setContractTarget] = useState("");
   const [contractDesiredOutcome, setContractDesiredOutcome] = useState("");
@@ -244,6 +246,7 @@ function App() {
   const selectedPolicyFixture = useMemo(() => policyProfileCompositionFixtures.find((fixture) => fixture.id === selectedPolicyFixtureId) ?? policyProfileCompositionFixtures[0], [selectedPolicyFixtureId]);
   const selectedValidationGate = useMemo(() => validationGateSequence.find((stage) => stage.id === selectedValidationGateId) ?? validationGateSequence[0], [selectedValidationGateId]);
   const selectedInvocationStage = useMemo(() => invocationLifecycleSequence.find((stage) => stage.id === selectedInvocationStageId) ?? invocationLifecycleSequence[0], [selectedInvocationStageId]);
+  const runtimePreview = useMemo(() => evaluateIncantationRuntimePreview(runtimePreviewScenario), [runtimePreviewScenario]);
   const contractWorksheet = useMemo(() => ({
     recordType: "ARCANE-INCANTATION-CONTRACT-WORKSHEET",
     specificationLayer: "Modern incantation design v1.0–v2.0",
@@ -473,6 +476,21 @@ function App() {
             <p className="fixture-browser-caveat">This is an explainer, not an execution timeline, workflow engine, status monitor or proof that any gate has passed. VALIDATED is not authorised; authorised is not executed; executed is not outcome-verified.</p>
           </section>
 
+          <section className="fixture-browser runtime-preview-browser" aria-labelledby="runtime-preview-title">
+            <div className="fixture-browser-head"><div><span className="detail-kicker">CONNECTED EVALUATORS · READ-ONLY SAMPLE</span><h2 id="runtime-preview-title">Unified invocation diagnostics</h2></div><span>5 evaluator layers</span></div>
+            <p className="fixture-browser-intro">This panel runs the repository's bounded resource-preflight, policy-composition, authority-gate and invocation-coordinator functions against explicit sample inputs. It is an integration preview, not a real spell runtime or evidence-verification service.</p>
+            <label className="fixture-select-label">Choose a diagnostic scenario<select aria-label="Choose incantation runtime preview scenario" value={runtimePreviewScenario} onChange={(event) => setRuntimePreviewScenario(event.target.value as RuntimePreviewScenario)}>{runtimePreviewScenarios.map((scenario) => <option key={scenario.id} value={scenario.id}>{scenario.label}</option>)}</select></label>
+            <p className="runtime-preview-description">{runtimePreview.description}</p>
+            <div className="runtime-preview-outcome"><div><span>COORDINATED RESULT</span><strong className={runtimePreview.invocation.outcome === "ELIGIBLE-TO-PROCEED" ? "runtime-good" : runtimePreview.invocation.outcome === "BLOCKED" ? "runtime-blocked" : "runtime-unresolved"}>{runtimePreview.invocation.outcome}</strong></div><div><span>EXECUTION</span><strong>NOT STARTED</strong></div></div>
+            <div className="runtime-preview-grid">
+              <div><span>RESOURCE PREFLIGHT</span><strong>{runtimePreview.resource.outcome}</strong><small>{runtimePreview.resource.availableAmount === undefined ? "Available amount unresolved" : `Available: ${runtimePreview.resource.availableAmount} ${"mana-tick"}`}</small></div>
+              <div><span>POLICY COMPOSITION</span><strong>{runtimePreview.policy.outcome}</strong><small>{runtimePreview.policy.selectedProfileIds.length} selected profile(s)</small></div>
+              <div><span>AUTHORITY GATE</span><strong>{runtimePreview.authority.outcome}</strong><small>{runtimePreview.authority.gateSatisfied ? "Sample decision gate satisfied" : "Permission not established"}</small></div>
+            </div>
+            <div className="runtime-preview-trace"><h3>Independent invocation gates</h3>{runtimePreview.invocation.trace.map((entry, index) => <div className="runtime-preview-trace-row" key={entry.gate + index}><code>{entry.gate}</code><strong className={"runtime-state-" + entry.state.toLowerCase()}>{entry.state}</strong><span>{entry.reason}</span></div>)}</div>
+            <details className="runtime-preview-details"><summary>Evidence assumptions and evaluator limitations</summary><ul>{runtimePreview.assumptions.map((item) => <li key={item}>{item}</li>)}{runtimePreview.resource.limitations.map((item) => <li key={item}>{item}</li>)}{runtimePreview.policy.limitations.map((item) => <li key={item}>{item}</li>)}{runtimePreview.authority.limitations.map((item) => <li key={item}>{item}</li>)}{runtimePreview.invocation.limitations.map((item) => <li key={item}>{item}</li>)}</ul></details>
+            <p className="fixture-browser-caveat">A passing preview means only that these sample inputs satisfy the implemented functions. External trust, live scope resolution, predicate acquisition, physical feasibility, executor contracts and outcome verification remain outside this panel. The v1.5 source-order discrepancy is still preserved separately above.</p>
+          </section>
           <section className="contract-worksheet" aria-labelledby="contract-worksheet-title">
             <div className="contract-worksheet-head">
               <div><span className="detail-kicker">INCANTATION DESIGN LAB · NON-EXECUTABLE</span><h2 id="contract-worksheet-title">Incantation contract worksheet</h2></div>
