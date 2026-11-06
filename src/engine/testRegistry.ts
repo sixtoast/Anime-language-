@@ -11,6 +11,10 @@ export interface WorkbenchTest {
 }
 
 export const workbenchTests: WorkbenchTest[] = [
+  { id: "MV27-001", group: "Parser", title: "Parses exact quantity comparisons", description: "The v2.7 nari, dori and gari frames parse two complete same-unit typed quantities.", status: "authored-unverified", file: "src/engine/modernVernacularV27.test.ts", sourceRule: "docs/canon/arcane-modern-vernacular-v2.7-quantity-comparison.md" },
+  { id: "MV27-002", group: "Parser", title: "Evaluates comparison truth", description: "Well-formed equal, less-than and greater-than comparisons preserve false as a valid truth result.", status: "authored-unverified", file: "src/engine/modernVernacularV27.test.ts", sourceRule: "Modern Vernacular v2.7 §§2–4" },
+  { id: "MV27-003", group: "Parser", title: "Rejects incompatible or approximate operands", description: "Approximate quantities, mismatched units, zero values, malformed decimals and extra operands are rejected.", status: "authored-unverified", file: "src/engine/modernVernacularV27.test.ts", sourceRule: "Modern Vernacular v2.7 §§3–5" },
+
   { id: "PARSE-001", group: "Parser", title: "Parses binary operator", description: "FRAPA with two symbols produces a call node with two ordered arguments.", status: "authored-unverified", file: "src/engine/auditParser.test.ts", sourceRule: "LAN-005, LAN-006" },
   { id: "PARSE-002", group: "Parser", title: "Preserves nested structure", description: "Nested FRAPA calls remain nested in the returned syntax tree.", status: "authored-unverified", file: "src/engine/auditParser.test.ts", sourceRule: "LAN-002, LAN-005" },
   { id: "PARSE-003", group: "Parser", title: "Rejects missing arguments", description: "A binary operator call with one argument is rejected.", status: "authored-unverified", file: "src/engine/auditParser.test.ts", sourceRule: "LAN-005, LAN-006" },
