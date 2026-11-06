@@ -713,6 +713,7 @@ export type ModernVernacularUnifiedParseResult =
   | ModernVernacularV21ParseResult
   | ModernVernacularV22ParseResult
   | ModernVernacularV23ParseResult
+  | ModernVernacularV24ParseResult
   | ModernVernacularV26ParseResult
   | ModernVernacularV27ParseResult;
 
@@ -725,7 +726,7 @@ export type ModernVernacularV20Ast = {
   polarity: "positive" | "negative";
   action: "wish" | "nak" | "zir" | "mos" | "mol" | "tut" | "bul" | "lil" | "ful" | "zem" | "seno";
   clause: string;
-  base: ModernVernacularParseResult["ast"] | ModernVernacularV11ParseResult["ast"] | ModernVernacularV12ParseResult["ast"] | ModernVernacularV13ParseResult["ast"] | ModernVernacularV14ParseResult["ast"] | ModernVernacularV15ParseResult["ast"] | ModernVernacularV16ParseResult["ast"] | ModernVernacularV17ParseResult["ast"] | ModernVernacularV18ParseResult["ast"];
+  base: ModernVernacularParseResult["ast"] | ModernVernacularV11ParseResult["ast"] | ModernVernacularV12ParseResult["ast"] | ModernVernacularV13ParseResult["ast"] | ModernVernacularV14ParseResult["ast"] | ModernVernacularV15ParseResult["ast"] | ModernVernacularV16ParseResult["ast"] | ModernVernacularV17ParseResult["ast"] | ModernVernacularV18ParseResult["ast"]
     | { kind: "waiting-clause"; subject: string; polarity: "positive" | "negative"; polarQuestion: boolean };
 };
 export type ModernVernacularV20ParseResult = {
@@ -957,6 +958,78 @@ export function parseModernVernacularV23(input: string): ModernVernacularV23Pars
     ok: true,
     grammar: "modern-vernacular-v2.3-locked",
     ast: { kind: "waiting-until", grammarVersion: "2.3", waiting: waiting.ast, endpoint: endpoint.ast, endpointRequiresRecoverableDeicticCentre: true, polarQuestion },
+    diagnostics: []
+  };
+}
+
+/** Modern Vernacular v2.4: whole-second numeric duration on affirmative completed events. */
+export type ModernVernacularV24Ast = {
+  kind: "numeric-duration";
+  grammarVersion: "2.4";
+  clause: ModernVernacularV20Ast;
+  durationSeconds: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+  approximate: boolean;
+  unit: "se";
+  polarQuestion: boolean;
+};
+export type ModernVernacularV24ParseResult = {
+  ok: boolean;
+  grammar: "modern-vernacular-v2.4-locked";
+  ast?: ModernVernacularV24Ast;
+  diagnostics: ModernVernacularDiagnostic[];
+};
+const MV24_DIGITS: Record<string, number> = {
+  ki: 1, to: 2, mu: 3, re: 4, sa: 5, fi: 6, du: 7, go: 8, pe: 9, za: 0
+};
+function v24Rejected(message: string, tokenIndex?: number, token?: string): ModernVernacularV24ParseResult {
+  return { ok: false, grammar: "modern-vernacular-v2.4-locked", diagnostics: [{
+    code: "MV1_UNSUPPORTED_CONSTRUCTION", message,
+    ...(tokenIndex === undefined ? {} : { tokenIndex }),
+    ...(token === undefined ? {} : { token })
+  }] };
+}
+export function parseModernVernacularV24(input: string): ModernVernacularV24ParseResult {
+  const tokens = input.trim().toLowerCase().split(/\\s+/).filter(Boolean);
+  if (!tokens.length) return v24Rejected("Enter a complete v2.4 completed-event numeric-duration clause.");
+  const polarQuestion = tokens[tokens.length - 1] === "pun";
+  const end = tokens.length - (polarQuestion ? 1 : 0);
+  if (end < 4 || tokens[end - 1] !== "se") {
+    return v24Rejected("A v2.4 numeric duration must end with one digit token followed by se, optionally preceded by nela.");
+  }
+  const digitIndex = end - 2;
+  const digit = tokens[digitIndex];
+  if (!Object.prototype.hasOwnProperty.call(MV24_DIGITS, digit)) {
+    return v24Rejected("The numeric duration slot accepts exactly one canonical digit token immediately before se.", digitIndex, digit);
+  }
+  const durationSeconds = MV24_DIGITS[digit];
+  if (durationSeconds === 0) return v24Rejected("Zero-second completed-event duration is not licensed in v2.4.", digitIndex, digit);
+  const approximate = tokens[digitIndex - 1] === "nela";
+  const durationStart = digitIndex - (approximate ? 1 : 0);
+  const clauseTokens = tokens.slice(0, durationStart);
+  if (!clauseTokens.length) return v24Rejected("Numeric duration must modify a complete affirmative completed-event clause.");
+  if (tokens.slice(durationStart, end).filter(token => token === "nela").length !== (approximate ? 1 : 0)) {
+    return v24Rejected("nela must occur exactly once immediately before the digit and scope over the complete duration phrase.");
+  }
+  if (tokens.includes("melo") || tokens.includes("runi")) {
+    return v24Rejected("Numeric duration cannot be combined with the qualitative duration markers melo or runi.");
+  }
+  if (tokens.includes("nava")) return v24Rejected("Negative completion and numeric duration are not licensed together in v2.4.");
+  const clause = parseModernVernacularV20(clauseTokens.join(" "));
+  if (!clause.ok || !clause.ast || clause.ast.aspect !== "completed" || clause.ast.polarity !== "positive") {
+    return v24Rejected("Numeric duration requires a complete affirmative don clause licensed for completed eventive aspect.");
+  }
+  return {
+    ok: true,
+    grammar: "modern-vernacular-v2.4-locked",
+    ast: {
+      kind: "numeric-duration",
+      grammarVersion: "2.4",
+      clause: clause.ast,
+      durationSeconds: durationSeconds as ModernVernacularV24Ast["durationSeconds"],
+      approximate,
+      unit: "se",
+      polarQuestion
+    },
     diagnostics: []
   };
 }
@@ -1199,6 +1272,7 @@ export function parseModernVernacularV27(input: string): ModernVernacularV27Pars
 
 export function parseModernVernacular(input: string): ModernVernacularUnifiedParseResult {
   const tokens = input.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  if (tokens.includes("se") && tokens.includes("don")) return parseModernVernacularV24(input);
   if (tokens.includes("kavi")) return parseModernVernacularV23(input);
   if (tokens.includes("nemi") || tokens.includes("pavo") || tokens.includes("sula")) return parseModernVernacularV21(input);
   if (tokens.includes("melo") || tokens.includes("runi")) return parseModernVernacularV22(input);
