@@ -65,7 +65,7 @@ describe("Arcane Incantations v1.9 resource ledger projection", () => {
     const wrongUnit = event({ unit: "milliunit" });
     const transform = event({ eventKind: "TRANSFORMATION-INPUT" });
     expect(projectResourceLedger(accounts(), [wrongUnit]).balances.a).toBe(100);
-    expect(projectResourceLedger(accounts(), [transform]).issues[0]?.code).toBe("UNIT-CONTRACT-MISMATCH");
+    expect(projectResourceLedger(accounts(), [transform]).issues[0]?.code).toBe("EVENT-KIND-UNSUPPORTED");
   });
   it("[RES19-LEDGER-011] requires unique account and event identities", () => {
     expect(projectResourceLedger([...accounts(), accounts()[0]!], []).outcome).toBe("LEDGER-MALFORMED");
