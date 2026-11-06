@@ -750,6 +750,7 @@ function v27Rejected(message: string, tokenIndex?: number, token?: string): Mode
 
 function parseV27Quantity(tokens: string[], offset: number): {
   quantity?: ModernVernacularV27Ast["left"];
+  scaledValue?: number;
   next: number;
   error?: string;
 } {
@@ -782,11 +783,10 @@ function parseV27Quantity(tokens: string[], offset: number): {
   }
   offset++;
   const integerValue = Number(integerDigits.map(digit => MV27_DIGITS[digit]).join(""));
-  const fractionValue = fractionalDigits.length
-    ? Number("0." + fractionalDigits.map(digit => MV27_DIGITS[digit]).join(""))
-    : 0;
-  const value = integerValue + fractionValue;
-  if (!Number.isFinite(value) || value <= 0) {
+  const fractionText = fractionalDigits.map(digit => MV27_DIGITS[digit]).join("").padEnd(3, "0");
+  const scaledValue = integerValue * 1000 + Number(fractionText || "0");
+  const value = scaledValue / 1000;
+  if (!Number.isFinite(value) || scaledValue <= 0) {
     return { next: offset, error: "Comparison quantities must be finite and greater than zero." };
   }
   return {
@@ -795,7 +795,8 @@ function parseV27Quantity(tokens: string[], offset: number): {
       raw: tokens.slice(start, offset).join(" "),
       value,
       unit: unit as ModernVernacularV27Unit
-    }
+    },
+    scaledValue
   };
 }
 
@@ -817,11 +818,13 @@ export function parseModernVernacularV27(input: string): ModernVernacularV27Pars
     return v27Rejected("Both comparison operands must use the exact same unit token. Unit conversion is not defined in v2.7.", left.next, tokens[left.next]);
   }
   const relation = operator === "nari" ? "equal" : operator === "dori" ? "less-than" : "greater-than";
+  const leftScaled = left.scaledValue ?? Math.round(left.quantity.value * 1000);
+  const rightScaled = right.scaledValue ?? Math.round(right.quantity.value * 1000);
   const truth = relation === "equal"
-    ? left.quantity.value === right.quantity.value
+    ? leftScaled === rightScaled
     : relation === "less-than"
-      ? left.quantity.value < right.quantity.value
-      : left.quantity.value > right.quantity.value;
+      ? leftScaled < rightScaled
+      : leftScaled > rightScaled;
   return {
     ok: true,
     grammar: "modern-vernacular-v2.7-locked",
