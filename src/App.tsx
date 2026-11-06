@@ -19,7 +19,8 @@ import { authorityDecisionFixtures } from "./engine/authorityDecisionFixtures";
 import { policyProfileCompositionFixtures } from "./engine/policyProfileCompositionFixtures";
 import { invocationLifecycleSequence, invocationOrderNote, validationGateSequence } from "./engine/incantationGateSequence";
 import { evaluateIncantationRuntimePreview, runtimePreviewScenarios, type RuntimePreviewScenario } from "./engine/incantationRuntimePreview";
-import { reviewConstructionRecord, type ConstructionRecord, type ConstructionStage, type ConstructionEvidenceStatus } from "./engine/constructionRecordReview";
+import { reviewConstructionRecord, type ConstructionRecord, type ConstructionEvidenceStatus } from "./engine/constructionRecordReview";
+import type { ConstructionStage } from "./engine/constructionOrderAudit";
 
 type Section = "Overview" | "Documentation" | "Playground" | "Test suite" | "Research & review";
 
