@@ -722,7 +722,7 @@ export type ModernVernacularV20Ast = {
   polarity: "positive" | "negative";
   action: "wish" | "nak" | "zir" | "mos" | "mol" | "tut" | "bul" | "lil" | "ful" | "zem";
   clause: string;
-  base: ModernVernacularUnifiedParseResult["ast"];
+  base: ModernVernacularParseResult["ast"] | ModernVernacularV11ParseResult["ast"] | ModernVernacularV12ParseResult["ast"] | ModernVernacularV13ParseResult["ast"] | ModernVernacularV14ParseResult["ast"] | ModernVernacularV15ParseResult["ast"] | ModernVernacularV16ParseResult["ast"] | ModernVernacularV17ParseResult["ast"] | ModernVernacularV18ParseResult["ast"];
 };
 export type ModernVernacularV20ParseResult = {
   ok: boolean;
