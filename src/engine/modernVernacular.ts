@@ -813,7 +813,7 @@ function parseV21CompletedClause(input: string): ModernVernacularV20Ast | undefi
   return parsed.ast;
 }
 export function parseModernVernacularV21(input: string): ModernVernacularV21ParseResult {
-  const tokens = input.trim().toLowerCase().split(/\\s+/).filter(Boolean);
+  const tokens = input.trim().toLowerCase().split(/\s+/).filter(Boolean);
   if (!tokens.length) return v21Rejected("Enter a complete v2.1 temporal construction.");
   const anchors = tokens.reduce<number[]>((out, token, index) => (token === "nemi" ? [...out, index] : out), []);
   const relations = tokens.reduce<number[]>((out, token, index) => (token === "pavo" || token === "sula" ? [...out, index] : out), []);
