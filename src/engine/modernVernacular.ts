@@ -1064,18 +1064,18 @@ function v25Rejected(message: string, tokenIndex?: number, token?: string): Mode
   }] };
 }
 export function parseModernVernacularV25(input: string): ModernVernacularV25ParseResult {
-  const tokens = input.trim().toLowerCase().split(/\\s+/).filter(Boolean);
+  const tokens = input.trim().toLowerCase().split(/\s+/).filter(Boolean);
   if (!tokens.length) return v25Rejected("Enter a complete v2.5 completed-event numeric-duration clause.");
   const polarQuestion = tokens[tokens.length - 1] === "pun";
   const end = tokens.length - (polarQuestion ? 1 : 0);
   if (end < 4 || tokens[end - 1] !== "se") return v25Rejected("A v2.5 duration must end with a numeric quantity followed by se.");
-  const approximate = tokens[end - 2] === "nela" || tokens[end - 3] === "nela" || tokens[end - 4] === "nela" || tokens[end - 5] === "nela";
-  const numberStart = approximate ? tokens.indexOf("nela", 0) : end - 2;
-  const numericStart = approximate ? numberStart + 1 : end - (tokens.slice(0, end).includes("shi") ? tokens.slice(tokens.slice(0, end).lastIndexOf("shi") + 1, end - 1).length + tokens.slice(0, end).slice(0, tokens.slice(0, end).lastIndexOf("shi")).length + 1 : 2);
-  const quantity = tokens.slice(numericStart, end - 1);
-  if (approximate && (numberStart !== numericStart - 1 || tokens.slice(numericStart, end - 1).includes("nela"))) {
-    return v25Rejected("nela must occur exactly once immediately before the complete numeric quantity.");
-  }
+  const unitIndex = end - 1;
+  let numericStart = unitIndex - 1;
+  while (numericStart >= 0 && (Object.prototype.hasOwnProperty.call(MV25_DIGITS, tokens[numericStart]) || tokens[numericStart] === "shi")) numericStart -= 1;
+  numericStart += 1;
+  const approximate = tokens[numericStart - 1] === "nela";
+  const numberStart = approximate ? numericStart - 1 : numericStart;
+  const quantity = tokens.slice(numericStart, unitIndex);
   const shiPositions = quantity.map((token, index) => token === "shi" ? index : -1).filter(index => index >= 0);
   if (shiPositions.length > 1) return v25Rejected("Only one shi decimal separator is licensed in v2.5.");
   const decimalIndex = shiPositions.length ? shiPositions[0] : -1;
@@ -1093,7 +1093,7 @@ export function parseModernVernacularV25(input: string): ModernVernacularV25Pars
   const fractionalValue = fractionalDigits.reduce((value, digit, index) => value + digit / (10 ** (index + 1)), 0);
   const durationSeconds = integerValue + fractionalValue;
   if (durationSeconds <= 0) return v25Rejected("Zero-second duration is not licensed.");
-  const clauseTokens = tokens.slice(0, approximate ? numberStart : numericStart);
+  const clauseTokens = tokens.slice(0, numberStart);
   if (!clauseTokens.length) return v25Rejected("Numeric duration must modify a complete affirmative completed-event clause.");
   if (tokens.includes("melo") || tokens.includes("runi")) return v25Rejected("Numeric and qualitative duration markers cannot be stacked.");
   if (tokens.includes("nava")) return v25Rejected("Negative completion and numeric duration are not licensed.");
