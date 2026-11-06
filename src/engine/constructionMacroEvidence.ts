@@ -8,6 +8,7 @@ export type ConstructionMacroStatus = "PATTERN-DESCRIBED" | "PROPOSED" | "PARTIA
 export interface ConstructionMacroEvidence {
   form: string;
   gloss: string;
+  lexicalStatus: "RECORDED-CANON-LEXICAL-FORM";
   evidenceStatus: Exclude<ConstructionMacroStatus, "UNRECOGNISED" | "EMPTY">;
   recoveredEvidence: string;
   unresolvedContract: string;
@@ -15,12 +16,12 @@ export interface ConstructionMacroEvidence {
 }
 const notExecutable = false as const;
 export const constructionMacroEvidence: readonly ConstructionMacroEvidence[] = [
-  { form: "TRAK", gloss: "alter", evidenceStatus: "PATTERN-DESCRIBED", recoveredEvidence: "Phase 4 §3.2 describes voiceless-stop frames p, t and k for discrete change.", unresolvedContract: "Exact expansion, arity, input/output relation, and physical/resource semantics are not recovered.", executable: notExecutable },
-  { form: "KREN", gloss: "establish", evidenceStatus: "PROPOSED", recoveredEvidence: "Phase 4 §3.2 proposes voiced-stop frames b, d and g as a reinforced counterpart to TRAK.", unresolvedContract: "The source marks this proposal as requiring owner confirmation; exact Foot mapping and operational meaning remain open.", executable: notExecutable },
-  { form: "FREM", gloss: "maintain", evidenceStatus: "PARTIAL-EXAMPLE", recoveredEvidence: "The Phase 4 hand-flame example uses ken as a held energy state.", unresolvedContract: "A general pattern, duration semantics, maintenance conditions, resource limits and termination behaviour are not established.", executable: notExecutable },
-  { form: "SHREN", gloss: "release", evidenceStatus: "PARTIAL-EXAMPLE", recoveredEvidence: "The Phase 4 hand-flame example uses kas for release.", unresolvedContract: "The general pattern, release target, release mode and safety conditions are not established.", executable: notExecutable },
-  { form: "BRAN", gloss: "couple", evidenceStatus: "PATTERN-DESCRIBED", recoveredEvidence: "Phase 4 §3.2 describes h-domain syllables as a coupling family.", unresolvedContract: "Exact coupling composition, participant order, domain mapping and resource costs remain unresolved.", executable: notExecutable },
-  { form: "VARE", gloss: "prefer", evidenceStatus: "ROLE-DESCRIBED", recoveredEvidence: "Phase 4 §3.2 and §6 G-4 describe a soft-requirement modifier paired with hard REQUIRE.", unresolvedContract: "Attachment, conflict resolution, failure policy and operational semantics remain open.", executable: notExecutable }
+  { form: "TRAK", lexicalStatus: "RECORDED-CANON-LEXICAL-FORM", gloss: "alter", evidenceStatus: "PATTERN-DESCRIBED", recoveredEvidence: "Phase 4 §3.2 describes voiceless-stop frames p, t and k for discrete change.", unresolvedContract: "Exact expansion, arity, input/output relation, and physical/resource semantics are not recovered.", executable: notExecutable },
+  { form: "KREN", lexicalStatus: "RECORDED-CANON-LEXICAL-FORM", gloss: "establish", evidenceStatus: "PROPOSED", recoveredEvidence: "Phase 4 §3.2 proposes voiced-stop frames b, d and g as a reinforced counterpart to TRAK.", unresolvedContract: "The source marks this proposal as requiring owner confirmation; exact Foot mapping and operational meaning remain open.", executable: notExecutable },
+  { form: "FREM", lexicalStatus: "RECORDED-CANON-LEXICAL-FORM", gloss: "maintain", evidenceStatus: "PARTIAL-EXAMPLE", recoveredEvidence: "The Phase 4 hand-flame construction includes the Foot ken as a held energy state; the matrix associates this with FREM only as partial example evidence, not as a proven one-to-one macro expansion.", unresolvedContract: "A general pattern, duration semantics, maintenance conditions, resource limits and termination behaviour are not established.", executable: notExecutable },
+  { form: "SHREN", lexicalStatus: "RECORDED-CANON-LEXICAL-FORM", gloss: "release", evidenceStatus: "PARTIAL-EXAMPLE", recoveredEvidence: "The Phase 4 hand-flame construction includes the Foot kas for release; the matrix associates this with SHREN only as partial example evidence, not as a proven one-to-one macro expansion.", unresolvedContract: "The general pattern, release target, release mode and safety conditions are not established.", executable: notExecutable },
+  { form: "BRAN", lexicalStatus: "RECORDED-CANON-LEXICAL-FORM", gloss: "couple", evidenceStatus: "PATTERN-DESCRIBED", recoveredEvidence: "Phase 4 §3.2 describes h-domain syllables as a coupling family.", unresolvedContract: "Exact coupling composition, participant order, domain mapping and resource costs remain unresolved.", executable: notExecutable },
+  { form: "VARE", lexicalStatus: "RECORDED-CANON-LEXICAL-FORM", gloss: "prefer", evidenceStatus: "ROLE-DESCRIBED", recoveredEvidence: "Phase 4 §3.2 and §6 G-4 describe a soft-requirement modifier paired with hard REQUIRE.", unresolvedContract: "Attachment, conflict resolution, failure policy and operational semantics remain open.", executable: notExecutable }
 ] as const;
 export interface ConstructionMacroReview {
   input: string;

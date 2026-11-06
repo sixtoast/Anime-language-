@@ -500,9 +500,10 @@ function App() {
               <input id="construction-macro-input" value={constructionMacroInput} onChange={event => setConstructionMacroInput(event.target.value)} placeholder="e.g. TRAK" spellCheck={false} />
               <div className="construction-macro-result" role="status" aria-live="polite">
                 <strong>{constructionMacroReview.status.replaceAll("-", " ")}</strong>
+                {constructionMacroReview.entry && <p><b>Lexical record:</b> {constructionMacroReview.entry.lexicalStatus.replaceAll("-", " ").toLowerCase()}; this does not mean its Construction macro contract is complete.</p>}
                 {constructionMacroReview.entry && <div className="construction-macro-heading"><span>{constructionMacroReview.entry.form}</span><span>{constructionMacroReview.entry.gloss}</span></div>}
                 <p>{constructionMacroReview.message}</p>
-                {constructionMacroReview.entry && <><p><b>Recovered evidence:</b> {constructionMacroReview.entry.recoveredEvidence}</p><p><b>Open contract:</b> {constructionMacroReview.entry.unresolvedContract}</p></>}
+                {constructionMacroReview.entry && <><p><b>Recovered Construction evidence:</b> {constructionMacroReview.entry.recoveredEvidence}</p><p><b>Open contract:</b> {constructionMacroReview.entry.unresolvedContract}</p></>}
               </div>
               <p className="fixture-browser-caveat">Source status is not a completion status. All six forms remain non-executable in this inspector.</p>
             </div>
