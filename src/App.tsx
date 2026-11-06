@@ -24,6 +24,7 @@ import type { ConstructionStage } from "./engine/constructionOrderAudit";
 import { bindConstructionReference, type ConstructionReferenceToken } from "./engine/constructionReferenceContext";
 import { reviewConstructionFootShape } from "./engine/constructionFootShape";
 import { reviewConstructionCoupling } from "./engine/constructionCouplingEvidence";
+import { reviewConstructionMacro } from "./engine/constructionMacroEvidence";
 
 type Section = "Overview" | "Documentation" | "Playground" | "Test suite" | "Research & review";
 
@@ -126,6 +127,8 @@ function App() {
   const constructionFootReview = useMemo(() => reviewConstructionFootShape(constructionFootInput.trim()), [constructionFootInput]);
   const [constructionCouplingInput, setConstructionCouplingInput] = useState("ha");
   const constructionCouplingReview = useMemo(() => reviewConstructionCoupling(constructionCouplingInput), [constructionCouplingInput]);
+  const [constructionMacroInput, setConstructionMacroInput] = useState("TRAK");
+  const constructionMacroReview = useMemo(() => reviewConstructionMacro(constructionMacroInput), [constructionMacroInput]);
   const constructionReference = useMemo(
     () => bindConstructionReference(constructionReferenceToken, constructionReferenceId),
     [constructionReferenceToken, constructionReferenceId]
@@ -489,6 +492,19 @@ function App() {
                 {constructionCouplingReview.entry && <p>{constructionCouplingReview.entry.limitation}</p>}
               </div>
               <p className="fixture-browser-caveat">All six entries have unresolved signatures and provisional physical mappings. No combination of these labels is treated as a valid or feasible coupling.</p>
+            </div>
+            <div className="construction-macro-review">
+              <div className="detail-kicker">OPERATIONAL MACROS · SOURCE EVIDENCE ONLY</div>
+              <p>Inspect the six operational forms without turning incomplete glosses into parser signatures or physical operations.</p>
+              <label htmlFor="construction-macro-input">Operational form</label>
+              <input id="construction-macro-input" value={constructionMacroInput} onChange={event => setConstructionMacroInput(event.target.value)} placeholder="e.g. TRAK" spellCheck={false} />
+              <div className="construction-macro-result" role="status" aria-live="polite">
+                <strong>{constructionMacroReview.status.replaceAll("-", " ")}</strong>
+                {constructionMacroReview.entry && <div className="construction-macro-heading"><span>{constructionMacroReview.entry.form}</span><span>{constructionMacroReview.entry.gloss}</span></div>}
+                <p>{constructionMacroReview.message}</p>
+                {constructionMacroReview.entry && <><p><b>Recovered evidence:</b> {constructionMacroReview.entry.recoveredEvidence}</p><p><b>Open contract:</b> {constructionMacroReview.entry.unresolvedContract}</p></>}
+              </div>
+              <p className="fixture-browser-caveat">Source status is not a completion status. All six forms remain non-executable in this inspector.</p>
             </div>
             <div className="construction-stage-list">
               {constructionStageLabels.map(({ stage, label }, index) => <div className="construction-stage-row" key={stage}>
