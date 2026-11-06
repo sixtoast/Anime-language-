@@ -13,7 +13,8 @@ const policy = (outcome: PolicyCompositionResult["outcome"] = "COMPOSED-PERMIT")
 const valid = (): InvocationGateInput => ({
   semanticValidation: "PASS", feasibilityAssessment: "PASS", resourceReadiness: "PASS",
   policyComposition: policy(), authority: authority(), consent: "PASS", privacy: "PASS",
-  safety: "PASS", requiredIndependentGateIds: ["consent", "privacy", "safety"]
+  safety: "PASS", requiredIndependentGateIds: ["consent", "privacy", "safety"],
+  independentGateResults: [{ gateId: "consent", state: "PASS" }, { gateId: "privacy", state: "PASS" }, { gateId: "safety", state: "PASS" }]
 });
 
 describe("Invocation gate coordination", () => {
@@ -45,7 +46,11 @@ describe("Invocation gate coordination", () => {
     expect(evaluateInvocationGates({ ...valid(), requiredIndependentGateIds: ["consent", "consent"] }).outcome).toBe("BLOCKED");
     expect(evaluateInvocationGates({ ...valid(), requiredIndependentGateIds: [" "] }).outcome).toBe("BLOCKED");
   });
-  it("[INV-GATE-008] preserves execution and outcome boundary", () => {
+  it("[INV-GATE-008] blocks missing results for declared independent gates", () => {
+    expect(evaluateInvocationGates({ ...valid(), requiredIndependentGateIds: ["ownership"] }).outcome).toBe("INDETERMINATE");
+    expect(evaluateInvocationGates({ ...valid(), requiredIndependentGateIds: ["ownership"], independentGateResults: [{ gateId: "ownership", state: "PASS" }] }).outcome).toBe("ELIGIBLE-TO-PROCEED");
+  });
+  it("[INV-GATE-009] preserves execution and outcome boundary", () => {
     const result = evaluateInvocationGates(valid());
     expect(result.executionStarted).toBe(false);
     expect(result.limitations.join(" ")).toContain("No spell is cast");
