@@ -22,6 +22,7 @@ import { evaluateIncantationRuntimePreview, runtimePreviewScenarios, type Runtim
 import { reviewConstructionRecord, type ConstructionRecord, type ConstructionEvidenceStatus } from "./engine/constructionRecordReview";
 import type { ConstructionStage } from "./engine/constructionOrderAudit";
 import { bindConstructionReference, type ConstructionReferenceToken } from "./engine/constructionReferenceContext";
+import { reviewConstructionFootShape } from "./engine/constructionFootShape";
 
 type Section = "Overview" | "Documentation" | "Playground" | "Test suite" | "Research & review";
 
@@ -120,6 +121,8 @@ function App() {
   });
   const [constructionReferenceToken, setConstructionReferenceToken] = useState<ConstructionReferenceToken>("MI");
   const [constructionReferenceId, setConstructionReferenceId] = useState("");
+  const [constructionFootInput, setConstructionFootInput] = useState("pa");
+  const constructionFootReview = useMemo(() => reviewConstructionFootShape(constructionFootInput.trim()), [constructionFootInput]);
   const constructionReference = useMemo(
     () => bindConstructionReference(constructionReferenceToken, constructionReferenceId),
     [constructionReferenceToken, constructionReferenceId]
@@ -454,6 +457,22 @@ function App() {
               </div>
               <p className="construction-reference-status"><strong>{constructionReference.status}</strong>{constructionReference.current ? " · " + constructionReference.current.scope + " · persists until replaced" : " · " + constructionReference.issue}</p>
               <p className="fixture-browser-caveat">{constructionReference.limitation}</p>
+            </div>
+            <div className="construction-foot-review">
+              <div className="detail-kicker">RECOVERED FOOT SHAPE · STRUCTURAL CHECK ONLY</div>
+              <p>Check a single recovered Construction Foot form against the documented frame + parameter vowel + optional relation-coda pattern. This does not assign a meaning to the vowel or certify an unknown coda.</p>
+              <label htmlFor="construction-foot-input">Construction Foot</label>
+              <input id="construction-foot-input" value={constructionFootInput} onChange={event => setConstructionFootInput(event.target.value)} placeholder="e.g. pa or paz" spellCheck={false} />
+              <div className="construction-foot-result" role="status" aria-live="polite">
+                <strong>{constructionFootReview.status.replaceAll("-", " ")}</strong>
+                <div className="construction-foot-parts">
+                  <span><small>Frame</small>{constructionFootReview.frame ?? "—"}</span>
+                  <span><small>Parameter vowel</small>{constructionFootReview.parameterVowel ?? "—"}</span>
+                  <span><small>Relation coda</small>{constructionFootReview.relationCoda ?? "—"}</span>
+                </div>
+                <ul>{constructionFootReview.notes.map((note, index) => <li key={index}>{note}</li>)}</ul>
+              </div>
+              <p className="fixture-browser-caveat">{constructionFootReview.limitation}</p>
             </div>
             <div className="construction-stage-list">
               {constructionStageLabels.map(({ stage, label }, index) => <div className="construction-stage-row" key={stage}>
