@@ -226,3 +226,12 @@
 .construction-review-panel{margin-top:14px;padding:13px;border:1px solid #494052;border-radius:6px;background:#17151b}
 .construction-findings{padding-left:18px;color:#c5b6d5;font:10px var(--sans);line-height:1.65}
 @media(max-width:560px){.construction-stage-fields{grid-template-columns:1fr}.construction-stage-label{grid-column:1}.construction-review-panel .fixture-browser-meta{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+
+.construction-reference-binding{margin:12px 0;padding:13px;border:1px solid #51445f;border-radius:6px;background:#17141b}
+.construction-reference-binding>p{font:10px/1.6 var(--sans);color:#b9afc4}
+.construction-reference-controls{display:grid;grid-template-columns:180px minmax(0,1fr);gap:9px}
+.construction-reference-controls label{display:flex;flex-direction:column;gap:6px;font:600 10px var(--display);color:#ded3e8}
+.construction-reference-controls input,.construction-reference-controls select{width:100%;min-width:0;background:#0f0e12;border:1px solid #393440;border-radius:4px;padding:9px;color:#e4ddec;font:10px var(--sans)}
+.construction-reference-status{margin:10px 0 0!important;color:#d7c3e8!important}
+@media(max-width:560px){.construction-reference-controls{grid-template-columns:1fr}}

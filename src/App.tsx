@@ -21,6 +21,7 @@ import { invocationLifecycleSequence, invocationOrderNote, validationGateSequenc
 import { evaluateIncantationRuntimePreview, runtimePreviewScenarios, type RuntimePreviewScenario } from "./engine/incantationRuntimePreview";
 import { reviewConstructionRecord, type ConstructionRecord, type ConstructionEvidenceStatus } from "./engine/constructionRecordReview";
 import type { ConstructionStage } from "./engine/constructionOrderAudit";
+import { bindConstructionReference, type ConstructionReferenceToken } from "./engine/constructionReferenceContext";
 
 type Section = "Overview" | "Documentation" | "Playground" | "Test suite" | "Research & review";
 
@@ -117,6 +118,12 @@ function App() {
     control: { status: "NOT-SUPPLIED", content: "" },
     release: { status: "NOT-SUPPLIED", content: "" }
   });
+  const [constructionReferenceToken, setConstructionReferenceToken] = useState<ConstructionReferenceToken>("MI");
+  const [constructionReferenceId, setConstructionReferenceId] = useState("");
+  const constructionReference = useMemo(
+    () => bindConstructionReference(constructionReferenceToken, constructionReferenceId),
+    [constructionReferenceToken, constructionReferenceId]
+  );
   const constructionRecord: ConstructionRecord = {
     id: "playground-construction-record",
     elements: constructionStageLabels
@@ -432,6 +439,22 @@ function App() {
           <section className="fixture-browser construction-inspector" aria-labelledby="construction-inspector-title">
             <div className="fixture-browser-head"><div><span className="detail-kicker">MANA CONSTRUCTION · EVIDENCE-AWARE WORKSPACE</span><h2 id="construction-inspector-title">Construction record inspector</h2></div><span>7 recovered stages</span></div>
             <p className="fixture-browser-intro">Enter a record against the recovered performed order. Each field is an evidence note, not a token parser. Choose the evidence status honestly; the inspector will not infer missing grammar, physical meaning or spell validity.</p>
+            <div className="construction-reference-binding">
+              <div className="detail-kicker">RECOVERED REFERENCE CONTEXT</div>
+              <p>Reference persistence is documented until replaced. The recovered default scope is limited to the tokens listed here; this does not supply anatomical landmark rules.</p>
+              <div className="construction-reference-controls">
+                <label>Reference token
+                  <select value={constructionReferenceToken} onChange={event => setConstructionReferenceToken(event.target.value as ConstructionReferenceToken)}>
+                    <option value="MI">MI — default volume</option><option value="NI">NI — default volume</option><option value="RI">RI — default volume</option><option value="me">me — SELF-surface</option>
+                  </select>
+                </label>
+                <label>Reference identity
+                  <input value={constructionReferenceId} onChange={event => setConstructionReferenceId(event.target.value)} placeholder="Enter a reference identifier…" />
+                </label>
+              </div>
+              <p className="construction-reference-status"><strong>{constructionReference.status}</strong>{constructionReference.current ? " · " + constructionReference.current.scope + " · persists until replaced" : " · " + constructionReference.issue}</p>
+              <p className="fixture-browser-caveat">{constructionReference.limitation}</p>
+            </div>
             <div className="construction-stage-list">
               {constructionStageLabels.map(({ stage, label }, index) => <div className="construction-stage-row" key={stage}>
                 <div className="construction-stage-number">{index + 1}</div>
