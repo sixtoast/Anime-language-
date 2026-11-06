@@ -694,6 +694,48 @@ export function parseModernVernacularV14(input: string): ModernVernacularV14Pars
 }
 
 
+/** Modern Vernacular v1.9: conditionals and paired hypotheses. */
+export type ModernVernacularV19Ast = {
+  kind: "conditional"; grammarVersion: "1.9";
+  condition: ModernVernacularUnifiedParseResult;
+  consequence: ModernVernacularUnifiedParseResult;
+  hypothetical?: ModernVernacularUnifiedParseResult;
+};
+export type ModernVernacularV19ParseResult = {
+  ok: boolean; grammar: "modern-vernacular-v1.9-locked";
+  ast?: ModernVernacularV19Ast; diagnostics: ModernVernacularDiagnostic[];
+};
+function v19Rejected(message: string): ModernVernacularV19ParseResult {
+  return { ok: false, grammar: "modern-vernacular-v1.9-locked", diagnostics: [{ code: "MV1_UNSUPPORTED_CONSTRUCTION", message }] };
+}
+export function parseModernVernacularV19(input: string): ModernVernacularV19ParseResult {
+  const text = input.trim().toLowerCase();
+  if (!text) return v19Rejected("Enter a complete v1.9 conditional construction.");
+  const parts = text.split(";");
+  if (parts.length > 2 || (parts.length === 2 && !parts[0].trim())) return v19Rejected("Only one semicolon is allowed, delimiting ravi from its paired conditional.");
+  let hypothetical: ModernVernacularUnifiedParseResult | undefined;
+  let conditionalText = text;
+  if (parts.length === 2) {
+    const premise = parts[0].trim().split(/\\s+/).filter(Boolean);
+    conditionalText = parts[1].trim();
+    if (premise.shift() !== "ravi" || !premise.length) return v19Rejected("The semicolon must follow ravi and a complete supposition clause.");
+    hypothetical = parseModernVernacular(premise.join(" "));
+    if (!hypothetical.ok) return v19Rejected("The ravi premise must independently parse as a complete licensed clause.");
+  }
+  const tokens = conditionalText.split(/\\s+/).filter(Boolean);
+  const navi = tokens.filter(x => x === "navi").length;
+  const saku = tokens.filter(x => x === "saku").length;
+  if (navi !== 1 || saku !== 1 || tokens[0] !== "navi") return v19Rejected("A conditional requires exactly one leading navi and one following saku; nested and repeated markers are blocked.");
+  const split = tokens.indexOf("saku");
+  if (split <= 1 || split >= tokens.length - 1 || tokens.includes("ravi")) return v19Rejected("The required order is navi CONDITION saku CONSEQUENCE, with complete clauses in both slots.");
+  if (tokens.some(x => ["pun","shuk","zosh","dema","sori","mira","toku"].includes(x))) return v19Rejected("Conditional questions and directive clauses are blocked until their scope is specified.");
+  const condition = parseModernVernacular(tokens.slice(1, split).join(" "));
+  const consequence = parseModernVernacular(tokens.slice(split + 1).join(" "));
+  if (!condition.ok || !consequence.ok) return v19Rejected("Condition and consequence must each be complete, independently licensed clauses.");
+  if (condition.grammar === "modern-vernacular-v1.7-locked" || consequence.grammar === "modern-vernacular-v1.7-locked") return v19Rejected("Directive clauses cannot occupy conditional slots.");
+  return { ok: true, grammar: "modern-vernacular-v1.9-locked", ast: { kind: "conditional", grammarVersion: "1.9", condition, consequence, ...(hypothetical ? { hypothetical } : {}) }, diagnostics: [] };
+}
+
 /**
  * Unified entry point for the locked Modern Vernacular grammar family.
  * Dispatch is based only on the overt modal/verb form; it never repairs an
@@ -709,6 +751,7 @@ export type ModernVernacularUnifiedParseResult =
   | ModernVernacularV16ParseResult
   | ModernVernacularV17ParseResult
   | ModernVernacularV18ParseResult
+  | ModernVernacularV19ParseResult
   | ModernVernacularV20ParseResult
   | ModernVernacularV21ParseResult
   | ModernVernacularV22ParseResult
@@ -1346,6 +1389,7 @@ export function parseModernVernacularV27(input: string): ModernVernacularV27Pars
 
 export function parseModernVernacular(input: string): ModernVernacularUnifiedParseResult {
   const tokens = input.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  if (tokens.includes("navi") || tokens.includes("saku") || tokens.includes("ravi")) return parseModernVernacularV19(input);
   if (tokens.includes("se") && tokens.includes("don")) return parseModernVernacularV24(input);
   if (tokens.includes("kavi")) return parseModernVernacularV23(input);
   if (tokens.includes("nemi") || tokens.includes("pavo") || tokens.includes("sula")) return parseModernVernacularV21(input);
