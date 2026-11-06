@@ -708,7 +708,7 @@ export type ModernVernacularUnifiedParseResult =
   | ModernVernacularV15ParseResult
   | ModernVernacularV16ParseResult
   | ModernVernacularV17ParseResult
-  | ModernVernacularV18ParseResult\n  | ModernVernacularV27ParseResult;
+  | ModernVernacularV18ParseResult\n  | ModernVernacularV26ParseResult\n  | ModernVernacularV27ParseResult;
 
 
 /** Modern Vernacular v2.6: standalone typed measurement quantity. */
@@ -950,6 +950,7 @@ export function parseModernVernacularV27(input: string): ModernVernacularV27Pars
 export function parseModernVernacular(input: string): ModernVernacularUnifiedParseResult {
   const tokens = input.trim().toLowerCase().split(/\s+/).filter(Boolean);
   if (["nari", "dori", "gari"].includes(tokens[0])) return parseModernVernacularV27(input);
+  if (tokens[0] === "nela" || ["za","ki","to","mu","re","sa","fi","du","go","pe"].includes(tokens[0])) return parseModernVernacularV26(input);
   if (tokens.some(token => token === "lena" || token === "savi" || token === "doru")) return parseModernVernacularV18(input);
   if (["dema","sori","mira","toku"].includes(tokens[0])) return parseModernVernacularV17(input);
   const modalAtOne = ["fam","kong","tek","yemi","zami"].includes(tokens[1]);
