@@ -1200,9 +1200,9 @@ export function parseModernVernacularV27(input: string): ModernVernacularV27Pars
 export function parseModernVernacular(input: string): ModernVernacularUnifiedParseResult {
   const tokens = input.trim().toLowerCase().split(/\s+/).filter(Boolean);
   if (tokens.includes("kavi")) return parseModernVernacularV23(input);
+  if (tokens.includes("nemi") || tokens.includes("pavo") || tokens.includes("sula")) return parseModernVernacularV21(input);
   if (tokens.includes("melo") || tokens.includes("runi")) return parseModernVernacularV22(input);
   if (tokens.includes("seno")) return parseModernVernacularV23(input);
-  if (tokens.includes("nemi") || tokens.includes("pavo") || tokens.includes("sula")) return parseModernVernacularV21(input);
   if (tokens.includes("don") || tokens.includes("kok")) return parseModernVernacularV20(input);
   if (["nari", "dori", "gari"].includes(tokens[0])) return parseModernVernacularV27(input);
   if (tokens[0] === "nela" || ["za","ki","to","mu","re","sa","fi","du","go","pe"].includes(tokens[0])) return parseModernVernacularV26(input);

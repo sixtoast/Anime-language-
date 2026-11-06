@@ -1,18 +1,24 @@
 import { describe, expect, it } from "vitest";
-import { parseModernVernacular, parseModernVernacularV23 } from "./modernVernacular";
+import { parseModernVernacular, parseModernVernacularV22, parseModernVernacularV23 } from "./modernVernacular";
 
 describe("Modern Vernacular v2.3 waiting and until", () => {
   it.each([
     ["teshi kok seno", "ongoing", "positive"],
     ["teshi don seno", "completed", "positive"],
     ["teshi nava kok seno", "ongoing", "negative"],
-    ["teshi don seno melo", "completed", "positive"]
   ])("parses waiting clause %s", input => {
     const result = parseModernVernacularV23(input);
     expect(result.ok).toBe(true);
     if (result.ast?.kind === "waiting-clause") {
       expect(result.ast.clause.action).toBe("seno");
     }
+  });
+
+  it("extends v2.2 qualitative duration to completed waiting episodes", () => {
+    const result = parseModernVernacularV22("teshi don seno melo");
+    expect(result.ok).toBe(true);
+    expect(result.ast?.duration).toBe("brief");
+    expect(result.ast?.clause.action).toBe("seno");
   });
 
   it("supports present-time anchoring through the v2.1 parser", () => {
