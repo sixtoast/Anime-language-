@@ -281,7 +281,7 @@ export function projectResourceLedger(
 
   const available: Record<string, number> = {};
   for (const id of Object.keys(balances)) available[id] = balances[id] - reserved[id];
-  const failed = eventResults.some(item => item.issue);
+  const failed = issues.length > 0;
   const unresolved = issues.some(item => item.code === "EVIDENCE-UNRESOLVED");
   const malformed = issues.some(item => item.code === "ACCOUNT-MALFORMED" || item.code === "ACCOUNT-DUPLICATE" || item.code === "EVENT-MALFORMED");
   const outcome = malformed ? "LEDGER-MALFORMED" :
