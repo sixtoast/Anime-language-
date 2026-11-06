@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 import { reviewConstructionFootShape } from "./constructionFootShape";
 
 describe("recovered Construction Foot shape", () => {
-  it("[CON-FOOT-001] recognises canonical pa CV frame shape", () => {
-    expect(reviewConstructionFootShape("pa").status).toBe("SHAPE-RECOGNISED");
+  it("[CON-FOOT-001] recognises canonical pa CV frame form", () => {
+    expect(reviewConstructionFootShape("pa").status).toBe("FRAME-FORM-RECOGNISED");
   });
   it("[CON-FOOT-002] recognises all six documented frame initials", () => {
     for (const token of ["pa", "ba", "ta", "da", "ka", "ga"]) {
@@ -19,6 +19,12 @@ describe("recovered Construction Foot shape", () => {
     const result = reviewConstructionFootShape("paz");
     expect(result.status).toBe("UNRESOLVED");
     expect(result.relationCoda).toBe("z");
+    expect(result.notes.join(" ")).toContain("inventory is incomplete");
+  });
+  it("[CON-FOOT-009] does not treat a CV frame form as a complete CVC Foot", () => {
+    const result = reviewConstructionFootShape("pa");
+    expect(result.status).toBe("FRAME-FORM-RECOGNISED");
+    expect(result.notes.join(" ")).toContain("not evidence that the complete CVC Foot is present");
   });
   it("[CON-FOOT-005] rejects a vowel in the relation-coda position", () => {
     expect(reviewConstructionFootShape("paa").status).toBe("SHAPE-INVALID");

@@ -1,10 +1,10 @@
 /**
  * Structural-only recogniser for the recovered Construction Foot pattern.
  * Evidence: Phase 4 §§3.1–3.2 and 10; Phase 5.15 Construction Contract Matrix.
- * It recognises a frame consonant + parameter vowel + optional relation coda.
+ * It recognises canonical CV frame forms and checks the documented CVC Foot shape.
  * It does not assign final vowel meanings or validate the incomplete coda inventory.
  */
-export type FootShapeStatus = "SHAPE-RECOGNISED" | "SHAPE-INVALID" | "UNRESOLVED";
+export type FootShapeStatus = "FRAME-FORM-RECOGNISED" | "SHAPE-INVALID" | "UNRESOLVED";
 export interface FootShapeReview {
   input: string;
   status: FootShapeStatus;
@@ -39,10 +39,10 @@ export function reviewConstructionFootShape(input: string): FootShapeReview {
     return { input, status: "SHAPE-INVALID", frame, parameterVowel, relationCoda,
       notes: ["The final relation-coda position must be consonantal, not a parameter vowel."], limitation: LIMITATION };
   }
-  notes.push("Frame consonant and parameter-vowel positions match the recovered Foot shape.");
+  notes.push("Frame consonant and parameter-vowel positions match a recovered canonical frame form.");
   if (relationCoda) notes.push("A final relation-coda position is present; its membership and meaning are not validated because the inventory is incomplete.");
-  else notes.push("No relation-coda position is present.");
+  else notes.push("This two-character CV form is a documented frame form, not evidence that the complete CVC Foot is present.");
   notes.push("The parameter-vowel mapping remains provisional.");
-  return { input, status: relationCoda ? "UNRESOLVED" : "SHAPE-RECOGNISED",
+  return { input, status: relationCoda ? "UNRESOLVED" : "FRAME-FORM-RECOGNISED",
     frame, parameterVowel, relationCoda, notes, limitation: LIMITATION };
 }
