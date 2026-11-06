@@ -11,6 +11,10 @@ export interface WorkbenchTest {
 }
 
 export const workbenchTests: WorkbenchTest[] = [
+  { id: "MV19-001", group: "Parser", title: "Parses explicit conditional clauses", description: "navi introduces a condition and saku its consequence; both slots must independently parse as complete clauses.", status: "authored-unverified", file: "src/engine/modernVernacularV19.test.ts", sourceRule: "docs/canon/arcane-modern-vernacular-v1.9-conditionals-and-hypotheses.md §§1–2, 5" },
+  { id: "MV19-002", group: "Parser", title: "Parses paired hypothetical premises", description: "ravi introduces a complete supposition followed by a written semicolon and a complete navi…saku conditional.", status: "authored-unverified", file: "src/engine/modernVernacularV19.test.ts", sourceRule: "Modern Vernacular v1.9 §3" },
+  { id: "MV19-003", group: "Parser", title: "Rejects unresolved conditional scope", description: "Rejects missing or repeated markers, nested conditionals, directives, questions, incomplete clauses and unpaired ravi.", status: "authored-unverified", file: "src/engine/modernVernacularV19.test.ts", sourceRule: "Modern Vernacular v1.9 §§5, 7–8" },
+
   { id: "MV25-001", group: "Parser", title: "Parses positional compound integers", description: "The duration slot reads two-to-four digit tokens as base-ten positional numerals, without leading zeroes.", status: "authored-unverified", file: "src/engine/modernVernacularV25.test.ts", sourceRule: "docs/canon/arcane-modern-vernacular-v2.5-compound-numerals.md §§1–2" },
   { id: "MV25-002", group: "Parser", title: "Parses fractional seconds", description: "shi separates a one-to-three-digit fractional part; numeric duration must be greater than zero.", status: "authored-unverified", file: "src/engine/modernVernacularV25.test.ts", sourceRule: "Modern Vernacular v2.5 §3" },
   { id: "MV25-003", group: "Parser", title: "Parses approximate compound and decimal duration", description: "nela scopes over the complete compound or fractional numeric duration without adding bound semantics.", status: "authored-unverified", file: "src/engine/modernVernacularV25.test.ts", sourceRule: "Modern Vernacular v2.5 §4" },
