@@ -989,7 +989,7 @@ function v24Rejected(message: string, tokenIndex?: number, token?: string): Mode
   }] };
 }
 export function parseModernVernacularV24(input: string): ModernVernacularV24ParseResult {
-  const tokens = input.trim().toLowerCase().split(/\\s+/).filter(Boolean);
+  const tokens = input.trim().toLowerCase().split(/\s+/).filter(Boolean);
   if (!tokens.length) return v24Rejected("Enter a complete v2.4 completed-event numeric-duration clause.");
   const polarQuestion = tokens[tokens.length - 1] === "pun";
   const end = tokens.length - (polarQuestion ? 1 : 0);
