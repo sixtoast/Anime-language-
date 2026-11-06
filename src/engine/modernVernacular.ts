@@ -712,6 +712,7 @@ export type ModernVernacularUnifiedParseResult =
   | ModernVernacularV20ParseResult
   | ModernVernacularV21ParseResult
   | ModernVernacularV22ParseResult
+  | ModernVernacularV23ParseResult
   | ModernVernacularV26ParseResult
   | ModernVernacularV27ParseResult;
 
@@ -722,9 +723,10 @@ export type ModernVernacularV20Ast = {
   grammarVersion: "2.0";
   aspect: "completed" | "ongoing";
   polarity: "positive" | "negative";
-  action: "wish" | "nak" | "zir" | "mos" | "mol" | "tut" | "bul" | "lil" | "ful" | "zem";
+  action: "wish" | "nak" | "zir" | "mos" | "mol" | "tut" | "bul" | "lil" | "ful" | "zem" | "seno";
   clause: string;
   base: ModernVernacularParseResult["ast"] | ModernVernacularV11ParseResult["ast"] | ModernVernacularV12ParseResult["ast"] | ModernVernacularV13ParseResult["ast"] | ModernVernacularV14ParseResult["ast"] | ModernVernacularV15ParseResult["ast"] | ModernVernacularV16ParseResult["ast"] | ModernVernacularV17ParseResult["ast"] | ModernVernacularV18ParseResult["ast"];
+    | { kind: "waiting-clause"; subject: string; polarity: "positive" | "negative"; polarQuestion: boolean };
 };
 export type ModernVernacularV20ParseResult = {
   ok: boolean;
@@ -733,8 +735,8 @@ export type ModernVernacularV20ParseResult = {
   diagnostics: ModernVernacularDiagnostic[];
 };
 
-const MV20_COMPLETED = new Set(["wish","nak","zir","mos","mol","tut","bul","lil","ful","zem"]);
-const MV20_ONGOING = new Set(["zir","mos","mol","tut","bul","lil","ful","zem"]);
+const MV20_COMPLETED = new Set(["wish","nak","zir","mos","mol","tut","bul","lil","ful","zem","seno"]);
+const MV20_ONGOING = new Set(["zir","mos","mol","tut","bul","lil","ful","zem","seno"]);
 
 function v20Rejected(message: string, tokenIndex?: number, token?: string): ModernVernacularV20ParseResult {
   return { ok: false, grammar: "modern-vernacular-v2.0-locked", diagnostics: [{
@@ -770,7 +772,24 @@ export function parseModernVernacularV20(input: string): ModernVernacularV20Pars
     return v20Rejected("Modal and directive constructions cannot combine with v2.0 aspect.");
   }
   const baseTokens = tokens.filter((_, index) => index !== aspectIndex);
-  const base = parseModernVernacular(baseTokens.join(" "));
+  let base: { ok: boolean; ast?: ModernVernacularV20Ast["base"]; diagnostics: ModernVernacularDiagnostic[] };
+  if (action === "seno") {
+    const expectedLength = tokens.includes("nava") ? 3 : 2;
+    if (tokens.length !== expectedLength + (tokens[tokens.length - 1] === "pun" ? 1 : 0)) {
+      return v20Rejected("seno takes no direct object or arbitrary complement in v2.3.", verbIndex + 1, tokens[verbIndex + 1]);
+    }
+    const subject = tokens[0];
+    const subjectCheck = parseModernVernacularV1(`${subject} wish fezo`);
+    if (!subjectCheck.ok) return v20Rejected("The waiting clause requires an independently licensed subject.", 0, subject);
+    base = {
+      ok: true,
+      ast: { kind: "waiting-clause", subject, polarity: tokens.includes("nava") ? "negative" : "positive", polarQuestion: tokens[tokens.length - 1] === "pun" },
+      diagnostics: []
+    };
+  } else {
+    const parsedBase = parseModernVernacular(baseTokens.join(" "));
+    base = { ok: parsedBase.ok, ast: parsedBase.ast, diagnostics: parsedBase.diagnostics };
+  }
   if (!base.ok) return v20Rejected("The underlying clause is not independently licensed by the existing Modern Vernacular parser.", base.diagnostics[0]?.tokenIndex, base.diagnostics[0]?.token);
   if (tokens[tokens.length - 1] === "pun" && tokens.includes("nava")) {
     return v20Rejected("Negative polar questions with v2.0 aspect remain blocked.");
@@ -889,6 +908,55 @@ export function parseModernVernacularV22(input: string): ModernVernacularV22Pars
       clause: clause.ast,
       polarQuestion
     },
+    diagnostics: []
+  };
+}
+
+/** Modern Vernacular v2.3: explicit waiting state and one bounded until construction. */
+export type ModernVernacularV23Ast =
+  | { kind: "waiting-clause"; grammarVersion: "2.3"; clause: ModernVernacularV20Ast }
+  | { kind: "waiting-until"; grammarVersion: "2.3"; waiting: ModernVernacularV20Ast; endpoint: ModernVernacularV20Ast; endpointRequiresRecoverableDeicticCentre: true; polarQuestion: boolean };
+export type ModernVernacularV23ParseResult = {
+  ok: boolean;
+  grammar: "modern-vernacular-v2.3-locked";
+  ast?: ModernVernacularV23Ast;
+  diagnostics: ModernVernacularDiagnostic[];
+};
+function v23Rejected(message: string, tokenIndex?: number, token?: string): ModernVernacularV23ParseResult {
+  return { ok: false, grammar: "modern-vernacular-v2.3-locked", diagnostics: [{
+    code: "MV1_UNSUPPORTED_CONSTRUCTION", message,
+    ...(tokenIndex === undefined ? {} : { tokenIndex }),
+    ...(token === undefined ? {} : { token })
+  }] };
+}
+export function parseModernVernacularV23(input: string): ModernVernacularV23ParseResult {
+  const tokens = input.trim().toLowerCase().split(/\\s+/).filter(Boolean);
+  if (!tokens.length) return v23Rejected("Enter a complete v2.3 waiting or waiting-until construction.");
+  const endpointMarkers = tokens.reduce<number[]>((out, token, index) => token === "kavi" ? [...out, index] : out, []);
+  if (endpointMarkers.length > 1) return v23Rejected("Nested or chained kavi endpoints are not licensed in v2.3.");
+  if (endpointMarkers.length === 0) {
+    const waiting = parseModernVernacularV20(input);
+    if (!waiting.ok || !waiting.ast || waiting.ast.action !== "seno") return v23Rejected("A standalone v2.3 waiting clause must use an explicitly aspect-marked seno verb.");
+    return { ok: true, grammar: "modern-vernacular-v2.3-locked", ast: { kind: "waiting-clause", grammarVersion: "2.3", clause: waiting.ast }, diagnostics: [] };
+  }
+  const markerIndex = endpointMarkers[0];
+  const polarQuestion = tokens[tokens.length - 1] === "pun";
+  const leftTokens = tokens.slice(0, markerIndex);
+  const rightTokens = tokens.slice(markerIndex + 1, polarQuestion ? -1 : undefined);
+  if (!leftTokens.length || !rightTokens.length) return v23Rejected("Both the waiting clause and completed endpoint clause are required.", markerIndex, "kavi");
+  if (tokens.includes("pavo") || tokens.includes("sula") || tokens.includes("nemi")) return v23Rejected("kavi cannot combine with pavo, sula or nemi in v2.3.");
+  const waiting = parseModernVernacularV20(leftTokens.join(" "));
+  if (!waiting.ok || !waiting.ast || waiting.ast.action !== "seno" || waiting.ast.aspect !== "ongoing" || waiting.ast.polarity !== "positive") {
+    return v23Rejected("The left side of kavi must be a positive ongoing kok seno waiting clause.");
+  }
+  const endpoint = parseModernVernacularV20(rightTokens.join(" "));
+  if (!endpoint.ok || !endpoint.ast || endpoint.ast.action !== "zem" || endpoint.ast.aspect !== "completed" || endpoint.ast.polarity !== "positive") {
+    return v23Rejected("The right side of kavi must be a positive completed don zem endpoint clause.");
+  }
+  return {
+    ok: true,
+    grammar: "modern-vernacular-v2.3-locked",
+    ast: { kind: "waiting-until", grammarVersion: "2.3", waiting: waiting.ast, endpoint: endpoint.ast, endpointRequiresRecoverableDeicticCentre: true, polarQuestion },
     diagnostics: []
   };
 }
@@ -1131,6 +1199,7 @@ export function parseModernVernacularV27(input: string): ModernVernacularV27Pars
 
 export function parseModernVernacular(input: string): ModernVernacularUnifiedParseResult {
   const tokens = input.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  if (tokens.includes("kavi") || tokens.includes("seno")) return parseModernVernacularV23(input);
   if (tokens.includes("melo") || tokens.includes("runi")) return parseModernVernacularV22(input);
   if (tokens.includes("nemi") || tokens.includes("pavo") || tokens.includes("sula")) return parseModernVernacularV21(input);
   if (tokens.includes("don") || tokens.includes("kok")) return parseModernVernacularV20(input);

@@ -11,6 +11,10 @@ export interface WorkbenchTest {
 }
 
 export const workbenchTests: WorkbenchTest[] = [
+  { id: "MV23-001", group: "Parser", title: "Parses explicit waiting aspect", description: "seno supports explicit completed and ongoing aspect, including the defined negative forms and present anchoring.", status: "authored-unverified", file: "src/engine/modernVernacularV23.test.ts", sourceRule: "docs/canon/arcane-modern-vernacular-v2.3-waiting-and-until.md §2" },
+  { id: "MV23-002", group: "Parser", title: "Parses bounded waiting-until construction", description: "Only positive kok seno kavi ... don zem is accepted, with a recoverable deictic centre required for endpoint interpretation.", status: "authored-unverified", file: "src/engine/modernVernacularV23.test.ts", sourceRule: "Modern Vernacular v2.3 §3" },
+  { id: "MV23-003", group: "Parser", title: "Rejects unsupported waiting endpoints", description: "Rejects reversed, incomplete, nested, modal, non-zem, ongoing-endpoint and mixed temporal relations.", status: "authored-unverified", file: "src/engine/modernVernacularV23.test.ts", sourceRule: "Modern Vernacular v2.3 §§3–6" },
+
   { id: "MV22-001", group: "Parser", title: "Parses qualitative duration", description: "melo marks a brief completed event and runi marks a long completed event after all complements.", status: "authored-unverified", file: "src/engine/modernVernacularV22.test.ts", sourceRule: "docs/canon/arcane-modern-vernacular-v2.2-qualitative-duration.md §§1–2" },
   { id: "MV22-002", group: "Parser", title: "Allows positive duration polar questions", description: "A positive polar question may append pun after the duration marker.", status: "authored-unverified", file: "src/engine/modernVernacularV22.test.ts", sourceRule: "Modern Vernacular v2.2 §3" },
   { id: "MV22-003", group: "Parser", title: "Rejects unlicensed duration scope", description: "Rejects ongoing, negative, modal, stative, misplaced, repeated and incomplete duration constructions.", status: "authored-unverified", file: "src/engine/modernVernacularV22.test.ts", sourceRule: "Modern Vernacular v2.2 §§3–6" },
