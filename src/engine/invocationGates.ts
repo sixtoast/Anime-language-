@@ -18,6 +18,7 @@ export interface InvocationGateInput {
   privacy: GateState;
   safety: GateState;
   requiredIndependentGateIds: string[];
+  independentGateResults: { gateId: string; state: GateState }[];
 }
 
 export interface InvocationGateTrace {
@@ -70,8 +71,19 @@ export function evaluateInvocationGates(input: InvocationGateInput): InvocationG
   add("SAFETY", input.safety, "Safety is an independent gate.");
 
   const ids = input.requiredIndependentGateIds;
-  if (ids.some((id) => !id.trim()) || new Set(ids).size !== ids.length) {
-    add("INDEPENDENT-GATE-CONFIGURATION", "BLOCK", "Required independent gate IDs must be non-empty and unique.");
+  const resultIds = input.independentGateResults.map((entry) => entry.gateId);
+  if (ids.some((id) => !id.trim()) || new Set(ids).size !== ids.length ||
+      resultIds.some((id) => !id.trim()) || new Set(resultIds).size !== resultIds.length) {
+    add("INDEPENDENT-GATE-CONFIGURATION", "BLOCK", "Required and reported independent gate IDs must be non-empty and unique.");
+  } else {
+    for (const id of ids) {
+      const result = input.independentGateResults.find((entry) => entry.gateId === id);
+      if (!result) {
+        add("INDEPENDENT-GATE:" + id, "UNRESOLVED", "A required independent gate has no reported result.");
+      } else {
+        add("INDEPENDENT-GATE:" + id, result.state, "Consumes the explicitly reported result for this required gate.");
+      }
+    }
   }
 
   const states = trace.map((entry) => entry.state);
