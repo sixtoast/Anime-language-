@@ -207,3 +207,10 @@
 .runtime-preview-details summary{font:10px var(--mono);cursor:pointer}
 .runtime-preview-details ul{padding-left:17px;color:#a59cad;font:9px var(--sans);line-height:1.6}
 @media(max-width:520px){.runtime-preview-outcome,.runtime-preview-grid{grid-template-columns:1fr}.runtime-preview-trace-row{grid-template-columns:minmax(0,1fr) auto}}
+
+/* Incantation architecture gate cards: keep the three readiness checks visibly distinct. */
+.gate-architecture-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.gate-architecture-support{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:9px}
+.gate-architecture-grid>div>span,.gate-architecture-support>div>span{display:block}
+@media(max-width:900px){.gate-architecture-grid{grid-template-columns:1fr}}
+@media(max-width:760px){.gate-architecture-support{grid-template-columns:1fr}}

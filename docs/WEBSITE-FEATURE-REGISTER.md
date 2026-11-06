@@ -309,3 +309,18 @@ The latest main commit inspected was `1a66fd8b`. GitHub Actions run [#692](https
 | ID | Feature | Origin | Priority | Dependencies | Affected files/sections | Acceptance criteria | Verification evidence | Final status |
 |---|---|---|---|---|---|---|---|---|
 | WEB-INC-RUNTIME-01 | Expose existing incantation evaluator outputs in a read-only Playground panel | Existing v1.9 resource preflight/ledger, v2.0 authority, v2.1 policy composition and invocation gate modules | High | Pure evaluator APIs and their unit fixtures/tests | `src/App.tsx`, `src/engine/resourcePreflight.ts`, `resourceLedger.ts`, `authorityGate.ts`, `policyComposition.ts`, `invocationGates.ts`, `tests/browser/playground.spec.ts` | Use deterministic, labelled sample inputs; show independent gate outcomes and diagnostics; retain BLOCK, UNRESOLVED and UNAVAILABLE distinctions; expose evidence assumptions and limitations; no external service, resource mutation, spell execution or claimed real-world effect; responsive at 360px | Queued after the 2026-11-06 repository review; no implementation or verification claimed | Planned |
+
+
+## Live reconciliation — 2026-11-06, commit pending
+
+The Playground now contains the read-only unified invocation diagnostics panel. The former Overview recommendation to build that panel is therefore complete as an implementation task and has been replaced with the next source-backed gap: the expression-to-construction boundary.
+
+### WEB-INC-ARCH-01 — Incantation readiness architecture in Overview
+
+| ID | Feature | Origin | Priority | Dependencies | Affected files/sections | Acceptance criteria | Verification evidence | Final status |
+|---|---|---|---|---|---|---|---|---|
+| WEB-INC-ARCH-01 | Show linguistic validity, construction completeness and casting feasibility as distinct readiness gates | Phase 7W readiness and construction gate; Incantations v1.0–v2.1 | High | Locked Incantations canon; source-backed readiness assessment | `src/App.tsx`, `src/styles.css`, `tests/browser/overview.spec.ts`, `src/engine/testRegistry.ts` | Overview clearly distinguishes Gate L/C/P; gives evidence-based current readiness; links to Phase 7W; explains that parsing, construction review and feasibility are non-substitutable; remains responsive at 360px; no unsupported operator signatures or execution claims | Browser assertion authored for the next CI run; not yet executed | Implemented — CI pending |
+
+### WEB-INC-RUNTIME-01 — Reconciliation
+
+The read-only unified invocation diagnostics panel is now implemented in the Playground. It coordinates existing resource-preflight, policy-composition, authority and invocation evaluators against deterministic sample inputs. It does not execute an incantation, mutate a resource ledger, verify external evidence or establish physical feasibility. Its implementation is present in `src/engine/incantationRuntimePreview.ts` and `src/App.tsx`; automated verification remains pending for the current commit. Update this record only after the exact-commit unit, build and browser checks complete.

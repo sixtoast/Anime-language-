@@ -338,22 +338,25 @@ function App() {
           </div>
           <section className="next-task-panel" aria-labelledby="next-task-title">
             <div className="next-task-heading">
-              <div><div className="eyebrow"><CheckCircle2 size={13}/> RECOMMENDED NEXT · WEB-INC-RUNTIME-01</div><h2 id="next-task-title">Inspect the incantation runtime</h2></div>
+              <div><div className="eyebrow"><Layers3 size={13}/> INCANTATION ARCHITECTURE · NEXT INCREMENT</div><h2 id="next-task-title">Close the expression-to-construction gap</h2></div>
               <span className="next-task-priority">HIGH PRIORITY</span>
             </div>
-            <p className="next-task-summary">The Playground now exposes the v1.2/v1.5 gate sequence, v1.9 resource fixtures, v2.0 authority fixtures and v2.1 policy fixtures. The engine has also gained bounded resource preflight, ledger projection, authority, policy-composition and invocation-gate evaluators. The next website step is to connect these existing evaluators to a read-only runtime diagnostics panel using explicit, labelled sample inputs.</p>
-            <div className="next-task-grid">
-              <div><span>WHY THIS IS NEXT</span><p>The current Playground mostly displays specification fixtures and a non-executable worksheet. The evaluator modules exist, but their outputs are not yet inspectable together from the website. A read-only panel would show what the current TypeScript implementation actually evaluates, and where its evidence assumptions and limitations remain.</p></div>
-              <div><span>DEPENDENCIES</span><p>Existing pure modules: src/engine/resourcePreflight.ts, resourceLedger.ts, authorityGate.ts, policyComposition.ts and invocationGates.ts, with their unit fixtures/tests. The panel must not create real resources, authenticate external evidence, execute spells or imply physical feasibility.</p></div>
-              <div><span>FILES / SURFACES</span><p><code>docs/canon/arcane-incantations-v1.2-preconditions-constraints-and-failure.md</code>, <code>docs/canon/arcane-incantations-v1.5-invocation-profiles-and-execution-contracts.md</code>, Playground and browser acceptance tests.</p></div>
-              <div><span>ACCEPTANCE CRITERIA</span><p>Expose evaluator outputs from deterministic, explicit sample records; show each independent gate state and diagnostic; preserve UNRESOLVED/UNAVAILABLE/BLOCK distinctly; show evaluator limitations and input provenance; never claim a spell was executed; test representative pass, block and unresolved paths plus 360px layout.</p></div>
+            <p className="next-task-summary">The read-only invocation diagnostics are now connected in the Playground. The next Incantations milestone is to make the boundary between a formal expression, a complete construction and a feasible casting explicit. A valid expression must never be mistaken for a complete or physically realisable spell.</p>
+            <div className="next-task-grid gate-architecture-grid">
+              <div><span>GATE L · LINGUISTIC VALIDITY</span><p>Check versioned token provenance, approved signatures and arity, typed arguments, grouping and unique reference resolution. Current readiness: partial; unresolved signatures remain blocked rather than guessed.</p></div>
+              <div><span>GATE C · CONSTRUCTION COMPLETENESS</span><p>Check target and initial state, state transition, coupling participants and pathway, mechanism, spatial scope, constraints, resources, termination and failure behaviour. Current readiness: incomplete; the expression-to-construction bridge still needs source recovery.</p></div>
+              <div><span>GATE P · CASTING FEASIBILITY</span><p>Assess resource demand, mana propagation, timing, coherence, target susceptibility, caster limits and stability against an explicit model. Current readiness: not assessed; wording alone cannot earn a feasibility pass.</p></div>
+            </div>
+            <div className="next-task-grid gate-architecture-support">
+              <div><span>IMPLEMENTATION ORDER</span><p>First reconcile source-backed operator contracts and reference resolution; then define only the missing construction records and mappings; finally connect them to the existing validation, resource, authority, policy and lifecycle evaluators.</p></div>
+              <div><span>NON-NEGOTIABLE BOUNDARY</span><p>A parser result is not a construction pass. A construction review is not a feasibility result. An eligible invocation is not an executed spell or a verified physical effect.</p></div>
             </div>
             <div className="next-task-actions">
-              <button className="secondary-button" onClick={() => changeSection("Playground")}>Open runtime diagnostics <span aria-hidden="true">→</span></button>
-              <button className="secondary-button" onClick={() => changeSection("Playground")}>Open specification fixtures <span aria-hidden="true">→</span></button>
-              <a className="secondary-button" href="https://github.com/sixtoast/Anime-language-/blob/main/docs/WEBSITE-FEATURE-REGISTER.md" target="_blank" rel="noreferrer">Open feature register <span aria-hidden="true">↗</span></a>
+              <button className="secondary-button" onClick={() => changeSection("Playground")}>Open invocation diagnostics <span aria-hidden="true">→</span></button>
+              <button className="secondary-button" onClick={() => changeSection("Documentation")}>Open Incantations canon <span aria-hidden="true">→</span></button>
+              <a className="secondary-button" href="https://github.com/sixtoast/Anime-language-/blob/main/docs/research/phase7w-incantation-readiness-and-construction-gate.md" target="_blank" rel="noreferrer">Open readiness and construction gate <span aria-hidden="true">↗</span></a>
             </div>
-            <p className="next-task-caveat">Status: queued website task. This will visualise existing bounded evaluators only; it will not be an execution engine, external evidence verifier, or claim about real-world effects.</p>
+            <p className="next-task-caveat">Evidence basis: Phase 7W readiness assessment and Incantations v1.0–v2.1. This is a development priority, not a new canon rule. Unknown signatures, construction mappings and physical parameters remain explicitly unresolved.</p>
           </section>
           <div className="section-heading"><div><div className="eyebrow">WORKSPACE</div><h2>Everything in one place</h2></div><span className="section-caption">SOURCE RECOVERY · PHASE 01</span></div>
           <div className="feature-grid">

@@ -97,7 +97,12 @@ test.describe("Overview live health browser acceptance", () => {
     await expect(metrics.nth(2).locator("strong")).toHaveText("Report loaded");
     await expect(metrics.nth(2)).toContainText("40 passed · 0 failed · 0 unmapped");
     await expect(page.locator(".cockpit-note")).toContainText("Workflow state comes from GitHub Actions");
-    await expect(page.getByRole("heading", { name: "Inspect the incantation runtime" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Close the expression-to-construction gap" })).toBeVisible();
+    await expect(page.locator(".gate-architecture-grid > div")).toHaveCount(3);
+    await expect(page.getByText("GATE L · LINGUISTIC VALIDITY")).toBeVisible();
+    await expect(page.getByText("GATE C · CONSTRUCTION COMPLETENESS")).toBeVisible();
+    await expect(page.getByText("GATE P · CASTING FEASIBILITY")).toBeVisible();
+    await expect(page.locator(".next-task-caveat")).toContainText("Phase 7W readiness assessment");
     await expect(page.locator(".version-chip")).toContainText("INCANTATIONS v2.1 · WORKBENCH");
   });
 
