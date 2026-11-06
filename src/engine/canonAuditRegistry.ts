@@ -28,10 +28,10 @@ export const canonAuditItems: CanonAuditItem[] = [
     id: "CANON-002",
     title: "Conservation and resource accounting",
     domain: "Conservation",
-    readiness: "not-implemented",
-    sourceRule: "MAG-004",
-    currentEvidence: "The conservation constraint is canonical, but no spell-feasibility evaluator currently accounts for matter, energy, momentum or information sources and conversions.",
-    nextRequirement: "Specify a resource ledger and explicit source/conversion records, then add positive and negative feasibility fixtures. Do not treat dimensional arithmetic as conservation enforcement."
+    readiness: "implemented-limited",
+    sourceRule: "MAG-004; Arcane Incantations v1.9 §§2–8",
+    currentEvidence: "A bounded scalar-additive conservation evaluator, read-only expected-versus-observed reconciliation evaluator and append-only resource-ledger projection are implemented. The evaluator is limited to one resource kind and one exact unit contract; evidence states are caller-supplied and are not authenticated. General vector/relational invariants, domain-specific transformations and conversions, physical feasibility, execution and effect verification are not implemented.",
+    nextRequirement: "Extend only against approved resource/account/source/transfer/transformation contracts and their fixtures. Preserve explicit provenance, uncertainty, version and valid-time requirements; do not infer resource equivalence or treat an accounting pass as physical feasibility or successful execution."
   },
   {
     id: "CANON-003",
