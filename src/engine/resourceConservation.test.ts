@@ -143,6 +143,6 @@ describe("Arcane Incantations v1.9 conservation and reconciliation", () => {
 
   it("[RES19-RECON-005] states that reconciliation never mutates the ledger or proves execution", () => {
     expect(reconcileResourceBalance(reconciliation()).limitations.join(" "))
-      .toContain("no ledger entries or account balances are changed");
+      .toContain("No ledger entries or account balances are changed");
   });
 });
