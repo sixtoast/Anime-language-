@@ -144,3 +144,13 @@ export function evaluateResourcePreflight(input: ResourcePreflightInput): Resour
 
   return result("RESOURCE-READY", "RESOURCE-READY", input.requiredAmount, diagnostics, availableAmount);
 }
+
+/** Map a preflight result into the coordinator's four-state gate vocabulary. */
+export function resourcePreflightGateState(
+  preflight: ResourcePreflightResult
+): "PASS" | "BLOCK" | "UNRESOLVED" | "UNAVAILABLE" {
+  if (preflight.outcome === "RESOURCE-READY") return "PASS";
+  if (preflight.outcome === "RESOURCE-OUTCOME-UNKNOWN") return "UNRESOLVED";
+  if (preflight.outcome === "SOURCE-UNVERIFIED" || preflight.outcome === "RESOURCE-EVIDENCE-STALE") return "UNAVAILABLE";
+  return "BLOCK";
+}
