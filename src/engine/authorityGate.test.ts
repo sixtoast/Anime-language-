@@ -25,7 +25,7 @@ describe("Arcane Incantations v2.0 conservative authority gate", () => {
     expect(evaluateAuthorityGate(validInput())).toMatchObject({ outcome: "PERMIT", gateSatisfied: true });
   });
   it("[AUTH-GATE-002] blocks malformed requests and decisions", () => {
-    expect(evaluateAuthorityGate({ ...validInput(), requestWellFormed: false }).outcome).toBe("MALFORMED-DECISION");
+    expect(evaluateAuthorityGate({ ...validInput(), requestWellFormed: false }).outcome).toBe("MALFORMED-REQUEST");
     expect(evaluateAuthorityGate({ ...validInput(), decisionWellFormed: false }).outcome).toBe("MALFORMED-DECISION");
   });
   it("[AUTH-GATE-003] keeps missing decisions unavailable, not denied or permitted", () => {
