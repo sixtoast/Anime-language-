@@ -140,7 +140,7 @@ export function evaluateAuthorityGate(input: AuthorityGateInput): AuthorityGateR
     return block(input.conditions === "MONITORING-UNAVAILABLE" ? "INDETERMINATE" : "INDETERMINATE", diagnostics);
   }
 
-  if (input.requiredIndependentGates !== "PASS") {
+  if (input.requiredIndependentGates !== "PASS" && input.requiredIndependentGates !== "NOT-REQUIRED") {
     add("INDEPENDENT-GATES", "INDEPENDENT-GATE-" + input.requiredIndependentGates, "Every applicable independent invocation gate must be explicitly satisfied.");
     return block(input.requiredIndependentGates === "UNAVAILABLE" ? "UNAVAILABLE" : "INDETERMINATE", diagnostics);
   }
