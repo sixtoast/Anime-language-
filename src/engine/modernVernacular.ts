@@ -843,6 +843,7 @@ export function parseModernVernacularV27(input: string): ModernVernacularV27Pars
 
 export function parseModernVernacular(input: string): ModernVernacularUnifiedParseResult {
   const tokens = input.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  if (["nari", "dori", "gari"].includes(tokens[0])) return parseModernVernacularV27(input);
   if (tokens.some(token => token === "lena" || token === "savi" || token === "doru")) return parseModernVernacularV18(input);
   if (["dema","sori","mira","toku"].includes(tokens[0])) return parseModernVernacularV17(input);
   const modalAtOne = ["fam","kong","tek","yemi","zami"].includes(tokens[1]);
