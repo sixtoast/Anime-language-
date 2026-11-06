@@ -711,6 +711,112 @@ export type ModernVernacularUnifiedParseResult =
   | ModernVernacularV18ParseResult\n  | ModernVernacularV27ParseResult;
 
 
+/** Modern Vernacular v2.6: standalone typed measurement quantity. */
+export type ModernVernacularV26Unit = "ma" | "se" | "ke" | "ra" | "ku";
+export type ModernVernacularV26Dimension = "LENGTH" | "TIME" | "MASS" | "PLANE_ANGLE" | "THERMODYNAMIC_TEMPERATURE";
+export type ModernVernacularV26Ast = {
+  kind: "measurement-quantity";
+  grammarVersion: "2.6";
+  approximate: boolean;
+  value: number;
+  scaledValue: number;
+  unit: ModernVernacularV26Unit;
+  dimension: ModernVernacularV26Dimension;
+  raw: string;
+};
+export type ModernVernacularV26ParseResult = {
+  ok: boolean;
+  grammar: "modern-vernacular-v2.6-locked";
+  ast?: ModernVernacularV26Ast;
+  diagnostics: ModernVernacularDiagnostic[];
+};
+
+const MV26_DIGITS: Record<string, number> = {
+  za: 0, ki: 1, to: 2, mu: 3, re: 4,
+  sa: 5, fi: 6, du: 7, go: 8, pe: 9
+};
+const MV26_UNITS: Record<ModernVernacularV26Unit, ModernVernacularV26Dimension> = {
+  ma: "LENGTH",
+  se: "TIME",
+  ke: "MASS",
+  ra: "PLANE_ANGLE",
+  ku: "THERMODYNAMIC_TEMPERATURE"
+};
+
+function v26Rejected(message: string, tokenIndex?: number, token?: string): ModernVernacularV26ParseResult {
+  return {
+    ok: false,
+    grammar: "modern-vernacular-v2.6-locked",
+    diagnostics: [{
+      code: "MV1_UNSUPPORTED_CONSTRUCTION",
+      message,
+      ...(tokenIndex === undefined ? {} : { tokenIndex }),
+      ...(token === undefined ? {} : { token })
+    }]
+  };
+}
+
+/** Parses the complete quantity phrase; it deliberately does not parse a sentence or arithmetic. */
+export function parseModernVernacularV26(input: string): ModernVernacularV26ParseResult {
+  const tokens = input.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  if (!tokens.length) return v26Rejected("Enter one complete v2.6 measurement quantity.");
+  let offset = 0;
+  const approximate = tokens[offset] === "nela";
+  if (approximate) offset++;
+
+  const integerStart = offset;
+  while (offset < tokens.length && Object.prototype.hasOwnProperty.call(MV26_DIGITS, tokens[offset])) offset++;
+  const integerDigits = tokens.slice(integerStart, offset);
+  if (integerDigits.length < 1 || integerDigits.length > 4) {
+    return v26Rejected("A quantity requires one to four integer digit tokens.", offset, tokens[offset]);
+  }
+  if (integerDigits.length > 1 && integerDigits[0] === "za") {
+    return v26Rejected("A compound integer cannot begin with zero.", integerStart, tokens[integerStart]);
+  }
+
+  let fractionalDigits: string[] = [];
+  if (tokens[offset] === "shi") {
+    offset++;
+    const fractionStart = offset;
+    while (offset < tokens.length && Object.prototype.hasOwnProperty.call(MV26_DIGITS, tokens[offset])) offset++;
+    fractionalDigits = tokens.slice(fractionStart, offset);
+    if (fractionalDigits.length < 1 || fractionalDigits.length > 3) {
+      return v26Rejected("The decimal separator shi requires one to three fractional digit tokens.", fractionStart, tokens[fractionStart]);
+    }
+  }
+
+  const unit = tokens[offset] as ModernVernacularV26Unit | undefined;
+  if (!unit || !Object.prototype.hasOwnProperty.call(MV26_UNITS, unit)) {
+    return v26Rejected("A quantity must end with exactly one canonical unit: ma, se, ke, ra or ku.", offset, tokens[offset]);
+  }
+  offset++;
+  if (offset !== tokens.length) {
+    return v26Rejected("A v2.6 quantity contains exactly one numeric value and one unit; trailing or chained unit tokens are not allowed.", offset, tokens[offset]);
+  }
+
+  const integerValue = Number(integerDigits.map(token => MV26_DIGITS[token]).join(""));
+  const fractionText = fractionalDigits.map(token => MV26_DIGITS[token]).join("");
+  const scaledValue = integerValue * 1000 + Number(fractionText.padEnd(3, "0") || "0");
+  if (!Number.isSafeInteger(scaledValue) || scaledValue <= 0) {
+    return v26Rejected("A v2.6 measurement quantity must be greater than zero.", integerStart, tokens[integerStart]);
+  }
+  return {
+    ok: true,
+    grammar: "modern-vernacular-v2.6-locked",
+    ast: {
+      kind: "measurement-quantity",
+      grammarVersion: "2.6",
+      approximate,
+      value: scaledValue / 1000,
+      scaledValue,
+      unit,
+      dimension: MV26_UNITS[unit],
+      raw: tokens.join(" ")
+    },
+    diagnostics: []
+  };
+}
+
 /** Modern Vernacular v2.7: exact comparison of two same-unit typed quantities. */
 export type ModernVernacularV27Unit = "ma" | "se" | "ke" | "ra" | "ku";
 export type ModernVernacularV27Ast = {
