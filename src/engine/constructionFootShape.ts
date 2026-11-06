@@ -35,6 +35,10 @@ export function reviewConstructionFootShape(input: string): FootShapeReview {
     return { input, status: "SHAPE-INVALID", frame, parameterVowel, relationCoda,
       notes: ["The medial character is not in the recovered parameter-vowel set."], limitation: LIMITATION };
   }
+  if (relationCoda && PARAMETER_VOWELS.has(relationCoda)) {
+    return { input, status: "SHAPE-INVALID", frame, parameterVowel, relationCoda,
+      notes: ["The final relation-coda position must be consonantal, not a parameter vowel."], limitation: LIMITATION };
+  }
   notes.push("Frame consonant and parameter-vowel positions match the recovered Foot shape.");
   if (relationCoda) notes.push("A final relation-coda position is present; its membership and meaning are not validated because the inventory is incomplete.");
   else notes.push("No relation-coda position is present.");

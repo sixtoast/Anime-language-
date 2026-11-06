@@ -20,15 +20,18 @@ describe("recovered Construction Foot shape", () => {
     expect(result.status).toBe("UNRESOLVED");
     expect(result.relationCoda).toBe("z");
   });
-  it("[CON-FOOT-005] rejects non-frame initial consonants", () => {
+  it("[CON-FOOT-005] rejects a vowel in the relation-coda position", () => {
+    expect(reviewConstructionFootShape("paa").status).toBe("SHAPE-INVALID");
+  });
+  it("[CON-FOOT-006] rejects non-frame initial consonants", () => {
     expect(reviewConstructionFootShape("va").status).toBe("SHAPE-INVALID");
     expect(reviewConstructionFootShape("za").status).toBe("SHAPE-INVALID");
   });
-  it("[CON-FOOT-006] rejects unsupported lengths", () => {
+  it("[CON-FOOT-007] rejects unsupported lengths", () => {
     expect(reviewConstructionFootShape("p").status).toBe("SHAPE-INVALID");
     expect(reviewConstructionFootShape("paaa").status).toBe("SHAPE-INVALID");
   });
-  it("[CON-FOOT-007] records the provisional vowel and unresolved semantic boundary", () => {
+  it("[CON-FOOT-008] records the provisional vowel and unresolved semantic boundary", () => {
     expect(reviewConstructionFootShape("pu").notes.join(" ")).toContain("provisional");
     expect(reviewConstructionFootShape("pu").limitation).toContain("does not establish Foot meaning");
   });
