@@ -863,7 +863,7 @@ function v22Rejected(message: string, tokenIndex?: number, token?: string): Mode
   }] };
 }
 export function parseModernVernacularV22(input: string): ModernVernacularV22ParseResult {
-  const tokens = input.trim().toLowerCase().split(/\\s+/).filter(Boolean);
+  const tokens = input.trim().toLowerCase().split(/\s+/).filter(Boolean);
   if (!tokens.length) return v22Rejected("Enter a complete v2.2 qualitative-duration clause.");
   const markers = tokens.reduce<number[]>((out, token, index) => token === "melo" || token === "runi" ? [...out, index] : out, []);
   if (markers.length !== 1) return v22Rejected("A v2.2 duration clause requires exactly one clause-final marker: melo or runi.");
