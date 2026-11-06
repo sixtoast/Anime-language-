@@ -288,3 +288,24 @@ The source parser, unit tests, Playground browser, responsive styling and browse
 | ID | Feature | Origin | Priority | Dependencies | Affected files/sections | Acceptance criteria | Verification evidence | Final status |
 |---|---|---|---|---|---|---|---|---|
 | WEB-INC-GATE-01 | Explore the v1.2 validation sequence and v1.5 invocation lifecycle without simulating execution | Arcane Incantations v1.2 and v1.5; non-substitution and execution-boundary requirements | High | Locked v1.2/v1.5 specifications and existing Playground | src/App.tsx, src/styles.css, src/engine/incantationGateSequence.ts, src/engine/incantationGateSequence.test.ts, tests/browser/playground.spec.ts, tests/browser/overview.spec.ts | Preserve both source sequences separately; source links and exact stage order; selected-stage responsibility and non-substitution notes; no live state or execution claims; responsive at 360px | Implementation committed; unit, build and browser CI pending | Implemented — CI pending |
+
+
+## Repository reconciliation — 2026-11-06
+
+A fresh inspection of `main` confirms the website has moved substantially beyond the 2026-10-17 planning baseline. The Playground now contains:
+- Phase 6G source fixture browser and provenance-aware lexicon inspector;
+- v1.9 resource-accounting specification fixture browser (60 design fixtures);
+- v2.0 authority-decision specification fixture browser (60 design fixtures);
+- v2.1 policy-profile composition specification fixture browser (60 design fixtures);
+- separate v1.2 validation-gate and v1.5 invocation-lifecycle sequence explorer;
+- non-executable incantation contract worksheet.
+
+The Documentation catalogue contains entries through v2.1 incantation design and modern vernacular through v2.7. The engine contains bounded resource preflight, append-only resource-ledger projection, authority decision checks, policy composition and invocation-gate coordination. These capabilities are not interchangeable with a complete spell executor; their modules retain explicit evidence and execution limitations.
+
+The latest main commit inspected was `1a66fd8b`. GitHub Actions run [#692](https://github.com/sixtoast/Anime-language-/actions/runs/42270895535) passed unit tests, report mapping, type-check/build and website browser acceptance. The public report publication step was skipped, so the Overview may show an older report until a later successful publication. Vercel deployment `dpl_7FzHJLv3MrhZAFGJda8WchjcMQ6W` is READY for the same commit.
+
+### WEB-INC-RUNTIME-01 — Read-only evaluator diagnostics panel
+
+| ID | Feature | Origin | Priority | Dependencies | Affected files/sections | Acceptance criteria | Verification evidence | Final status |
+|---|---|---|---|---|---|---|---|---|
+| WEB-INC-RUNTIME-01 | Expose existing incantation evaluator outputs in a read-only Playground panel | Existing v1.9 resource preflight/ledger, v2.0 authority, v2.1 policy composition and invocation gate modules | High | Pure evaluator APIs and their unit fixtures/tests | `src/App.tsx`, `src/engine/resourcePreflight.ts`, `resourceLedger.ts`, `authorityGate.ts`, `policyComposition.ts`, `invocationGates.ts`, `tests/browser/playground.spec.ts` | Use deterministic, labelled sample inputs; show independent gate outcomes and diagnostics; retain BLOCK, UNRESOLVED and UNAVAILABLE distinctions; expose evidence assumptions and limitations; no external service, resource mutation, spell execution or claimed real-world effect; responsive at 360px | Queued after the 2026-11-06 repository review; no implementation or verification claimed | Planned |
