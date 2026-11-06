@@ -11,6 +11,10 @@ export interface WorkbenchTest {
 }
 
 export const workbenchTests: WorkbenchTest[] = [
+  { id: "MV20-001", group: "Parser", title: "Parses completed and ongoing aspect", description: "don and kok are recognised in their locked positions and return distinct aspect values.", status: "authored-unverified", file: "src/engine/modernVernacularV20.test.ts", sourceRule: "docs/canon/arcane-modern-vernacular-v2.0-completion-and-ongoing-aspect.md §§2–3" },
+  { id: "MV20-002", group: "Parser", title: "Preserves clause-local negative aspect scope", description: "nava don means not completed by reference time; nava kok means not in progress at reference time.", status: "authored-unverified", file: "src/engine/modernVernacularV20.test.ts", sourceRule: "Modern Vernacular v2.0 §4" },
+  { id: "MV20-003", group: "Parser", title: "Rejects unlicensed aspect combinations", description: "Aspect stacking, unsupported verbs, modal/directive combinations and negative polar questions are rejected.", status: "authored-unverified", file: "src/engine/modernVernacularV20.test.ts", sourceRule: "Modern Vernacular v2.0 §§3–5" },
+
   { id: "MV26-001", group: "Parser", title: "Parses typed measurement quantities", description: "The v2.6 parser recognises all five canonical unit tokens and returns their dimension types.", status: "authored-unverified", file: "src/engine/modernVernacularV26.test.ts", sourceRule: "docs/canon/arcane-modern-vernacular-v2.6-typed-measurement-quantities.md §§1–3" },
   { id: "MV26-002", group: "Parser", title: "Parses bounded compound and decimal values", description: "One-to-four digit integers and one-to-three fractional digits follow the v2.5 positional rules.", status: "authored-unverified", file: "src/engine/modernVernacularV26.test.ts", sourceRule: "Modern Vernacular v2.5 §§2–3; v2.6 §1" },
   { id: "MV26-003", group: "Dimensions", title: "Preserves measurement dimension types", description: "Length, time, mass, plane angle and thermodynamic temperature remain distinct.", status: "authored-unverified", file: "src/engine/modernVernacularV26.test.ts", sourceRule: "Modern Vernacular v2.6 §2" },
