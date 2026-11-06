@@ -74,4 +74,28 @@ describe("Arcane Incantations v1.9 resource ledger projection", () => {
   it("[RES19-LEDGER-012] preserves the non-execution boundary", () => {
     expect(projectResourceLedger(accounts(), []).limitations.join(" ")).toContain("not a physical measurement");
   });
+
+  it("[RES19-LEDGER-013] validates reservation release against the reservation account contract", () => {
+    const reserve = event({ eventId: "reserve", eventKind: "RESERVE", amountTicks: 40, reservationId: "r-1", idempotencyKey: "reserve-key" });
+    const release = event({ eventId: "release", eventKind: "RESERVATION-RELEASE", reservationId: "r-1", amountTicks: 10, unit: "milliunit", idempotencyKey: "release-key" });
+    const result = projectResourceLedger(accounts(), [reserve, release]);
+    expect(result.reserved.a).toBe(40);
+    expect(result.events[1]?.applied).toBe(false);
+    expect(result.issues.some(item => item.code === "UNIT-CONTRACT-MISMATCH")).toBe(true);
+  });
+
+  it("[RES19-LEDGER-014] does not poison idempotency keys when an event cannot be applied", () => {
+    const first = event({ amountTicks: 101 });
+    const retry = event({ eventId: "event-retry", amountTicks: 50 });
+    const result = projectResourceLedger(accounts(), [first, retry]);
+    expect(result.balances.a).toBe(50);
+    expect(result.events[1]).toMatchObject({ eventId: "event-retry", applied: true, duplicate: false });
+  });
+
+  it("[RES19-LEDGER-015] emits a failed event result when an account lookup fails", () => {
+    const result = projectResourceLedger(accounts(), [event({ fromAccount: "missing" })]);
+    expect(result.events).toHaveLength(1);
+    expect(result.events[0]).toMatchObject({ applied: false, duplicate: false });
+    expect(result.issues[0]?.code).toBe("ACCOUNT-NOT-FOUND");
+  });
 });
