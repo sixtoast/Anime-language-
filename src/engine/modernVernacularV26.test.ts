@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseModernVernacularV26 } from "./modernVernacular";
+import { parseModernVernacular, parseModernVernacularV26 } from "./modernVernacular";
 
 describe("Modern Vernacular v2.6 typed measurement quantities", () => {
   it.each([
@@ -39,6 +39,12 @@ describe("Modern Vernacular v2.6 typed measurement quantities", () => {
     ["vobi to ma", "unlicensed Formal comparison form"]
   ])("rejects %s (%s)", input => {
     expect(parseModernVernacularV26(input).ok).toBe(false);
+  });
+
+  it("dispatches standalone quantities through the unified language entry point", () => {
+    const result = parseModernVernacular("nela to shi sa ke");
+    expect(result.ok).toBe(true);
+    expect(result.grammar).toBe("modern-vernacular-v2.6-locked");
   });
 
   it("preserves exact thousandth precision", () => {
