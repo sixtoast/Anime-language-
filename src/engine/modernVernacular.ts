@@ -713,6 +713,81 @@ export type ModernVernacularUnifiedParseResult =
   | ModernVernacularV27ParseResult;
 
 
+/** Modern Vernacular v2.0: bounded completion and ongoing aspect. */
+export type ModernVernacularV20Ast = {
+  kind: "aspect-clause";
+  grammarVersion: "2.0";
+  aspect: "completed" | "ongoing";
+  polarity: "positive" | "negative";
+  action: "wish" | "nak" | "zir" | "mos" | "mol" | "tut" | "bul" | "lil" | "ful" | "zem";
+  clause: string;
+  base: ModernVernacularUnifiedParseResult["ast"];
+};
+export type ModernVernacularV20ParseResult = {
+  ok: boolean;
+  grammar: "modern-vernacular-v2.0-locked";
+  ast?: ModernVernacularV20Ast;
+  diagnostics: ModernVernacularDiagnostic[];
+};
+
+const MV20_COMPLETED = new Set(["wish","nak","zir","mos","mol","tut","bul","lil","ful","zem"]);
+const MV20_ONGOING = new Set(["zir","mos","mol","tut","bul","lil","ful","zem"]);
+
+function v20Rejected(message: string, tokenIndex?: number, token?: string): ModernVernacularV20ParseResult {
+  return { ok: false, grammar: "modern-vernacular-v2.0-locked", diagnostics: [{
+    code: "MV1_UNSUPPORTED_CONSTRUCTION", message,
+    ...(tokenIndex === undefined ? {} : { tokenIndex }),
+    ...(token === undefined ? {} : { token })
+  }] };
+}
+
+/** Validates aspect scope first, then delegates the underlying argument frame to the existing clause parser. */
+export function parseModernVernacularV20(input: string): ModernVernacularV20ParseResult {
+  const tokens = input.trim().toLowerCase().split(/\\s+/).filter(Boolean);
+  if (!tokens.length) return v20Rejected("Enter a complete v2.0 aspect-marked action clause.");
+  let aspectIndex = tokens.indexOf("don");
+  if (aspectIndex < 0) aspectIndex = tokens.indexOf("kok");
+  if (aspectIndex < 0) return v20Rejected("A v2.0 clause requires exactly one aspect marker: don or kok.");
+  const aspectToken = tokens[aspectIndex];
+  if (tokens.indexOf(aspectToken, aspectIndex + 1) >= 0 || tokens.includes(aspectToken === "don" ? "kok" : "don")) {
+    return v20Rejected("Aspect stacking or multiple aspect markers are not licensed.", aspectIndex, aspectToken);
+  }
+  if (aspectIndex !== 1 && !(aspectIndex === 2 && tokens[1] === "nava")) {
+    return v20Rejected("Aspect must immediately follow the subject and any clause-local nava.", aspectIndex, aspectToken);
+  }
+  const verbIndex = aspectIndex + 1;
+  const action = tokens[verbIndex];
+  const licensed = aspectToken === "don" ? MV20_COMPLETED : MV20_ONGOING;
+  if (!action || !licensed.has(action)) {
+    return v20Rejected(aspectToken === "kok"
+      ? "kok is licensed only with zir, mos, mol, tut, bul, lil, ful or zem."
+      : "don is licensed only with the v2.0 eventive verb inventory.", verbIndex, action);
+  }
+  if (tokens.slice(verbIndex + 1).some(token => ["fam","kong","tek","yemi","zami","dema","sori","mira","toku"].includes(token))) {
+    return v20Rejected("Modal and directive constructions cannot combine with v2.0 aspect.");
+  }
+  const baseTokens = tokens.filter((_, index) => index !== aspectIndex);
+  const base = parseModernVernacular(baseTokens.join(" "));
+  if (!base.ok) return v20Rejected("The underlying clause is not independently licensed by the existing Modern Vernacular parser.", base.diagnostics[0]?.tokenIndex, base.diagnostics[0]?.token);
+  if (tokens[tokens.length - 1] === "pun" && tokens.includes("nava")) {
+    return v20Rejected("Negative polar questions with v2.0 aspect remain blocked.");
+  }
+  return {
+    ok: true,
+    grammar: "modern-vernacular-v2.0-locked",
+    ast: {
+      kind: "aspect-clause",
+      grammarVersion: "2.0",
+      aspect: aspectToken === "don" ? "completed" : "ongoing",
+      polarity: tokens.includes("nava") ? "negative" : "positive",
+      action: action as ModernVernacularV20Ast["action"],
+      clause: tokens.join(" "),
+      base: base.ast
+    },
+    diagnostics: []
+  };
+}
+
 /** Modern Vernacular v2.6: standalone typed measurement quantity. */
 export type ModernVernacularV26Unit = "ma" | "se" | "ke" | "ra" | "ku";
 export type ModernVernacularV26Dimension = "LENGTH" | "TIME" | "MASS" | "PLANE_ANGLE" | "THERMODYNAMIC_TEMPERATURE";
