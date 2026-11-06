@@ -708,7 +708,135 @@ export type ModernVernacularUnifiedParseResult =
   | ModernVernacularV15ParseResult
   | ModernVernacularV16ParseResult
   | ModernVernacularV17ParseResult
-  | ModernVernacularV18ParseResult;
+  | ModernVernacularV18ParseResult\n  | ModernVernacularV27ParseResult;
+
+
+/** Modern Vernacular v2.7: exact comparison of two same-unit typed quantities. */
+export type ModernVernacularV27Unit = "ma" | "se" | "ke" | "ra" | "ku";
+export type ModernVernacularV27Ast = {
+  kind: "quantity-comparison";
+  grammarVersion: "2.7";
+  relation: "equal" | "less-than" | "greater-than";
+  operator: "nari" | "dori" | "gari";
+  left: { raw: string; value: number; unit: ModernVernacularV27Unit };
+  right: { raw: string; value: number; unit: ModernVernacularV27Unit };
+  truth: boolean;
+};
+export type ModernVernacularV27ParseResult = {
+  ok: boolean;
+  grammar: "modern-vernacular-v2.7-locked";
+  ast?: ModernVernacularV27Ast;
+  diagnostics: ModernVernacularDiagnostic[];
+};
+
+const MV27_DIGITS: Record<string, string> = {
+  za: "0", ki: "1", to: "2", mu: "3", re: "4",
+  sa: "5", fi: "6", du: "7", go: "8", pe: "9"
+};
+const MV27_UNITS = new Set<ModernVernacularV27Unit>(["ma", "se", "ke", "ra", "ku"]);
+
+function v27Rejected(message: string, tokenIndex?: number, token?: string): ModernVernacularV27ParseResult {
+  return {
+    ok: false,
+    grammar: "modern-vernacular-v2.7-locked",
+    diagnostics: [{
+      code: "MV1_UNSUPPORTED_CONSTRUCTION",
+      message,
+      ...(tokenIndex === undefined ? {} : { tokenIndex }),
+      ...(token === undefined ? {} : { token })
+    }]
+  };
+}
+
+function parseV27Quantity(tokens: string[], offset: number): {
+  quantity?: ModernVernacularV27Ast["left"];
+  next: number;
+  error?: string;
+} {
+  const start = offset;
+  if (tokens[offset] === "nela") return { next: offset, error: "Approximate quantities are not licensed in exact v2.7 comparisons." };
+  const integerStart = offset;
+  while (offset < tokens.length && Object.hasOwn(MV27_DIGITS, tokens[offset])) offset++;
+  const integerDigits = tokens.slice(integerStart, offset);
+  if (integerDigits.length < 1 || integerDigits.length > 4) {
+    return { next: offset, error: "A comparison operand requires one to four integer digit tokens." };
+  }
+  if (integerDigits.length > 1 && integerDigits[0] === "za") {
+    return { next: offset, error: "A compound integer cannot begin with zero." };
+  }
+
+  let fractionalDigits: string[] = [];
+  if (tokens[offset] === "shi") {
+    offset++;
+    const fractionStart = offset;
+    while (offset < tokens.length && Object.hasOwn(MV27_DIGITS, tokens[offset])) offset++;
+    fractionalDigits = tokens.slice(fractionStart, offset);
+    if (fractionalDigits.length < 1 || fractionalDigits.length > 3) {
+      return { next: offset, error: "The decimal separator shi requires one to three fractional digit tokens." };
+    }
+  }
+
+  const unit = tokens[offset];
+  if (!MV27_UNITS.has(unit as ModernVernacularV27Unit)) {
+    return { next: offset, error: "A quantity comparison operand must end with one of the typed units: ma, se, ke, ra or ku." };
+  }
+  offset++;
+  const integerValue = Number(integerDigits.map(digit => MV27_DIGITS[digit]).join(""));
+  const fractionValue = fractionalDigits.length
+    ? Number("0." + fractionalDigits.map(digit => MV27_DIGITS[digit]).join(""))
+    : 0;
+  const value = integerValue + fractionValue;
+  if (!Number.isFinite(value) || value <= 0) {
+    return { next: offset, error: "Comparison quantities must be finite and greater than zero." };
+  }
+  return {
+    next: offset,
+    quantity: {
+      raw: tokens.slice(start, offset).join(" "),
+      value,
+      unit: unit as ModernVernacularV27Unit
+    }
+  };
+}
+
+export function parseModernVernacularV27(input: string): ModernVernacularV27ParseResult {
+  const tokens = input.trim().toLowerCase().split(/\\s+/).filter(Boolean);
+  if (!tokens.length) return v27Rejected("Enter a v2.7 quantity comparison.");
+  const operator = tokens[0];
+  if (operator !== "nari" && operator !== "dori" && operator !== "gari") {
+    return v27Rejected("A v2.7 comparison must begin with nari, dori or gari.", 0, operator);
+  }
+  const left = parseV27Quantity(tokens, 1);
+  if (!left.quantity) return v27Rejected(left.error ?? "The first quantity is invalid.", left.next, tokens[left.next]);
+  const right = parseV27Quantity(tokens, left.next);
+  if (!right.quantity) return v27Rejected(right.error ?? "The second quantity is invalid.", right.next, tokens[right.next]);
+  if (right.next !== tokens.length) {
+    return v27Rejected("A v2.7 comparison contains exactly one relation and two complete quantities; trailing tokens are not allowed.", right.next, tokens[right.next]);
+  }
+  if (left.quantity.unit !== right.quantity.unit) {
+    return v27Rejected("Both comparison operands must use the exact same unit token. Unit conversion is not defined in v2.7.", left.next, tokens[left.next]);
+  }
+  const relation = operator === "nari" ? "equal" : operator === "dori" ? "less-than" : "greater-than";
+  const truth = relation === "equal"
+    ? left.quantity.value === right.quantity.value
+    : relation === "less-than"
+      ? left.quantity.value < right.quantity.value
+      : left.quantity.value > right.quantity.value;
+  return {
+    ok: true,
+    grammar: "modern-vernacular-v2.7-locked",
+    ast: {
+      kind: "quantity-comparison",
+      grammarVersion: "2.7",
+      relation,
+      operator,
+      left: left.quantity,
+      right: right.quantity,
+      truth
+    },
+    diagnostics: []
+  };
+}
 
 export function parseModernVernacular(input: string): ModernVernacularUnifiedParseResult {
   const tokens = input.trim().toLowerCase().split(/\s+/).filter(Boolean);
