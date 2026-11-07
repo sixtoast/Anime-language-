@@ -10,6 +10,11 @@
  *
  * The v5 draft CSV is a lexicon snapshot, not a complete grammar version, so
  * it is deliberately not represented as a parser/language profile here.
+ *
+ * This registry covers formal operators and the six Construction macros only.
+ * REN/BEN is a geometry/region lexical rename, not an operator identity;
+ * HƏ/HE/HA/HU/HI/HO are coupling vocabulary, not ordinary operators; and
+ * Phase 4 proposal-only tokens remain outside this source-backed core registry.
  */
 export type OperatorIdentityProfile = "v3.0-L" | "phase4-renamed";
 
