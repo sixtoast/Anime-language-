@@ -170,7 +170,7 @@ export function evaluateConservationContract(
   }
   if (!nonEmptyString(contract.contractId) || !nonEmptyString(contract.resourceKind) ||
       !nonEmptyString(contract.unit) || !nonEmptyString(contract.unitContractId) ||
-      !nonEmptyString(contract.systemBoundary) || !contract.validInterval ||
+      !nonEmptyString(contract.systemBoundary) || !nonEmptyString(contract.invariant) || !contract.validInterval ||
       !isIsoTime(contract.validInterval.start) || !isIsoTime(contract.validInterval.end) ||
       !isIsoTime(contract.evaluationTime) ||
       !nonEmptyString(contract.contractEvidenceRef) || !nonEmptyString(contract.boundaryEvidenceRef) ||
