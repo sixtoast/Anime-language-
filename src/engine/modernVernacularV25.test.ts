@@ -33,6 +33,10 @@ describe("Modern Vernacular v2.5 compound numerals and fractional seconds", () =
     const result = parseModernVernacular("teshi don zir rawu to shi sa se");
     expect(result.ok).toBe(true);
     expect(result.grammar).toBe("modern-vernacular-v2.5-locked");
+
+    const compound = parseModernVernacular("teshi don zir rawu ki to se");
+    expect(compound.ok).toBe(true);
+    expect(compound.grammar).toBe("modern-vernacular-v2.5-locked");
   });
 
   it("[MV25-007] supports a positive polar question after the duration phrase", () => {

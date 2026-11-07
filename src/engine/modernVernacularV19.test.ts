@@ -46,7 +46,7 @@ describe("Modern Vernacular v1.9 conditionals and hypotheses", () => {
   });
 
   it("[MV19-005] tokenises conditional clauses across line breaks", () => {
-    const result = parseModernVernacularV19("navi teshi wish fezo\\nsaku fezo nak rawu");
+    const result = parseModernVernacularV19("navi teshi wish fezo\nsaku fezo nak rawu");
     expect(result.ok).toBe(true);
   });
 });

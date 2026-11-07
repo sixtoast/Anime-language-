@@ -1392,7 +1392,11 @@ export function parseModernVernacularV27(input: string): ModernVernacularV27Pars
 export function parseModernVernacular(input: string): ModernVernacularUnifiedParseResult {
   const tokens = input.trim().toLowerCase().split(/\s+/).filter(Boolean);
   if (tokens.includes("navi") || tokens.includes("saku") || tokens.includes("ravi")) return parseModernVernacularV19(input);
-  if (tokens.includes("don") && tokens.includes("se")) return parseModernVernacularV25(input);
+  if (tokens.includes("don") && tokens.includes("se")) {
+    const durationDigits = tokens.filter(token => ["za","ki","to","mu","re","sa","fi","du","go","pe"].includes(token));
+    if (tokens.includes("shi") || durationDigits.length > 1) return parseModernVernacularV25(input);
+    return parseModernVernacularV24(input);
+  }
   if (tokens.includes("kavi")) return parseModernVernacularV23(input);
   if (tokens.includes("nemi") || tokens.includes("pavo") || tokens.includes("sula")) return parseModernVernacularV21(input);
   if (tokens.includes("melo") || tokens.includes("runi")) return parseModernVernacularV22(input);
