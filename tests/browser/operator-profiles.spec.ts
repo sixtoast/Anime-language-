@@ -1,6 +1,6 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
-async function openPlayground(page: Parameters<Parameters<typeof test>[1]>[0]["page"]) {
+async function openPlayground(page: Page) {
   await page.route("https://api.github.com/**", async (route) => {
     await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ workflow_runs: [], jobs: [] }) });
   });
