@@ -616,7 +616,7 @@ function App() {
           </section>
 
           <section className="fixture-browser runtime-preview-browser" aria-labelledby="runtime-preview-title">
-            <div className="fixture-browser-head"><div><span className="detail-kicker">CONNECTED EVALUATORS · READ-ONLY SAMPLE</span><h2 id="runtime-preview-title">Unified invocation diagnostics</h2></div><span>5 evaluator layers</span></div>
+            <div className="fixture-browser-head"><div><span className="detail-kicker">CONNECTED EVALUATORS · READ-ONLY SAMPLE</span><h2 id="runtime-preview-title">Unified invocation diagnostics</h2></div><span>4 evaluator layers</span></div>
             <p className="fixture-browser-intro">This panel runs the repository's bounded resource-preflight, policy-composition, authority-gate and invocation-coordinator functions against explicit sample inputs. It is an integration preview, not a real spell runtime or evidence-verification service.</p>
             <label className="fixture-select-label">Choose a diagnostic scenario<select aria-label="Choose incantation runtime preview scenario" value={runtimePreviewScenario} onChange={(event) => setRuntimePreviewScenario(event.target.value as RuntimePreviewScenario)}>{runtimePreviewScenarios.map((scenario) => <option key={scenario.id} value={scenario.id}>{scenario.label}</option>)}</select></label>
             <p className="runtime-preview-description">{runtimePreview.description}</p>
