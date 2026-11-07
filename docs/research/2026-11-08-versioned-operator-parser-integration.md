@@ -236,3 +236,24 @@ Added POLICY-COMP-011 through POLICY-COMP-015 and central registry entries. They
 
 ### Scope
 This validates the profile-evaluation inputs consumed by the policy composer. It does not validate the underlying trust evidence, evaluate applicability predicates, establish scope, verify decision signatures, or execute policy rulesets.
+
+
+## 13. Incantation authority-gate runtime hardening
+
+**Implementation commit:** `e0ff4bd3423817104549c82a8bc04e4ffd30d5b8`.
+
+The v2.0 authority evaluator now validates its runtime input before reading any request, decision or evidence field.
+
+### Changes
+- Added a non-null, non-array object guard.
+- Validates request and decision well-formedness as strict booleans or the documented `UNKNOWN` state.
+- Validates decision presence as a strict boolean.
+- Validates decision outcomes, evidence checks, expiry, scope-match states and condition states against explicit allowlists.
+- Invalid runtime input returns the implementation-level outcome `MALFORMED-INPUT`, `gateSatisfied: false`, and a structured diagnostic. It does not masquerade as a canonical authority denial or a semantic permit.
+- Updated the invocation coordinator's accepted authority-result outcome list so the new malformed-input result is consumed as a blocking authority state rather than causing an unchecked path.
+
+### Regression cases
+Added AUTH-GATE-012 through AUTH-GATE-016 and registered all five in the central workbench test catalogue. They cover null/non-object input, truthy strings in boolean fields, unknown decision/evidence values, invalid expiry/scope states and unknown conditional-evaluation states. All five are `authored-unverified`.
+
+### Verification boundary
+The latest authority hardening commit is on the feature branch. Its Vercel deployment and TypeScript build must be checked before claiming compile verification. No unit tests have been executed. The implementation still consumes caller-supplied trust, delegation, integrity, freshness, revocation and scope results; it does not verify those external facts.
