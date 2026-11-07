@@ -716,13 +716,13 @@ export function parseModernVernacularV19(input: string): ModernVernacularV19Pars
   let hypothetical: ModernVernacularUnifiedParseResult | undefined;
   let conditionalText = text;
   if (parts.length === 2) {
-    const premise = parts[0].trim().split(/\\s+/).filter(Boolean);
+    const premise = parts[0].trim().split(/\s+/).filter(Boolean);
     conditionalText = parts[1].trim();
     if (premise.shift() !== "ravi" || !premise.length) return v19Rejected("The semicolon must follow ravi and a complete supposition clause.");
     hypothetical = parseModernVernacular(premise.join(" "));
     if (!hypothetical.ok) return v19Rejected("The ravi premise must independently parse as a complete licensed clause.");
   }
-  const tokens = conditionalText.split(/\\s+/).filter(Boolean);
+  const tokens = conditionalText.split(/\s+/).filter(Boolean);
   const navi = tokens.filter(x => x === "navi").length;
   const saku = tokens.filter(x => x === "saku").length;
   if (navi !== 1 || saku !== 1 || tokens[0] !== "navi") return v19Rejected("A conditional requires exactly one leading navi and one following saku; nested and repeated markers are blocked.");
@@ -813,7 +813,7 @@ export function parseModernVernacularV20(input: string): ModernVernacularV20Pars
       ? "kok is licensed only with zir, mos, mol, tut, bul, lil, ful or zem."
       : "don is licensed only with the v2.0 eventive verb inventory.", verbIndex, action);
   }
-  if (tokens.slice(verbIndex + 1).some(token => ["fam","kong","tek","yemi","zami","dema","sori","mira","toku"].includes(token))) {
+  if (tokens.some(token => ["fam","kong","tek","yemi","zami","dema","sori","mira","toku"].includes(token))) {
     return v20Rejected("Modal and directive constructions cannot combine with v2.0 aspect.");
   }
   const baseTokens = tokens.filter((_, index) => index !== aspectIndex);
@@ -1086,6 +1086,7 @@ export type ModernVernacularV25Ast = {
   integerDigits: number[];
   fractionalDigits: number[];
   durationSeconds: number;
+  durationThousandths: number;
   approximate: boolean;
   unit: "se";
   polarQuestion: boolean;
@@ -1133,9 +1134,10 @@ export function parseModernVernacularV25(input: string): ModernVernacularV25Pars
   const integerDigits = integerTokens.map(token => MV25_DIGITS[token]);
   const fractionalDigits = fractionalTokens.map(token => MV25_DIGITS[token]);
   const integerValue = integerDigits.reduce((value, digit) => value * 10 + digit, 0);
-  const fractionalValue = fractionalDigits.reduce((value, digit, index) => value + digit / (10 ** (index + 1)), 0);
-  const durationSeconds = integerValue + fractionalValue;
-  if (durationSeconds <= 0) return v25Rejected("Zero-second duration is not licensed.");
+  const fractionalText = fractionalDigits.map(String).join("").padEnd(3, "0");
+  const durationThousandths = integerValue * 1000 + Number(fractionalText || "0");
+  const durationSeconds = durationThousandths / 1000;
+  if (durationThousandths <= 0) return v25Rejected("Zero-second duration is not licensed.");
   const clauseTokens = tokens.slice(0, numberStart);
   if (!clauseTokens.length) return v25Rejected("Numeric duration must modify a complete affirmative completed-event clause.");
   if (tokens.includes("melo") || tokens.includes("runi")) return v25Rejected("Numeric and qualitative duration markers cannot be stacked.");
@@ -1146,7 +1148,7 @@ export function parseModernVernacularV25(input: string): ModernVernacularV25Pars
   }
   return {
     ok: true, grammar: "modern-vernacular-v2.5-locked",
-    ast: { kind: "numeric-duration", grammarVersion: "2.5", clause: clause.ast, integerDigits, fractionalDigits, durationSeconds, approximate, unit: "se", polarQuestion },
+    ast: { kind: "numeric-duration", grammarVersion: "2.5", clause: clause.ast, integerDigits, fractionalDigits, durationSeconds, durationThousandths, approximate, unit: "se", polarQuestion },
     diagnostics: []
   };
 }
@@ -1390,15 +1392,14 @@ export function parseModernVernacularV27(input: string): ModernVernacularV27Pars
 export function parseModernVernacular(input: string): ModernVernacularUnifiedParseResult {
   const tokens = input.trim().toLowerCase().split(/\s+/).filter(Boolean);
   if (tokens.includes("navi") || tokens.includes("saku") || tokens.includes("ravi")) return parseModernVernacularV19(input);
-  if (tokens.includes("se") && tokens.includes("don")) return parseModernVernacularV24(input);
+  if (tokens.includes("don") && tokens.includes("se")) return parseModernVernacularV25(input);
   if (tokens.includes("kavi")) return parseModernVernacularV23(input);
   if (tokens.includes("nemi") || tokens.includes("pavo") || tokens.includes("sula")) return parseModernVernacularV21(input);
   if (tokens.includes("melo") || tokens.includes("runi")) return parseModernVernacularV22(input);
   if (tokens.includes("seno")) return parseModernVernacularV23(input);
-  if (tokens.includes("shi") || tokens.includes("se")) return parseModernVernacularV25(input);
+  if (tokens[0] === "nela" || ["za","ki","to","mu","re","sa","fi","du","go","pe"].includes(tokens[0])) return parseModernVernacularV26(input);
   if (tokens.includes("don") || tokens.includes("kok")) return parseModernVernacularV20(input);
   if (["nari", "dori", "gari"].includes(tokens[0])) return parseModernVernacularV27(input);
-  if (tokens[0] === "nela" || ["za","ki","to","mu","re","sa","fi","du","go","pe"].includes(tokens[0])) return parseModernVernacularV26(input);
   if (tokens.some(token => token === "lena" || token === "savi" || token === "doru")) return parseModernVernacularV18(input);
   if (["dema","sori","mira","toku"].includes(tokens[0])) return parseModernVernacularV17(input);
   const modalAtOne = ["fam","kong","tek","yemi","zami"].includes(tokens[1]);

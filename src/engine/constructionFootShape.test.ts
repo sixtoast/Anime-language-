@@ -7,12 +7,12 @@ describe("recovered Construction Foot shape", () => {
   });
   it("[CON-FOOT-002] recognises all six documented frame initials", () => {
     for (const token of ["pa", "ba", "ta", "da", "ka", "ga"]) {
-      expect(reviewConstructionFootShape(token).status).toBe("SHAPE-RECOGNISED");
+      expect(reviewConstructionFootShape(token).status).toBe("FRAME-FORM-RECOGNISED");
     }
   });
   it("[CON-FOOT-003] recognises the documented parameter-vowel positions structurally", () => {
     for (const vowel of ["a", "u", "o", "e", "i", "ə"]) {
-      expect(reviewConstructionFootShape("p" + vowel).status).toBe("SHAPE-RECOGNISED");
+      expect(reviewConstructionFootShape("p" + vowel).status).toBe("FRAME-FORM-RECOGNISED");
     }
   });
   it("[CON-FOOT-004] does not claim coda validity from an incomplete inventory", () => {
