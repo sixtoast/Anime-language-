@@ -78,9 +78,42 @@ function validNonNegative(value: number): boolean {
   return Number.isFinite(value) && value >= 0;
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function validResourceInput(value: unknown): value is ResourcePreflightInput {
+  if (!isRecord(value)) return false;
+  const nonEmpty = (candidate: unknown) =>
+    typeof candidate === "string" && candidate.length > 0 && candidate.trim() === candidate;
+  const optionalString = (candidate: unknown) => candidate === undefined || nonEmpty(candidate);
+  const optionalAmount = (candidate: unknown) => candidate === undefined ||
+    (typeof candidate === "number" && validNonNegative(candidate));
+  const evidence = (candidate: unknown) =>
+    candidate === "PASS" || candidate === "FAIL" || candidate === "UNKNOWN" || candidate === "UNAVAILABLE";
+  return nonEmpty(value.resourceKind) && nonEmpty(value.accountId) &&
+    nonEmpty(value.unit) && nonEmpty(value.requiredUnit) &&
+    optionalString(value.unitContractId) && optionalString(value.budgetUnit) &&
+    (value.openingBalance === null || (typeof value.openingBalance === "number" && validNonNegative(value.openingBalance))) &&
+    evidence(value.openingBalanceEvidence) && evidence(value.sourceEvidence) &&
+    evidence(value.evidenceFreshness) && evidence(value.reservationEvidence) &&
+    evidence(value.budgetEvidence) &&
+    typeof value.requiredAmount === "number" && validNonNegative(value.requiredAmount) &&
+    typeof value.heldReservations === "number" && validNonNegative(value.heldReservations) &&
+    optionalAmount(value.budgetLimit) &&
+    optionalAmount(value.conservativeConsumptionUpperBound) &&
+    optionalAmount(value.sourceAvailableAmount);
+}
+
 export function evaluateResourcePreflight(input: ResourcePreflightInput): ResourcePreflightResult {
   const diagnostics: ResourcePreflightDiagnostic[] = [];
   const add = (code: string, message: string) => diagnostics.push({ code, message });
+  if (!validResourceInput(input)) {
+    add("RESOURCE-INPUT-INVALID", "Resource preflight input must be an object with canonical identifiers, finite non-negative quantities and documented evidence states.");
+    const requiredAmount = isRecord(input) && typeof input.requiredAmount === "number" && Number.isFinite(input.requiredAmount)
+      ? input.requiredAmount : 0;
+    return result("RESOURCE-SPEC-UNDERSPECIFIED", "RESOURCE-OUTCOME-UNKNOWN", requiredAmount, diagnostics);
+  }
 
   if (!input.resourceKind.trim() || !input.accountId.trim() || !input.unit.trim() || !input.requiredUnit.trim() ||
       !input.unitContractId?.trim() || !validNonNegative(input.requiredAmount) ||

@@ -42,4 +42,28 @@ describe("Arcane Incantations v1.9 resource preflight", () => {
     expect(result.limitations.join(" ")).toContain("No implicit or inferred unit conversion");
     expect(result.limitations.join(" ")).toContain("does not execute");
   });
+  it("[RES19-EVAL-010] rejects null and non-object resource input", () => {
+    expect(evaluateResourcePreflight(null as never).outcome).toBe("RESOURCE-SPEC-UNDERSPECIFIED");
+    expect(evaluateResourcePreflight([] as never).diagnostics[0]?.code).toBe("RESOURCE-INPUT-INVALID");
+  });
+  it("[RES19-EVAL-011] rejects unknown evidence states", () => {
+    expect(evaluateResourcePreflight({ ...valid(), sourceEvidence: "VERIFIED" } as never).outcome)
+      .toBe("RESOURCE-SPEC-UNDERSPECIFIED");
+  });
+  it("[RES19-EVAL-012] rejects truthy strings and non-finite quantities", () => {
+    expect(evaluateResourcePreflight({ ...valid(), requiredAmount: "1" } as never).outcome)
+      .toBe("RESOURCE-SPEC-UNDERSPECIFIED");
+    expect(evaluateResourcePreflight({ ...valid(), heldReservations: Number.POSITIVE_INFINITY }).outcome)
+      .toBe("RESOURCE-SPEC-UNDERSPECIFIED");
+  });
+  it("[RES19-EVAL-013] rejects whitespace-padded resource identifiers", () => {
+    expect(evaluateResourcePreflight({ ...valid(), accountId: " tank-a " }).outcome)
+      .toBe("RESOURCE-SPEC-UNDERSPECIFIED");
+  });
+  it("[RES19-EVAL-014] rejects malformed optional budget and source amounts", () => {
+    expect(evaluateResourcePreflight({ ...valid(), budgetLimit: "40" } as never).outcome)
+      .toBe("RESOURCE-SPEC-UNDERSPECIFIED");
+    expect(evaluateResourcePreflight({ ...valid(), sourceAvailableAmount: -1 }).outcome)
+      .toBe("RESOURCE-SPEC-UNDERSPECIFIED");
+  });
 });
