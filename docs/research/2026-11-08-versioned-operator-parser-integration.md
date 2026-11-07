@@ -79,8 +79,8 @@ Coverage includes profile primary forms, cross-version rejection, opt-in aliases
 
 - An initial integrated commit failed Vercel TypeScript compilation because the new raw-token and alias-option fields were not initialised. This was corrected in commit `e27b71c25d47bbb4be9846ee46b8d3d3130dec30`.
 - Vercel deployment `dpl_GpX2zBfaSqXneWUnXGP9hGL4XgRh` for that corrected integration commit reached READY. Its build logs show `tsc --noEmit` completed and Vite transformed 2,096 modules and completed the production build.
-- A subsequent follow-up commit briefly failed TypeScript because an unused import remained after tightening unresolved-operator handling. The unused import was removed in the following commit.
-- The latest branch commit at the time of this document is `b354864dad53da5141999b8f1b79d87c5cebf31c`. Its Vercel deployment was queued/building at the last check; its final state is not yet verified.
+- A subsequent follow-up commit briefly failed TypeScript because an unused import remained after tightening unresolved-operator handling. The unused import was removed in commit `48589d312cd6713a335346e78243e5c37c308a25`. That commit also ensures unresolved-signature diagnostics retain the entered surface spelling.
+- The integrated READY build at `e27b71c...` predates the last diagnostic, test-catalogue and documentation follow-ups; it does not prove the exact latest branch head. The latest implementation commit before this documentation refresh is `48589d312cd6713a335346e78243e5c37c308a25`; its Vercel deployment was BUILDING at the last status check.
 - No GitHub Actions run was triggered for this branch. No workflow was manually dispatched or rerun.
 - Unit tests have **not** been executed. A successful Vercel production build is not a test-suite pass.
 - Main and production were not changed. The branch is not merged and no PR has been opened.
@@ -101,3 +101,13 @@ Coverage includes profile primary forms, cross-version rejection, opt-in aliases
 Continue from this branch by verifying the latest preview, reviewing the parser diff and semantic regression cases, then implement a version-aware operator explorer with explicit readiness axes (identity, parser grammar, signature, semantic contract and execution). Keep the dictionary's v5 draft source snapshot visibly distinct. Follow with runtime hardening of the Incantation gates and v1.9 ledger review, and keep website/release documentation in sync.
 
 **Release boundary:** parse recognition is not semantic validity; semantic annotation is not physical feasibility; feasibility is not authority; authority is not execution; and execution is not a verified outcome.
+
+
+## 9. Follow-up after the initial integration record
+
+- `src/engine/testRegistry.ts` now includes 10 OP-ID cases, six P6G-V cases and SEM-A-013. These 17 entries remain `authored-unverified`.
+- `src/engine/surfaceParser.ts` retains the original unresolved-operator rejection for forms such as WEKI/RUKI even when an explicit spelling profile is selected. The operator identity import was removed after the parser guard was simplified, avoiding an unused-import TypeScript failure.
+- `src/engine/semanticAnalysis.ts` now uses the entered `surfaceForm` as the subject for signature-unresolved diagnostics, while the AST continues to expose the resolved preferred spelling and stable identity.
+- `src/App.tsx` imports the parser inventory helper through its existing surface-parser import, and the runtime preview count is now four.
+- The previous two preview failures are recorded rather than hidden: the first exposed missing constructor initialisation for raw token provenance/options; a later follow-up exposed an unused import. Both source issues have corresponding fixes. Do not call the final head verified until its own Vercel build completes.
+- Main, production, and GitHub Actions remain untouched by this work.
