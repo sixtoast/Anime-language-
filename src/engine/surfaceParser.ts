@@ -380,7 +380,7 @@ class Parser {
       throw new ParseFailure("AMBIGUOUS_HOMOPHONE", `${token.toUpperCase()} is a documented homophone; disambiguation is not implemented.`, this.cursor, token);
     }
     const form = this.take();
-    if ((!this.operatorProfile && OPERATOR_CLASSES.has(form)) || (this.operatorProfile && operatorIdentityRecords.some((record) => record.v3_0LForm?.toLowerCase() === form || record.phase4Form?.toLowerCase() === form))) {
+    if (OPERATOR_CLASSES.has(form)) {
       throw new ParseFailure("UNRESOLVED_OPERATOR", `Operator ${form.toUpperCase()} has no usable signature in this parser context.`, this.cursor - 1, form);
     }
     if (this.lexiconRegistry) {

@@ -4,7 +4,7 @@ import {
   Command, FileText, FlaskConical, GitBranch, Layers3, Menu,
   Search, ShieldCheck, Sparkles, TestTube2, X, Play, AlertTriangle
 } from "lucide-react";
-import { parseSurfaceExpression, type SurfaceParseResult } from "./engine/surfaceParser";
+import { listPhase6GParserOperators, parseSurfaceExpression, type SurfaceParseResult } from "./engine/surfaceParser";
 import { analyseSurfaceParse } from "./engine/semanticAnalysis";
 import { reviewExpressionConstructionBridge } from "./engine/expressionConstructionBridge";
 import { parseModernVernacular, parseModernVernacularV1, parseModernVernacularV11, parseModernVernacularV12, parseModernVernacularV13, parseModernVernacularV14, type ModernVernacularUnifiedParseResult, type ModernVernacularV13ParseResult, type ModernVernacularParseResult, type ModernVernacularV11ParseResult, type ModernVernacularV12ParseResult, type ModernVernacularV14ParseResult } from "./engine/modernVernacular";
@@ -26,7 +26,6 @@ import { bindConstructionReference, type ConstructionReferenceToken } from "./en
 import { reviewConstructionFootShape } from "./engine/constructionFootShape";
 import { reviewConstructionCoupling } from "./engine/constructionCouplingEvidence";
 import { reviewConstructionMacro } from "./engine/constructionMacroEvidence";
-import { listPhase6GParserOperators } from "./engine/surfaceParser";
 import type { OperatorIdentityProfile } from "./engine/operatorIdentityRegistry";
 
 type Section = "Overview" | "Documentation" | "Playground" | "Test suite" | "Research & review";
