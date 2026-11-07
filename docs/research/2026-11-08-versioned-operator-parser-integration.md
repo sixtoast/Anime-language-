@@ -208,3 +208,31 @@ The first Vercel build after the invocation-gate hardening failed at TypeScript 
 - Exact compiler issue: six TS2322 errors at `src/engine/testRegistry.ts` lines 239–244; the accepted group is `Incantation contracts`.
 - Corrected in commit `cfa2bf6a9ec191ed27b4f373b91be1cf634321d7` by using the existing `Incantation contracts` group. No runtime semantics were changed in this correction.
 - The corrected commit's own Vercel build still requires verification. The previous failed build is retained in this record.
+
+
+## 12. Incantation policy-composition runtime hardening
+
+**Implementation commits:** `e7a79cf705fae8615c8dd0fdd154077d14f82069` and `b61d09f79b254d53bcc01d4a4410132c41cd288a`.
+
+The v2.1 policy composer previously trusted TypeScript types at runtime. An unknown strategy could fall through into the multi-profile path; malformed applicability/trust/freshness values could be skipped or treated as usable; an unknown decision could leave the blocker unset and reach the final COMPOSED-PERMIT return. This increment adds a fail-closed runtime contract.
+
+### Changes
+- Validates the input object before reading profile collections.
+- Accepts only the three bounded strategies: `SINGLE-APPLICABLE`, `ALL-MUST-PERMIT`, `DENY-OVERRIDES`.
+- Validates plan trust and the exact `true | false | UNKNOWN` plan-validity domain.
+- Validates every profile's non-empty canonical ID/version, boolean flags, applicability, trust, freshness and authority-decision enums.
+- Validates optional `conditionsSatisfied` as boolean when present.
+- Rejects null arrays, null profile records, malformed profile fields and unknown enum values with `COMPOSITION-ERROR`.
+- Keeps malformed strategy reporting explicit as `strategy: INVALID`; no substitute strategy is applied. The result remains blocking and states that no strategy was applied.
+- Preserves existing distinction between applicability uncertainty, untrusted profiles, stale/expired/unavailable profiles, explicit denial, conditional permit and indeterminate decisions.
+
+### Regression cases
+Added POLICY-COMP-011 through POLICY-COMP-015 and central registry entries. They cover unknown strategies, invalid profile enums, malformed profile booleans, invalid plan-validity values and null/malformed profile collections. All are `authored-unverified`.
+
+### Verification
+- Vercel deployment `dpl_GyREVonLyXUbDs4d1F4KQTGXLApZ` for `e7a79cf705fae8615c8dd0fdd154077d14f82069` reached READY, confirming the policy validator and new test source compile.
+- A follow-up type refinement in `b61d09f79b254d53bcc01d4a4410132c41cd288a` reports invalid strategy as `INVALID` rather than substituting a real strategy. Its exact-commit deployment is still BUILDING at this documentation checkpoint.
+- Unit tests remain unexecuted. A successful build is not a test-suite pass.
+
+### Scope
+This validates the profile-evaluation inputs consumed by the policy composer. It does not validate the underlying trust evidence, evaluate applicability predicates, establish scope, verify decision signatures, or execute policy rulesets.
