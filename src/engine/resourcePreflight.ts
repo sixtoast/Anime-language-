@@ -108,10 +108,11 @@ function validResourceInput(value: unknown): value is ResourcePreflightInput {
 export function evaluateResourcePreflight(input: ResourcePreflightInput): ResourcePreflightResult {
   const diagnostics: ResourcePreflightDiagnostic[] = [];
   const add = (code: string, message: string) => diagnostics.push({ code, message });
-  if (!validResourceInput(input)) {
+  const candidate: unknown = input;
+  if (!validResourceInput(candidate)) {
     add("RESOURCE-INPUT-INVALID", "Resource preflight input must be an object with canonical identifiers, finite non-negative quantities and documented evidence states.");
-    const requiredAmount = isRecord(input) && typeof input.requiredAmount === "number" && Number.isFinite(input.requiredAmount)
-      ? input.requiredAmount : 0;
+    const requiredAmount = isRecord(candidate) && typeof candidate.requiredAmount === "number" && Number.isFinite(candidate.requiredAmount)
+      ? candidate.requiredAmount : 0;
     return result("RESOURCE-SPEC-UNDERSPECIFIED", "RESOURCE-OUTCOME-UNKNOWN", requiredAmount, diagnostics);
   }
 
