@@ -5,7 +5,7 @@ async function openPlayground(page: Page) {
     await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ workflow_runs: [], jobs: [] }) });
   });
   await page.route("https://raw.githubusercontent.com/sixtoast/Anime-language-/**", async (route) => {
-    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({}) });
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ generatedAt: "2026-11-08T00:00:00Z", commit: null, runId: null, runAttempt: null, counts: { total: 0, passed: 0, failed: 0, skipped: 0, unmapped: 0 }, tests: [] }) });
   });
   await page.goto("/");
   await page.getByRole("button", { name: "Playground" }).click();
