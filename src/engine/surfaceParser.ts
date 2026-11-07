@@ -6,7 +6,7 @@
  * lexicon, type-check expressions, evaluate spells, or establish canon.
  */
 import { inspectLexiconForm, resolveLexiconForm, type LexiconRegistry } from "./lexiconRegistry";
-import { resolveOperatorIdentity, type OperatorIdentityProfile, type OperatorIdentityResolution } from "./operatorIdentityRegistry";
+import { operatorIdentityRecords, resolveOperatorIdentity, type OperatorIdentityProfile, type OperatorIdentityResolution } from "./operatorIdentityRegistry";
 
 export type SurfaceNode =
   | { kind: "atom"; form: string; lexicalClass: string }
@@ -51,7 +51,7 @@ export interface SurfaceParseResult {
 export interface SurfaceParserOptions {
   /** Additional lexicon forms permitted as atomic leaves. */
   knownAtoms?: readonly string[];
-  /** Enable the archived prototype's legacy spelling normalisation. */
+  /** Enable documented compatibility aliases for operators and source-backed lexical aliases. */
   allowLegacyAliases?: boolean;
   /** Optional source-loaded registry. It is consulted only for lexical atoms and legacy alias resolution. */
   lexiconRegistry?: LexiconRegistry;
@@ -155,7 +155,10 @@ class Parser {
     this.rawTokens = input.trim() ? input.trim().split(/\s+/) : [];
     this.tokens = this.rawTokens.map((token) => {
       const lowered = token.toLowerCase();
-      if (options.operatorProfile) return lowered;
+      const isRegisteredOperatorForm = operatorIdentityRecords.some((record) =>
+        record.v3_0LForm?.toLowerCase() === lowered || record.phase4Form?.toLowerCase() === lowered
+      );
+      if (options.operatorProfile && isRegisteredOperatorForm) return lowered;
       if (options.lexiconRegistry) return resolveLexiconForm(options.lexiconRegistry, lowered, { allowLegacyAliases: options.allowLegacyAliases }).resolvedForm;
       return options.allowLegacyAliases === true ? (LEGACY_ALIASES[lowered] ?? lowered) : lowered;
     });
