@@ -173,3 +173,28 @@ A final parser regression was found while integrating the profile selector: the 
 - This is a build verification only. Unit tests and the two browser acceptance scenarios remain unexecuted. No GitHub Actions workflow was triggered. The latest feature branch remains isolated from main and production.
 
 The source spelling profile selector controls operator identity and operator grammar selection; it does not change the separately pinned v5 draft lexicon snapshot. Non-operator lexical alias resolution still uses the lexicon registry's own explicit opt-in and evidence. The two version systems are not treated as interchangeable.
+
+
+## 11. Incantation invocation-gate runtime hardening
+
+**Implementation commit:** `6f8c8652cf70fbe1ea324b5632bc439d61241ba7`.
+
+The next Incantation increment hardens `src/engine/invocationGates.ts` at its runtime boundary. TypeScript interfaces alone do not protect this function when callers supply external JSON, JavaScript values or unsafe casts.
+
+### Changes
+- Added a runtime object-shape guard before any nested property access.
+- Validates all eight top-level gate states against the exact `PASS | BLOCK | UNRESOLVED | UNAVAILABLE` allowlist.
+- Validates policy composition outcome and strategy against their supported enumerations.
+- Requires the policy `blocking` flag to agree with its outcome; a forged `COMPOSED-PERMIT` with `blocking: true`, or a non-permit with `blocking: false`, is malformed.
+- Validates authority outcome and requires `gateSatisfied` to be a real boolean consistent with a permit-eligible authority outcome. A truthy string such as `"false"` can no longer be treated as a pass.
+- Validates independent-gate arrays and every result entry before mapping or iteration. Null collections, null entries, unknown states and malformed identifiers return a blocked input-contract trace instead of throwing or being interpreted as a pass.
+- Rejects whitespace-padded gate identifiers and duplicate identifiers.
+- Malformed inputs return `BLOCKED`, `eligibleToProceed: false`, and `executionStarted: false`.
+
+### Regression cases
+Added INV-GATE-010 through INV-GATE-015 to `src/engine/invocationGates.test.ts` and the central test registry. They cover unknown states, truthy non-boolean authority flags, contradictory authority outcomes, unknown/inconsistent policy outcomes, null/malformed independent gate collections and whitespace-padded identifiers.
+
+All six new cases are `authored-unverified`. They have not yet been executed. The gate coordinator remains a consumer of upstream evidence and does not verify the evidence itself.
+
+### Remaining hardening
+This is a first fail-closed increment, not a claim that every Incantation runtime boundary is hardened. The next work should apply the same explicit runtime-contract validation to policy composition, authority evaluation, contract-record kind dispatch, scenario selection and resource preflight. Each evaluator should preserve its own outcome distinctions and avoid broad exception swallowing.
