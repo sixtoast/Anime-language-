@@ -158,3 +158,18 @@ The Operator Explorer is a searchable evidence viewer, not a language-authoring 
 - The browser test fixture update `b1d75a40225a63c11382ad55377d8c99e6612564` also reached READY at `dpl_7WWicXtt51QXCX2q6VZMrnriNavm`.
 - The latest test addition commit at the time of this note is `712a23c3c43b57975e0d9c65b9b3168eb0aaa9ee`; its Vercel deployment was BUILDING at the last check. This build validates TypeScript and bundling only; it does not execute Vitest or Playwright.
 - No GitHub Actions run has been triggered. The unit and browser tests are authored but not executed. Main and production remain unchanged.
+
+
+## 10. Lexicon alias regression and latest verified preview
+
+**Latest implementation commit at this checkpoint:** `f6b51f84a6ed5821689748776687a3f4f0a45348`.
+
+A final parser regression was found while integrating the profile selector: the explicit operator-profile token path could short-circuit the lexicon resolver for non-operator lexical forms. This matters because the Phase 4 rename REN → BEN is a geometry/region vocabulary change, not an operator identity. The correction preserves the source-backed lexicon alias path for non-operator tokens while keeping registered operator profile resolution separate.
+
+- `src/engine/surfaceParser.ts`: versioned operator token resolution and non-operator lexicon alias resolution remain distinct.
+- `src/engine/surfaceParser.test.ts`: added P6G-V-007, which verifies that REN resolves to BEN as a GEOM atom when the documented lexicon alias is explicitly enabled under the Phase 4 operator profile.
+- `src/engine/testRegistry.ts`: P6G-V-007 is registered as `authored-unverified`.
+- Vercel deployment `dpl_C3mkho3YNb49GxjxsMT3gERey3cj` for exact commit `f6b51f84a6ed5821689748776687a3f4f0a45348` reached **READY**. Build events show `npm run build`, `tsc --noEmit && vite build`, 2,096 modules transformed and Vite completed. The build emits a non-blocking large-chunk warning (approximately 699 kB minified JS); no TypeScript or Vite build error was reported.
+- This is a build verification only. Unit tests and the two browser acceptance scenarios remain unexecuted. No GitHub Actions workflow was triggered. The latest feature branch remains isolated from main and production.
+
+The source spelling profile selector controls operator identity and operator grammar selection; it does not change the separately pinned v5 draft lexicon snapshot. Non-operator lexical alias resolution still uses the lexicon registry's own explicit opt-in and evidence. The two version systems are not treated as interchangeable.
