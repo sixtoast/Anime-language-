@@ -299,3 +299,13 @@ Added RES19-EVAL-010 through RES19-EVAL-014 and registered them in the central c
 
 ### Scope
 This is input validation for the scalar preflight evaluator, not the full v1.9 conservation ledger. It does not authenticate source evidence, convert units, reserve or debit resources, reconcile physical systems, or establish feasibility.
+
+
+### Resource preflight build correction
+
+The first resource-preflight hardening build failed TypeScript because the function parameter was already statically typed as `ResourcePreflightInput`; the false branch of a type-predicate check narrowed it to `never`, so the malformed-input diagnostic could not read `requiredAmount`.
+
+- Failed build: `dpl_Av3n7EKV3eZh4LWWLTVtVmtfhdzu`, commit `a1942df5b1ac271c2900610b577704f6497b053a`.
+- Corrected in commit `39f8ae43b94533cd7ea41ebf5129e6ae28eab37e` by checking an `unknown` candidate value and deriving the safe diagnostic quantity from that candidate.
+- No resource calculation or acceptance rule changed in this correction.
+- The corrected implementation's exact-commit Vercel build still needs verification.
