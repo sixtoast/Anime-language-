@@ -73,7 +73,7 @@ describe("versioned Formal Arcane operator identities", () => {
       signatureStatus: "OPEN", auditArity: null
     });
     expect(resolveOperatorIdentity("kren", "v3.0-L")).toMatchObject({
-      status: "VERSION-NOT-LICENSED", licensedForm: "null"
+      status: "VERSION-NOT-LICENSED", licensedForm: null
     });
   });
 

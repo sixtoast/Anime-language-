@@ -103,7 +103,7 @@ export type OperatorIdentityResolution =
       status: "VERSION-NOT-LICENSED";
       inputForm: string;
       profile: OperatorIdentityProfile;
-      licensedForm: string;
+      licensedForm: string | null;
       operatorId: string;
     }
   | {
@@ -175,7 +175,7 @@ export function resolveOperatorIdentity(
       }
 
       const licensedForm = primaryForm;
-      if (licensedForm !== null) {
+      {
         return {
           status: "VERSION-NOT-LICENSED",
           inputForm,
