@@ -119,3 +119,22 @@ describe("Phase 6H-A conservative semantic analysis", () => {
     expect(result.diagnostics[0]?.code).toBe("SEMANTIC_BLOCK_RESULT_UNRESOLVED");
   });
 });
+
+
+describe("versioned operator identity in semantic analysis", () => {
+  it("[SEM-A-013] resolves a renamed operator identity without losing its entered spelling", () => {
+    const parsed = parseSurfaceExpression("frata ki sho to sho", {
+      operatorProfile: "phase4-renamed",
+      allowLegacyAliases: true
+    });
+    const result = analyseSurfaceParse(parsed);
+    expect(result.status).toBe("unresolved");
+    expect(result.diagnostics.some((item) =>
+      item.code === "SEMANTIC_SIGNATURE_UNRESOLVED" && item.subject === "FRATA"
+    )).toBe(true);
+    expect(result.diagnostics.some((item) => item.code === "SEMANTIC_OPERATOR_UNKNOWN")).toBe(false);
+    expect(result.typedAst?.source).toMatchObject({
+      operator: "FRAJA", surfaceForm: "FRATA", operatorId: "subtract"
+    });
+  });
+});

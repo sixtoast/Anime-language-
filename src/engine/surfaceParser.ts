@@ -6,12 +6,13 @@
  * lexicon, type-check expressions, evaluate spells, or establish canon.
  */
 import { inspectLexiconForm, resolveLexiconForm, type LexiconRegistry } from "./lexiconRegistry";
+import { operatorIdentityRecords, resolveOperatorIdentity, type OperatorIdentityProfile, type OperatorIdentityResolution } from "./operatorIdentityRegistry";
 
 export type SurfaceNode =
   | { kind: "atom"; form: string; lexicalClass: string }
   | { kind: "quantity"; value: string; unit: string; rawNumber: string }
   | { kind: "identifier"; digits: string }
-  | { kind: "call"; operator: string; args: SurfaceNode[] }
+  | { kind: "call"; operator: string; args: SurfaceNode[]; surfaceForm?: string; operatorId?: string; operatorProfile?: OperatorIdentityProfile }
   | { kind: "block"; expressions: SurfaceNode[] };
 
 export type SurfaceDiagnosticCode =
@@ -29,7 +30,9 @@ export type SurfaceDiagnosticCode =
   | "UNRESOLVED_OPERATOR"
   | "AMBIGUOUS_HOMOPHONE"
   | "INVALID_COMPARISON_CRITERION"
-  | "TRAILING_EXPRESSIONS";
+  | "TRAILING_EXPRESSIONS"
+  | "OPERATOR_ALIAS_DISABLED"
+  | "OPERATOR_VERSION_MISMATCH";
 
 export interface SurfaceDiagnostic {
   code: SurfaceDiagnosticCode;
@@ -50,8 +53,10 @@ export interface SurfaceParserOptions {
   knownAtoms?: readonly string[];
   /** Enable the archived prototype's legacy spelling normalisation. */
   allowLegacyAliases?: boolean;
-  /** Optional source-loaded registry. It is consulted only for lexical atoms and alias resolution. */
+  /** Optional source-loaded registry. It is consulted only for lexical atoms and legacy alias resolution. */
   lexiconRegistry?: LexiconRegistry;
+  /** Explicit documentary operator profile. Omit to retain the original Phase 6G compatibility parser. */
+  operatorProfile?: OperatorIdentityProfile;
 }
 
 const DIGITS: Readonly<Record<string, string>> = {
@@ -74,6 +79,57 @@ const LEGACY_ALIASES: Readonly<Record<string, string>> = {
 };
 const OPERATOR_CLASSES = new Set(["frapa", "frata", "fraka", "frala", "frasha", "dran", "drem", "drim", "dral", "fraja", "frama", "drum", "dras", "gran", "grat", "grak", "grash", "kwam", "kwat", "kwak", "kwash", "bek", "zet", "kole", "nes", "gama", "dave", "sima", "weki", "ruki"]);
 
+/**
+ * This is parser grammar metadata, not an operator signature registry.
+ * Only constructs whose Phase 6G parsing shape is already implemented appear.
+ * The identity registry establishes spelling/version identity; this table
+ * separately establishes which provisional syntax forms this parser handles.
+ */
+const VERSIONED_PARSER_GRAMMAR: Readonly<Record<OperatorIdentityProfile, Readonly<Record<string, { arity: number; form: string }>>>> = {
+  "v3.0-L": {
+    add: { arity: 2, form: "FRAPA" },
+    subtract: { arity: 2, form: "FRATA" },
+    multiply: { arity: 2, form: "FRAKA" },
+    divide: { arity: 2, form: "FRALA" },
+    negate: { arity: 1, form: "FRASHA" },
+    magnitude: { arity: 1, form: "DRAN" },
+    "dot-product": { arity: 2, form: "DREM" },
+    "cross-product": { arity: 2, form: "DRIM" },
+    compare: { arity: 3, form: "DRAL" },
+    and: { arity: 2, form: "GRAN" },
+    or: { arity: 2, form: "GRAT" },
+    not: { arity: 1, form: "GRAK" },
+    bind: { arity: 2, form: "KWAM" },
+    "reference-binding": { arity: 1, form: "KWAT" },
+    if: { arity: 2, form: "BEK" },
+    while: { arity: 2, form: "ZET" }
+  },
+  "phase4-renamed": {
+    add: { arity: 2, form: "FRAPA" },
+    subtract: { arity: 2, form: "FRAJA" },
+    multiply: { arity: 2, form: "FRAMA" },
+    divide: { arity: 2, form: "FRALA" },
+    negate: { arity: 1, form: "FRASHA" },
+    magnitude: { arity: 1, form: "DRAN" },
+    "dot-product": { arity: 2, form: "DREM" },
+    "cross-product": { arity: 2, form: "DRUM" },
+    compare: { arity: 3, form: "DRAS" },
+    and: { arity: 2, form: "GRAN" },
+    or: { arity: 2, form: "GRAT" },
+    not: { arity: 1, form: "GRASH" },
+    bind: { arity: 2, form: "KWAM" },
+    "reference-binding": { arity: 1, form: "KWAT" },
+    "live-evaluation": { arity: 1, form: "KWASH" },
+    if: { arity: 2, form: "BEK" },
+    while: { arity: 2, form: "ZET" }
+  }
+};
+
+export function listPhase6GParserOperators(profile: OperatorIdentityProfile): Array<{ form: string; operatorId: string; arity: number }> {
+  const grammar = VERSIONED_PARSER_GRAMMAR[profile];
+  return Object.entries(grammar).map(([operatorId, item]) => ({ form: item.form, operatorId, arity: item.arity }));
+}
+
 class ParseFailure extends Error {
   constructor(
     readonly code: SurfaceDiagnosticCode,
@@ -88,9 +144,12 @@ class ParseFailure extends Error {
 
 class Parser {
   private readonly tokens: string[];
+  private readonly rawTokens: string[];
   private cursor = 0;
   private readonly knownAtoms: Set<string>;
   private readonly lexiconRegistry?: LexiconRegistry;
+  private readonly operatorProfile?: OperatorIdentityProfile;
+  private readonly optionsAllowCompatibilityAliases: boolean;
 
   constructor(input: string, options: SurfaceParserOptions) {
     this.tokens = input.trim() ? input.trim().split(/\s+/).map((token) => {
@@ -191,6 +250,62 @@ class Parser {
     return { kind: "identifier", digits: digits.join("") };
   }
 
+  private parseVersionedOperator(resolution: Extract<OperatorIdentityResolution, { status: "RESOLVED" }>): SurfaceNode {
+    const grammar = VERSIONED_PARSER_GRAMMAR[resolution.profile][resolution.operatorId];
+    if (!grammar) {
+      throw new ParseFailure(
+        "UNRESOLVED_OPERATOR",
+        `Operator ${resolution.resolvedForm} is recognised in the ${resolution.profile} identity registry, but its Phase 6G parser grammar/signature remains unresolved.`,
+        this.cursor,
+        resolution.inputForm
+      );
+    }
+    this.take();
+    const metadata = {
+      operator: resolution.resolvedForm,
+      surfaceForm: resolution.inputForm,
+      operatorId: resolution.operatorId,
+      operatorProfile: resolution.profile
+    };
+    if (resolution.operatorId === "bind") {
+      const identifier = this.parseIdentifier();
+      return { kind: "call", ...metadata, args: [identifier, this.expression()] };
+    }
+    if (resolution.operatorId === "reference-binding") {
+      const identifier = this.parseIdentifier();
+      return { kind: "call", ...metadata, args: [identifier] };
+    }
+    if (resolution.operatorId === "if" || resolution.operatorId === "while") {
+      const condition = this.expression();
+      if (this.peek() !== "meto") {
+        throw new ParseFailure("MISSING_BLOCK_OPEN", `${resolution.resolvedForm} requires METO before its block.`, this.cursor, this.peek());
+      }
+      this.take();
+      const expressions: SurfaceNode[] = [];
+      while (this.peek() !== "dogu") {
+        if (this.peek() === undefined) {
+          throw new ParseFailure("MISSING_BLOCK_CLOSE", `${resolution.resolvedForm} block is missing DOGU.`, this.cursor);
+        }
+        expressions.push(this.expression());
+      }
+      this.take();
+      return { kind: "call", ...metadata, args: [condition, { kind: "block", expressions }] };
+    }
+    if (resolution.operatorId === "compare") {
+      const first = this.expression();
+      const second = this.expression();
+      const criterion = this.peek();
+      if (criterion === undefined || !AUDIT_CRITERIA.has(criterion)) {
+        throw new ParseFailure("INVALID_COMPARISON_CRITERION", `${resolution.resolvedForm} requires an audit-only comparison criterion (LT/LE/EQ/NE/GE/GT); canonical surface forms remain unresolved.`, this.cursor, criterion);
+      }
+      this.take();
+      return { kind: "call", ...metadata, args: [first, second, { kind: "atom", form: criterion.toUpperCase(), lexicalClass: "AUDIT_CRITERION" }] };
+    }
+    const args: SurfaceNode[] = [];
+    for (let index = 0; index < grammar.arity; index += 1) args.push(this.expression());
+    return { kind: "call", ...metadata, args };
+  }
+
   private expression(): SurfaceNode {
     const token = this.peek();
     if (token === undefined) {
@@ -201,7 +316,22 @@ class Parser {
       throw new ParseFailure("BLOCK_DELIMITER_OUTSIDE_CONTROL", `${token.toUpperCase()} is only valid inside a control form.`, this.cursor, token);
     }
 
-    if (Object.hasOwn(ARITY, token)) {
+    if (this.operatorProfile) {
+      const resolution = resolveOperatorIdentity(this.rawTokens[this.cursor] ?? token, this.operatorProfile, {
+        allowCompatibilityAliases: this.optionsAllowCompatibilityAliases
+      });
+      if (resolution.status === "ALIAS-DISABLED") {
+        throw new ParseFailure("OPERATOR_ALIAS_DISABLED", `${resolution.inputForm} is a documented compatibility alias for ${resolution.preferredForm}; enable compatibility aliases explicitly to accept it under ${this.operatorProfile}.`, this.cursor, token);
+      }
+      if (resolution.status === "VERSION-NOT-LICENSED") {
+        throw new ParseFailure("OPERATOR_VERSION_MISMATCH", `${resolution.inputForm} is not licensed by ${this.operatorProfile}; the recorded spelling for this identity is ${resolution.licensedForm ?? "not established"}.`, this.cursor, token);
+      }
+      if (resolution.status === "RESOLVED") {
+        return this.parseVersionedOperator(resolution);
+      }
+    }
+
+    if (!this.operatorProfile && Object.hasOwn(ARITY, token)) {
       const operator = this.take();
       if (operator === "kwam") {
         const identifier = this.parseIdentifier();
@@ -246,7 +376,7 @@ class Parser {
       throw new ParseFailure("AMBIGUOUS_HOMOPHONE", `${token.toUpperCase()} is a documented homophone; disambiguation is not implemented.`, this.cursor, token);
     }
     const form = this.take();
-    if (OPERATOR_CLASSES.has(form)) {
+    if ((!this.operatorProfile && OPERATOR_CLASSES.has(form)) || (this.operatorProfile && operatorIdentityRecords.some((record) => record.v3_0LForm?.toLowerCase() === form || record.phase4Form?.toLowerCase() === form))) {
       throw new ParseFailure("UNRESOLVED_OPERATOR", `Operator ${form.toUpperCase()} has no usable signature in this parser context.`, this.cursor - 1, form);
     }
     if (this.lexiconRegistry) {

@@ -128,3 +128,46 @@ describe("parseSurfaceExpression — provisional Phase 6G subset", () => {
     expect(parseSurfaceExpression("ki ma").notation).toBe("phase-6g-provisional");
   });
 });
+
+
+describe("versioned operator profile parsing", () => {
+  it("[P6G-V-001] parses a v3.0-L primary spelling and preserves source identity", () => {
+    const result = parseSurfaceExpression("frata ki sho to sho", { operatorProfile: "v3.0-L" });
+    expect(result).toMatchObject({
+      ok: true,
+      ast: { kind: "call", operator: "FRATA", surfaceForm: "FRATA", operatorId: "subtract", operatorProfile: "v3.0-L" }
+    });
+  });
+
+  it("[P6G-V-002] rejects a Phase 4 preferred spelling in the v3.0-L profile", () => {
+    expect(parseSurfaceExpression("fraja ki sho to sho", { operatorProfile: "v3.0-L" }).diagnostics[0]?.code)
+      .toBe("OPERATOR_VERSION_MISMATCH");
+  });
+
+  it("[P6G-V-003] rejects a historical spelling when Phase 4 aliases are disabled", () => {
+    expect(parseSurfaceExpression("frata ki sho to sho", { operatorProfile: "phase4-renamed" }).diagnostics[0]?.code)
+      .toBe("OPERATOR_ALIAS_DISABLED");
+  });
+
+  it("[P6G-V-004] resolves a Phase 4 compatibility alias while preserving entered spelling", () => {
+    const result = parseSurfaceExpression("frata ki sho to sho", {
+      operatorProfile: "phase4-renamed",
+      allowLegacyAliases: true
+    });
+    expect(result).toMatchObject({
+      ok: true,
+      ast: { kind: "call", operator: "FRAJA", surfaceForm: "FRATA", operatorId: "subtract", operatorProfile: "phase4-renamed" }
+    });
+  });
+
+  it("[P6G-V-005] rejects recognised identities whose parser grammar is not implemented", () => {
+    expect(parseSurfaceExpression("kren", { operatorProfile: "phase4-renamed" }).diagnostics[0]?.code)
+      .toBe("UNRESOLVED_OPERATOR");
+  });
+
+  it("[P6G-V-006] keeps the legacy Phase 6G compatibility mode unchanged when no profile is selected", () => {
+    expect(parseSurfaceExpression("fraja ki sho to sho")).toMatchObject({
+      ok: true, ast: { kind: "call", operator: "FRAJA" }
+    });
+  });
+});

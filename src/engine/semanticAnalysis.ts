@@ -10,6 +10,7 @@ import { getUnit, type DimensionVector } from "./dimensions";
 import type { SurfaceNode, SurfaceParseResult } from "./surfaceParser";
 import type { SemanticValueType } from "./semanticTypes";
 import { getOperatorContract } from "./operatorContracts";
+import { getOperatorIdentity } from "./operatorIdentityRegistry";
 
 export type SemanticDiagnosticSeverity = "error" | "unresolved";
 export type SemanticDiagnosticCode =
@@ -146,13 +147,22 @@ function analyseNode(
       const children = node.args.map((child, index) =>
         analyseNode(child, `${path}.args[${index}]`, diagnostics)
       );
-      // Exact lookup is intentional. No alias map or spelling normalisation is applied.
-      const contract = getOperatorContract(node.operator);
+      // Versioned parser nodes carry a source-backed stable identity. Resolve the
+      // semantic contract through its documented v3.0-L spelling, while retaining
+      // the user's exact surface spelling in the source AST. Legacy ASTs continue
+      // to use exact lookup and are never silently rewritten.
+      const identity = node.operatorId ? getOperatorIdentity(node.operatorId) : undefined;
+      const contractForm = identity?.v3_0LForm ?? node.operator;
+      const contract = getOperatorContract(contractForm);
       if (!contract) {
+        const knownIdentity = node.operatorId ? identity : undefined;
         diagnostics.push(diagnostic(
-          "SEMANTIC_OPERATOR_UNKNOWN", "unresolved", path, "call",
-          `No exact operator contract exists for "${node.operator}". Operator identity is not rewritten.`,
-          node.operator
+          knownIdentity ? "SEMANTIC_SIGNATURE_UNRESOLVED" : "SEMANTIC_OPERATOR_UNKNOWN", "unresolved", path, "call",
+          knownIdentity
+            ? `Operator identity "${knownIdentity.id}" is recognised, but no source-backed semantic contract is available for this operator class.`
+            : `No exact operator contract exists for "${node.operator}". Operator identity is not rewritten.`,
+          node.surfaceForm ?? node.operator,
+          knownIdentity?.sources ? [...knownIdentity.sources] : undefined
         ));
         return { source: node, type: unknown(`operator contract not found: ${node.operator}`), children };
       }
