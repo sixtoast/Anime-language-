@@ -37,7 +37,7 @@ export interface AuthorityGateDiagnostic {
   message: string;
 }
 
-export type AuthorityGateOutcome = AuthorityDecisionOutcome | "MALFORMED-REQUEST" | "INSUFFICIENT-CONTEXT";
+export type AuthorityGateOutcome = AuthorityDecisionOutcome | "MALFORMED-REQUEST" | "MALFORMED-INPUT" | "INSUFFICIENT-CONTEXT";
 
 export interface AuthorityGateResult {
   outcome: AuthorityGateOutcome;
@@ -60,7 +60,50 @@ function block(
   return { outcome, gateSatisfied: false, diagnostics, limitations: [...LIMITATIONS] };
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function isOneOf<T extends string>(value: unknown, allowed: readonly T[]): value is T {
+  return typeof value === "string" && allowed.includes(value as T);
+}
+
+function validAuthorityInput(value: unknown): value is AuthorityGateInput {
+  if (!isRecord(value)) return false;
+  const booleanOrUnknown = (candidate: unknown) => typeof candidate === "boolean" || candidate === "UNKNOWN";
+  const evidence = ["PASS", "FAIL", "UNKNOWN", "UNAVAILABLE", "NOT-REQUIRED"] as const;
+  const scope = ["MATCH", "MISMATCH", "UNKNOWN"] as const;
+  const conditions = ["ALL-SATISFIED", "FALSE", "UNKNOWN", "STALE", "ERROR", "MONITORING-UNAVAILABLE"] as const;
+  const decisions = [
+    "PERMIT", "DENY", "CONDITIONAL-PERMIT", "INDETERMINATE", "UNAVAILABLE",
+    "EXPIRED", "REVOKED", "SCOPE-MISMATCH", "ISSUER-UNTRUSTED", "MALFORMED-DECISION", "UNKNOWN"
+  ] as const;
+  return booleanOrUnknown(value.requestWellFormed) &&
+    booleanOrUnknown(value.decisionWellFormed) &&
+    typeof value.decisionPresent === "boolean" &&
+    isOneOf(value.decision, decisions) &&
+    isOneOf(value.issuerTrust, evidence) &&
+    isOneOf(value.delegation, evidence) &&
+    isOneOf(value.integrity, evidence) &&
+    isOneOf(value.freshness, evidence) &&
+    isOneOf(value.revocation, evidence) &&
+    isOneOf(value.requiredIndependentGates, evidence) &&
+    isOneOf(value.expiry, ["CURRENT", "EXPIRED", "BOUNDARY-UNCERTAIN", "UNKNOWN"] as const) &&
+    isOneOf(value.subjectMatch, scope) &&
+    isOneOf(value.actionMatch, scope) &&
+    isOneOf(value.targetMatch, scope) &&
+    isOneOf(value.scopeContainment, scope) &&
+    isOneOf(value.conditions, conditions);
+}
+
 export function evaluateAuthorityGate(input: AuthorityGateInput): AuthorityGateResult {
+  if (!validAuthorityInput(input)) {
+    return block("MALFORMED-INPUT", [{
+      stage: "REQUEST",
+      code: "INPUT-CONTRACT-INVALID",
+      message: "Authority gate input must contain every required field with a documented runtime type and enum value."
+    }]);
+  }
   const diagnostics: AuthorityGateDiagnostic[] = [];
   const add = (stage: AuthorityGateDiagnostic["stage"], code: string, message: string) =>
     diagnostics.push({ stage, code, message });

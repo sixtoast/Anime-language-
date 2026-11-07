@@ -64,4 +64,26 @@ describe("Arcane Incantations v2.0 conservative authority gate", () => {
     expect(result.limitations.join(" ")).toContain("does not establish execution");
     expect(result).not.toHaveProperty("executed");
   });
+  it("[AUTH-GATE-012] rejects null and non-object runtime input", () => {
+    expect(evaluateAuthorityGate(null as never).outcome).toBe("MALFORMED-INPUT");
+    expect(evaluateAuthorityGate([] as never).outcome).toBe("MALFORMED-INPUT");
+  });
+  it("[AUTH-GATE-013] rejects truthy strings in boolean request fields", () => {
+    const malformed = { ...validInput(), decisionPresent: "false" };
+    expect(evaluateAuthorityGate(malformed as never)).toMatchObject({
+      outcome: "MALFORMED-INPUT", gateSatisfied: false
+    });
+  });
+  it("[AUTH-GATE-014] rejects unknown authority decision and evidence enums", () => {
+    expect(evaluateAuthorityGate({ ...validInput(), decision: "APPROVED" } as never).outcome).toBe("MALFORMED-INPUT");
+    expect(evaluateAuthorityGate({ ...validInput(), issuerTrust: "VERIFIED" } as never).outcome).toBe("MALFORMED-INPUT");
+  });
+  it("[AUTH-GATE-015] rejects unknown expiry and scope comparison states", () => {
+    expect(evaluateAuthorityGate({ ...validInput(), expiry: "VALID" } as never).outcome).toBe("MALFORMED-INPUT");
+    expect(evaluateAuthorityGate({ ...validInput(), scopeContainment: "CLOSE-ENOUGH" } as never).outcome).toBe("MALFORMED-INPUT");
+  });
+  it("[AUTH-GATE-016] rejects unknown condition evaluation states", () => {
+    expect(evaluateAuthorityGate({ ...validInput(), decision: "CONDITIONAL-PERMIT", conditions: "MOSTLY-SATISFIED" } as never).outcome)
+      .toBe("MALFORMED-INPUT");
+  });
 });
