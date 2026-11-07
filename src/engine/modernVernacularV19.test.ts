@@ -7,20 +7,20 @@ describe("Modern Vernacular v1.9 conditionals and hypotheses", () => {
     "navi teshi wish fezo saku fezo nak rawu",
     "navi teshi nava fam ful tava gezi saku teshi yemi ful tava gezi",
     "navi teshi fam ful tava gezi saku teshi nava yemi ful tava gezi"
-  ])("parses complete conditionals: %s", input => {
+  ])("[MV19-001] parses complete conditionals: %s", input => {
     const result = parseModernVernacularV19(input);
     expect(result.ok).toBe(true);
     expect(result.ast?.condition.ok).toBe(true);
     expect(result.ast?.consequence.ok).toBe(true);
   });
 
-  it("parses ravi only with the paired conditional and written semicolon", () => {
+  it("[MV19-002] parses ravi only with the paired conditional and written semicolon", () => {
     const result = parseModernVernacularV19("ravi teshi ful tava gezi; navi teshi ful tava gezi saku teshi yemi ful tava gezi");
     expect(result.ok).toBe(true);
     expect(result.ast?.hypothetical?.ok).toBe(true);
   });
 
-  it("dispatches v1.9 from the unified parser", () => {
+  it("[MV19-004] dispatches v1.9 from the unified parser", () => {
     expect(parseModernVernacular("navi teshi wish fezo saku fezo nak rawu").grammar).toBe("modern-vernacular-v1.9-locked");
   });
 
@@ -37,11 +37,16 @@ describe("Modern Vernacular v1.9 conditionals and hypotheses", () => {
     "navi teshi fam ful tava gezi saku",
     "ravi teshi ful tava gezi navi teshi ful tava gezi saku teshi yemi ful tava gezi",
     "ravi teshi ful tava gezi; ravi fezo nak rawu; navi teshi ful tava gezi saku teshi yemi ful tava gezi"
-  ])("rejects unresolved conditional scope: %s", input => {
+  ])("[MV19-003] rejects unresolved conditional scope: %s", input => {
     expect(parseModernVernacularV19(input).ok).toBe(false);
   });
 
-  it("does not confuse causal linkers with conditionals", () => {
+  it("[MV19-006] does not confuse causal linkers with conditionals", () => {
     expect(parseModernVernacularV19("teshi fam ful tava gezi doru teshi yemi ful tava gezi").ok).toBe(false);
+  });
+
+  it("[MV19-005] tokenises conditional clauses across line breaks", () => {
+    const result = parseModernVernacularV19("navi teshi wish fezo\nsaku fezo nak rawu");
+    expect(result.ok).toBe(true);
   });
 });

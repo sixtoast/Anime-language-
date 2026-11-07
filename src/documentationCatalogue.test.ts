@@ -42,7 +42,22 @@ describe("Documentation catalogue website regression checks", () => {
   });
 
   it("[WEB-DOC-REG-009] filters sources by status and provenance type together", () => {
-    expect(filterDocuments("", "Canonical").map((doc) => doc.title)).toEqual(["Modern Vernacular v1.0 — locked core", "Modern Vernacular v1.1 — core verb expansion", "Modern Vernacular v1.2 — transfer and recipients", "Modern Vernacular v1.3 — motion and routes", "Modern Vernacular v1.4 — modality and intention", "Modern Vernacular v1.5 — permission", "Modern Vernacular v1.6 — modal negation and prohibition", "Modern Vernacular v1.7 — directives and requests", "Modern Vernacular v1.8 — clause coordination and causal links", "Magic system v3.0", "Arcane language v3.0-L", "Arcane incantations v1.0 — foundation", "Arcane incantations v1.1 — target resolution", "Arcane incantations v1.2 — constraints and failure", "Arcane incantations v1.3 — mechanism and effect", "Arcane incantations v1.4 — sequencing", "Arcane incantations v1.5 — execution contracts", "Arcane incantations v1.6 — typed values", "Arcane incantations v1.7 — predicates", "Arcane incantations v1.8 — spatial semantics", "Arcane Incantations v1.9 — Resource Accounting and Conservation Contracts", "Arcane Incantations v2.0 — Authority and Authorisation Decision Contracts", "Arcane Incantations v2.1 — Policy-Profile Composition and Conflict Resolution", "Decision D-016 — policy-profile composition", "Decision D-017 — invocation-order discrepancy"]);
+    expect(filterDocuments("", "Canonical").map((doc) => doc.title)).toEqual([
+      "Modern Vernacular v1.0 — locked core", "Modern Vernacular v1.1 — core verb expansion",
+      "Modern Vernacular v1.2 — transfer and recipients", "Modern Vernacular v1.3 — motion and routes",
+      "Modern Vernacular v1.4 — modality and intention", "Modern Vernacular v1.5 — permission",
+      "Modern Vernacular v1.6 — modal negation and prohibition", "Modern Vernacular v1.7 — directives and requests",
+      "Modern Vernacular v1.8 — clause coordination and causal links", "Magic system v3.0", "Arcane language v3.0-L",
+      "Arcane incantations v1.0 — foundation", "Arcane incantations v1.1 — target resolution",
+      "Arcane incantations v1.2 — constraints and failure", "Arcane incantations v1.3 — mechanism and effect",
+      "Arcane incantations v1.4 — sequencing", "Arcane incantations v1.5 — execution contracts",
+      "Arcane incantations v1.6 — typed values", "Arcane incantations v1.7 — predicates",
+      "Arcane incantations v1.8 — spatial semantics", "Decision D-016 — policy-profile composition",
+      "Decision D-017 — invocation-order discrepancy",
+      "Arcane Incantations v1.9 — Resource Accounting and Conservation Contracts",
+      "Arcane Incantations v2.0 — Authority and Authorisation Decision Contracts",
+      "Arcane Incantations v2.1 — Policy-Profile Composition and Conflict Resolution"
+    ]);
     expect(filterDocuments("", "Provisional", "Original historical source file").map((doc) => doc.title)).toEqual(["Phase 4 — ambiguity audit", "Phase 5 — semantic audit"]);
     expect(filterDocuments("phase 6g", "Provisional", "Provisional research audit").map((doc) => doc.title)).toEqual(["Phase 6G — source lexicon audit"]);
     expect(filterDocuments("", "Deprecated")).toEqual([]);
