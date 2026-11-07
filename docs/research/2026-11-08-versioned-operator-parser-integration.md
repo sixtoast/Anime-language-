@@ -146,3 +146,15 @@ Both are registered in `src/engine/testRegistry.ts` and marked `authored-unverif
 ### Current feature boundary
 
 The Operator Explorer is a searchable evidence viewer, not a language-authoring interface. It does not promote aliases, approve signatures, create grammar rules, or enable execution. The parser grammar subset remains intentionally smaller than the identity registry.
+
+
+## 11. Lexical alias coexistence and current verification
+
+- The versioned parser initially bypassed all lexicon alias normalisation to protect operator tokens from being rewritten before stable identity resolution. That also suppressed non-operator lexical aliases such as REN → BEN.
+- `src/engine/surfaceParser.ts` now distinguishes known operator spellings from other tokens before applying lexicon alias resolution. Operator spellings are kept raw for version-aware identity resolution; non-operator lexical forms continue to use the source lexicon's explicit alias registry when alias acceptance is enabled.
+- `src/engine/surfaceParser.test.ts` adds P6G-V-007, proving the REN → BEN lexical alias still resolves as an atom under an explicit Phase 4 operator profile when aliases are enabled. `src/engine/testRegistry.ts` records this case.
+- Browser tests remain two cases (P6G-UI-001/002). Current new registry entries total 20: OP-ID-001–010, P6G-V-001–007, P6G-UI-001/002 and SEM-A-013. All remain `authored-unverified`.
+- The source change is commit `f6b51f84a6ed5821689748776687a3f4f0a45348`; Vercel deployment `dpl_C3mkho3YNb49GxjxsMT3gERey3cj` reached READY.
+- The browser test fixture update `b1d75a40225a63c11382ad55377d8c99e6612564` also reached READY at `dpl_7WWicXtt51QXCX2q6VZMrnriNavm`.
+- The latest test addition commit at the time of this note is `712a23c3c43b57975e0d9c65b9b3168eb0aaa9ee`; its Vercel deployment was BUILDING at the last check. This build validates TypeScript and bundling only; it does not execute Vitest or Playwright.
+- No GitHub Actions run has been triggered. The unit and browser tests are authored but not executed. Main and production remain unchanged.
