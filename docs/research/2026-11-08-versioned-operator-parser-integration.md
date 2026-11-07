@@ -111,3 +111,38 @@ Continue from this branch by verifying the latest preview, reviewing the parser 
 - `src/App.tsx` imports the parser inventory helper through its existing surface-parser import, and the runtime preview count is now four.
 - The previous two preview failures are recorded rather than hidden: the first exposed missing constructor initialisation for raw token provenance/options; a later follow-up exposed an unused import. Both source issues have corresponding fixes. Do not call the final head verified until its own Vercel build completes.
 - Main, production, and GitHub Actions remain untouched by this work.
+
+
+## 10. Operator Explorer and browser acceptance follow-up
+
+### Website feature
+
+`src/App.tsx` now includes a dedicated Operator Explorer immediately before the Phase 6G editor. It displays the 27 source-backed identity records and, for the currently selected spelling profile, shows:
+- the primary form (or explicitly says no form is recorded for that profile);
+- the alternate spelling from the other documentary profile;
+- stable identity ID, kind and category;
+- whether the form has an implemented Phase 6G grammar shape;
+- signature status and audit arity (clearly labelled non-executable);
+- source records and unresolved limitations.
+
+The profile selector and alias toggle are positioned before the explorer, so changing the profile updates the explorer and the parser inventory together. Search filters by stable ID, gloss, either spelling, category or identity kind. The v5 draft lexicon inspector remains a separate pinned source view; it is not falsely presented as switching with the operator spelling profile.
+
+### Browser acceptance authored
+
+`tests/browser/operator-profiles.spec.ts` adds two Playwright scenarios:
+- P6G-UI-001: switch from Phase 4 preferred spellings to v3.0-L and verify the primary subtraction spelling changes from FRAJA to FRATA.
+- P6G-UI-002: verify FRATA is rejected as a Phase 4 alias by default, then enable compatibility aliases and check the AST retains FRAJA as the resolved form, FRATA as the entered surface form and `subtract` as the stable identity.
+
+Both are registered in `src/engine/testRegistry.ts` and marked `authored-unverified`. The health endpoints are mocked with deterministic responses. These browser tests have not been executed.
+
+### Build follow-up
+
+- The first Operator Explorer commit failed TypeScript because the `operatorSearch` state was declared after the memo that consumed it. The state was moved before the derived memo in commit `eb54f9b0f89943fc6cad77b5645654b81b2e22bc`.
+- Vercel deployment `dpl_AJ71KckMx5g46mWhAdusMJkc8qfP` for that corrected feature commit reached READY; the TypeScript and Vite build passed.
+- The subsequent browser-fixture adjustment is committed as `b1d75a40225a63c11382ad55377d8c99e6612564`; its Vercel deployment was BUILDING at the last check.
+- The two earlier failed builds are retained as diagnostic history, not hidden. Their causes and fixes are recorded above.
+- No unit or browser tests have been run. GitHub Actions remains unused for this branch.
+
+### Current feature boundary
+
+The Operator Explorer is a searchable evidence viewer, not a language-authoring interface. It does not promote aliases, approve signatures, create grammar rules, or enable execution. The parser grammar subset remains intentionally smaller than the identity registry.
