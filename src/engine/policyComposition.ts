@@ -47,7 +47,7 @@ export interface PolicyCompositionTraceEntry {
 export interface PolicyCompositionResult {
   outcome: CompositionOutcome;
   blocking: boolean;
-  strategy: CompositionStrategy;
+  strategy: CompositionStrategy | "INVALID";
   selectedProfileIds: string[];
   trace: PolicyCompositionTraceEntry[];
   limitations: string[];
@@ -70,11 +70,11 @@ function result(
   return {
     outcome,
     blocking: outcome !== "COMPOSED-PERMIT",
-    strategy: strategy === "INVALID" ? "ALL-MUST-PERMIT" : strategy,
+    strategy,
     selectedProfileIds,
     trace,
     limitations: strategy === "INVALID"
-      ? [...LIMITATIONS, "The reported strategy is a safe placeholder because the supplied strategy was invalid; no composition strategy was applied."]
+      ? [...LIMITATIONS, "The supplied composition strategy was invalid; no strategy was applied."]
       : [...LIMITATIONS]
   };
 }
