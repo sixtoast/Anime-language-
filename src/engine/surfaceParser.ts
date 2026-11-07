@@ -152,13 +152,17 @@ class Parser {
   private readonly optionsAllowCompatibilityAliases: boolean;
 
   constructor(input: string, options: SurfaceParserOptions) {
-    this.tokens = input.trim() ? input.trim().split(/\s+/).map((token) => {
+    this.rawTokens = input.trim() ? input.trim().split(/\s+/) : [];
+    this.tokens = this.rawTokens.map((token) => {
       const lowered = token.toLowerCase();
+      if (options.operatorProfile) return lowered;
       if (options.lexiconRegistry) return resolveLexiconForm(options.lexiconRegistry, lowered, { allowLegacyAliases: options.allowLegacyAliases }).resolvedForm;
       return options.allowLegacyAliases === true ? (LEGACY_ALIASES[lowered] ?? lowered) : lowered;
-    }) : [];
+    });
     this.knownAtoms = new Set((options.knownAtoms ?? []).map((atom) => atom.toLowerCase()));
     this.lexiconRegistry = options.lexiconRegistry;
+    this.operatorProfile = options.operatorProfile;
+    this.optionsAllowCompatibilityAliases = options.allowLegacyAliases === true;
   }
 
   private peek(): string | undefined { return this.tokens[this.cursor]; }
