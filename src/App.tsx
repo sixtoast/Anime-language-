@@ -85,6 +85,7 @@ function App() {
   const [editor, setEditor] = useState("");
   const [operatorProfile, setOperatorProfile] = useState<OperatorIdentityProfile>("phase4-renamed");
   const [allowOperatorAliases, setAllowOperatorAliases] = useState(false);
+  const [operatorSearch, setOperatorSearch] = useState("");
   const [analysis, setAnalysis] = useState<SurfaceParseResult | null>(null);
   const [vernacularEditor, setVernacularEditor] = useState("teshi wish fezo");
   const [vernacularResult, setVernacularResult] = useState<ModernVernacularParseResult | null>(null);
@@ -114,7 +115,6 @@ function App() {
   );
   const expressionConstructionBridge = useMemo(() => analysis ? reviewExpressionConstructionBridge(analysis) : null, [analysis]);
   const [lexiconQuery, setLexiconQuery] = useState("pa");
-  const [operatorSearch, setOperatorSearch] = useState("");
   const [selectedFixtureId, setSelectedFixtureId] = useState("P6G-FX-001");
   const [selectedResourceFixtureId, setSelectedResourceFixtureId] = useState("RES19-01");
   const [selectedAuthorityFixtureId, setSelectedAuthorityFixtureId] = useState("AUTH20-01");
