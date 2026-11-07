@@ -59,13 +59,54 @@ const LIMITATIONS = [
   "No strategy other than SINGLE-APPLICABLE, ALL-MUST-PERMIT and DENY-OVERRIDES is executable in this implementation."
 ];
 
+type ReportedStrategy = CompositionStrategy | "INVALID";
+
 function result(
-  strategy: CompositionStrategy,
+  strategy: ReportedStrategy,
   outcome: CompositionOutcome,
   selectedProfileIds: string[],
   trace: PolicyCompositionTraceEntry[]
 ): PolicyCompositionResult {
-  return { outcome, blocking: outcome !== "COMPOSED-PERMIT", strategy, selectedProfileIds, trace, limitations: [...LIMITATIONS] };
+  return {
+    outcome,
+    blocking: outcome !== "COMPOSED-PERMIT",
+    strategy: strategy === "INVALID" ? "ALL-MUST-PERMIT" : strategy,
+    selectedProfileIds,
+    trace,
+    limitations: strategy === "INVALID"
+      ? [...LIMITATIONS, "The reported strategy is a safe placeholder because the supplied strategy was invalid; no composition strategy was applied."]
+      : [...LIMITATIONS]
+  };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function isCompositionStrategy(value: unknown): value is CompositionStrategy {
+  return value === "SINGLE-APPLICABLE" || value === "ALL-MUST-PERMIT" || value === "DENY-OVERRIDES";
+}
+
+function isPolicyProfileEvaluation(value: unknown): value is PolicyProfileEvaluation {
+  if (!isRecord(value)) return false;
+  return typeof value.profileId === "string" && value.profileId.length > 0 && value.profileId.trim() === value.profileId &&
+    typeof value.version === "string" && value.version.length > 0 && value.version.trim() === value.version &&
+    typeof value.required === "boolean" &&
+    typeof value.optionalOmissionExplicit === "boolean" &&
+    (value.applicability === "TRUE" || value.applicability === "FALSE" || value.applicability === "UNKNOWN" ||
+      value.applicability === "ERROR" || value.applicability === "INVALID") &&
+    (value.trust === "TRUSTED" || value.trust === "UNTRUSTED" || value.trust === "UNKNOWN") &&
+    (value.freshness === "CURRENT" || value.freshness === "STALE" || value.freshness === "EXPIRED" || value.freshness === "UNAVAILABLE") &&
+    (value.decision === "PERMIT" || value.decision === "DENY" || value.decision === "CONDITIONAL-PERMIT" ||
+      value.decision === "INDETERMINATE" || value.decision === "UNAVAILABLE" || value.decision === "EXPIRED" ||
+      value.decision === "REVOKED" || value.decision === "SCOPE-MISMATCH" || value.decision === "ISSUER-UNTRUSTED" ||
+      value.decision === "MALFORMED-DECISION") &&
+    (value.conditionsSatisfied === undefined || typeof value.conditionsSatisfied === "boolean");
+}
+
+function invalidInputResult(input: unknown): PolicyCompositionResult {
+  const suppliedStrategy = isRecord(input) ? input.strategy : undefined;
+  return result(isCompositionStrategy(suppliedStrategy) ? suppliedStrategy : "INVALID", "COMPOSITION-ERROR", [], []);
 }
 
 function traceProfile(
@@ -94,6 +135,13 @@ function mapDecisionBlocker(decision: AuthorityDecisionOutcome): CompositionOutc
 }
 
 export function evaluatePolicyComposition(input: PolicyCompositionInput): PolicyCompositionResult {
+  if (!isRecord(input) || !isCompositionStrategy(input.strategy) ||
+      (input.planTrust !== "TRUSTED" && input.planTrust !== "UNTRUSTED" && input.planTrust !== "UNKNOWN") ||
+      (input.planValid !== true && input.planValid !== false && input.planValid !== "UNKNOWN") ||
+      !Array.isArray(input.profiles) || !input.profiles.every(isPolicyProfileEvaluation)) {
+    return invalidInputResult(input);
+  }
+
   const trace: PolicyCompositionTraceEntry[] = [];
   const ids = input.profiles.map((profile) => profile.profileId);
   if (ids.some((id) => !id.trim()) || new Set(ids).size !== ids.length) {

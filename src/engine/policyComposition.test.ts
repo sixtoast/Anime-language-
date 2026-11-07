@@ -87,4 +87,43 @@ describe("bounded v2.1 policy composition", () => {
     expect(result.outcome).toBe("PROFILE-UNTRUSTED");
     expect(result.trace).toHaveLength(0);
   });
+  it("[POLICY-COMP-011] rejects an unknown runtime strategy instead of defaulting to multi-profile permit logic", () => {
+    const malformed = { strategy: "FIRST-WINS", planTrust: "TRUSTED", planValid: true, profiles: [profile()] };
+    expect(evaluatePolicyComposition(malformed as never).outcome).toBe("COMPOSITION-ERROR");
+    expect(evaluatePolicyComposition(malformed as never).blocking).toBe(true);
+  });
+  it("[POLICY-COMP-012] rejects invalid applicability, trust, freshness and decision enums", () => {
+    for (const overrides of [
+      { applicability: "MAYBE" },
+      { trust: "VERIFIED" },
+      { freshness: "FRESH" },
+      { decision: "APPROVED" }
+    ]) {
+      const malformed = { ...profile(), ...overrides };
+      expect(evaluatePolicyComposition({
+        strategy: "ALL-MUST-PERMIT", planTrust: "TRUSTED", planValid: true,
+        profiles: [malformed]
+      } as never).outcome).toBe("COMPOSITION-ERROR");
+    }
+  });
+  it("[POLICY-COMP-013] rejects malformed profile records and non-boolean required flags", () => {
+    const malformed = { ...profile(), required: "false" };
+    expect(evaluatePolicyComposition({
+      strategy: "ALL-MUST-PERMIT", planTrust: "TRUSTED", planValid: true,
+      profiles: [malformed]
+    } as never).outcome).toBe("COMPOSITION-ERROR");
+    expect(evaluatePolicyComposition(null as never).outcome).toBe("COMPOSITION-ERROR");
+  });
+  it("[POLICY-COMP-014] rejects an invalid plan-validity value", () => {
+    const malformed = { strategy: "ALL-MUST-PERMIT", planTrust: "TRUSTED", planValid: "true", profiles: [profile()] };
+    expect(evaluatePolicyComposition(malformed as never).outcome).toBe("COMPOSITION-ERROR");
+  });
+  it("[POLICY-COMP-015] rejects null and malformed profile collections", () => {
+    expect(evaluatePolicyComposition({
+      strategy: "ALL-MUST-PERMIT", planTrust: "TRUSTED", planValid: true, profiles: null
+    } as never).outcome).toBe("COMPOSITION-ERROR");
+    expect(evaluatePolicyComposition({
+      strategy: "ALL-MUST-PERMIT", planTrust: "TRUSTED", planValid: true, profiles: [null]
+    } as never).outcome).toBe("COMPOSITION-ERROR");
+  });
 });
