@@ -26,7 +26,7 @@ import { bindConstructionReference, type ConstructionReferenceToken } from "./en
 import { reviewConstructionFootShape } from "./engine/constructionFootShape";
 import { reviewConstructionCoupling } from "./engine/constructionCouplingEvidence";
 import { reviewConstructionMacro } from "./engine/constructionMacroEvidence";
-import type { OperatorIdentityProfile } from "./engine/operatorIdentityRegistry";
+import { operatorIdentityRecords, type OperatorIdentityProfile } from "./engine/operatorIdentityRegistry";
 
 type Section = "Overview" | "Documentation" | "Playground" | "Test suite" | "Research & review";
 
@@ -100,8 +100,21 @@ function App() {
   const [unifiedVernacularResult, setUnifiedVernacularResult] = useState<ModernVernacularUnifiedParseResult | null>(null);
   const semanticAnalysis = useMemo(() => analysis ? analyseSurfaceParse(analysis) : null, [analysis]);
   const phase6gOperators = useMemo(() => listPhase6GParserOperators(operatorProfile), [operatorProfile]);
+  const operatorExplorerEntries = useMemo(() => operatorIdentityRecords
+    .map((record) => ({
+      ...record,
+      form: operatorProfile === "v3.0-L" ? record.v3_0LForm : record.phase4Form,
+      alternateForm: operatorProfile === "v3.0-L" ? record.phase4Form : record.v3_0LForm,
+      parserSupported: phase6gOperators.some((item) => item.operatorId === record.id)
+    }))
+    .filter((record) => [
+      record.id, record.gloss, record.form ?? "", record.alternateForm ?? "", record.category, record.kind
+    ].join(" ").toLowerCase().includes(operatorSearch.trim().toLowerCase())),
+    [operatorProfile, operatorSearch, phase6gOperators]
+  );
   const expressionConstructionBridge = useMemo(() => analysis ? reviewExpressionConstructionBridge(analysis) : null, [analysis]);
   const [lexiconQuery, setLexiconQuery] = useState("pa");
+  const [operatorSearch, setOperatorSearch] = useState("");
   const [selectedFixtureId, setSelectedFixtureId] = useState("P6G-FX-001");
   const [selectedResourceFixtureId, setSelectedResourceFixtureId] = useState("RES19-01");
   const [selectedAuthorityFixtureId, setSelectedAuthorityFixtureId] = useState("AUTH20-01");
@@ -681,6 +694,32 @@ function App() {
             </div> : <p className="lexicon-empty" role="status">No exact source entry found for “{lexiconQuery.trim()}”. This does not prove that the form is invalid in every Arcane register or historical source.</p>}
             {lexiconInspection?.alias && <p className="lexicon-alias" role="status"><strong>Recorded legacy alias:</strong> {lexiconInspection.alias.alias} → {lexiconInspection.alias.preferredForm}. Evidence: {lexiconInspection.alias.evidence}. This is an inspection result only; parsing does not rewrite aliases by default.</p>}
             <p className="lexicon-provenance">Source: {BUNDLED_LEXICON_SOURCE.label} ({BUNDLED_LEXICON_SOURCE.version}); {bundledLexiconLoad.rowCount} loaded rows. Lexicon and alias CSV snapshots are versioned evidence, not blanket canon promotion.</p>
+          </section>
+          <section className="lexicon-inspector operator-explorer" aria-labelledby="operator-explorer-title">
+            <div className="lexicon-inspector-head">
+              <div><span className="detail-kicker">VERSIONED IDENTITY REGISTRY</span><h2 id="operator-explorer-title">Operator explorer</h2><p>Browse stable operator identities against the selected spelling profile. Parser support and signature readiness are separate; a listed identity is not necessarily parseable or semantically complete.</p></div>
+              <span className="contract-draft-status">{operatorExplorerEntries.length} RECORDS</span>
+            </div>
+            <label className="lexicon-query-label">Search operator, spelling or meaning<input aria-label="Search operator identities" value={operatorSearch} onChange={(event) => setOperatorSearch(event.target.value)} placeholder="e.g. subtract, FRAJA, construction"/></label>
+            <div className="operator-explorer-list">
+              {operatorExplorerEntries.map((record) => (
+                <details className="operator-explorer-record" key={record.id}>
+                  <summary><strong>{record.form ?? "Not recorded in this profile"}</strong><span>{record.gloss}</span><code>{record.id}</code></summary>
+                  <div className="lexicon-record-grid">
+                    <div><span>Identity</span><strong>{record.id}</strong></div>
+                    <div><span>Kind / category</span><strong>{record.kind} · {record.category}</strong></div>
+                    <div><span>Selected-profile form</span><strong>{record.form ?? "Not established"}</strong></div>
+                    <div><span>Other-profile form</span><strong>{record.alternateForm ?? "Not established"}</strong></div>
+                    <div><span>Phase 6G parser support</span><strong>{record.parserSupported ? "Implemented provisional grammar shape" : "Not implemented / unresolved"}</strong></div>
+                    <div><span>Signature status</span><strong>{record.signatureStatus}{record.auditArity === null ? "" : ` · audit arity ${record.auditArity} (not executable)`}</strong></div>
+                    <div className="lexicon-record-wide"><span>Source records</span><strong>{record.sources.join(" · ")}</strong></div>
+                    {record.notes.length > 0 && <div className="lexicon-record-wide"><span>Limitations / notes</span><strong>{record.notes.join(" · ")}</strong></div>}
+                  </div>
+                </details>
+              ))}
+              {operatorExplorerEntries.length === 0 && <p className="lexicon-empty" role="status">No operator identity matches this search in the registry.</p>}
+            </div>
+            <p className="lexicon-provenance">The registry is an evidence index, not a canon amendment. Audit arity is not an approved semantic signature. Construction macros, coupling vocabulary and ordinary formal operators remain distinct.</p>
           </section>
           <div className="playground-actions operator-profile-controls">
             <label>Operator spelling profile <select value={operatorProfile} onChange={(event) => { setOperatorProfile(event.target.value as OperatorIdentityProfile); setAnalysis(null); }}><option value="v3.0-L">Arcane language v3.0-L spellings</option><option value="phase4-renamed">Phase 4 preferred spellings</option></select></label>
