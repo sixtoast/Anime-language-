@@ -42,14 +42,93 @@ const LIMITATIONS = [
   "ELIGIBLE-TO-PROCEED is not execution. No spell is cast, no external action is initiated, and no effect is verified."
 ];
 
+const GATE_STATES: readonly GateState[] = ["PASS", "BLOCK", "UNRESOLVED", "UNAVAILABLE"];
+const POLICY_OUTCOMES = [
+  "COMPOSED-PERMIT", "COMPOSED-DENY", "INDETERMINATE", "PROFILE-CONFLICT",
+  "NO-APPLICABLE-PROFILE", "PROFILE-UNAVAILABLE", "PROFILE-UNTRUSTED",
+  "PROFILE-STALE", "PROFILE-EXPIRED", "COMPOSITION-ERROR"
+] as const;
+const AUTHORITY_OUTCOMES = [
+  "PERMIT", "DENY", "CONDITIONAL-PERMIT", "INDETERMINATE", "UNAVAILABLE",
+  "EXPIRED", "REVOKED", "SCOPE-MISMATCH", "ISSUER-UNTRUSTED",
+  "MALFORMED-DECISION", "MALFORMED-REQUEST", "INSUFFICIENT-CONTEXT"
+] as const;
+const COMPOSITION_STRATEGIES = ["SINGLE-APPLICABLE", "ALL-MUST-PERMIT", "DENY-OVERRIDES"] as const;
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function isGateState(value: unknown): value is GateState {
+  return typeof value === "string" && GATE_STATES.includes(value as GateState);
+}
+
+function isNonEmptyTrimmedString(value: unknown): value is string {
+  return typeof value === "string" && value.length > 0 && value.trim() === value;
+}
+
+function malformedInput(reason: string): InvocationGateResult {
+  return {
+    outcome: "BLOCKED",
+    eligibleToProceed: false,
+    executionStarted: false,
+    trace: [{
+      gate: "INPUT-CONTRACT",
+      state: "BLOCK",
+      reason
+    }],
+    limitations: [...LIMITATIONS]
+  };
+}
+
+function validateInputShape(input: unknown): input is InvocationGateInput {
+  if (!isRecord(input)) return false;
+  if (!isGateState(input.semanticValidation) ||
+      !isGateState(input.feasibilityAssessment) ||
+      !isGateState(input.resourceReadiness) ||
+      !isGateState(input.consent) ||
+      !isGateState(input.privacy) ||
+      !isGateState(input.safety)) return false;
+
+  if (!isRecord(input.policyComposition) ||
+      !POLICY_OUTCOMES.includes(input.policyComposition.outcome as typeof POLICY_OUTCOMES[number]) ||
+      typeof input.policyComposition.blocking !== "boolean" ||
+      input.policyComposition.blocking !== (input.policyComposition.outcome !== "COMPOSED-PERMIT") ||
+      !COMPOSITION_STRATEGIES.includes(input.policyComposition.strategy as typeof COMPOSITION_STRATEGIES[number]) ||
+      !Array.isArray(input.policyComposition.selectedProfileIds) ||
+      !Array.isArray(input.policyComposition.trace) ||
+      !Array.isArray(input.policyComposition.limitations)) return false;
+
+  if (!isRecord(input.authority) ||
+      !AUTHORITY_OUTCOMES.includes(input.authority.outcome as typeof AUTHORITY_OUTCOMES[number]) ||
+      typeof input.authority.gateSatisfied !== "boolean" ||
+      !Array.isArray(input.authority.diagnostics) ||
+      !Array.isArray(input.authority.limitations)) return false;
+
+  const authorityOutcomePermits = input.authority.outcome === "PERMIT" ||
+    input.authority.outcome === "CONDITIONAL-PERMIT";
+  if (input.authority.gateSatisfied !== authorityOutcomePermits) return false;
+
+  if (!Array.isArray(input.requiredIndependentGateIds) ||
+      !input.requiredIndependentGateIds.every(isNonEmptyTrimmedString) ||
+      !Array.isArray(input.independentGateResults) ||
+      !input.independentGateResults.every((entry: unknown) =>
+        isRecord(entry) && isNonEmptyTrimmedString(entry.gateId) && isGateState(entry.state))) return false;
+
+  return true;
+}
+
 function stateForAuthority(result: AuthorityGateResult): GateState {
-  if (result.gateSatisfied) return "PASS";
+  if (result.gateSatisfied === true) return "PASS";
   if (result.outcome === "UNAVAILABLE") return "UNAVAILABLE";
   if (result.outcome === "INDETERMINATE" || result.outcome === "INSUFFICIENT-CONTEXT") return "UNRESOLVED";
   return "BLOCK";
 }
 
 export function evaluateInvocationGates(input: InvocationGateInput): InvocationGateResult {
+  if (!validateInputShape(input)) {
+    return malformedInput("Invocation gate input contains a malformed object, invalid state, inconsistent upstream outcome, or missing collection.");
+  }
   const trace: InvocationGateTrace[] = [];
   const add = (gate: string, state: GateState, reason: string) => trace.push({ gate, state, reason });
 
@@ -72,8 +151,7 @@ export function evaluateInvocationGates(input: InvocationGateInput): InvocationG
 
   const ids = input.requiredIndependentGateIds;
   const resultIds = input.independentGateResults.map((entry) => entry.gateId);
-  if (ids.some((id) => !id.trim()) || new Set(ids).size !== ids.length ||
-      resultIds.some((id) => !id.trim()) || new Set(resultIds).size !== resultIds.length) {
+  if (new Set(ids).size !== ids.length || new Set(resultIds).size !== resultIds.length) {
     add("INDEPENDENT-GATE-CONFIGURATION", "BLOCK", "Required and reported independent gate IDs must be non-empty and unique.");
   } else {
     for (const id of ids) {

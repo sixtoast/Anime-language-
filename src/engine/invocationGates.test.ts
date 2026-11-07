@@ -55,4 +55,35 @@ describe("Invocation gate coordination", () => {
     expect(result.executionStarted).toBe(false);
     expect(result.limitations.join(" ")).toContain("No spell is cast");
   });
+  it("[INV-GATE-010] rejects unknown runtime gate states instead of passing them through", () => {
+    const malformed = { ...valid(), semanticValidation: "PASSED" } as unknown as InvocationGateInput;
+    expect(evaluateInvocationGates(malformed)).toMatchObject({
+      outcome: "BLOCKED", eligibleToProceed: false, executionStarted: false,
+      trace: [{ gate: "INPUT-CONTRACT", state: "BLOCK" }]
+    });
+  });
+  it("[INV-GATE-011] rejects truthy non-boolean authority flags", () => {
+    const malformed = { ...valid(), authority: { ...authority(), gateSatisfied: "false" } } as unknown as InvocationGateInput;
+    expect(evaluateInvocationGates(malformed).outcome).toBe("BLOCKED");
+  });
+  it("[INV-GATE-012] rejects contradictory authority outcomes and gate flags", () => {
+    const malformed = { ...valid(), authority: authority(true, "DENY") };
+    expect(evaluateInvocationGates(malformed).outcome).toBe("BLOCKED");
+  });
+  it("[INV-GATE-013] rejects unknown policy outcomes and inconsistent blocking flags", () => {
+    const unknown = { ...valid(), policyComposition: { ...policy(), outcome: "PERMIT" } } as unknown as InvocationGateInput;
+    const inconsistent = { ...valid(), policyComposition: { ...policy(), blocking: true } };
+    expect(evaluateInvocationGates(unknown).outcome).toBe("BLOCKED");
+    expect(evaluateInvocationGates(inconsistent).outcome).toBe("BLOCKED");
+  });
+  it("[INV-GATE-014] rejects null collections and malformed independent gate entries", () => {
+    const nullResults = { ...valid(), independentGateResults: null } as unknown as InvocationGateInput;
+    const malformedEntry = { ...valid(), independentGateResults: [{ gateId: "consent", state: "MAYBE" }] } as unknown as InvocationGateInput;
+    expect(evaluateInvocationGates(nullResults).outcome).toBe("BLOCKED");
+    expect(evaluateInvocationGates(malformedEntry).outcome).toBe("BLOCKED");
+  });
+  it("[INV-GATE-015] rejects whitespace-padded identifiers", () => {
+    const malformed = { ...valid(), requiredIndependentGateIds: [" consent "] };
+    expect(evaluateInvocationGates(malformed).outcome).toBe("BLOCKED");
+  });
 });
