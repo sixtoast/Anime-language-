@@ -198,3 +198,13 @@ All six new cases are `authored-unverified`. They have not yet been executed. Th
 
 ### Remaining hardening
 This is a first fail-closed increment, not a claim that every Incantation runtime boundary is hardened. The next work should apply the same explicit runtime-contract validation to policy composition, authority evaluation, contract-record kind dispatch, scenario selection and resource preflight. Each evaluator should preserve its own outcome distinctions and avoid broad exception swallowing.
+
+
+### Invocation-gate build correction
+
+The first Vercel build after the invocation-gate hardening failed at TypeScript compilation because the six new central test-registry entries used a group label (`Invocation gates`) that is not part of the registry's declared group union. The evaluator and tests were not the cause of this failure.
+
+- Failed build: `dpl_7sPFtC3sRzwREM9dkEQpuWbTXYEr`, commit `8c4468f82cc83ae884409562505ba78b542a2c9a`.
+- Exact compiler issue: six TS2322 errors at `src/engine/testRegistry.ts` lines 239–244; the accepted group is `Incantation contracts`.
+- Corrected in commit `cfa2bf6a9ec191ed27b4f373b91be1cf634321d7` by using the existing `Incantation contracts` group. No runtime semantics were changed in this correction.
+- The corrected commit's own Vercel build still requires verification. The previous failed build is retained in this record.
