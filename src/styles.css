@@ -267,3 +267,18 @@
 .construction-macro-result>p{font:10px/1.6 var(--sans);color:#c5b6d5}
 .construction-macro-heading{display:flex;gap:12px;margin:10px 0}
 .construction-macro-heading span{padding:8px;background:#1b1820;border-radius:4px;color:#f0e8f6;font:12px var(--mono)}
+
+
+/* Version-aware operator explorer: identity, parser and signature status remain separate. */
+.operator-explorer-list{display:flex;flex-direction:column;gap:7px;margin-top:12px}
+.operator-explorer-record{border:1px solid #303136;border-radius:6px;background:#191a1d;overflow:hidden}
+.operator-explorer-record>summary{display:grid;grid-template-columns:minmax(110px,.8fr) minmax(100px,1fr) minmax(110px,.9fr);align-items:center;gap:12px;padding:11px 12px;color:#d9d5e1;list-style:none}
+.operator-explorer-record>summary::-webkit-details-marker{display:none}
+.operator-explorer-record>summary:after{content:"+";justify-self:end;color:#a99ac9;font:14px var(--mono)}
+.operator-explorer-record[open]>summary:after{content:"−"}
+.operator-explorer-record>summary strong{font:600 11px var(--mono);color:#d7c8ff;overflow-wrap:anywhere}
+.operator-explorer-record>summary span{font-size:11px;color:#c3bfca}
+.operator-explorer-record>summary code{font:9px var(--mono);color:#898592;overflow-wrap:anywhere}
+.operator-explorer-record[open] .lexicon-record-grid{padding:0 10px 10px}
+.operator-explorer .contract-draft-status{font:9px var(--mono);color:#c6b6e7;white-space:nowrap}
+@media(max-width:600px){.operator-explorer-record>summary{grid-template-columns:minmax(0,1fr) auto;gap:5px 10px}.operator-explorer-record>summary span{grid-column:1}.operator-explorer-record>summary code{grid-column:1}.operator-explorer-record>summary:after{grid-column:2;grid-row:1/4}}
