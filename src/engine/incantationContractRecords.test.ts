@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   getRequiredContractFields,
   isAuthorityDecisionOutcome,
+  isContractRecordKind,
   isDecisionOutcomePermitEligible,
   mapCompositionOutcomeToAuthority,
   validateContractRecord,
@@ -88,5 +89,15 @@ describe("source-grounded incantation contract record validation", () => {
     const result = validateContractRecord("AUTHORITY-DECISION", completeRecord("AUTHORITY-DECISION"));
     expect(result.limitation).toContain("does not prove");
     expect(result.limitation).toContain("execution");
+  });
+  it("[CONTRACT-REC-009] rejects unknown runtime record kinds without indexing undefined schemas", () => {
+    expect(isContractRecordKind("AUTHORITY-DECISION")).toBe(true);
+    expect(isContractRecordKind("AUTHORITY-DECISION-PLUS")).toBe(false);
+    expect(validateContractRecord("UNKNOWN-KIND" as never, {}).issues[0]).toMatchObject({
+      code: "UNKNOWN_RECORD_KIND", recordKind: "UNKNOWN"
+    });
+  });
+  it("[CONTRACT-REC-010] makes direct required-field lookup fail explicitly for unknown kinds", () => {
+    expect(() => getRequiredContractFields("UNKNOWN-KIND" as never)).toThrow(RangeError);
   });
 });

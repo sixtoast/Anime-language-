@@ -25,15 +25,15 @@ export type ContractRecordKind =
   | "COMPOSITION-RECORD";
 
 export interface ContractRecordIssue {
-  code: "RECORD_NOT_OBJECT" | "REQUIRED_FIELD_MISSING" | "REQUIRED_FIELD_EMPTY";
-  recordKind: ContractRecordKind;
+  code: "UNKNOWN_RECORD_KIND" | "RECORD_NOT_OBJECT" | "REQUIRED_FIELD_MISSING" | "REQUIRED_FIELD_EMPTY";
+  recordKind: ContractRecordKind | "UNKNOWN";
   field?: string;
   message: string;
 }
 
 export interface ContractRecordValidation {
   valid: boolean;
-  recordKind: ContractRecordKind;
+  recordKind: ContractRecordKind | "UNKNOWN";
   issues: ContractRecordIssue[];
   limitation: string;
 }
@@ -125,7 +125,14 @@ const REQUIRED_FIELDS: Readonly<Record<ContractRecordKind, readonly string[]>> =
 const LIMITATION =
   "Structural validation only: a complete record does not prove that its values, evidence, trust, policy, scope, or real-world effects are valid, and does not establish execution or a verified outcome.";
 
+export function isContractRecordKind(value: unknown): value is ContractRecordKind {
+  return typeof value === "string" && Object.prototype.hasOwnProperty.call(REQUIRED_FIELDS, value);
+}
+
 export function getRequiredContractFields(kind: ContractRecordKind): readonly string[] {
+  if (!isContractRecordKind(kind)) {
+    throw new RangeError("Unknown Incantation contract record kind: " + String(kind));
+  }
   return REQUIRED_FIELDS[kind];
 }
 
@@ -133,6 +140,18 @@ export function validateContractRecord(
   kind: ContractRecordKind,
   value: unknown
 ): ContractRecordValidation {
+  if (!isContractRecordKind(kind)) {
+    return {
+      valid: false,
+      recordKind: "UNKNOWN",
+      issues: [{
+        code: "UNKNOWN_RECORD_KIND",
+        recordKind: "UNKNOWN",
+        message: "The supplied contract record kind is not registered."
+      }],
+      limitation: LIMITATION
+    };
+  }
   const issues: ContractRecordIssue[] = [];
 
   if (value === null || typeof value !== "object" || Array.isArray(value)) {
