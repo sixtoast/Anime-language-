@@ -257,3 +257,22 @@ Added AUTH-GATE-012 through AUTH-GATE-016 and registered all five in the central
 
 ### Verification boundary
 The latest authority hardening commit is on the feature branch. Its Vercel deployment and TypeScript build must be checked before claiming compile verification. No unit tests have been executed. The implementation still consumes caller-supplied trust, delegation, integrity, freshness, revocation and scope results; it does not verify those external facts.
+
+
+## 14. Contract record dispatch and runtime preview scenario guards
+
+**Implementation commits:** `2a5bdcc5021e5fed67acd65e2d3554cddc7796d1` and `18ba26c4e3f6c3b9829b318ddde2e4859022b81b`.
+
+### Contract record kinds
+- Added `isContractRecordKind` using own-property membership against the canonical required-field registry.
+- `validateContractRecord` now returns an explicit `UNKNOWN_RECORD_KIND` issue with `recordKind: UNKNOWN` for unregistered runtime values instead of indexing `undefined` and throwing during iteration.
+- `getRequiredContractFields` now throws a deliberate `RangeError` for an unknown kind rather than returning an absent schema.
+- Added CONTRACT-REC-009 and CONTRACT-REC-010 to the unit test source and workbench test catalogue. Both remain `authored-unverified`.
+
+### Runtime preview scenarios
+- `evaluateIncantationRuntimePreview` now verifies that the requested scenario ID exists in the declared scenario catalogue before selecting any sample inputs.
+- Unknown runtime scenario values return `scenario: INVALID`, a blocked invocation trace, and explicit assumptions. The evaluator no longer falls through to READY-SAMPLE-like defaults with an empty description.
+- Added RUNTIME-PREVIEW-006 to the unit test source and workbench test catalogue. It remains `authored-unverified`.
+
+### Scope
+These are defensive dispatch guards. Contract-record validation remains structural only, and the runtime preview remains a read-only sample coordinator. Neither verifies external evidence nor executes an incantation.
