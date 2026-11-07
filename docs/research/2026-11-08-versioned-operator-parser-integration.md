@@ -309,3 +309,26 @@ The first resource-preflight hardening build failed TypeScript because the funct
 - Corrected in commit `39f8ae43b94533cd7ea41ebf5129e6ae28eab37e` by checking an `unknown` candidate value and deriving the safe diagnostic quantity from that candidate.
 - No resource calculation or acceptance rule changed in this correction.
 - The corrected implementation's exact-commit Vercel build still needs verification.
+
+
+## 16. Expression-to-Construction bridge runtime boundary validation
+
+**Implementation commit:** `05290babe55f8a571aacd0d173085f51db9fca4f`.
+
+The bridge remains a traceability review, not a translation system. Its runtime boundary is now guarded so malformed caller-supplied data cannot be mistaken for source AST structure or accepted as a target contract mapping.
+
+### Changes
+- Validates parser result object shape, exact provisional notation label, boolean parse status and recursive SurfaceNode structure before traversing.
+- Recursively checks atom, quantity, identifier, call and block node fields; malformed nested children are rejected.
+- Requires traceability input to be an array.
+- Validates every record's object shape, target slot, source path, provenance and optional note.
+- Only the five declared target slots are accepted: HEAD, CORE, PARAMETERS, CONSTRAINTS and CONTROL.
+- Unknown target slots produce `UNKNOWN_TARGET_SLOT`; malformed records produce `INVALID_TRACEABILITY_RECORD`; malformed parser/AST input produces `INVALID_PARSE_RESULT`.
+- Existing checks for known source paths, duplicate target slots and non-empty provenance remain in place.
+- No mapping is generated, no source-to-target equivalence is inferred, and no Construction instruction becomes executable.
+
+### Regression cases
+Added CON-BRIDGE-010 through CON-BRIDGE-014 and registered them in the central test catalogue. They cover unknown target slots, null traceability records, malformed parser results, malformed nested AST nodes and non-array traceability collections. All five remain `authored-unverified`.
+
+### Scope
+The five target slots are the existing contract boundary. These checks do not recover the missing expression-to-Construction translation grammar, define Construction Feet or couplings, or promote user-recorded traceability into approved semantic mappings.
