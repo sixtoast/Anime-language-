@@ -332,3 +332,12 @@ Added CON-BRIDGE-010 through CON-BRIDGE-014 and registered them in the central t
 
 ### Scope
 The five target slots are the existing contract boundary. These checks do not recover the missing expression-to-Construction translation grammar, define Construction Feet or couplings, or promote user-recorded traceability into approved semantic mappings.
+
+
+### Construction bridge build correction
+
+The first Vercel build for the bridge hardening failed TypeScript parsing because the existing CON-BRIDGE-001 test-registry entry lacked a trailing comma before the five new entries.
+
+- Failed build: `dpl_GKkfuPP2kwNPtfLxXi6FoJ1EWgFv`, commit `05290babe55f8a571aacd0d173085f51db9fca4f`, TS1005 at `src/engine/testRegistry.ts:297`.
+- Corrected in `c5b7974739bd6978e26f0d25784ed55ace2b23bc` by restoring the missing comma. The bridge implementation itself was not changed by this syntax correction.
+- The corrected commit's exact Vercel build remains pending verification.
