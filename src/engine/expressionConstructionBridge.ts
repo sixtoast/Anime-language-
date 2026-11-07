@@ -144,7 +144,7 @@ export function reviewExpressionConstructionBridge(
   }
 
   const sourceNodes: SurfaceSourceNode[] = [];
-  collectNodes(parse.ast, "$", sourceNodes);
+  collectNodes(parseCandidate.ast, "$", sourceNodes);
   const knownPaths = new Set(sourceNodes.map((node) => node.path));
   const diagnostics: BridgeDiagnostic[] = [];
   const accepted: Array<BridgeTraceabilityRecord & { evidenceStatus: "USER-RECORDED-UNVERIFIED" }> = [];
