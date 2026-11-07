@@ -180,15 +180,13 @@ export function resolveOperatorIdentity(
       }
 
       const licensedForm = primaryForm;
-      {
-        return {
-          status: "VERSION-NOT-LICENSED",
-          inputForm,
-          profile,
-          licensedForm,
-          operatorId: record.id
-        };
-      }
+      return {
+        status: "VERSION-NOT-LICENSED",
+        inputForm,
+        profile,
+        licensedForm,
+        operatorId: record.id
+      };
     }
   }
 
