@@ -6,7 +6,7 @@
  * lexicon, type-check expressions, evaluate spells, or establish canon.
  */
 import { inspectLexiconForm, resolveLexiconForm, type LexiconRegistry } from "./lexiconRegistry";
-import { operatorIdentityRecords, resolveOperatorIdentity, type OperatorIdentityProfile, type OperatorIdentityResolution } from "./operatorIdentityRegistry";
+import { resolveOperatorIdentity, type OperatorIdentityProfile, type OperatorIdentityResolution } from "./operatorIdentityRegistry";
 
 export type SurfaceNode =
   | { kind: "atom"; form: string; lexicalClass: string }

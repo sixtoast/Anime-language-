@@ -176,7 +176,7 @@ function analyseNode(
         diagnostics.push(diagnostic(
           "SEMANTIC_SIGNATURE_UNRESOLVED", "unresolved", path, "call",
           `Operator "${node.operator}" has registry metadata but no complete approved input/output semantic signature. Parser arity is not treated as a type contract.`,
-          node.operator,
+          node.surfaceForm ?? node.operator,
           contract.source
         ));
         return { source: node, type: unknown(`operator signature unresolved: ${node.operator}`), children };
