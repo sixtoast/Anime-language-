@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { parseSurfaceExpression } from "./surfaceParser";
+import { buildLexiconRegistry } from "./lexiconRegistry";
 
 describe("parseSurfaceExpression — provisional Phase 6G subset", () => {
   it("[P6G-001] parses an integer numeral closed by a unit", () => {
@@ -168,6 +169,24 @@ describe("versioned operator profile parsing", () => {
   it("[P6G-V-006] keeps the legacy Phase 6G compatibility mode unchanged when no profile is selected", () => {
     expect(parseSurfaceExpression("fraja ki sho to sho")).toMatchObject({
       ok: true, ast: { kind: "call", operator: "FRAJA" }
+    });
+  });
+});
+
+
+describe("versioned parser and non-operator lexical aliases", () => {
+  it("[P6G-V-007] retains source-backed lexical alias handling in explicit operator profiles", () => {
+    const lexiconRegistry = buildLexiconRegistry([
+      { form: "ben", gloss: "region", cls: "GEOM", status: "RENAMED", note: "was ren" }
+    ], { sourceLabel: "parser alias test", sourceVersion: "fixture-v1" });
+    const result = parseSurfaceExpression("ren", {
+      operatorProfile: "phase4-renamed",
+      allowLegacyAliases: true,
+      lexiconRegistry
+    });
+    expect(result).toMatchObject({
+      ok: true,
+      ast: { kind: "atom", form: "BEN", lexicalClass: "GEOM" }
     });
   });
 });
