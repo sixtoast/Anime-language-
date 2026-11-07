@@ -9,7 +9,8 @@ export type RuntimePreviewScenario =
   | "AUTHORITY-UNAVAILABLE"
   | "POLICY-UNRESOLVED"
   | "CONSENT-UNRESOLVED"
-  | "FEASIBILITY-BLOCKED";
+  | "FEASIBILITY-BLOCKED"
+  | "INVALID";
 
 export const runtimePreviewScenarios: { id: RuntimePreviewScenario; label: string; description: string }[] = [
   { id: "READY-SAMPLE", label: "All sample gates pass", description: "Illustrates the coordinator's eligible-to-proceed result using explicitly assumed passing upstream evidence." },
@@ -33,6 +34,54 @@ export interface IncantationRuntimePreview {
 export function evaluateIncantationRuntimePreview(
   scenario: RuntimePreviewScenario
 ): IncantationRuntimePreview {
+  if (!runtimePreviewScenarios.some((item) => item.id === scenario)) {
+    const resource = evaluateResourcePreflight({
+      resourceKind: "",
+      accountId: "",
+      unit: "",
+      requiredUnit: "",
+      openingBalance: null,
+      openingBalanceEvidence: "UNKNOWN",
+      sourceEvidence: "UNKNOWN",
+      evidenceFreshness: "UNKNOWN",
+      requiredAmount: 0,
+      heldReservations: 0,
+      reservationEvidence: "UNKNOWN",
+      budgetEvidence: "UNKNOWN"
+    });
+    const policy = evaluatePolicyComposition({
+      strategy: "ALL-MUST-PERMIT",
+      planTrust: "UNKNOWN",
+      planValid: "UNKNOWN",
+      profiles: []
+    });
+    const authority = evaluateAuthorityGate(null as never);
+    const invocation = evaluateInvocationGates({
+      semanticValidation: "BLOCK",
+      feasibilityAssessment: "UNRESOLVED",
+      resourceReadiness: "UNRESOLVED",
+      policyComposition: policy,
+      authority,
+      consent: "UNRESOLVED",
+      privacy: "UNRESOLVED",
+      safety: "UNRESOLVED",
+      requiredIndependentGateIds: [],
+      independentGateResults: []
+    });
+    return {
+      scenario: "INVALID",
+      description: "Unknown runtime preview scenario identifier; no sample scenario was selected.",
+      resource,
+      policy,
+      authority,
+      invocation,
+      assumptions: [
+        "The supplied scenario identifier was not recognised and no READY-SAMPLE defaults were substituted.",
+        "The preview returns a blocked diagnostic result only; no incantation is executed and no external evidence is verified."
+      ]
+    };
+  }
+
   const resource = evaluateResourcePreflight({
     resourceKind: "mana",
     accountId: "sample-account",

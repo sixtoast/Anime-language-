@@ -32,4 +32,10 @@ describe("read-only incantation runtime preview", () => {
     expect(evaluateIncantationRuntimePreview("CONSENT-UNRESOLVED").invocation.outcome).toBe("INDETERMINATE");
     expect(evaluateIncantationRuntimePreview("FEASIBILITY-BLOCKED").invocation.outcome).toBe("BLOCKED");
   });
+  it("[RUNTIME-PREVIEW-006] rejects unknown scenario identifiers instead of substituting READY-SAMPLE data", () => {
+    const result = evaluateIncantationRuntimePreview("UNKNOWN-SCENARIO" as never);
+    expect(result.scenario).toBe("INVALID");
+    expect(result.invocation.outcome).toBe("BLOCKED");
+    expect(result.assumptions.join(" ")).toContain("no READY-SAMPLE defaults were substituted");
+  });
 });
