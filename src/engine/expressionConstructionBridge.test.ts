@@ -81,4 +81,32 @@ describe("expression-to-Construction boundary review", () => {
     expect(result.unmappedSlots).toContain("CONTROL");
     expect(result.status).toBe("MAPPING-NOT-SPECIFIED");
   });
+  it("[CON-BRIDGE-010] rejects unknown target slots instead of accepting extra contract fields", () => {
+    const result = reviewExpressionConstructionBridge(parseSurfaceExpression("ki sho"), [
+      { targetSlot: "EXECUTION" as never, sourcePath: "$", provenance: "owner-review" }
+    ]);
+    expect(result.status).toBe("MAPPING-RECORD-INCOMPLETE");
+    expect(result.diagnostics[0]?.code).toBe("UNKNOWN_TARGET_SLOT");
+  });
+  it("[CON-BRIDGE-011] rejects null traceability entries without throwing", () => {
+    const result = reviewExpressionConstructionBridge(parseSurfaceExpression("ki sho"), [null as never]);
+    expect(result.status).toBe("MAPPING-RECORD-INCOMPLETE");
+    expect(result.diagnostics[0]?.code).toBe("INVALID_TRACEABILITY_RECORD");
+  });
+  it("[CON-BRIDGE-012] rejects malformed parser result objects", () => {
+    const result = reviewExpressionConstructionBridge(null as never);
+    expect(result.status).toBe("PARSE-UNAVAILABLE");
+    expect(result.diagnostics[0]?.code).toBe("INVALID_PARSE_RESULT");
+  });
+  it("[CON-BRIDGE-013] rejects malformed nested AST nodes", () => {
+    const malformed = { ok: true, notation: "phase-6g-provisional", diagnostics: [], ast: { kind: "call", operator: "FRAPA", args: [null] } };
+    const result = reviewExpressionConstructionBridge(malformed as never);
+    expect(result.status).toBe("PARSE-UNAVAILABLE");
+    expect(result.diagnostics[0]?.code).toBe("INVALID_PARSE_RESULT");
+  });
+  it("[CON-BRIDGE-014] requires traceability collections to be arrays", () => {
+    const result = reviewExpressionConstructionBridge(parseSurfaceExpression("ki sho"), {} as never);
+    expect(result.status).toBe("MAPPING-RECORD-INCOMPLETE");
+    expect(result.diagnostics[0]?.code).toBe("INVALID_TRACEABILITY_RECORD");
+  });
 });
