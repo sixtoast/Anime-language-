@@ -341,3 +341,13 @@ The first Vercel build for the bridge hardening failed TypeScript parsing becaus
 - Failed build: `dpl_GKkfuPP2kwNPtfLxXi6FoJ1EWgFv`, commit `05290babe55f8a571aacd0d173085f51db9fca4f`, TS1005 at `src/engine/testRegistry.ts:297`.
 - Corrected in `c5b7974739bd6978e26f0d25784ed55ace2b23bc` by restoring the missing comma. The bridge implementation itself was not changed by this syntax correction.
 - The corrected commit's exact Vercel build remains pending verification.
+
+
+### Construction bridge AST narrowing correction
+
+After the test-registry comma was corrected, the next build exposed a second TypeScript issue: the bridge validated `parseCandidate.ast` but still traversed the original optional `parse.ast` property. The runtime guard's narrowing therefore did not apply at the call site.
+
+- Failed build: `dpl_Gjz1WTa98yWnsirwHisk2L5dicva`, commit `c5b7974739bd6978e26f0d25784ed55ace2b23bc`, TS2345 at `src/engine/expressionConstructionBridge.ts:147`.
+- Corrected in `e949fe93168fa8f98e3c59b8dfaaac16e585fa67` by traversing `parseCandidate.ast`, the value proven valid by the runtime guard.
+- This is a type-safe use of the already validated AST; no parsing or mapping semantics changed.
+- The exact corrected commit still requires its own Vercel build verification.
