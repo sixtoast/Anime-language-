@@ -10,7 +10,7 @@ test.describe("Documentation catalogue browser acceptance", () => {
   });
 
   test("search, status and provenance filters combine and reset", async ({ page }) => {
-    const status = page.getByRole("status");
+    const status = page.locator(".doc-result-count");
     const initial = (await status.innerText()).match(/(\d+) of (\d+) sources/);
     expect(initial).not.toBeNull();
     const total = Number(initial?.[2]);
@@ -35,7 +35,7 @@ test.describe("Documentation catalogue browser acceptance", () => {
 
   test("shows an understandable empty state and recovers from it", async ({ page }) => {
     const search = page.getByRole("textbox", { name: "Search documentation catalogue" });
-    const status = page.getByRole("status");
+    const status = page.locator(".doc-result-count");
     const initial = (await status.innerText()).match(/(\d+) of (\d+) sources/);
     expect(initial).not.toBeNull();
     const total = Number(initial?.[2]);
