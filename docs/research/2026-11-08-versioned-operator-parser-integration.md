@@ -276,3 +276,26 @@ The latest authority hardening commit is on the feature branch. Its Vercel deplo
 
 ### Scope
 These are defensive dispatch guards. Contract-record validation remains structural only, and the runtime preview remains a read-only sample coordinator. Neither verifies external evidence nor executes an incantation.
+
+
+## 15. Incantation resource preflight runtime hardening
+
+**Implementation commit:** `a1942df5b1ac271c2900610b577704f6497b053a`.
+
+The v1.9 resource preflight evaluator now validates the external/runtime input shape before calling string methods, comparing units or calculating quantities.
+
+### Changes
+- Rejects null, arrays and non-record values with `RESOURCE-SPEC-UNDERSPECIFIED` and a `RESOURCE-INPUT-INVALID` diagnostic.
+- Requires resource/account/unit identifiers to be non-empty canonical strings without leading or trailing whitespace.
+- Requires opening balance to be null or a finite non-negative number.
+- Requires required amount and held reservations to be finite non-negative numbers.
+- Validates all evidence-state inputs against `PASS | FAIL | UNKNOWN | UNAVAILABLE`.
+- Validates optional unit-contract/budget-unit identifiers and optional budget/source quantities when supplied.
+- Malformed quantities such as strings, Infinity, NaN or negative values cannot enter arithmetic or create a passing preflight.
+- Existing exact-unit matching, conservative budget upper-bound checks, evidence distinctions and no-mutation/no-execution boundary remain intact.
+
+### Regression cases
+Added RES19-EVAL-010 through RES19-EVAL-014 and registered them in the central catalogue. They cover null/non-object input, unknown evidence states, malformed/non-finite quantities, whitespace-padded identifiers and malformed optional amounts. All five are `authored-unverified`.
+
+### Scope
+This is input validation for the scalar preflight evaluator, not the full v1.9 conservation ledger. It does not authenticate source evidence, convert units, reserve or debit resources, reconcile physical systems, or establish feasibility.
