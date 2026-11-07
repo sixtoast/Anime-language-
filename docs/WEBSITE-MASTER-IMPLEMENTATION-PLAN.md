@@ -404,3 +404,14 @@ Latest inspected main commit: `1a66fd8b`. GitHub Actions [#692](https://github.c
 The Overview workbench badge has been corrected from v1.8 to v2.1. Its next-task recommendation now points to WEB-INC-RUNTIME-01: a read-only Playground panel that invokes only existing pure evaluator modules with explicit deterministic sample inputs and displays their independent results, diagnostics and limitations. It must not call external identity/policy services, mutate resource state, or imply that a spell has been executed. The Overview browser assertion has been updated to protect the version badge and recommendation.
 
 GitHub Actions usage is currently limited according to the project owner. Do not deliberately trigger new workflows until the limit resets. Changes after commit `1a66fd8b` therefore remain unverified by CI unless the owner reports that Actions are available again or an alternative local verification environment is used. See the current [Website Feature Register](WEBSITE-FEATURE-REGISTER.md).
+
+
+### 2026-11-07 — v1.9 bounded conservation evaluator and account-balance reconciliation
+
+A draft implementation now adds a scalar-additive conservation evaluator and a read-only account-balance reconciler. The evaluator requires one exact resource/unit contract, a declared system boundary and valid interval, integer ticks, an explicit tolerance, and caller-supplied contract/boundary/uncertainty-rule evidence references. Unsupported invariants and non-passing evidence remain unresolved.
+
+The reconciler derives its expected gross account balance by projecting the supplied ledger accounts and events. It rejects partial or unresolved ledger projections, requires the selected account to match the named contract, checks the observation against the contract interval, and preserves signed discrepancies without changing ledger records. A held reservation remains part of gross balance and is not treated as consumption.
+
+This is account-balance-only reconciliation, not the full v1.9 RESOURCE-RECONCILED stage. It does not authenticate evidence, interpret an uncertainty model, implement transformations or cross-account invariants, infer conversions, establish physical conservation, authorise or execute operations, or verify effects. The feature is in a draft development branch; CI and Vercel preview verification are pending.
+
+Next: expose deterministic sample conservation and account-reconciliation results in the existing read-only Playground runtime preview, keeping the specification fixture browser separate from executed evaluator tests.
