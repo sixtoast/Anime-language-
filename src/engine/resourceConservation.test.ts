@@ -186,6 +186,7 @@ describe("Arcane Incantations v1.9 conservation and reconciliation", () => {
       openingState: [quantity(100)],
       sources: [],
       closingState: [quantity(90)],
+      permittedOutputs: [],
       declaredLosses: [lossQuantity(10)]
     }));
     expect(result).toMatchObject({
