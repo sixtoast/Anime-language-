@@ -87,7 +87,6 @@ const reconciliation = (overrides: Partial<ResourceReconciliationInput> = {}): R
   accounts: accounts(),
   events: [ledgerEvent()],
   observedBalanceTicks: 90,
-  toleranceTicks: 0,
   observedAt: "2026-06-01T00:00:00Z",
   evidence: "PASS",
   evidenceRef: "measurement:1",
@@ -235,11 +234,34 @@ describe("Arcane Incantations v1.9 conservation and reconciliation", () => {
       .toBe("INVALID-RECONCILIATION");
   });
 
-  it("[RES19-RECON-005] requires explicit non-negative tolerance and observation evidence reference", () => {
-    expect(reconcileResourceBalance(reconciliation({ toleranceTicks: -1 })).outcome)
-      .toBe("INVALID-RECONCILIATION");
+  it("[RES19-RECON-005] requires the contract's explicit non-negative tolerance and an observation evidence reference", () => {
+    expect(reconcileResourceBalance(reconciliation({
+      contract: { ...contract(), toleranceTicks: -1 }
+    })).outcome).toBe("INVALID-RECONCILIATION");
     expect(reconcileResourceBalance(reconciliation({ evidenceRef: "" })).outcome)
       .toBe("INVALID-RECONCILIATION");
+  });
+
+  it("[RES19-RECON-009] uses only the tolerance declared by the conservation contract", () => {
+    const withinTolerance = reconcileResourceBalance(reconciliation({
+      contract: { ...contract(), toleranceTicks: 3 },
+      observedBalanceTicks: 87
+    }));
+    expect(withinTolerance).toMatchObject({
+      outcome: "ACCOUNT-BALANCE-RECONCILED",
+      discrepancyTicks: -3,
+      toleranceTicks: 3
+    });
+
+    const outsideTolerance = reconcileResourceBalance(reconciliation({
+      contract: { ...contract(), toleranceTicks: 2 },
+      observedBalanceTicks: 87
+    }));
+    expect(outsideTolerance).toMatchObject({
+      outcome: "ACCOUNT-BALANCE-DISCREPANCY",
+      discrepancyTicks: -3,
+      toleranceTicks: 2
+    });
   });
 
   it("[RES19-RECON-006] rejects observations outside the contract valid interval", () => {

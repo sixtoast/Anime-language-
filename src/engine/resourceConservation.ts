@@ -297,6 +297,7 @@ export type ResourceReconciliationContract = Pick<
   | "unitContractId"
   | "systemBoundary"
   | "validInterval"
+  | "toleranceTicks"
   | "contractEvidence"
   | "contractEvidenceRef"
   | "boundaryEvidence"
@@ -313,7 +314,6 @@ export interface ResourceReconciliationInput {
   accounts: LedgerAccount[];
   events: LedgerEvent[];
   observedBalanceTicks: number | null;
-  toleranceTicks: number;
   observedAt: string;
   evidence: ConservationEvidence;
   evidenceRef: string;
@@ -343,6 +343,7 @@ export interface ResourceReconciliationResult {
 const RECONCILIATION_LIMITATIONS = [
   "Expected balance is derived by projecting the supplied accounts and events; the projection and evidence are caller-supplied and are not authenticated.",
   "Only one account with an exact resource, unit and unit-contract match is compared; no conversion or multi-account invariant is inferred.",
+  "The comparison uses only the tolerance declared by the conservation contract; a separate caller-supplied reconciliation tolerance is not accepted.",
   "The named contract must have passing contract, boundary and uncertainty-policy evidence, but this evaluator does not authenticate or interpret those sources.",
   "The comparison uses gross account balance. A held reservation remains in that balance and is not treated as physical consumption.",
   "This is an account-balance comparison only; it does not by itself satisfy the whole-resource RESOURCE-RECONCILED stage.",
@@ -397,10 +398,11 @@ export function reconcileResourceBalance(
       !nonEmptyString(input.contract.boundaryEvidenceRef) ||
       !nonEmptyString(input.contract.uncertaintyRuleRef) ||
       !nonEmptyString(input.contract.uncertaintyPolicyEvidenceRef) ||
+      !safeTicks(input.contract.toleranceTicks) ||
       !Array.isArray(input.accounts) || !Array.isArray(input.events) ||
-      !safeTicks(input.toleranceTicks) || !isIsoTime(input.observedAt) ||
+      !isIsoTime(input.observedAt) ||
       !nonEmptyString(input.evidenceRef)) {
-    return invalid("RECONCILIATION-RECORD-INVALID", "Reconciliation identity, contract boundary and interval, evidence references, account/event records, safe non-negative tolerance, valid observation time and evidence reference are required.");
+    return invalid("RECONCILIATION-RECORD-INVALID", "Reconciliation identity, contract boundary, interval and safe non-negative contract tolerance, evidence references, account/event records, valid observation time and evidence reference are required.");
   }
 
   if (input.contract.contractEvidence !== "PASS" ||
@@ -466,7 +468,7 @@ export function reconcileResourceBalance(
   }
 
   const discrepancyTicks = input.observedBalanceTicks - expectedBalanceTicks;
-  const outcome = Math.abs(discrepancyTicks) <= input.toleranceTicks
+  const outcome = Math.abs(discrepancyTicks) <= input.contract.toleranceTicks
     ? "ACCOUNT-BALANCE-RECONCILED"
     : "ACCOUNT-BALANCE-DISCREPANCY";
   if (outcome === "ACCOUNT-BALANCE-DISCREPANCY") {
@@ -486,7 +488,7 @@ export function reconcileResourceBalance(
     expectedBalanceTicks,
     observedBalanceTicks: input.observedBalanceTicks,
     discrepancyTicks,
-    toleranceTicks: input.toleranceTicks,
+    toleranceTicks: input.contract.toleranceTicks,
     diagnostics,
     limitations: [...RECONCILIATION_LIMITATIONS]
   };
