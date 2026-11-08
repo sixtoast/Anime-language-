@@ -18,6 +18,13 @@ export interface ConservationQuantity {
   evidenceRef: string;
 }
 
+export interface ConservationLossQuantity extends ConservationQuantity {
+  /** Reference to the resource-specific permitted loss pathway; not external authorisation. */
+  permittedPathwayRef: string;
+  permittedPathwayEvidence: ConservationEvidence;
+  permittedPathwayEvidenceRef: string;
+}
+
 export interface ConservationContractInput {
   contractId: string;
   resourceKind: string;
@@ -41,7 +48,7 @@ export interface ConservationContractInput {
   closingState: ConservationQuantity[];
   sinks: ConservationQuantity[];
   permittedOutputs: ConservationQuantity[];
-  declaredLosses: ConservationQuantity[];
+  declaredLosses: ConservationLossQuantity[];
 }
 
 export type ConservationOutcome =
@@ -69,6 +76,7 @@ export interface ConservationResult {
 const CONSERVATION_LIMITATIONS = [
   "The evaluator supports only an explicitly declared scalar-additive balance for one resource kind and one exact unit contract.",
   "Evidence states and references are caller-supplied; this evaluator checks required references but does not authenticate sources, boundaries, measurements, contracts or uncertainty rules.",
+  "Declared losses require caller-supplied permitted-pathway references and passing evidence; those references are not authenticated or resolved against external contract content.",
   "A satisfied balance is an accounting result under the named contract, not proof of a physical law, mechanism, authorisation, execution or successful effect.",
   "No ledger entries or account balances are changed; discrepancies remain visible for separate review."
 ];
@@ -152,6 +160,35 @@ function sumTerms(
   return total;
 }
 
+function sumLossTerms(
+  terms: ConservationLossQuantity[],
+  contract: ConservationContractInput,
+  diagnostics: ConservationDiagnostic[]
+): number | undefined {
+  if (!Array.isArray(terms)) {
+    diagnostics.push({ code: "CONSERVATION-TERMS-MALFORMED", message: "Declared losses must be a list of declared loss quantities." });
+    return undefined;
+  }
+  for (const loss of terms) {
+    if (!loss || !nonEmptyString(loss.permittedPathwayRef) ||
+        !nonEmptyString(loss.permittedPathwayEvidenceRef)) {
+      diagnostics.push({
+        code: "CONSERVATION-LOSS-PATHWAY-MISSING",
+        message: "Each declared loss requires a permitted pathway reference and supporting evidence reference."
+      });
+      return undefined;
+    }
+    if (loss.permittedPathwayEvidence !== "PASS") {
+      diagnostics.push({
+        code: "CONSERVATION-LOSS-PATHWAY-EVIDENCE-UNRESOLVED",
+        message: "The declared loss pathway evidence has not passed; the loss cannot be counted in the balance."
+      });
+      return undefined;
+    }
+  }
+  return sumTerms(terms, contract, "Declared losses", diagnostics);
+}
+
 export function evaluateConservationContract(
   contract: ConservationContractInput
 ): ConservationResult {
@@ -214,7 +251,7 @@ export function evaluateConservationContract(
   const closing = sumTerms(contract.closingState, contract, "Closing state", diagnostics);
   const sinks = sumTerms(contract.sinks, contract, "Sinks", diagnostics);
   const outputs = sumTerms(contract.permittedOutputs, contract, "Permitted outputs", diagnostics);
-  const losses = sumTerms(contract.declaredLosses, contract, "Declared losses", diagnostics);
+  const losses = sumLossTerms(contract.declaredLosses, contract, diagnostics);
   if ([opening, sources, inputs, closing, sinks, outputs, losses].some(value => value === undefined)) {
     return {
       outcome: "CONSERVATION-UNRESOLVED",

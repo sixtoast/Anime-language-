@@ -4,6 +4,7 @@ import {
   reconcileResourceBalance,
   type ConservationContractInput,
   type ConservationQuantity,
+  type ConservationLossQuantity,
   type ResourceReconciliationInput
 } from "./resourceConservation";
 import { projectResourceLedger, type LedgerAccount, type LedgerEvent } from "./resourceLedger";
@@ -15,6 +16,17 @@ const quantity = (amountTicks: number, overrides: Partial<ConservationQuantity> 
   unitContractId: "mana-tick-v1",
   evidence: "PASS",
   evidenceRef: "evidence:" + amountTicks,
+  ...overrides
+});
+
+const lossQuantity = (
+  amountTicks: number,
+  overrides: Partial<ConservationLossQuantity> = {}
+): ConservationLossQuantity => ({
+  ...quantity(amountTicks),
+  permittedPathwayRef: "loss-pathway:v1",
+  permittedPathwayEvidence: "PASS",
+  permittedPathwayEvidenceRef: "loss-pathway:evidence",
   ...overrides
 });
 
@@ -128,6 +140,60 @@ describe("Arcane Incantations v1.9 conservation and reconciliation", () => {
       openingState: [quantity(Number.MAX_SAFE_INTEGER), quantity(1)],
       sources: []
     })).outcome).toBe("CONSERVATION-UNRESOLVED");
+  });
+
+  it("[RES19-CONS-006] refuses to count a declared loss without a permitted pathway and evidence references", () => {
+    const missingPathway = evaluateConservationContract(contract({
+      openingState: [quantity(100)],
+      sources: [],
+      closingState: [quantity(90)],
+      declaredLosses: [lossQuantity(10, { permittedPathwayRef: "" })]
+    }));
+    expect(missingPathway.outcome).toBe("CONSERVATION-UNRESOLVED");
+    expect(missingPathway.diagnostics).toContainEqual(expect.objectContaining({
+      code: "CONSERVATION-LOSS-PATHWAY-MISSING"
+    }));
+
+    const missingEvidenceReference = evaluateConservationContract(contract({
+      openingState: [quantity(100)],
+      sources: [],
+      closingState: [quantity(90)],
+      declaredLosses: [lossQuantity(10, { permittedPathwayEvidenceRef: "" })]
+    }));
+    expect(missingEvidenceReference.outcome).toBe("CONSERVATION-UNRESOLVED");
+    expect(missingEvidenceReference.diagnostics).toContainEqual(expect.objectContaining({
+      code: "CONSERVATION-LOSS-PATHWAY-MISSING"
+    }));
+  });
+
+  it("[RES19-CONS-007] keeps declared losses unresolved when permitted-pathway evidence is not passing", () => {
+    for (const evidence of ["FAIL", "UNKNOWN", "UNAVAILABLE"] as const) {
+      const result = evaluateConservationContract(contract({
+        openingState: [quantity(100)],
+        sources: [],
+        closingState: [quantity(90)],
+        declaredLosses: [lossQuantity(10, { permittedPathwayEvidence: evidence })]
+      }));
+      expect(result.outcome).toBe("CONSERVATION-UNRESOLVED");
+      expect(result.diagnostics).toContainEqual(expect.objectContaining({
+        code: "CONSERVATION-LOSS-PATHWAY-EVIDENCE-UNRESOLVED"
+      }));
+    }
+  });
+
+  it("[RES19-CONS-008] counts a declared loss only when its permitted pathway is explicitly evidenced", () => {
+    const result = evaluateConservationContract(contract({
+      openingState: [quantity(100)],
+      sources: [],
+      closingState: [quantity(90)],
+      declaredLosses: [lossQuantity(10)]
+    }));
+    expect(result).toMatchObject({
+      outcome: "CONSERVATION-SATISFIED",
+      leftTotalTicks: 100,
+      rightTotalTicks: 100,
+      differenceTicks: 0
+    });
   });
 
   it("[RES19-RECON-001] derives the expected account balance from the confirmed ledger projection", () => {
