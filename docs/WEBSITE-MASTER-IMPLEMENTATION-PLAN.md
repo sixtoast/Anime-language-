@@ -414,4 +414,13 @@ The reconciler derives its expected gross account balance by projecting the supp
 
 This is account-balance-only reconciliation, not the full v1.9 RESOURCE-RECONCILED stage. It does not authenticate evidence, interpret an uncertainty model, implement transformations or cross-account invariants, infer conversions, establish physical conservation, authorise or execute operations, or verify effects. The feature is in a draft development branch; CI and Vercel preview verification are pending.
 
-Next: expose deterministic sample conservation and account-reconciliation results in the existing read-only Playground runtime preview, keeping the specification fixture browser separate from executed evaluator tests.
+Next: enforce the v1.9 observation evidence boundary before exposing deterministic sample conservation and account-reconciliation results in the read-only Playground runtime preview.
+
+
+### 2026-11-09 — v1.9 observation evidence boundary
+
+The account-balance reconciler now requires an explicitly classified observation. An estimate cannot be substituted for a measurement. A measurement must carry references for its method, observation time, uncertainty and provenance, plus a caller-supplied evidence reference and an explicit per-observation acceptance reference under the named uncertainty policy. The policy-acceptance state must be PASS before the observation can contribute to reconciliation.
+
+This is a presence and classification gate, not a measurement system or uncertainty calculator. The references and evidence states remain caller-supplied and unauthenticated; the evaluator does not validate an instrument, resolve provenance, calculate uncertainty bounds, or interpret the policy itself. Missing, failed, unknown or unavailable policy acceptance remains unresolved. The v1.9 RES19-56 and RES19-57 distinctions are preserved without adding a new resource law, conversion, tolerance or spoken form.
+
+Next: expose the bounded evaluator through deterministic read-only Playground examples only after the review branch is synchronised with main; keep the 60 canonical resource fixtures visibly separate from executed evaluator tests.

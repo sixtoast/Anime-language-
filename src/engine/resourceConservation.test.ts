@@ -5,7 +5,8 @@ import {
   type ConservationContractInput,
   type ConservationQuantity,
   type ConservationLossQuantity,
-  type ResourceReconciliationInput
+  type ResourceReconciliationInput,
+  type ResourceBalanceObservation
 } from "./resourceConservation";
 import { projectResourceLedger, type LedgerAccount, type LedgerEvent } from "./resourceLedger";
 
@@ -80,16 +81,29 @@ const ledgerEvent = (overrides: Partial<LedgerEvent> = {}): LedgerEvent => ({
   ...overrides
 });
 
+const measurementObservation = (
+  overrides: Partial<ResourceBalanceObservation> = {}
+): ResourceBalanceObservation => ({
+  category: "MEASUREMENT",
+  balanceTicks: 90,
+  observedAt: "2026-06-01T00:00:00Z",
+  methodRef: "method:account-meter-v1",
+  uncertaintyRef: "uncertainty:measurement-1",
+  provenanceRef: "provenance:source-1",
+  evidence: "PASS",
+  evidenceRef: "measurement:1",
+  policyAcceptanceEvidence: "PASS",
+  policyAcceptanceEvidenceRef: "uncertainty-policy-acceptance:1",
+  ...overrides
+});
+
 const reconciliation = (overrides: Partial<ResourceReconciliationInput> = {}): ResourceReconciliationInput => ({
   reconciliationId: "recon-1",
   contract: contract(),
   accountId: "account-a",
   accounts: accounts(),
   events: [ledgerEvent()],
-  observedBalanceTicks: 90,
-  observedAt: "2026-06-01T00:00:00Z",
-  evidence: "PASS",
-  evidenceRef: "measurement:1",
+  observation: measurementObservation(),
   ...overrides
 });
 
@@ -208,7 +222,7 @@ describe("Arcane Incantations v1.9 conservation and reconciliation", () => {
   });
 
   it("[RES19-RECON-002] preserves a signed discrepancy without correcting the ledger", () => {
-    expect(reconcileResourceBalance(reconciliation({ observedBalanceTicks: 87 }))).toMatchObject({
+    expect(reconcileResourceBalance(reconciliation({ observation: measurementObservation({ balanceTicks: 87 }) }))).toMatchObject({
       outcome: "ACCOUNT-BALANCE-DISCREPANCY",
       expectedBalanceTicks: 90,
       observedBalanceTicks: 87,
@@ -219,8 +233,8 @@ describe("Arcane Incantations v1.9 conservation and reconciliation", () => {
   it("[RES19-RECON-003] leaves partial ledger projections and unavailable observations unresolved", () => {
     const partialEvents = [ledgerEvent({ amountTicks: 101 })];
     expect(reconcileResourceBalance(reconciliation({ events: partialEvents })).outcome).toBe("UNRESOLVED");
-    expect(reconcileResourceBalance(reconciliation({ evidence: "UNKNOWN" })).outcome).toBe("UNRESOLVED");
-    expect(reconcileResourceBalance(reconciliation({ observedBalanceTicks: null })).outcome).toBe("UNRESOLVED");
+    expect(reconcileResourceBalance(reconciliation({ observation: measurementObservation({ evidence: "UNKNOWN" }) })).outcome).toBe("UNRESOLVED");
+    expect(reconcileResourceBalance(reconciliation({ observation: measurementObservation({ balanceTicks: null }) })).outcome).toBe("UNRESOLVED");
     expect(reconcileResourceBalance(reconciliation({
       contract: { ...contract(), uncertaintyPolicyEvidence: "UNKNOWN" }
     })).outcome).toBe("UNRESOLVED");
@@ -238,14 +252,14 @@ describe("Arcane Incantations v1.9 conservation and reconciliation", () => {
     expect(reconcileResourceBalance(reconciliation({
       contract: { ...contract(), toleranceTicks: -1 }
     })).outcome).toBe("INVALID-RECONCILIATION");
-    expect(reconcileResourceBalance(reconciliation({ evidenceRef: "" })).outcome)
+    expect(reconcileResourceBalance(reconciliation({ observation: measurementObservation({ evidenceRef: "" }) })).outcome)
       .toBe("INVALID-RECONCILIATION");
   });
 
   it("[RES19-RECON-009] uses only the tolerance declared by the conservation contract", () => {
     const withinTolerance = reconcileResourceBalance(reconciliation({
       contract: { ...contract(), toleranceTicks: 3 },
-      observedBalanceTicks: 87
+      observation: measurementObservation({ balanceTicks: 87 })
     }));
     expect(withinTolerance).toMatchObject({
       outcome: "ACCOUNT-BALANCE-RECONCILED",
@@ -255,7 +269,7 @@ describe("Arcane Incantations v1.9 conservation and reconciliation", () => {
 
     const outsideTolerance = reconcileResourceBalance(reconciliation({
       contract: { ...contract(), toleranceTicks: 2 },
-      observedBalanceTicks: 87
+      observation: measurementObservation({ balanceTicks: 87 })
     }));
     expect(outsideTolerance).toMatchObject({
       outcome: "ACCOUNT-BALANCE-DISCREPANCY",
@@ -266,7 +280,7 @@ describe("Arcane Incantations v1.9 conservation and reconciliation", () => {
 
   it("[RES19-RECON-006] rejects observations outside the contract valid interval", () => {
     expect(reconcileResourceBalance(reconciliation({
-      observedAt: "2028-01-01T00:00:00Z"
+      observation: measurementObservation({ observedAt: "2028-01-01T00:00:00Z" })
     })).outcome).toBe("INVALID-RECONCILIATION");
   });
 
@@ -280,7 +294,7 @@ describe("Arcane Incantations v1.9 conservation and reconciliation", () => {
     });
     const result = reconcileResourceBalance(reconciliation({
       events: [reserve],
-      observedBalanceTicks: 100
+      observation: measurementObservation({ balanceTicks: 100 })
     }));
     expect(result).toMatchObject({
       outcome: "ACCOUNT-BALANCE-RECONCILED",
@@ -299,4 +313,55 @@ describe("Arcane Incantations v1.9 conservation and reconciliation", () => {
     expect(result.scope).toBe("ACCOUNT-BALANCE-ONLY");
     expect(result.limitations.join(" ")).toContain("does not by itself satisfy the whole-resource RESOURCE-RECONCILED stage");
   });
+
+  it("[RES19-RECON-010] rejects an estimate presented as a measured account balance", () => {
+    const result = reconcileResourceBalance(reconciliation({
+      observation: measurementObservation({ category: "ESTIMATE" })
+    }));
+    expect(result.outcome).toBe("UNRESOLVED");
+    expect(result.diagnostics).toContainEqual(expect.objectContaining({
+      code: "RECONCILIATION-EVIDENCE-CATEGORY-SUBSTITUTION"
+    }));
+  });
+
+  it("[RES19-RECON-011] requires measurement method, time, uncertainty and provenance", () => {
+    for (const overrides of [
+      { methodRef: "" },
+      { uncertaintyRef: "" },
+      { provenanceRef: "" }
+    ]) {
+      const result = reconcileResourceBalance(reconciliation({
+        observation: measurementObservation(overrides)
+      }));
+      expect(result.outcome).toBe("UNRESOLVED");
+      expect(result.diagnostics).toContainEqual(expect.objectContaining({
+        code: "RECONCILIATION-MEASUREMENT-METADATA-MISSING"
+      }));
+    }
+
+    expect(reconcileResourceBalance(reconciliation({
+      observation: measurementObservation({ observedAt: "" })
+    })).outcome).toBe("INVALID-RECONCILIATION");
+  });
+
+  it("[RES19-RECON-012] requires explicit passing acceptance under the uncertainty policy", () => {
+    for (const evidence of ["FAIL", "UNKNOWN", "UNAVAILABLE"] as const) {
+      const result = reconcileResourceBalance(reconciliation({
+        observation: measurementObservation({ policyAcceptanceEvidence: evidence })
+      }));
+      expect(result.outcome).toBe("UNRESOLVED");
+      expect(result.diagnostics).toContainEqual(expect.objectContaining({
+        code: "RECONCILIATION-MEASUREMENT-POLICY-UNRESOLVED"
+      }));
+    }
+
+    const missingAcceptanceReference = reconcileResourceBalance(reconciliation({
+      observation: measurementObservation({ policyAcceptanceEvidenceRef: "" })
+    }));
+    expect(missingAcceptanceReference.outcome).toBe("UNRESOLVED");
+    expect(missingAcceptanceReference.diagnostics).toContainEqual(expect.objectContaining({
+      code: "RECONCILIATION-MEASUREMENT-METADATA-MISSING"
+    }));
+  });
+
 });

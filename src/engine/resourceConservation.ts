@@ -307,16 +307,28 @@ export type ResourceReconciliationContract = Pick<
   | "uncertaintyPolicyEvidenceRef"
 >;
 
+export type ResourceObservationKind = "ESTIMATE" | "MEASUREMENT";
+
+export interface ResourceBalanceObservation {
+  category: ResourceObservationKind;
+  balanceTicks: number | null;
+  observedAt: string;
+  methodRef: string;
+  uncertaintyRef: string;
+  provenanceRef: string;
+  evidence: ConservationEvidence;
+  evidenceRef: string;
+  policyAcceptanceEvidence: ConservationEvidence;
+  policyAcceptanceEvidenceRef: string;
+}
+
 export interface ResourceReconciliationInput {
   reconciliationId: string;
   contract: ResourceReconciliationContract;
   accountId: string;
   accounts: LedgerAccount[];
   events: LedgerEvent[];
-  observedBalanceTicks: number | null;
-  observedAt: string;
-  evidence: ConservationEvidence;
-  evidenceRef: string;
+  observation: ResourceBalanceObservation;
 }
 
 export type ResourceReconciliationOutcome =
@@ -345,6 +357,8 @@ const RECONCILIATION_LIMITATIONS = [
   "Only one account with an exact resource, unit and unit-contract match is compared; no conversion or multi-account invariant is inferred.",
   "The comparison uses only the tolerance declared by the conservation contract; a separate caller-supplied reconciliation tolerance is not accepted.",
   "The named contract must have passing contract, boundary and uncertainty-policy evidence, but this evaluator does not authenticate or interpret those sources.",
+  "Measurement method, time, uncertainty and provenance are caller-supplied; the evaluator checks required references and timestamp format but does not authenticate them.",
+  "Per-observation acceptance under the uncertainty policy is caller-supplied evidence; the evaluator requires PASS but does not interpret or authenticate the policy decision.",
   "The comparison uses gross account balance. A held reservation remains in that balance and is not treated as physical consumption.",
   "This is an account-balance comparison only; it does not by itself satisfy the whole-resource RESOURCE-RECONCILED stage.",
   "Discrepancies are reported without changing ledger entries or balances. Reconciliation is not proof of conservation, authority, mechanism validity, execution or a successful effect."
@@ -400,8 +414,10 @@ export function reconcileResourceBalance(
       !nonEmptyString(input.contract.uncertaintyPolicyEvidenceRef) ||
       !safeTicks(input.contract.toleranceTicks) ||
       !Array.isArray(input.accounts) || !Array.isArray(input.events) ||
-      !isIsoTime(input.observedAt) ||
-      !nonEmptyString(input.evidenceRef)) {
+      !input.observation || typeof input.observation !== "object" ||
+      (input.observation.category !== "ESTIMATE" && input.observation.category !== "MEASUREMENT") ||
+      !isIsoTime(input.observation.observedAt) ||
+      !nonEmptyString(input.observation.evidenceRef)) {
     return invalid("RECONCILIATION-RECORD-INVALID", "Reconciliation identity, contract boundary, interval and safe non-negative contract tolerance, evidence references, account/event records, valid observation time and evidence reference are required.");
   }
 
@@ -411,7 +427,30 @@ export function reconcileResourceBalance(
     return unresolved("RECONCILIATION-CONTRACT-EVIDENCE-UNRESOLVED", "The named contract, boundary or uncertainty-policy evidence has not passed.");
   }
 
-  const observedTime = Date.parse(input.observedAt);
+  const observation = input.observation;
+  if (observation.category === "ESTIMATE") {
+    return unresolved(
+      "RECONCILIATION-EVIDENCE-CATEGORY-SUBSTITUTION",
+      "An estimate is a prediction, not a measurement, and cannot be presented as an observed account balance."
+    );
+  }
+  if (!nonEmptyString(observation.methodRef) ||
+      !nonEmptyString(observation.uncertaintyRef) ||
+      !nonEmptyString(observation.provenanceRef) ||
+      !nonEmptyString(observation.policyAcceptanceEvidenceRef)) {
+    return unresolved(
+      "RECONCILIATION-MEASUREMENT-METADATA-MISSING",
+      "A measurement requires method, time, uncertainty, provenance and explicit uncertainty-policy acceptance evidence references."
+    );
+  }
+  if (observation.policyAcceptanceEvidence !== "PASS") {
+    return unresolved(
+      "RECONCILIATION-MEASUREMENT-POLICY-UNRESOLVED",
+      "The measurement has not been accepted under the named uncertainty policy; no reconciliation is claimed."
+    );
+  }
+
+  const observedTime = Date.parse(observation.observedAt);
   if (observedTime < Date.parse(input.contract.validInterval.start) ||
       observedTime > Date.parse(input.contract.validInterval.end)) {
     return invalid("RECONCILIATION-OUTSIDE-VALID-INTERVAL", "The observation time is outside the named contract's valid interval.");
@@ -462,12 +501,12 @@ export function reconcileResourceBalance(
     return unresolved("RECONCILIATION-PROJECTION-INCONSISTENT", "The projected gross, reserved and available account balances are missing, unsafe or arithmetically inconsistent.", projection.outcome);
   }
 
-  if (input.observedBalanceTicks === null || !safeTicks(input.observedBalanceTicks) ||
-      input.evidence !== "PASS") {
-    return unresolved("RECONCILIATION-EVIDENCE-UNRESOLVED", "The observed balance is absent, invalid or not supported by passing evidence; no value is inferred.", projection.outcome, expectedBalanceTicks);
+  if (observation.balanceTicks === null || !safeTicks(observation.balanceTicks) ||
+      observation.evidence !== "PASS") {
+    return unresolved("RECONCILIATION-EVIDENCE-UNRESOLVED", "The measured balance is absent, invalid or not supported by passing observation evidence; no value is inferred.", projection.outcome, expectedBalanceTicks);
   }
 
-  const discrepancyTicks = input.observedBalanceTicks - expectedBalanceTicks;
+  const discrepancyTicks = observation.balanceTicks - expectedBalanceTicks;
   const outcome = Math.abs(discrepancyTicks) <= input.contract.toleranceTicks
     ? "ACCOUNT-BALANCE-RECONCILED"
     : "ACCOUNT-BALANCE-DISCREPANCY";
@@ -486,7 +525,7 @@ export function reconcileResourceBalance(
     accountId: input.accountId,
     ledgerOutcome: projection.outcome,
     expectedBalanceTicks,
-    observedBalanceTicks: input.observedBalanceTicks,
+    observedBalanceTicks: observation.balanceTicks!,
     discrepancyTicks,
     toleranceTicks: input.contract.toleranceTicks,
     diagnostics,
