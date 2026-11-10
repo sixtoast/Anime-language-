@@ -424,3 +424,14 @@ The account-balance reconciler now requires an explicitly classified observation
 This is a presence and classification gate, not a measurement system or uncertainty calculator. The references and evidence states remain caller-supplied and unauthenticated; the evaluator does not validate an instrument, resolve provenance, calculate uncertainty bounds, or interpret the policy itself. Missing, failed, unknown or unavailable policy acceptance remains unresolved. The v1.9 RES19-56 and RES19-57 distinctions are preserved without adding a new resource law, conversion, tolerance or spoken form.
 
 Next: expose the bounded evaluator through deterministic read-only Playground examples only after the review branch is synchronised with main; keep the 60 canonical resource fixtures visibly separate from executed evaluator tests.
+
+
+### 2026-11-10 — read-only v1.9 conservation and reconciliation preview
+
+The Playground now invokes the bounded v1.9 conservation evaluator and ledger-backed account-balance reconciler through a separate deterministic sample preview. Six selectable scenarios cover a balanced sample, a conservation mismatch, an account discrepancy, estimate-to-measurement substitution, unknown per-measurement policy acceptance, and unresolved contract evidence. Conservation and account reconciliation remain visibly separate results with their own metrics and diagnostics.
+
+The preview uses only synthetic `preview-sample-stock` / `tick` identifiers, a declared scalar-additive demonstration contract, a zero-tick demonstration tolerance, a synthetic confirmed ledger consumption event, and caller-supplied evidence references. These are software demonstration inputs, not canonical resource vocabulary, physical units, live measurements, or new physical laws. The preview does not authenticate evidence, interpret uncertainty, modify ledger records, authorise, execute or verify an incantation. The 60 canonical RES19 specification fixtures remain a separate source-only browser and are not represented as executed evaluator tests.
+
+The v1.9 review branch now includes the only intervening main-branch change, `docs/IMG_1895.jpeg`, as the second parent of the feature commit. This synchronises the branch without changing main or merging a pull request.
+
+Next: keep the preview read-only and synthetic. Do not expand to transformations, cross-account invariants, distributed consistency or trusted measurement until their domain contracts, evidence requirements and negative fixtures are defined. Main CI remains blocked by the 13-test regression set in [run #767](https://github.com/sixtoast/Anime-language-/actions/runs/42394664885); the draft regression branch and v1.9 branch have separate successful workflows.

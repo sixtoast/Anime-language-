@@ -20,6 +20,7 @@ import { authorityDecisionFixtures } from "./engine/authorityDecisionFixtures";
 import { policyProfileCompositionFixtures } from "./engine/policyProfileCompositionFixtures";
 import { invocationLifecycleSequence, invocationOrderNote, validationGateSequence } from "./engine/incantationGateSequence";
 import { evaluateIncantationRuntimePreview, runtimePreviewScenarios, type RuntimePreviewScenario } from "./engine/incantationRuntimePreview";
+import { evaluateResourceConservationPreview, resourceConservationPreviewScenarios, type ResourceConservationPreviewScenario } from "./engine/resourceConservationPreview";
 import { reviewConstructionRecord, type ConstructionRecord, type ConstructionEvidenceStatus } from "./engine/constructionRecordReview";
 import type { ConstructionStage } from "./engine/constructionOrderAudit";
 import { bindConstructionReference, type ConstructionReferenceToken } from "./engine/constructionReferenceContext";
@@ -105,6 +106,7 @@ function App() {
   const [selectedValidationGateId, setSelectedValidationGateId] = useState("CON12-01");
   const [selectedInvocationStageId, setSelectedInvocationStageId] = useState("INV15-01");
   const [runtimePreviewScenario, setRuntimePreviewScenario] = useState<RuntimePreviewScenario>("READY-SAMPLE");
+  const [resourceConservationScenario, setResourceConservationScenario] = useState<ResourceConservationPreviewScenario>("BALANCED");
   const constructionStageLabels: { stage: ConstructionStage; label: string }[] = [
     { stage: "reference", label: "Reference" },
     { stage: "spatial-role-vector", label: "Spatial role / vector" },
@@ -291,6 +293,7 @@ function App() {
   const selectedValidationGate = useMemo(() => validationGateSequence.find((stage) => stage.id === selectedValidationGateId) ?? validationGateSequence[0], [selectedValidationGateId]);
   const selectedInvocationStage = useMemo(() => invocationLifecycleSequence.find((stage) => stage.id === selectedInvocationStageId) ?? invocationLifecycleSequence[0], [selectedInvocationStageId]);
   const runtimePreview = useMemo(() => evaluateIncantationRuntimePreview(runtimePreviewScenario), [runtimePreviewScenario]);
+  const resourceConservationPreview = useMemo(() => evaluateResourceConservationPreview(resourceConservationScenario), [resourceConservationScenario]);
   const contractWorksheet = useMemo(() => ({
     recordType: "ARCANE-INCANTATION-CONTRACT-WORKSHEET",
     specificationLayer: "Modern incantation design v1.0–v2.0",
@@ -626,6 +629,57 @@ function App() {
             <details className="runtime-preview-details"><summary>Evidence assumptions and evaluator limitations</summary><ul>{runtimePreview.assumptions.map((item) => <li key={item}>{item}</li>)}{runtimePreview.resource.limitations.map((item) => <li key={item}>{item}</li>)}{runtimePreview.policy.limitations.map((item) => <li key={item}>{item}</li>)}{runtimePreview.authority.limitations.map((item) => <li key={item}>{item}</li>)}{runtimePreview.invocation.limitations.map((item) => <li key={item}>{item}</li>)}</ul></details>
             <p className="fixture-browser-caveat">A passing preview means only that these sample inputs satisfy the implemented functions. External trust, live scope resolution, predicate acquisition, physical feasibility, executor contracts and outcome verification remain outside this panel. The v1.5 source-order discrepancy is still preserved separately above.</p>
           </section>
+          <section className="fixture-browser runtime-preview-browser resource-conservation-preview" aria-labelledby="resource-conservation-preview-title">
+            <div className="fixture-browser-head">
+              <div><span className="detail-kicker">V1.9 CONSERVATION · READ-ONLY SAMPLE</span><h2 id="resource-conservation-preview-title">Conservation and account reconciliation</h2></div>
+              <span>2 independent evaluations</span>
+            </div>
+            <p className="fixture-browser-intro">This panel runs the bounded conservation evaluator and ledger-backed account reconciler against deterministic synthetic inputs. It does not use the 60 canonical specification fixtures as executed test cases.</p>
+            <label className="fixture-select-label">Choose a resource-accounting scenario
+              <select aria-label="Choose resource conservation preview scenario" value={resourceConservationScenario} onChange={(event) => setResourceConservationScenario(event.target.value as ResourceConservationPreviewScenario)}>
+                {resourceConservationPreviewScenarios.map((scenario) => <option key={scenario.id} value={scenario.id}>{scenario.label}</option>)}
+              </select>
+            </label>
+            <p className="runtime-preview-description">{resourceConservationPreview.description}</p>
+            <div className="resource-conservation-grid">
+              <article className="resource-conservation-card" aria-label="Conservation evaluation result">
+                <span>CONSERVATION EVALUATION</span>
+                <strong className={resourceConservationPreview.conservation.outcome === "CONSERVATION-SATISFIED" ? "runtime-good" : resourceConservationPreview.conservation.outcome === "CONSERVATION-MISMATCH" ? "runtime-blocked" : "runtime-unresolved"}>{resourceConservationPreview.conservation.outcome}</strong>
+                <div className="resource-conservation-metrics">
+                  <div><span>Left total:</span><strong>{resourceConservationPreview.conservation.leftTotalTicks === undefined ? "Not computed" : resourceConservationPreview.conservation.leftTotalTicks + " ticks"}</strong></div>
+                  <div><span>Right total:</span><strong>{resourceConservationPreview.conservation.rightTotalTicks === undefined ? "Not computed" : resourceConservationPreview.conservation.rightTotalTicks + " ticks"}</strong></div>
+                  <div><span>Balance difference:</span><strong>{resourceConservationPreview.conservation.differenceTicks === undefined ? "Not computed" : resourceConservationPreview.conservation.differenceTicks + " ticks"}</strong></div>
+                  <div><span>Contract tolerance:</span><strong>{resourceConservationPreview.conservation.toleranceTicks === undefined ? "Not available" : resourceConservationPreview.conservation.toleranceTicks + " ticks"}</strong></div>
+                </div>
+                {resourceConservationPreview.conservation.diagnostics.length > 0
+                  ? <ul className="resource-conservation-diagnostics">{resourceConservationPreview.conservation.diagnostics.map((item, index) => <li key={item.code + index}><code>{item.code}</code><span>{item.message}</span></li>)}</ul>
+                  : <p className="resource-conservation-no-diagnostics">No diagnostics for this sample result.</p>}
+              </article>
+              <article className="resource-conservation-card" aria-label="Account reconciliation result">
+                <span>ACCOUNT RECONCILIATION · {resourceConservationPreview.reconciliation.scope}</span>
+                <strong className={resourceConservationPreview.reconciliation.outcome === "ACCOUNT-BALANCE-RECONCILED" ? "runtime-good" : resourceConservationPreview.reconciliation.outcome === "ACCOUNT-BALANCE-DISCREPANCY" ? "runtime-blocked" : "runtime-unresolved"}>{resourceConservationPreview.reconciliation.outcome}</strong>
+                <div className="resource-conservation-metrics">
+                  <div><span>Projected balance:</span><strong>{resourceConservationPreview.reconciliation.expectedBalanceTicks === undefined ? "Not computed" : resourceConservationPreview.reconciliation.expectedBalanceTicks + " ticks"}</strong></div>
+                  <div><span>Observed balance:</span><strong>{resourceConservationPreview.reconciliation.observedBalanceTicks === undefined ? "Not accepted" : resourceConservationPreview.reconciliation.observedBalanceTicks + " ticks"}</strong></div>
+                  <div><span>Discrepancy:</span><strong>{resourceConservationPreview.reconciliation.discrepancyTicks === undefined ? "Not computed" : resourceConservationPreview.reconciliation.discrepancyTicks + " ticks"}</strong></div>
+                  <div><span>Contract tolerance:</span><strong>{resourceConservationPreview.reconciliation.toleranceTicks === undefined ? "Not available" : resourceConservationPreview.reconciliation.toleranceTicks + " ticks"}</strong></div>
+                </div>
+                {resourceConservationPreview.reconciliation.diagnostics.length > 0
+                  ? <ul className="resource-conservation-diagnostics">{resourceConservationPreview.reconciliation.diagnostics.map((item, index) => <li key={item.code + index}><code>{item.code}</code><span>{item.message}</span></li>)}</ul>
+                  : <p className="resource-conservation-no-diagnostics">No diagnostics for this sample result.</p>}
+              </article>
+            </div>
+            <details className="runtime-preview-details">
+              <summary>Evidence assumptions and evaluator limitations</summary>
+              <ul>
+                {resourceConservationPreview.assumptions.map((item) => <li key={item}>{item}</li>)}
+                {resourceConservationPreview.conservation.limitations.map((item) => <li key={item}>{item}</li>)}
+                {resourceConservationPreview.reconciliation.limitations.map((item) => <li key={item}>{item}</li>)}
+              </ul>
+            </details>
+            <p className="fixture-browser-caveat">The sample resource kind and tick unit are synthetic demonstration data, not canonical vocabulary or physical units. The 60 v1.9 rows above remain source-only specification expectations. Neither result authenticates evidence, changes a ledger, authorises or executes an incantation, establishes physical feasibility, or verifies an effect.</p>
+          </section>
+
           <section className="contract-worksheet" aria-labelledby="contract-worksheet-title">
             <div className="contract-worksheet-head">
               <div><span className="detail-kicker">INCANTATION DESIGN LAB · NON-EXECUTABLE</span><h2 id="contract-worksheet-title">Incantation contract worksheet</h2></div>
