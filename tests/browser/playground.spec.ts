@@ -206,9 +206,9 @@ test.describe("Playground Phase 6G parser integration", () => {
     await select.selectOption("CONTRACT-EVIDENCE-UNRESOLVED");
     await expect(preview).toContainText("CONSERVATION-UNRESOLVED");
     await expect(preview).toContainText("RECONCILIATION-CONTRACT-EVIDENCE-UNRESOLVED");
-    await expect(preview).toContainText("synthetic demonstration inputs");
+    await expect(preview).toContainText("synthetic caller-supplied demonstration inputs");
     await expect(preview).toContainText("does not authenticate");
-    await expect(preview).toContainText("does not execute");
+    await expect(preview).toContainText("authorises or executes an incantation");
   });
 
   test("keeps the v1.9 evaluator preview within a 360px viewport", async ({ page }) => {
