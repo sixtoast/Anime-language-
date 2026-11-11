@@ -47,7 +47,6 @@ describe("Arcane Incantations v1.9 fixture-to-implementation coverage audit", ()
 
   it("[RES19-COVERAGE-005] verifies each linked test marker against one registered source file", () => {
     const linkedIds = [...new Set(resourceAccountingCoverage.flatMap((item) => item.testIds))];
-    const projectRoot = resolve(process.cwd());
 
     for (const testId of linkedIds) {
       const entries = workbenchTests.filter((test) => test.id === testId);
