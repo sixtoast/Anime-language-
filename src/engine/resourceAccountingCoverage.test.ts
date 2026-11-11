@@ -1,9 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync } from "node:fs";
-import { isAbsolute, relative, resolve } from "node:path";
 import { resourceAccountingFixtures } from "./resourceAccountingFixtures";
 import { resourceAccountingCoverage, resourceAccountingCoverageAudit, resourceAccountingCoverageSummary } from "./resourceAccountingCoverage";
 import { workbenchTests } from "./testRegistry";
+
+const registeredTestSources = import.meta.glob("./*.test.ts", {
+  eager: true,
+  query: "?raw",
+  import: "default"
+}) as Record<string, string>;
 
 describe("Arcane Incantations v1.9 fixture-to-implementation coverage audit", () => {
   it("[RES19-COVERAGE-001] maps all canonical fixtures exactly once in source order", () => {
@@ -49,16 +53,12 @@ describe("Arcane Incantations v1.9 fixture-to-implementation coverage audit", ()
       const entries = workbenchTests.filter((test) => test.id === testId);
       expect(entries, testId + " must resolve to exactly one registry entry").toHaveLength(1);
       const entry = entries[0];
-      expect(entry.file.trim().length, testId + " must declare a source file").toBeGreaterThan(0);
+      const engineTestPrefix = "src/engine/";
+      expect(entry.file.startsWith(engineTestPrefix), testId + " must reference an engine test file").toBe(true);
 
-      const sourcePath = resolve(projectRoot, entry.file);
-      const relativePath = relative(projectRoot, sourcePath);
-      expect(
-        relativePath.length > 0 && !relativePath.startsWith("..") && !isAbsolute(relativePath),
-        testId + " source path must remain inside the repository"
-      ).toBe(true);
-
-      const source = readFileSync(sourcePath, "utf8");
+      const sourceKey = "./" + entry.file.slice(engineTestPrefix.length);
+      const source = registeredTestSources[sourceKey];
+      expect(typeof source, testId + " source file must resolve through the Vite test-source glob").toBe("string");
       expect(
         source.split("[" + testId + "]").length - 1,
         testId + " marker must appear exactly once in its declared source file"
