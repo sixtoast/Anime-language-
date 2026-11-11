@@ -435,7 +435,7 @@ test.describe("Playground Phase 6G parser integration", () => {
     const browser = page.locator(".resource-fixture-browser");
     const select = browser.getByRole("combobox", { name: "Choose resource-accounting specification fixture" });
     await expect(browser.locator(".resource-coverage-summary")).toBeVisible();
-    await expect(browser.locator(".resource-coverage-summary")).toContainText("60");
+    await expect(browser).toContainText("60 design cases");
     await select.selectOption("RES19-56");
     await expect(browser.locator(".resource-coverage-detail")).toContainText("BOUNDED");
     await expect(browser.locator(".resource-coverage-detail")).toContainText("RES19-RECON-010");
