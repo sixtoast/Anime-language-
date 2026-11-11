@@ -429,4 +429,35 @@ test.describe("Playground Phase 6G parser integration", () => {
     expect(sizes.page, "Gate sequence explorer should not overflow at 360px").toBeLessThanOrEqual(sizes.viewport);
   });
 
+
+  test("shows v1.9 fixture implementation coverage separately from normative outcomes", async ({ page }) => {
+    await openPlayground(page);
+    const browser = page.locator(".resource-fixture-browser");
+    const select = browser.getByRole("combobox", { name: "Choose resource-accounting specification fixture" });
+    await expect(browser.locator(".resource-coverage-summary")).toBeVisible();
+    await expect(browser.locator(".resource-coverage-summary")).toContainText("60");
+    await select.selectOption("RES19-56");
+    await expect(browser.locator(".resource-coverage-detail")).toContainText("BOUNDED");
+    await expect(browser.locator(".resource-coverage-detail")).toContainText("RES19-RECON-010");
+    await select.selectOption("RES19-36");
+    await expect(browser.locator(".resource-coverage-detail")).toContainText("SEPARATE-GATE");
+    await expect(browser.locator(".resource-coverage-detail")).toContainText("AUTH20-TEST-004");
+    await select.selectOption("RES19-53");
+    await expect(browser.locator(".resource-coverage-detail")).toContainText("SPECIFICATION-ONLY");
+    await expect(browser.locator(".resource-coverage-detail")).toContainText("None — specification only");
+    await expect(browser).toContainText("do not change the canonical expected outcomes");
+  });
+
+  test("keeps the v1.9 fixture coverage audit within a 360px viewport", async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 800 });
+    await openPlayground(page);
+    const browser = page.locator(".resource-fixture-browser");
+    await browser.getByRole("combobox", { name: "Choose resource-accounting specification fixture" }).selectOption("RES19-60");
+    const sizes = await page.evaluate(() => ({
+      viewport: document.documentElement.clientWidth,
+      page: document.documentElement.scrollWidth
+    }));
+    expect(sizes.page, "Resource fixture coverage audit should not overflow at 360px").toBeLessThanOrEqual(sizes.viewport);
+  });
+
 });

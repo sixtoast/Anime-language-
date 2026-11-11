@@ -435,3 +435,15 @@ The preview uses only synthetic `preview-sample-stock` / `tick` identifiers, a d
 The v1.9 review branch now includes the only intervening main-branch change, `docs/IMG_1895.jpeg`, as the second parent of the feature commit. This synchronises the branch without changing main or merging a pull request.
 
 Next: keep the preview read-only and synthetic. Do not expand to transformations, cross-account invariants, distributed consistency or trusted measurement until their domain contracts, evidence requirements and negative fixtures are defined. Main CI remains blocked by the 13-test regression set in [run #767](https://github.com/sixtoast/Anime-language-/actions/runs/42394664885); the draft regression branch and v1.9 branch have separate successful workflows.
+
+### 2026-11-11 — v1.9 fixture-to-implementation coverage audit
+
+Added a separate engineering coverage map for all 60 normative v1.9 fixtures. Each source fixture is classified as BOUNDED, PARTIAL, SEPARATE-GATE or SPECIFICATION-ONLY, with a concise implementation boundary and links to stable workbench test IDs where evidence exists. The source fixture table and its expected outcomes remain unchanged.
+
+The audit deliberately distinguishes a bounded implementation from full normative coverage. It records missing dimension-vector and transformation evaluators, source-contract authentication, reservation expiry and concurrency, executor transaction/recovery semantics, distributed consistency, contract-version reconciliation, complete resource reconciliation, audit-record construction and target postcondition verification. Authority and policy checks remain separate gates rather than being folded into resource readiness.
+
+The ledger regression suite was extended for valid reservation release, partial reserved consumption, generic correction rejection without erasing the original debit, missing transfer/source references, resource-kind mismatch and distinct event identities with different idempotency keys. These tests verify only the current deterministic projection behaviour; they do not add concurrency, correction or transformation contracts.
+
+The Playground now displays the engineering coverage classification beside each canonical fixture and a summary of the four coverage categories. This classification is not canonical, does not execute the 60 fixtures and does not claim physical or spell-runtime behaviour.
+
+Next: use the audit to select one specification gap only after the relevant domain contract and evidence model are defined. Prioritise missing temporal/concurrency or transformation contracts only when their source requirements are sufficiently complete; do not infer them from current ledger behaviour.

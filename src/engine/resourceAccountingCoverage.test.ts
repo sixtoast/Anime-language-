@@ -1,0 +1,51 @@
+import { describe, expect, it } from "vitest";
+import { resourceAccountingFixtures } from "./resourceAccountingFixtures";
+import { resourceAccountingCoverage, resourceAccountingCoverageAudit, resourceAccountingCoverageSummary } from "./resourceAccountingCoverage";
+import { workbenchTests } from "./testRegistry";
+
+describe("Arcane Incantations v1.9 fixture-to-implementation coverage audit", () => {
+  it("[RES19-COVERAGE-001] maps all canonical fixtures exactly once in source order", () => {
+    expect(resourceAccountingCoverageAudit).toMatchObject({
+      fixtureCount: 60,
+      mappedCount: 60,
+      fixtureIdsMatch: true
+    });
+    expect(resourceAccountingCoverage.map((item) => item.fixtureId))
+      .toEqual(resourceAccountingFixtures.map((fixture) => fixture.id));
+    expect(new Set(resourceAccountingCoverage.map((item) => item.fixtureId)).size).toBe(60);
+  });
+
+  it("[RES19-COVERAGE-002] links only test IDs that exist in the workbench registry", () => {
+    const registered = new Set(workbenchTests.map((test) => test.id));
+    const missing = resourceAccountingCoverage.flatMap((item) =>
+      item.testIds.filter((testId) => !registered.has(testId))
+    );
+    expect(missing).toEqual([]);
+  });
+
+  it("[RES19-COVERAGE-003] distinguishes bounded, partial, separate-gate and specification-only cases", () => {
+    expect(resourceAccountingCoverageSummary.total).toBe(60);
+    expect(
+      resourceAccountingCoverageSummary.bounded +
+      resourceAccountingCoverageSummary.partial +
+      resourceAccountingCoverageSummary.separateGate +
+      resourceAccountingCoverageSummary.specificationOnly
+    ).toBe(60);
+    for (const item of resourceAccountingCoverage) {
+      expect(item.note.trim().length, item.fixtureId + " must explain its coverage boundary").toBeGreaterThan(0);
+      if (item.status === "SPECIFICATION-ONLY") expect(item.testIds, item.fixtureId).toEqual([]);
+      else expect(item.testIds.length, item.fixtureId).toBeGreaterThan(0);
+    }
+  });
+
+  it("[RES19-COVERAGE-004] keeps cross-gate and unsupported outcome cases outside bounded resource claims", () => {
+    expect(resourceAccountingCoverage.find((item) => item.fixtureId === "RES19-36")?.status)
+      .toBe("SEPARATE-GATE");
+    expect(resourceAccountingCoverage.find((item) => item.fixtureId === "RES19-57")?.status)
+      .toBe("PARTIAL");
+    expect(resourceAccountingCoverage.find((item) => item.fixtureId === "RES19-60")?.status)
+      .toBe("SPECIFICATION-ONLY");
+    expect(resourceAccountingCoverage.find((item) => item.fixtureId === "RES19-30")?.status)
+      .toBe("BOUNDED");
+  });
+});

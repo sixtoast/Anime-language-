@@ -16,6 +16,7 @@ import { canonAuditItems, auditReadinessLabels } from "./engine/canonAuditRegist
 import phase6gFixtureData from "../tests/fixtures/phase6g-surface-parser-cases.json";
 import { auditPhase6GFixtures, type Phase6GFixture } from "./engine/phase6gFixtureAudit";
 import { resourceAccountingFixtures } from "./engine/resourceAccountingFixtures";
+import { getResourceAccountingCoverage, resourceAccountingCoverageSummary } from "./engine/resourceAccountingCoverage";
 import { authorityDecisionFixtures } from "./engine/authorityDecisionFixtures";
 import { policyProfileCompositionFixtures } from "./engine/policyProfileCompositionFixtures";
 import { invocationLifecycleSequence, invocationOrderNote, validationGateSequence } from "./engine/incantationGateSequence";
@@ -288,6 +289,7 @@ function App() {
   }, [lexiconQuery]);
   const selectedPhase6GFixture = useMemo(() => phase6gFixtures.find((fixture) => fixture.id === selectedFixtureId) ?? phase6gFixtures[0], [selectedFixtureId]);
   const selectedResourceFixture = useMemo(() => resourceAccountingFixtures.find((fixture) => fixture.id === selectedResourceFixtureId) ?? resourceAccountingFixtures[0], [selectedResourceFixtureId]);
+  const selectedResourceCoverage = getResourceAccountingCoverage(selectedResourceFixture.id)!;
   const selectedAuthorityFixture = useMemo(() => authorityDecisionFixtures.find((fixture) => fixture.id === selectedAuthorityFixtureId) ?? authorityDecisionFixtures[0], [selectedAuthorityFixtureId]);
   const selectedPolicyFixture = useMemo(() => policyProfileCompositionFixtures.find((fixture) => fixture.id === selectedPolicyFixtureId) ?? policyProfileCompositionFixtures[0], [selectedPolicyFixtureId]);
   const selectedValidationGate = useMemo(() => validationGateSequence.find((stage) => stage.id === selectedValidationGateId) ?? validationGateSequence[0], [selectedValidationGateId]);
@@ -553,12 +555,18 @@ function App() {
           <section className="fixture-browser resource-fixture-browser" aria-labelledby="resource-fixture-browser-title">
             <div className="fixture-browser-head"><div><span className="detail-kicker">SPECIFICATION FIXTURES · NOT EXECUTABLE TESTS</span><h2 id="resource-fixture-browser-title">Incantation resource-accounting fixtures</h2></div><span>{resourceAccountingFixtures.length} design cases</span></div>
             <p className="fixture-browser-intro">Browse the 60 expected outcomes defined in Arcane Incantations v1.9. These rows are read directly from the canonical Markdown specification; they are not runs of a resource evaluator and do not demonstrate physical feasibility or spell execution.</p>
+            <div className="resource-coverage-summary" aria-label="v1.9 implementation coverage summary">
+              <div><span>Bounded</span><strong>{resourceAccountingCoverageSummary.bounded}</strong></div>
+              <div><span>Partial</span><strong>{resourceAccountingCoverageSummary.partial}</strong></div>
+              <div><span>Separate gate</span><strong>{resourceAccountingCoverageSummary.separateGate}</strong></div>
+              <div><span>Specification only</span><strong>{resourceAccountingCoverageSummary.specificationOnly}</strong></div>
+            </div>
             <label className="fixture-select-label">Choose a specification fixture<select aria-label="Choose resource-accounting specification fixture" value={selectedResourceFixtureId} onChange={(event) => setSelectedResourceFixtureId(event.target.value)}>{resourceAccountingFixtures.map((fixture) => <option key={fixture.id} value={fixture.id}>{fixture.id} — {fixture.caseDescription}</option>)}</select></label>
             {selectedResourceFixture && <div className="fixture-browser-detail">
-              <div className="fixture-browser-meta"><div><span>Specification fixture ID</span><code>{selectedResourceFixture.id}</code></div><div><span>Fixture category</span><strong>Resource accounting / conservation</strong></div><div className="fixture-browser-meta-wide"><span>Case</span><strong>{selectedResourceFixture.caseDescription}</strong></div><div className="fixture-browser-meta-wide"><span>Expected design outcome</span><strong>{selectedResourceFixture.expectedResult}</strong></div><div className="fixture-browser-meta-wide"><span>Evidence class</span><strong>Normative specification fixture — not executed runtime behaviour</strong></div></div>
+              <div className="fixture-browser-meta"><div><span>Specification fixture ID</span><code>{selectedResourceFixture.id}</code></div><div><span>Fixture category</span><strong>Resource accounting / conservation</strong></div><div className="fixture-browser-meta-wide"><span>Case</span><strong>{selectedResourceFixture.caseDescription}</strong></div><div className="fixture-browser-meta-wide"><span>Expected design outcome</span><strong>{selectedResourceFixture.expectedResult}</strong></div><div className="fixture-browser-meta-wide"><span>Evidence class</span><strong>Normative specification fixture — not executed runtime behaviour</strong></div><div className="fixture-browser-meta-wide resource-coverage-detail"><span>Engineering coverage audit — not a canonical outcome</span><strong className={"resource-coverage-status resource-coverage-" + selectedResourceCoverage.status.toLowerCase()}>{selectedResourceCoverage.status}</strong><p>{selectedResourceCoverage.note}</p><span>Linked implementation tests: {selectedResourceCoverage.testIds.length > 0 ? selectedResourceCoverage.testIds.join(", ") : "None — specification only"}</span></div></div>
             </div>}
             <div className="fixture-browser-actions"><a className="secondary-button" href="https://github.com/sixtoast/Anime-language-/blob/main/docs/canon/arcane-incantations-v1.9-resource-accounting-and-conservation-contracts.md" target="_blank" rel="noreferrer">Open full v1.9 specification ↗</a><span>Selection only displays the source expectation; it does not run a spell.</span></div>
-            <p className="fixture-browser-caveat">Resource budgets do not prove a source exists. Reservation does not mean consumption. Dimensional arithmetic does not prove conservation. No universal mana-to-energy conversion or physical resource evaluator is implemented by this browser.</p>
+            <p className="fixture-browser-caveat">The coverage labels are a separate engineering audit: BOUNDED means only the linked behaviour is implemented and tested; PARTIAL and SEPARATE-GATE preserve limits; SPECIFICATION-ONLY means no executable implementation is claimed. These labels do not change the canonical expected outcomes. Resource budgets do not prove a source exists. Reservation does not mean consumption. Dimensional arithmetic does not prove conservation. No universal mana-to-energy conversion or physical resource evaluator is implied.</p>
           </section>
           <section className="fixture-browser authority-fixture-browser" aria-labelledby="authority-fixture-browser-title">
             <div className="fixture-browser-head"><div><span className="detail-kicker">SPECIFICATION FIXTURES · NOT EXECUTABLE TESTS</span><h2 id="authority-fixture-browser-title">Incantation authority-decision fixtures</h2></div><span>{authorityDecisionFixtures.length} design cases</span></div>
