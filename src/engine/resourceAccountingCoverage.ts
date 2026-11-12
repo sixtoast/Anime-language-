@@ -301,9 +301,12 @@ export const resourceAccountingCoverage: ResourceAccountingCoverage[] = [
     "status": "PARTIAL",
     "testIds": [
       "RES19-EVAL-005",
+      "RES19-EVAL-010",
+      "RES19-EVAL-011",
+      "RES19-EVAL-012",
       "RES19-RECON-006"
     ],
-    "note": "Preflight requires a passing freshness state and reconciliation checks the contract interval; source-availability validity windows are not modelled end to end."
+    "note": "Preflight checks caller-supplied availability timestamps against an explicit source window and leaves endpoint ambiguity unresolved. Source-contract validity and evidence authenticity remain caller-supplied, so end-to-end source verification is still partial."
   },
   {
     "fixtureId": "RES19-36",
