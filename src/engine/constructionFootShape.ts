@@ -18,7 +18,7 @@ const FRAMES = new Set(["p", "b", "t", "d", "k", "g"]);
 const PARAMETER_VOWELS = new Set(["a", "u", "o", "e", "i", "ə"]);
 const CANONICAL_CV_FORMS = new Set(["pa", "ba", "ta", "da", "ka", "ga"]);
 const LIMITATION = "Structural recognition only. Parameter-vowel property mappings are provisional and the relation-coda inventory is incomplete; this does not establish Foot meaning, construction validity, feasibility or execution.";
-const isLetter = (value: string) => /^\\p{L}$/u.test(value);
+const isLetter = (value: string) => /^\p{L}$/u.test(value);
 
 export function reviewConstructionFootShape(value: unknown): FootShapeReview {
   const input = typeof value === "string" ? value : "";
