@@ -25,6 +25,7 @@ import { reviewConstructionRecord, type ConstructionRecord, type ConstructionEvi
 import type { ConstructionStage } from "./engine/constructionOrderAudit";
 import { bindConstructionReference, type ConstructionReferenceToken } from "./engine/constructionReferenceContext";
 import { reviewConstructionFootShape } from "./engine/constructionFootShape";
+import { constructionFrameInventory, constructionParameterInventory, constructionFootEvidenceBoundary } from "./engine/constructionFootEvidence";
 import { reviewConstructionCoupling } from "./engine/constructionCouplingEvidence";
 import { reviewConstructionMacro } from "./engine/constructionMacroEvidence";
 
@@ -485,6 +486,15 @@ function App() {
               </div>
               <p className="fixture-browser-caveat">{constructionFootReview.limitation}</p>
             </div>
+              <div className="construction-foot-inventory">
+                <div className="detail-kicker">RECOVERED FOOT INVENTORY · EVIDENCE-INDEXED</div>
+                <p><strong>Frame consonants</strong> — six structural classes are source-backed; their semantic contrasts remain unresolved.</p>
+                <div className="construction-foot-parts">{constructionFrameInventory.map(entry => <span key={entry.consonant}><small>{entry.canonicalForm} · {entry.status}</small>{entry.consonant}</span>)}</div>
+                <p><strong>Parameter vowels</strong> — family labels are provisional, not executable meanings.</p>
+                <div className="construction-foot-parts">{constructionParameterInventory.map(entry => <span key={entry.vowel}><small>{entry.family} · {entry.status}</small>{entry.vowel}</span>)}</div>
+                <p className="fixture-browser-caveat">{constructionFootEvidenceBoundary.relationCoda}</p>
+                <p className="fixture-browser-caveat">Open gaps: {constructionFootEvidenceBoundary.unresolved.join("; ")}.</p>
+              </div>
             <div className="construction-coupling-review">
               <div className="detail-kicker">V2.0 H-SERIES · EVIDENCE LOOKUP ONLY</div>
               <p>The recovered registry records six coupling glosses. This lookup identifies source vocabulary; it does not define argument order, coupling direction, physical mappings or an executable BRAN operation.</p>
