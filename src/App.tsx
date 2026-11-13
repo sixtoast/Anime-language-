@@ -30,6 +30,7 @@ import { reviewConstructionCoupling } from "./engine/constructionCouplingEvidenc
 import { reviewConstructionMacro } from "./engine/constructionMacroEvidence";
 import { handFlameConstructionExample } from "./engine/constructionWorkedExampleEvidence";
 import { reviewFusedConstructionReference } from "./engine/constructionFusedReferenceEvidence";
+import { reviewKSeriesExample } from "./engine/constructionKSeriesExampleEvidence";
 
 type Section = "Overview" | "Documentation" | "Playground" | "Test suite" | "Research & review";
 
@@ -130,6 +131,8 @@ function App() {
   });
   const [constructionReferenceToken, setConstructionReferenceToken] = useState<ConstructionReferenceToken>("MI");
   const [constructionReferenceId, setConstructionReferenceId] = useState("");
+  const [constructionKSeriesInput, setConstructionKSeriesInput] = useState("ken");
+  const constructionKSeriesReview = useMemo(() => reviewKSeriesExample(constructionKSeriesInput), [constructionKSeriesInput]);
   const [constructionFusedReferenceInput, setConstructionFusedReferenceInput] = useState("mel");
   const constructionFusedReferenceReview = useMemo(() => reviewFusedConstructionReference(constructionFusedReferenceInput), [constructionFusedReferenceInput]);
   const [constructionFootInput, setConstructionFootInput] = useState("pa");
@@ -473,6 +476,17 @@ function App() {
               </div>
               <p className="construction-reference-status"><strong>{constructionReference.status}</strong>{constructionReference.current ? " · " + constructionReference.current.scope + " · persists until replaced" : " · " + constructionReference.issue}</p>
               <p className="fixture-browser-caveat">{constructionReference.limitation}</p>
+            </div>
+            <div className="construction-kseries-review">
+              <div className="detail-kicker">KAN · KEN · KAS / WORKED-EXAMPLE EVIDENCE</div>
+              <p>These three forms occur in the hand-flame evidence, but their rules are not equally recovered. Inspect each independently; their appearance together does not establish a pair rule.</p>
+              <label htmlFor="construction-kseries-input">K-series form</label>
+              <input id="construction-kseries-input" value={constructionKSeriesInput} onChange={event => setConstructionKSeriesInput(event.target.value)} placeholder="KAN, KEN or KAS" spellCheck={false} />
+              <div className="construction-coupling-result" role="status" aria-live="polite">
+                <strong>{constructionKSeriesReview.status.replaceAll("-", " ")}</strong>
+                {constructionKSeriesReview.entry && <><p>{constructionKSeriesReview.entry.evidence}</p><p><strong>Macro association:</strong> {constructionKSeriesReview.entry.macroAssociation}</p><p className="fixture-browser-caveat">{constructionKSeriesReview.entry.unresolved}</p></>}
+                <p>{constructionKSeriesReview.message}</p>
+              </div>
             </div>
             <div className="construction-fused-reference-review">
               <div className="detail-kicker">PERFORMED FUSED REFERENCE · EXAMPLE EVIDENCE</div>
