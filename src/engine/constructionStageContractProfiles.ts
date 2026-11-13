@@ -6,7 +6,7 @@
  */
 export const constructionStageContractProfiles = [
   {
-    stage: "reference", label: "1. Reference", contractStatus: "PARTIAL-CONTRACT-RECOVERED",
+    stage: "reference", label: "1. Reference", contractStatus: "PARTIAL-CONTRACT-RECOVERED",, versionBoundary: null
     recovered: ["MI / NI / RI use DEFAULT-VOLUME scope", "me is described as SELF-SURFACE", "reference persists UNTIL-REPLACED", "a missing replacement preserves the current binding; a valid replacement replaces it"],
     inputOutputStatus: "A reference token, reference identity and scope can be represented in the evidence/runtime guard; historical identifier syntax and downstream value type are not recovered.",
     bindingStatus: "Persistence is documented; binding to spatial values, Feet or couplings is not documented.",
@@ -29,28 +29,28 @@ export const constructionStageContractProfiles = [
     unresolved: ["individual frame semantics", "provisional parameter-vowel meanings", "complete relation-coda inventory", "productive combinations and physical/resource semantics"]
   },
   {
-    stage: "couplings", label: "4. Couplings", contractStatus: "GLOSS-AND-FAMILY-EVIDENCE-ONLY",
+    stage: "couplings", label: "4. Couplings", contractStatus: "GLOSS-AND-FAMILY-EVIDENCE-ONLY",, versionBoundary: null
     recovered: ["h + domain vowel family: hə/he/ha/hu/hi/ho", "recorded glosses mana/matter/energy/living/information/field"],
     inputOutputStatus: "Argument signature, participant types, direction and output type are unresolved.",
     bindingStatus: "No recovered rule specifies participant order or how a coupling attaches to one or more Feet.",
     unresolved: ["domain mapping is provisional", "coupling vector and physical mapping", "resource cost and validity conditions", "participant cardinality and order"]
   },
   {
-    stage: "quantity", label: "5. Quantity", contractStatus: "ORDER-ONLY",
+    stage: "quantity", label: "5. Quantity", contractStatus: "ORDER-ONLY",, versionBoundary: null
     recovered: ["quantity is named as a performed stage after couplings and before control"],
     inputOutputStatus: "No Construction-specific syntax, quantity type, unit, input or output contract is recovered.",
     bindingStatus: "No source-backed rule states whether quantity modifies a Foot, coupling, whole configuration or another object.",
     unresolved: ["quantity representation and units", "scope and attachment", "limits, aggregation and conversion semantics"]
   },
   {
-    stage: "control", label: "6. Control", contractStatus: "ORDER-ONLY",
+    stage: "control", label: "6. Control", contractStatus: "ORDER-ONLY",, versionBoundary: null
     recovered: ["control is named as a performed stage after quantity and before release"],
     inputOutputStatus: "No Construction-specific control syntax, input/output type or transition contract is recovered.",
     bindingStatus: "Do not attach VARE or other macros to this stage without direct evidence; VARE is separately described as a soft-requirement modifier.",
     unresolved: ["control vocabulary and scope", "attachment and transition conditions", "failure and interruption behaviour"]
   },
   {
-    stage: "release", label: "7. Release", contractStatus: "PARTIAL-EXAMPLE-ONLY",
+    stage: "release", label: "7. Release", contractStatus: "PARTIAL-EXAMPLE-ONLY",, versionBoundary: null
     recovered: ["the hand-flame example contains kas for release", "Phase 5.15 associates SHREN with release as partial example evidence"],
     inputOutputStatus: "A general release signature, target type, release mode or result is not recovered.",
     bindingStatus: "The example does not establish which prior stage output release consumes.",
