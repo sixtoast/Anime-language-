@@ -1,8 +1,8 @@
 /**
- * Structural-only recogniser for the recovered Construction Foot pattern.
- * Evidence: Phase 4 §§3.1–3.2 and 10; Phase 5.15 Construction Contract Matrix.
- * It recognises canonical CV frame forms and checks the documented CVC Foot shape.
- * It does not assign final vowel meanings or validate the incomplete coda inventory.
+ * Structural-only recogniser for recovered Construction Foot evidence.
+ * Canonical CV frame forms are exactly pa, ba, ta, da, ka and ga.
+ * Other frame+parameter combinations and all CVC codas remain unresolved:
+ * the complete productive paradigm and coda inventory are not recovered.
  */
 export type FootShapeStatus = "FRAME-FORM-RECOGNISED" | "SHAPE-INVALID" | "UNRESOLVED";
 export interface FootShapeReview {
@@ -16,6 +16,7 @@ export interface FootShapeReview {
 }
 const FRAMES = new Set(["p", "b", "t", "d", "k", "g"]);
 const PARAMETER_VOWELS = new Set(["a", "u", "o", "e", "i", "ə"]);
+const CANONICAL_CV_FORMS = new Set(["pa", "ba", "ta", "da", "ka", "ga"]);
 const LIMITATION = "Structural recognition only. Parameter-vowel property mappings are provisional and the relation-coda inventory is incomplete; this does not establish Foot meaning, construction validity, feasibility or execution.";
 
 export function reviewConstructionFootShape(input: string): FootShapeReview {
@@ -39,10 +40,19 @@ export function reviewConstructionFootShape(input: string): FootShapeReview {
     return { input, status: "SHAPE-INVALID", frame, parameterVowel, relationCoda,
       notes: ["The final relation-coda position must be consonantal, not a parameter vowel."], limitation: LIMITATION };
   }
-  notes.push("Frame consonant and parameter-vowel positions match a recovered canonical frame form.");
-  if (relationCoda) notes.push("A final relation-coda position is present; its membership and meaning are not validated because the inventory is incomplete.");
-  else notes.push("This two-character CV form is a documented frame form, not evidence that the complete CVC Foot is present.");
+  if (!relationCoda && CANONICAL_CV_FORMS.has(input)) {
+    notes.push("This is one of the six explicitly recovered canonical CV frame forms.");
+    notes.push("It is a frame form, not evidence that a complete CVC Foot is present.");
+    notes.push("The parameter-vowel mapping remains provisional.");
+    return { input, status: "FRAME-FORM-RECOGNISED", frame, parameterVowel, relationCoda, notes, limitation: LIMITATION };
+  }
+  notes.push("The initial consonant and medial vowel belong to the recovered structural inventories.");
+  if (!relationCoda) {
+    notes.push("This frame × parameter-vowel combination is not among the six recovered canonical CV forms; the productive combination inventory is unavailable.");
+  } else {
+    notes.push("A final relation-coda position is present, but the complete coda inventory and coda-to-relation meanings are not recovered.");
+    if (!CANONICAL_CV_FORMS.has(input.slice(0, 2))) notes.push("The frame × parameter-vowel combination is not among the six recovered canonical CV forms.");
+  }
   notes.push("The parameter-vowel mapping remains provisional.");
-  return { input, status: relationCoda ? "UNRESOLVED" : "FRAME-FORM-RECOGNISED",
-    frame, parameterVowel, relationCoda, notes, limitation: LIMITATION };
+  return { input, status: "UNRESOLVED", frame, parameterVowel, relationCoda, notes, limitation: LIMITATION };
 }

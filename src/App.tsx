@@ -502,7 +502,7 @@ function App() {
             </div>
             <div className="construction-foot-review">
               <div className="detail-kicker">RECOVERED FOOT SHAPE · STRUCTURAL CHECK ONLY</div>
-              <p>Check a single recovered Construction Foot form against the recovered canonical CV frame form and CVC Foot pattern. A CV result recognises only a frame form, not a complete Foot; a supplied coda remains unresolved until its inventory is recovered.</p>
+              <p>Check a form against the six explicitly recovered canonical CV forms and the documented CVC structural pattern. Other frame–vowel combinations and all coda-bearing forms remain unresolved until the productive paradigm and coda inventory are recovered.</p>
               <label htmlFor="construction-foot-input">Construction Foot</label>
               <input id="construction-foot-input" value={constructionFootInput} onChange={event => setConstructionFootInput(event.target.value)} placeholder="e.g. pa or paz" spellCheck={false} />
               <div className="construction-foot-result" role="status" aria-live="polite">
