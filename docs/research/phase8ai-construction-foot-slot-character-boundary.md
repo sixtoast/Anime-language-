@@ -2,7 +2,7 @@
 
 **Date:** 2026-11-13  
 **Canon effect:** none. **Tests authored:** CON-FOOT-013–017 (authored-unverified).  
-**Tests executed:** none locally. The prior Phase 8AH preview deployment is confirmed READY; this commit has not yet been deployed.
+**Tests executed:** no local unit or browser tests. The corrected Phase 8AI source passed Vercel's TypeScript and Vite production build.
 
 ## Finding
 
@@ -23,4 +23,4 @@ Added CON-FOOT-013–017 for punctuation/whitespace, non-string runtime inputs, 
 
 ## Deployment and safety
 
-Phase 8AH commit d2646e789ea59c25f781e51d9fac9400e963cfc6 is confirmed READY on Vercel preview at https://anime-language-65rb0ycio-sixtoast1.vercel.app/. Its build ran `tsc --noEmit && vite build`, transformed 2,125 modules and completed. Vite emitted a non-fatal large-chunk warning. This Phase 8AI commit requires its own preview deployment check. Main and production remain untouched.
+Phase 8AH commit d2646e789ea59c25f781e51d9fac9400e963cfc6 is confirmed READY on Vercel preview at https://anime-language-65rb0ycio-sixtoast1.vercel.app/. The first Phase 8AI commit (070ff7b11a55ec0c59474d8dbceff4c8d2074260) failed TypeScript because the Unicode property matcher was over-escaped; it was immediately corrected in 5d25de1f8f3d41cd1e06934cb0ac677ce5f12528. The corrected deployment dpl_6aondKX1WFa5rKo4yutgcQhzrKxe is READY at https://anime-language-i7t2ez9mq-sixtoast1.vercel.app/. Its build ran `tsc --noEmit && vite build`, transformed 2,125 modules and completed; Vite emitted a non-fatal large-chunk warning. No unit or browser acceptance suite was run. Main and production remain untouched.
