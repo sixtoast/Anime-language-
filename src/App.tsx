@@ -25,6 +25,7 @@ import { reviewConstructionRecord, type ConstructionRecord, type ConstructionEvi
 import type { ConstructionStage } from "./engine/constructionOrderAudit";
 import { bindConstructionReference, type ConstructionReferenceToken } from "./engine/constructionReferenceContext";
 import { reviewConstructionFootShape } from "./engine/constructionFootShape";
+import { reviewConstructionFootComposition } from "./engine/constructionFootComposition";
 import { constructionFrameInventory, constructionParameterInventory, constructionFootEvidenceBoundary } from "./engine/constructionFootEvidence";
 import { reviewConstructionCoupling } from "./engine/constructionCouplingEvidence";
 import { reviewConstructionMacro } from "./engine/constructionMacroEvidence";
@@ -137,6 +138,7 @@ function App() {
   const constructionFusedReferenceReview = useMemo(() => reviewFusedConstructionReference(constructionFusedReferenceInput), [constructionFusedReferenceInput]);
   const [constructionFootInput, setConstructionFootInput] = useState("pa");
   const constructionFootReview = useMemo(() => reviewConstructionFootShape(constructionFootInput.trim()), [constructionFootInput]);
+  const constructionFootCompositionReview = useMemo(() => reviewConstructionFootComposition(constructionFootInput.trim()), [constructionFootInput]);
   const [constructionCouplingInput, setConstructionCouplingInput] = useState("ha");
   const constructionCouplingReview = useMemo(() => reviewConstructionCoupling(constructionCouplingInput), [constructionCouplingInput]);
   const [constructionMacroInput, setConstructionMacroInput] = useState("TRAK");
@@ -515,6 +517,21 @@ function App() {
                 <ul>{constructionFootReview.notes.map((note, index) => <li key={index}>{note}</li>)}</ul>
               </div>
               <p className="fixture-browser-caveat">{constructionFootReview.limitation}</p>
+              <div className="construction-foot-composition">
+                <div className="detail-kicker">SOURCE-READING COMPARISON · NO CANON SELECTION</div>
+                <p>The same input is assessed independently against both recovered descriptions. These are competing source readings, not selectable grammar modes.</p>
+                <div className="construction-foot-parts">
+                  {constructionFootCompositionReview.readings.map(reading => (
+                    <span key={reading.sourceReading}>
+                      <small>{reading.sourceReading === "P5.15-CVC-REQUIRED" ? "Phase 5.15 · CVC required" : "Phase 5.16 C-02 · coda optional"}</small>
+                      <strong>{reading.slotAssessment.replaceAll("-", " ")}</strong>
+                      <small>{reading.framePrefix.replaceAll("-", " ")} · {reading.codaEvidence.replaceAll("-", " ")}</small>
+                      {reading.explanation}
+                    </span>
+                  ))}
+                </div>
+                <p className="fixture-browser-caveat">{constructionFootCompositionReview.limitation}</p>
+              </div>
             </div>
               <div className="construction-foot-inventory">
                 <div className="detail-kicker">RECOVERED FOOT INVENTORY · EVIDENCE-INDEXED</div>
