@@ -32,7 +32,7 @@ describe("evidence-bounded Construction order audit", () => {
       "reference", "construction-feet", "spatial-role-vector", "release", "control"
     ]);
     expect(result.status).toBe("ORDER_INCONSISTENT");
-    expect(result.issues.map((issue) => issue.stage)).toEqual([
+    expect(result.issues.map(issue => issue.stage)).toEqual([
       "spatial-role-vector", "control"
     ]);
   });
@@ -50,5 +50,28 @@ describe("evidence-bounded Construction order audit", () => {
     const result = auditConstructionOrder(["reference", "release"]);
     expect(result.limitation).toContain("not a complete construction");
     expect(result.unresolved).toContain("The exact v2.0 Foot, coupling, landmark and KAN/KEN/KAS rules.");
+  });
+
+  it("[CON-ORDER-007] rejects unknown runtime stage values instead of silently skipping them", () => {
+    const result = auditConstructionOrder(["reference", "invented-stage", "release"]);
+    expect(result.status).toBe("INVALID_SEQUENCE");
+    expect(result.ordered).toBeNull();
+    expect(result.issues).toMatchObject([{ code: "UNKNOWN_STAGE", index: 1 }]);
+  });
+
+  it("[CON-ORDER-008] rejects non-array runtime input", () => {
+    const result = auditConstructionOrder("reference");
+    expect(result.status).toBe("INVALID_SEQUENCE");
+    expect(result.issues[0]).toMatchObject({ code: "SEQUENCE_NOT_ARRAY", index: -1 });
+  });
+
+  it("[CON-ORDER-009] preserves ordering diagnostics alongside unknown-stage diagnostics", () => {
+    const result = auditConstructionOrder([
+      "reference", "construction-feet", "spatial-role-vector", "not-a-stage"
+    ]);
+    expect(result.status).toBe("INVALID_SEQUENCE");
+    expect(result.issues.map(issue => issue.code)).toEqual([
+      "STAGE_OUT_OF_ORDER", "UNKNOWN_STAGE"
+    ]);
   });
 });
