@@ -81,5 +81,15 @@ describe("Arcane Incantations v1.9 fixture-to-implementation coverage audit", ()
       "RES19-EVAL-011",
       "RES19-EVAL-012"
     ]));
+    const reservationExpiry = resourceAccountingCoverage.find((item) => item.fixtureId === "RES19-15");
+    expect(reservationExpiry?.status).toBe("PARTIAL");
+    expect(reservationExpiry?.testIds).toEqual(expect.arrayContaining([
+      "RES19-EXPIRY-001",
+      "RES19-EXPIRY-002",
+      "RES19-EXPIRY-003",
+      "RES19-EXPIRY-004",
+      "RES19-EXPIRY-005",
+      "RES19-EXPIRY-006"
+    ]));
   });
 });

@@ -137,9 +137,16 @@ export const resourceAccountingCoverage: ResourceAccountingCoverage[] = [
   },
   {
     "fixtureId": "RES19-15",
-    "status": "SPECIFICATION-ONLY",
-    "testIds": [],
-    "note": "Reservation expiry, enforcement evidence and temporal state transitions are not represented by the current ledger model."
+    "status": "PARTIAL",
+    "testIds": [
+      "RES19-EXPIRY-001",
+      "RES19-EXPIRY-002",
+      "RES19-EXPIRY-003",
+      "RES19-EXPIRY-004",
+      "RES19-EXPIRY-005",
+      "RES19-EXPIRY-006"
+    ],
+    "note": "A pure temporal assessment reports NOT-REACHED before the declared expiry, RESERVATION-EXPIRED only after it with caller-supplied OBSERVED evidence or a CONTRACTUALLY-GUARANTEED contract reference, and RESOURCE-OUTCOME-UNKNOWN at the exact boundary, after expiry without evidence, or on malformed/contradictory input. It does not verify reservation existence/state, authenticate references, apply release policy, mutate the ledger or change availability."
   },
   {
     "fixtureId": "RES19-16",
