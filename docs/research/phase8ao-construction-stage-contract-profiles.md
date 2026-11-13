@@ -72,3 +72,6 @@ Do not implement a Construction compiler from these profiles. The next useful in
 ## Build correction record
 
 The first Vercel build for the Phase 8AO implementation (`580439c`) failed at `tsc --noEmit` because the inferred union type did not expose `versionBoundary` on profiles where that optional field was omitted. The profile data was normalised in follow-up commit `47c5b1877dcba2405044a6af67976d4fb42b88d8` by adding an explicit `versionBoundary: null` to records without a special boundary. This correction is committed; the replacement deployment was still building at the time of this record update, so its successful build is not yet claimed.
+### Follow-up correction
+
+The first field-normalisation patch (`47c5b18`) inserted the nullable field with malformed punctuation in the TypeScript object literals. The source was rewritten cleanly in `3afc5dca36a67d618e2a85c2ba30233f52882d62`, with `versionBoundary` explicitly present on every profile and valid object syntax. The initial Vercel TypeScript failure is recorded above; this rewrite is the actual source correction. A successful build for the corrected commit remains pending confirmation.
