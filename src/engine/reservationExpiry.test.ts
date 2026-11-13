@@ -74,7 +74,7 @@ describe("Arcane Incantations v1.9 reservation expiry assessment", () => {
     }))).toMatchObject({
       outcome: "RESOURCE-OUTCOME-UNKNOWN",
       diagnostic: { code: "RESERVATION-EXPIRY-EVIDENCE-CONFLICT" }
-    }));
+    });
     expect(assessReservationExpiry(input({ expiryUnixMs: 2_000.5 }))).toMatchObject({
       outcome: "RESOURCE-OUTCOME-UNKNOWN",
       diagnostic: { code: "RESERVATION-EXPIRY-INPUT-MALFORMED" }
