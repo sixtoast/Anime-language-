@@ -40,4 +40,58 @@ describe("recovered Construction reference context", () => {
     expect(result.status).toBe("UNRESOLVED");
     expect(result.issue).toBe("REFERENCE_ID_EMPTY");
   });
+
+  it("[CON-REF-008] rejects a non-string reference identity without throwing", () => {
+    const result = bindConstructionReference("MI", 42);
+    expect(result.status).toBe("UNRESOLVED");
+    expect(result.issue).toBe("REFERENCE_ID_EMPTY");
+  });
+
+  it("[CON-REF-009] rejects a replacement whose declared scope conflicts with its token", () => {
+    const result = advanceConstructionReferenceContext(null, {
+      token: "MI", referenceId: "ref-1", scope: "SELF-SURFACE", persistence: "UNTIL-REPLACED"
+    });
+    expect(result.status).toBe("UNRESOLVED");
+    expect(result.current).toBeNull();
+    expect(result.issue).toBe("REPLACEMENT_BINDING_INVALID");
+  });
+
+  it("[CON-REF-010] rejects malformed replacement records rather than retaining the previous binding", () => {
+    const original = bindConstructionReference("MI", "ref-1").current;
+    const result = advanceConstructionReferenceContext(original, {
+      token: "MI", referenceId: " ", scope: "DEFAULT-VOLUME", persistence: "UNTIL-REPLACED"
+    });
+    expect(result.status).toBe("UNRESOLVED");
+    expect(result.current).toBeNull();
+    expect(result.issue).toBe("REPLACEMENT_BINDING_INVALID");
+  });
+
+  it("[CON-REF-011] rejects a corrupted persisted binding when no replacement is supplied", () => {
+    const result = advanceConstructionReferenceContext({
+      token: "NI", referenceId: "field-1", scope: "SELF-SURFACE", persistence: "UNTIL-REPLACED"
+    }, null);
+    expect(result.status).toBe("UNRESOLVED");
+    expect(result.current).toBeNull();
+    expect(result.issue).toBe("REFERENCE_BINDING_INVALID");
+  });
+
+  it("[CON-REF-012] rejects an unknown persistence policy", () => {
+    const result = advanceConstructionReferenceContext(null, {
+      token: "RI", referenceId: "target-1", scope: "DEFAULT-VOLUME", persistence: "FOREVER"
+    });
+    expect(result.status).toBe("UNRESOLVED");
+    expect(result.issue).toBe("REPLACEMENT_BINDING_INVALID");
+  });
+
+  it("[CON-REF-013] trims reference identifiers at the binding boundary", () => {
+    const result = bindConstructionReference("RI", "  target-1  ");
+    expect(result.current?.referenceId).toBe("target-1");
+  });
+
+  it("[CON-REF-014] treats a null initial context as unbound", () => {
+    const result = advanceConstructionReferenceContext(null, null);
+    expect(result.status).toBe("UNBOUND");
+    expect(result.current).toBeNull();
+    expect(result.issue).toBe("NONE");
+  });
 });
