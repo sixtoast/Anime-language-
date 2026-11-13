@@ -29,6 +29,7 @@ import { constructionFrameInventory, constructionParameterInventory, constructio
 import { reviewConstructionCoupling } from "./engine/constructionCouplingEvidence";
 import { reviewConstructionMacro } from "./engine/constructionMacroEvidence";
 import { handFlameConstructionExample } from "./engine/constructionWorkedExampleEvidence";
+import { reviewFusedConstructionReference } from "./engine/constructionFusedReferenceEvidence";
 
 type Section = "Overview" | "Documentation" | "Playground" | "Test suite" | "Research & review";
 
@@ -129,6 +130,8 @@ function App() {
   });
   const [constructionReferenceToken, setConstructionReferenceToken] = useState<ConstructionReferenceToken>("MI");
   const [constructionReferenceId, setConstructionReferenceId] = useState("");
+  const [constructionFusedReferenceInput, setConstructionFusedReferenceInput] = useState("mel");
+  const constructionFusedReferenceReview = useMemo(() => reviewFusedConstructionReference(constructionFusedReferenceInput), [constructionFusedReferenceInput]);
   const [constructionFootInput, setConstructionFootInput] = useState("pa");
   const constructionFootReview = useMemo(() => reviewConstructionFootShape(constructionFootInput.trim()), [constructionFootInput]);
   const [constructionCouplingInput, setConstructionCouplingInput] = useState("ha");
@@ -470,6 +473,18 @@ function App() {
               </div>
               <p className="construction-reference-status"><strong>{constructionReference.status}</strong>{constructionReference.current ? " · " + constructionReference.current.scope + " · persists until replaced" : " · " + constructionReference.issue}</p>
               <p className="fixture-browser-caveat">{constructionReference.limitation}</p>
+            </div>
+            <div className="construction-fused-reference-review">
+              <div className="detail-kicker">PERFORMED FUSED REFERENCE · EXAMPLE EVIDENCE</div>
+              <p>The hand-flame example records one fused form. Inspect it separately from the formal reference-context binder above; this lookup never creates or changes a binding.</p>
+              <label htmlFor="construction-fused-reference-input">Performed form</label>
+              <input id="construction-fused-reference-input" value={constructionFusedReferenceInput} onChange={event => setConstructionFusedReferenceInput(event.target.value)} placeholder="e.g. mel" spellCheck={false} />
+              <div className="construction-coupling-result" role="status" aria-live="polite">
+                <strong>{constructionFusedReferenceReview.status.replaceAll("-", " ")}</strong>
+                {constructionFusedReferenceReview.entry && <div className="construction-coupling-gloss"><span>{constructionFusedReferenceReview.entry.form}</span><span>{constructionFusedReferenceReview.entry.decomposition}</span><span>{constructionFusedReferenceReview.entry.exampleReferent}</span></div>}
+                <p>{constructionFusedReferenceReview.message}</p>
+                {constructionFusedReferenceReview.entry && <><p><strong>Scope association:</strong> {constructionFusedReferenceReview.entry.associatedFormalScope}</p><p className="fixture-browser-caveat">{constructionFusedReferenceReview.entry.limitation}</p></>}
+              </div>
             </div>
             <div className="construction-foot-review">
               <div className="detail-kicker">RECOVERED FOOT SHAPE · STRUCTURAL CHECK ONLY</div>
