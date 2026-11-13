@@ -33,6 +33,7 @@ import { reviewConstructionCoupling } from "./engine/constructionCouplingEvidenc
 import { reviewConstructionMacro } from "./engine/constructionMacroEvidence";
 import { handFlameConstructionExample } from "./engine/constructionWorkedExampleEvidence";
 import { constructionStageRelationshipEvidence } from "./engine/constructionStageRelationshipEvidence";
+import { constructionStageContractProfiles } from "./engine/constructionStageContractProfiles";
 import { reviewFusedConstructionReference } from "./engine/constructionFusedReferenceEvidence";
 import { reviewKSeriesExample } from "./engine/constructionKSeriesExampleEvidence";
 
@@ -592,6 +593,21 @@ function App() {
                 </li>)}
               </ol>
               <p className="fixture-browser-caveat">No direct data-flow, mandatory-stage, cardinality, omission, dependency or execution rule is inferred. Each interface requires original v2.0 evidence or an explicitly approved replacement specification.</p>
+            </div>
+            <div className="construction-contract-profiles">
+              <div className="detail-kicker">PHASE 8AO · STAGE CONTRACT EVIDENCE</div>
+              <p>These profiles separate recovered stage behaviour from missing interfaces. The spatial vocabulary shown below is version-tagged and is not automatically treated as the input grammar of the historical Construction stage.</p>
+              <div className="construction-example-chunks">
+                {constructionStageContractProfiles.map(profile => <section key={profile.stage}>
+                  <div><strong>{profile.label}</strong><span>{profile.contractStatus.replaceAll("-", " ")}</span></div>
+                  <p><strong>Recovered:</strong> {profile.recovered.join(" · ")}</p>
+                  <p><strong>Input / output:</strong> {profile.inputOutputStatus}</p>
+                  <p><strong>Cross-stage binding:</strong> {profile.bindingStatus}</p>
+                  {profile.versionBoundary && <p className="fixture-browser-caveat"><strong>Version boundary:</strong> {profile.versionBoundary}</p>}
+                  <p className="fixture-browser-caveat"><strong>Still open:</strong> {profile.unresolved.join(" · ")}</p>
+                </section>)}
+              </div>
+              <p className="fixture-browser-caveat">This is an evidence register, not a Construction validator or compiler. No stage output is inferred from the next stage's position in the sequence.</p>
             </div>
             <div className="construction-worked-example">
               <div className="detail-kicker">PHASE 4 §8 · HAND-FLAME WORKED EXAMPLE</div>
