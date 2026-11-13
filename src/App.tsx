@@ -28,6 +28,7 @@ import { reviewConstructionFootShape } from "./engine/constructionFootShape";
 import { constructionFrameInventory, constructionParameterInventory, constructionFootEvidenceBoundary } from "./engine/constructionFootEvidence";
 import { reviewConstructionCoupling } from "./engine/constructionCouplingEvidence";
 import { reviewConstructionMacro } from "./engine/constructionMacroEvidence";
+import { handFlameConstructionExample } from "./engine/constructionWorkedExampleEvidence";
 
 type Section = "Overview" | "Documentation" | "Playground" | "Test suite" | "Research & review";
 
@@ -522,6 +523,18 @@ function App() {
                 {constructionMacroReview.entry && <><p><b>Recovered Construction evidence:</b> {constructionMacroReview.entry.recoveredEvidence}</p><p><b>Open contract:</b> {constructionMacroReview.entry.unresolvedContract}</p></>}
               </div>
               <p className="fixture-browser-caveat">Source status is not a completion status. All six forms remain non-executable in this inspector.</p>
+            </div>
+            <div className="construction-worked-example">
+              <div className="detail-kicker">PHASE 4 §8 · HAND-FLAME WORKED EXAMPLE</div>
+              <p className="construction-example-sequence">{handFlameConstructionExample.sourceSequence}</p>
+              <p><strong>Evidence status:</strong> {handFlameConstructionExample.sourceStatus.replaceAll("-", " ").toLowerCase()}.</p>
+              <div className="construction-example-chunks">
+                {handFlameConstructionExample.chunks.map((chunk, index) => <section key={chunk.sourceText}>
+                  <div><strong>{index + 1}. {chunk.sourceText}</strong><span>{chunk.evidenceStatus.replaceAll("-", " ")}</span></div>
+                  <p>{chunk.interpretation}</p><p className="fixture-browser-caveat">{chunk.unresolved}</p>
+                </section>)}
+              </div>
+              <ul>{handFlameConstructionExample.limits.map(limit => <li key={limit}>{limit}</li>)}</ul>
             </div>
             <div className="construction-stage-list">
               {constructionStageLabels.map(({ stage, label }, index) => <div className="construction-stage-row" key={stage}>
