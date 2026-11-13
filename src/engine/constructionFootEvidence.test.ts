@@ -7,4 +7,5 @@ describe("Construction Foot evidence inventory",()=>{
  it("[CON-FOOT-EVID-004] does not promote parameter families to executable semantics",()=>{expect(constructionParameterInventory.every(x=>x.execution==="NOT-DEFINED")).toBe(true)});
  it("[CON-FOOT-EVID-005] distinguishes CV frame forms from complete CVC Feet",()=>{expect(constructionFootEvidenceBoundary.shape).toBe("CVC");expect(constructionFootEvidenceBoundary.cvForms).toContain("not complete CVC Feet")});
  it("[CON-FOOT-EVID-006] leaves coda inventory and productive composition unresolved",()=>{expect(constructionFootEvidenceBoundary.relationCoda).toContain("not recovered");expect(constructionFootEvidenceBoundary.unresolved).toContain("productive frame × parameter × relation combinations")});
+ it("[CON-FOOT-EVID-007] preserves the CVC versus optional-coda source discrepancy",()=>{expect(constructionFootEvidenceBoundary.shapeEvidenceDiscrepancy.status).toBe("UNRESOLVED-SOURCE-DISCREPANCY");expect(constructionFootEvidenceBoundary.shapeEvidenceDiscrepancy.primary).toContain("CVC");expect(constructionFootEvidenceBoundary.shapeEvidenceDiscrepancy.conflictingSummary).toContain("optional");});
 });

@@ -19,6 +19,7 @@ export const constructionParameterInventory: readonly ConstructionParameterEvide
 ] as const;
 export const constructionFootEvidenceBoundary = {
  shape:"CVC",
+ shapeEvidenceDiscrepancy:{ status:"UNRESOLVED-SOURCE-DISCREPANCY", primary:"Phase 5.15: CVC frame + parameter vowel + relation coda.", conflictingSummary:"Phase 5.16 C-02: frame + parameter vowel + optional relation coda.", treatment:"Do not collapse these statements into one canon rule. CV is recognised as a frame form; CVC is structurally recognised but remains semantically unresolved. Owner/source confirmation is required to settle whether the coda is mandatory in every Foot context." },
  relationCoda:"The relation occupies the final consonant position; the complete coda inventory and coda-to-relation meanings are not recovered.",
  cvForms:"pa, ba, ta, da, ka, ga are documented canonical frame forms, not complete CVC Feet.",
  unresolved:["semantic contrast carried by each frame consonant","complete relation-coda inventory and its meanings","productive frame × parameter × relation combinations","full Foot argument structure and composition","physical/resource semantics and execution"],

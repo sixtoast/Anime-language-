@@ -493,6 +493,7 @@ function App() {
                 <p><strong>Parameter vowels</strong> — family labels are provisional, not executable meanings.</p>
                 <div className="construction-foot-parts">{constructionParameterInventory.map(entry => <span key={entry.vowel}><small>{entry.family} · {entry.status}</small>{entry.vowel}</span>)}</div>
                 <p className="fixture-browser-caveat">{constructionFootEvidenceBoundary.relationCoda}</p>
+                <p className="fixture-browser-caveat"><strong>Structural source discrepancy:</strong> {constructionFootEvidenceBoundary.shapeEvidenceDiscrepancy.primary} {constructionFootEvidenceBoundary.shapeEvidenceDiscrepancy.conflictingSummary} {constructionFootEvidenceBoundary.shapeEvidenceDiscrepancy.treatment}</p>
                 <p className="fixture-browser-caveat">Open gaps: {constructionFootEvidenceBoundary.unresolved.join("; ")}.</p>
               </div>
             <div className="construction-coupling-review">
