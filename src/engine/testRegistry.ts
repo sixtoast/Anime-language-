@@ -2,7 +2,7 @@ export type TestExecutionStatus = "authored-unverified" | "blocked-by-specificat
 
 export interface WorkbenchTest {
   id: string;
-  group: "Parser" | "Dimensions" | "Semantic types" | "Operator contracts" | "Source lexicon" | "Fixture audit" | "Surface parser" | "Incantation contracts";
+  group: "Parser" | "Dimensions" | "Semantic types" | "Operator contracts" | "Source lexicon" | "Fixture audit" | "Surface parser" | "Incantation contracts" | "Construction";
   title: string;
   description: string;
   status: TestExecutionStatus;
