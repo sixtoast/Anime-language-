@@ -27,6 +27,7 @@ import { bindConstructionReference, type ConstructionReferenceToken } from "./en
 import { reviewConstructionFootShape } from "./engine/constructionFootShape";
 import { reviewConstructionFootComposition } from "./engine/constructionFootComposition";
 import { constructionFrameInventory, constructionParameterInventory, constructionFootEvidenceBoundary } from "./engine/constructionFootEvidence";
+import { constructionFrameTerminology } from "./engine/constructionFrameTerminology";
 import { reviewConstructionCoupling } from "./engine/constructionCouplingEvidence";
 import { reviewConstructionMacro } from "./engine/constructionMacroEvidence";
 import { handFlameConstructionExample } from "./engine/constructionWorkedExampleEvidence";
@@ -533,6 +534,12 @@ function App() {
                 <p className="fixture-browser-caveat">{constructionFootCompositionReview.limitation}</p>
               </div>
             </div>
+              <div className="construction-frame-terminology">
+                <div className="detail-kicker">TERMINOLOGY DISAMBIGUATION · INDEPENDENT FRAME SYSTEMS</div>
+                <p>“Frame” is used for different concepts in the recovered material. These systems must not be merged:</p>
+                <div className="construction-foot-parts">{constructionFrameTerminology.map(entry => <span key={entry.id}><small>{entry.source}</small><strong>{entry.label}</strong>{entry.description}</span>)}</div>
+                <p className="fixture-browser-caveat">The Phase 5.8/5.9 coordinate-frame model does not supply meanings for the six Construction Foot frame consonants.</p>
+              </div>
               <div className="construction-foot-inventory">
                 <div className="detail-kicker">RECOVERED FOOT INVENTORY · EVIDENCE-INDEXED</div>
                 <p><strong>Frame consonants</strong> — six structural classes are source-backed; their semantic contrasts remain unresolved.</p>
