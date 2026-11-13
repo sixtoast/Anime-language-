@@ -28,6 +28,7 @@ import { reviewConstructionFootShape } from "./engine/constructionFootShape";
 import { reviewConstructionFootComposition } from "./engine/constructionFootComposition";
 import { constructionFrameInventory, constructionParameterInventory, constructionFootEvidenceBoundary } from "./engine/constructionFootEvidence";
 import { constructionFrameTerminology } from "./engine/constructionFrameTerminology";
+import { constructionFrameMacroAssociations } from "./engine/constructionFrameContrastEvidence";
 import { reviewConstructionCoupling } from "./engine/constructionCouplingEvidence";
 import { reviewConstructionMacro } from "./engine/constructionMacroEvidence";
 import { handFlameConstructionExample } from "./engine/constructionWorkedExampleEvidence";
@@ -544,6 +545,9 @@ function App() {
                 <div className="detail-kicker">RECOVERED FOOT INVENTORY · EVIDENCE-INDEXED</div>
                 <p><strong>Frame consonants</strong> — six structural classes are source-backed; their semantic contrasts remain unresolved.</p>
                 <div className="construction-foot-parts">{constructionFrameInventory.map(entry => <span key={entry.consonant}><small>{entry.canonicalForm} · {entry.status}</small>{entry.consonant}</span>)}</div>
+                <p><strong>Frame-to-macro associations</strong> — pattern-level evidence only, not individual consonant definitions.</p>
+                <div className="construction-foot-parts">{constructionFrameMacroAssociations.map(entry => <span key={entry.macro}><small>{entry.frameSet.join(" · ")} · {entry.evidenceStatus}</small>{entry.macro}<small>{entry.pattern}</small></span>)}</div>
+                <p className="fixture-browser-caveat">TRAK's p/t/k association is described as alter / discrete change. KREN's b/d/g association is explicitly proposed and requires owner confirmation. Neither assigns a distinct meaning to each consonant.</p>
                 <p><strong>Parameter vowels</strong> — family labels are provisional, not executable meanings.</p>
                 <div className="construction-foot-parts">{constructionParameterInventory.map(entry => <span key={entry.vowel}><small>{entry.family} · {entry.status}</small>{entry.vowel}</span>)}</div>
                 <p className="fixture-browser-caveat">{constructionFootEvidenceBoundary.relationCoda}</p>
