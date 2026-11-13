@@ -18,7 +18,7 @@ describe("recovered Construction Foot shape", () => {
     expect(result.status).toBe("UNRESOLVED"); expect(result.relationCoda).toBe("z");
     expect(result.notes.join(" ")).toContain("coda inventory");
   });
-  it("[CON-FOOT-005] rejects a vowel in the relation-coda position", () => { expect(reviewConstructionFootShape("paa").status).toBe("SHAPE-INVALID"); });
+  it("[CON-FOOT-005] rejects a recovered parameter vowel in the relation-coda position", () => { expect(reviewConstructionFootShape("paa").status).toBe("SHAPE-INVALID"); });
   it("[CON-FOOT-006] rejects non-frame initial consonants", () => {
     expect(reviewConstructionFootShape("va").status).toBe("SHAPE-INVALID"); expect(reviewConstructionFootShape("za").status).toBe("SHAPE-INVALID");
   });
@@ -40,15 +40,37 @@ describe("recovered Construction Foot shape", () => {
       expect(result.status === "FRAME-FORM-RECOGNISED").toBe(canonical.includes(initial + vowel));
     }
   });
-  it("[CON-FOOT-011] keeps a structurally plausible but unrecorded CVC combination unresolved", () => {
+  it("[CON-FOOT-011] keeps unrecorded CVC combinations unresolved", () => {
     const result = reviewConstructionFootShape("puz");
     expect(result.status).toBe("UNRESOLVED");
     expect(result.notes.join(" ")).toContain("combination is not among");
     expect(result.notes.join(" ")).toContain("coda inventory");
   });
-  it("[CON-FOOT-012] preserves source-backed CVC structural position without validating a consonant coda", () => {
+  it("[CON-FOOT-012] does not validate a coda merely because it occupies the final slot", () => {
     const result = reviewConstructionFootShape("paz");
     expect(result.relationCoda).toBe("z");
     expect(result.status).toBe("UNRESOLVED");
+    expect(result.notes.join(" ")).toContain("letter shape alone does not establish");
+  });
+  it("[CON-FOOT-013] rejects punctuation in every structural slot", () => {
+    for (const value of ["p-a", "pa!", "p.a", "p a"]) expect(reviewConstructionFootShape(value).status).toBe("SHAPE-INVALID");
+  });
+  it("[CON-FOOT-014] rejects non-string runtime input without throwing", () => {
+    expect(reviewConstructionFootShape(null).status).toBe("SHAPE-INVALID");
+    expect(reviewConstructionFootShape(42).status).toBe("SHAPE-INVALID");
+    expect(reviewConstructionFootShape({}).status).toBe("SHAPE-INVALID");
+  });
+  it("[CON-FOOT-015] uses Unicode code points for structural length", () => {
+    expect(reviewConstructionFootShape("pə").status).toBe("UNRESOLVED");
+    expect(reviewConstructionFootShape("pəz").status).toBe("UNRESOLVED");
+  });
+  it("[CON-FOOT-016] does not infer consonant status from an unfamiliar letter", () => {
+    const result = reviewConstructionFootShape("pay");
+    expect(result.status).toBe("UNRESOLVED");
+    expect(result.notes.join(" ")).toContain("does not establish that it is a consonant");
+  });
+  it("[CON-FOOT-017] rejects whitespace-only or empty input as unsupported shape", () => {
+    expect(reviewConstructionFootShape("").status).toBe("SHAPE-INVALID");
+    expect(reviewConstructionFootShape("  ").status).toBe("SHAPE-INVALID");
   });
 });
