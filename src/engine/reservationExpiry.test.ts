@@ -59,7 +59,7 @@ describe("Arcane Incantations v1.9 reservation expiry assessment", () => {
     expect(assessReservationExpiry(input({
       evaluationTimeUnixMs: 2_001,
       evidence: { basis: "CONTRACTUALLY-GUARANTEED", contractRef: "reservation-contract:v2" }
-    })).toMatchObject({
+    }))).toMatchObject({
       outcome: "RESERVATION-EXPIRED",
       evidenceBasis: "CONTRACTUALLY-GUARANTEED",
       evidenceReference: "reservation-contract:v2",
@@ -71,7 +71,7 @@ describe("Arcane Incantations v1.9 reservation expiry assessment", () => {
     expect(assessReservationExpiry(input({
       evaluationTimeUnixMs: 1_999,
       evidence: { basis: "OBSERVED", evidenceRef: "expired-observation:before-deadline" }
-    })).toMatchObject({
+    }))).toMatchObject({
       outcome: "RESOURCE-OUTCOME-UNKNOWN",
       diagnostic: { code: "RESERVATION-EXPIRY-EVIDENCE-CONFLICT" }
     }));
