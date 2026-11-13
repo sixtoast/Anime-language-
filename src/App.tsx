@@ -32,6 +32,7 @@ import { constructionFrameMacroAssociations } from "./engine/constructionFrameCo
 import { reviewConstructionCoupling } from "./engine/constructionCouplingEvidence";
 import { reviewConstructionMacro } from "./engine/constructionMacroEvidence";
 import { handFlameConstructionExample } from "./engine/constructionWorkedExampleEvidence";
+import { constructionStageRelationshipEvidence } from "./engine/constructionStageRelationshipEvidence";
 import { reviewFusedConstructionReference } from "./engine/constructionFusedReferenceEvidence";
 import { reviewKSeriesExample } from "./engine/constructionKSeriesExampleEvidence";
 
@@ -580,6 +581,17 @@ function App() {
                 {constructionMacroReview.entry && <><p><b>Recovered Construction evidence:</b> {constructionMacroReview.entry.recoveredEvidence}</p><p><b>Open contract:</b> {constructionMacroReview.entry.unresolvedContract}</p></>}
               </div>
               <p className="fixture-browser-caveat">Source status is not a completion status. All six forms remain non-executable in this inspector.</p>
+            </div>
+            <div className="construction-relationship-map">
+              <div className="detail-kicker">PHASE 4 §3.3 · RECOVERED STAGE RELATIONSHIPS</div>
+              <p>The source establishes the relative performed order below. These arrows mean <strong>precedes</strong> only; they do not assert that one stage supplies arguments, values or physical outputs to the next.</p>
+              <ol>
+                {constructionStageRelationshipEvidence.precedence.map(edge => <li key={edge.from + "-" + edge.to}>
+                  <strong>{edge.fromLabel}</strong> <span aria-label="precedes">→</span> <strong>{edge.toLabel}</strong>
+                  <small>{edge.evidenceStatus} · interface {edge.interfaceStatus.toLowerCase()}</small>
+                </li>)}
+              </ol>
+              <p className="fixture-browser-caveat">No direct data-flow, mandatory-stage, cardinality, omission, dependency or execution rule is inferred. Each interface requires original v2.0 evidence or an explicitly approved replacement specification.</p>
             </div>
             <div className="construction-worked-example">
               <div className="detail-kicker">PHASE 4 §8 · HAND-FLAME WORKED EXAMPLE</div>
