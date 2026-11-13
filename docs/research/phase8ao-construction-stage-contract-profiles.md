@@ -69,3 +69,6 @@ Construction Studio now displays the profiles and makes the v3.0-L spatial inven
 ## Decision
 
 Do not implement a Construction compiler from these profiles. The next useful increment is to recover original Phase 4 DOCX text through a document-aware path or, if unavailable, prepare a single owner-reviewable replacement-specification decision package. Do not repeat the same spatial inventory work or infer interfaces from stage order.
+## Build correction record
+
+The first Vercel build for the Phase 8AO implementation (`580439c`) failed at `tsc --noEmit` because the inferred union type did not expose `versionBoundary` on profiles where that optional field was omitted. The profile data was normalised in follow-up commit `47c5b1877dcba2405044a6af67976d4fb42b88d8` by adding an explicit `versionBoundary: null` to records without a special boundary. This correction is committed; the replacement deployment was still building at the time of this record update, so its successful build is not yet claimed.
