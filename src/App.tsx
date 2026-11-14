@@ -27,6 +27,7 @@ import { bindConstructionReference, type ConstructionReferenceToken } from "./en
 import { reviewConstructionFootShape } from "./engine/constructionFootShape";
 import { reviewConstructionFootComposition } from "./engine/constructionFootComposition";
 import { constructionFrameInventory, constructionParameterInventory, constructionFootEvidenceBoundary } from "./engine/constructionFootEvidence";
+import { constructionFootSourceRecovery, reviewConstructionFootSourceForm } from "./engine/constructionFootSourceRecovery";
 import { constructionFrameTerminology } from "./engine/constructionFrameTerminology";
 import { constructionFrameMacroAssociations } from "./engine/constructionFrameContrastEvidence";
 import { reviewConstructionCoupling } from "./engine/constructionCouplingEvidence";
@@ -146,6 +147,7 @@ function App() {
   const [constructionCouplingInput, setConstructionCouplingInput] = useState("ha");
   const constructionCouplingReview = useMemo(() => reviewConstructionCoupling(constructionCouplingInput), [constructionCouplingInput]);
   const [constructionMacroInput, setConstructionMacroInput] = useState("TRAK");
+  const [constructionFootSourceReview, setConstructionFootSourceReview] = useState(() => reviewConstructionFootSourceForm("kan"));
   const constructionMacroReview = useMemo(() => reviewConstructionMacro(constructionMacroInput), [constructionMacroInput]);
   const constructionReference = useMemo(
     () => bindConstructionReference(constructionReferenceToken, constructionReferenceId),
@@ -555,6 +557,12 @@ function App() {
                 <p className="fixture-browser-caveat">{constructionFootEvidenceBoundary.relationCoda}</p>
                 <p className="fixture-browser-caveat"><strong>Structural source discrepancy:</strong> {constructionFootEvidenceBoundary.shapeEvidenceDiscrepancy.primary} {constructionFootEvidenceBoundary.shapeEvidenceDiscrepancy.conflictingSummary} {constructionFootEvidenceBoundary.shapeEvidenceDiscrepancy.treatment}</p>
                 <p className="fixture-browser-caveat">Open gaps: {constructionFootEvidenceBoundary.unresolved.join("; ")}.</p>
+                <p><strong>Observed historical CVC-shaped tokens</strong> — whole-token evidence from the complete Phase 5.22 parser source; not a recovered segment-by-segment paradigm.</p>
+                <div className="construction-foot-parts">{constructionFootSourceRecovery.observedWholeTokens.map(entry => <span key={entry.token}><small>{entry.alias}</small>{entry.token}<small>{entry.surfaceShape}</small></span>)}</div>
+                <p className="fixture-browser-caveat">Observed final letters are n and s in these three examples only. This does not establish a complete coda inventory or assign independent coda meanings. Use the source-form lookup below to distinguish documented whole tokens from unresolved shapes.</p>
+                <label htmlFor="construction-foot-source-input">Construction Foot source form</label>
+                <input id="construction-foot-source-input" defaultValue="kan" onChange={event => setConstructionFootSourceReview(reviewConstructionFootSourceForm(event.target.value))} placeholder="e.g. kan" spellCheck={false} />
+                <div className="construction-coupling-result" role="status" aria-live="polite"><strong>{constructionFootSourceReview.status.replaceAll("-", " ")}</strong><p>{constructionFootSourceReview.message}</p></div>
               </div>
             <div className="construction-coupling-review">
               <div className="detail-kicker">V2.0 H-SERIES · EVIDENCE LOOKUP ONLY</div>
