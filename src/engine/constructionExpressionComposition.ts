@@ -49,7 +49,10 @@ export interface ConstructionExpressionCompositionReview {
 const LIMITATION = "This composition groups documentary evidence by the seven recovered Construction stage labels. It does not parse Arcana, impose a stage sequence, infer mandatory or optional stages, resolve interfaces or cardinality, validate a spell, establish physical feasibility, or execute an operation.";
 
 export function createEmptyConstructionExpressionComposition(id: string): ConstructionExpressionComposition {
-  const stageEvidence = Object.fromEntries(constructionStageOrder.map(stage => [stage, []])) as Record<ConstructionStage, readonly ConstructionStageEvidenceRecord[]>;
+  const stageEvidence = constructionStageOrder.reduce((records, stage) => {
+    records[stage] = [];
+    return records;
+  }, {} as Record<ConstructionStage, readonly ConstructionStageEvidenceRecord[]>);
   return { id, stageEvidence, executable: false, canonEffect: "NONE" };
 }
 

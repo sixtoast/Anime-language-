@@ -21,7 +21,7 @@ export interface ConstructionStageInterfaceBoundary {
   evidence: string;
 }
 
-const unresolvedDimensions: readonly ConstructionInterfaceDimension[] = [
+const unresolvedDimensions = [
   "INPUT-TYPE",
   "OUTPUT-TYPE",
   "ATTACHMENT",
