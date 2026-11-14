@@ -39,7 +39,7 @@ describe("Phase 8CQ evidence-aware Incantation obligation review", () => {
     const ledger = completeLedger() as unknown as Record<string, unknown>;
     delete ledger["OUTCOME"];
     const result = reviewIncantationObligations({ profile: INCANTATION_OBLIGATION_PROFILE, obligations: ledger });
-    expect(result.disposition).toBe("REQUIRED-OBLIGATION-UNRESOLVED");
+    expect(result.disposition).toBe("INVALID-REVIEW-SHAPE");
     expect(result.results.find((entry) => entry.id === "OUTCOME")?.status).toBe("INVALID-ENTRY");
   });
 
