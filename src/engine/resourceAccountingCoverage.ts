@@ -491,6 +491,7 @@ export const resourceAccountingCoverage: ResourceAccountingCoverage[] = [
       "RES19-AUDIT-006"
     ],
     "note": "A presence-only assessor checks that all 14 top-level v1.9 audit sections are represented and preserves a caller-reported unknown or failed outcome verbatim. It does not validate section content, contract-version values, evidence authenticity or semantic audit completeness."
+  },
   {
     "fixtureId": "RES19-60",
     "status": "SPECIFICATION-ONLY",
