@@ -8,7 +8,7 @@
 
 `mel · po da za shi to za ma · kan ken · he ha · sa shi za se · kas`
 
-The sequence is represented as six source groups and 18 tokens. These are the source's displayed groupings, not inferred grammar stages.
+The sequence is represented as six source groups and 17 tokens. These are the source's displayed groupings, not inferred grammar stages.
 
 ## Evidence map
 

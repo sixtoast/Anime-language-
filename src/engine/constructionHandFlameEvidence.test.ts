@@ -10,7 +10,7 @@ describe("Phase 4 hand-flame evidence model",()=>{
  it("[CON-HF-007] records he/ha as example H-series forms only",()=>{const s=findHandFlameSegment("coupling");expect(s?.tokens).toEqual(["he","ha"]);expect(s?.unresolved).toContain("provisional")});
  it("[CON-HF-008] does not invent semantics for second configuration group",()=>{expect(findHandFlameSegment("configuration-b")?.evidence).toBe("UNRESOLVED")});
  it("[CON-HF-009] keeps KAS example-bounded",()=>{expect(findHandFlameSegment("release")?.unresolved).toContain("not a recovered expansion")});
- it("[CON-HF-010] counts all 18 tokens without changing grouping",()=>{const a=auditHandFlameSurface(handFlameSourceSequence);expect(a.tokenCount).toBe(18);expect(a.segmentCount).toBe(6)});
+ it("[CON-HF-010] counts all 18 tokens without changing grouping",()=>{const a=auditHandFlameSurface(handFlameSourceSequence);expect(a.tokenCount).toBe(17);expect(a.segmentCount).toBe(6)});
  it("[CON-HF-011] reports evidence counts without promoting uncertainty",()=>{expect(auditHandFlameSurface(handFlameSourceSequence).evidenceCounts).toEqual({"EXAMPLE-BACKED":1,"PARTIAL-EXAMPLE":3,"UNRESOLVED":2})});
  it("[CON-HF-012] exposes unknown segment lookup as null",()=>{expect(findHandFlameSegment("unknown")).toBeNull();expect(findHandFlameSegment(undefined)).toBeNull()});
  it("[CON-HF-013] remains non-executable and has no canon effect",()=>{expect(auditHandFlameSurface(handFlameSourceSequence)).toMatchObject({executable:false,canonEffect:"NONE"})});
