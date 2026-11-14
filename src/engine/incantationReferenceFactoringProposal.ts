@@ -25,13 +25,15 @@ export function packageIncantationSharedReferences(input:unknown):IncantationRef
    if(id){slots.push({kind:"SHARED",bindingId:id});if(!bindings.some(b=>b.bindingId===id))bindings.push({bindingId:id,reference:clone(reference)});}
    else slots.push({kind:"INLINE",reference:clone(reference)});
   }
-  const {references,...argumentsWithoutReferences}=args;
+  const argumentsWithoutReferences=clone(args);
+  delete argumentsWithoutReferences.references;
   const {operationId,...operationFields}=raw;
   delete operationFields.arguments;
-  operations.push({operationId:operationId as string,operationFields:clone(operationFields),argumentsWithoutReferences:clone(argumentsWithoutReferences),referenceSlots:slots});
+  operations.push({operationId:operationId as string,operationFields:clone(operationFields),argumentsWithoutReferences,referenceSlots:slots});
  }
- const {operations:discardedOperations,...sourceEnvelope}=input;
- return {profile:INCANTATION_REFERENCE_FACTORING_PROFILE,sourceProfile:input.profile??null,sourceEnvelope:clone(sourceEnvelope),sharedBindings:bindings,operations,auditDisposition:audit.disposition==="CANDIDATES-FOUND"?"CANDIDATES-FOUND":"NO-SAFE-CANDIDATES",factoredOccurrences:bindings.reduce((n,b)=>n+operations.reduce((m,o)=>m+o.referenceSlots.filter(s=>s.kind==="SHARED"&&s.bindingId===b.bindingId).length,0)-1,0),transformation:"STRUCTURED-IR-PACKAGING-ONLY",spokenSyntax:"NOT-DEFINED",scopeSemantics:"NOT-PROVEN",semanticEquivalence:"NOT-CLAIMED",executable:false,canonEffect:"NONE"};
+ const sourceEnvelope=clone(input);
+ delete sourceEnvelope.operations;
+ return {profile:INCANTATION_REFERENCE_FACTORING_PROFILE,sourceProfile:input.profile??null,sourceEnvelope,sharedBindings:bindings,operations,auditDisposition:audit.disposition==="CANDIDATES-FOUND"?"CANDIDATES-FOUND":"NO-SAFE-CANDIDATES",factoredOccurrences:bindings.reduce((n,b)=>n+operations.reduce((m,o)=>m+o.referenceSlots.filter(s=>s.kind==="SHARED"&&s.bindingId===b.bindingId).length,0)-1,0),transformation:"STRUCTURED-IR-PACKAGING-ONLY",spokenSyntax:"NOT-DEFINED",scopeSemantics:"NOT-PROVEN",semanticEquivalence:"NOT-CLAIMED",executable:false,canonEffect:"NONE"};
 }
 export function expandIncantationSharedReferences(input:unknown,expectedOriginal?:unknown):ExpansionResult {
  const fail=(issues:string[]):ExpansionResult=>({disposition:"INVALID-PACKAGE",expanded:null,structuralRoundTrip:"NOT-CHECKED",issues,semanticEquivalence:"NOT-CLAIMED",spokenSyntax:"NOT-DEFINED",executable:false,canonEffect:"NONE"});

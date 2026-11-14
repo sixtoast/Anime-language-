@@ -1,7 +1,7 @@
 # Phase 8CY-W — Grammatical compression opportunity audit
 
 **Status:** implemented as a non-transforming analysis.  
-**Canon effect:** NONE · **Execution:** disabled · **Tests:** 14 authored, not executed locally.
+**Canon effect:** NONE · **Execution:** disabled · **Tests:** 16 authored, not executed locally.
 
 ## Objective
 
