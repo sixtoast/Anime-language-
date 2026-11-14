@@ -1,15 +1,5 @@
 #!/usr/bin/env python3
-"""Extract paragraph and table text from a DOCX without third-party packages.
-
-Usage:
-  python tools/extract_docx_structure.py input.docx
-  python tools/extract_docx_structure.py input.docx --output extracted.md
-
-The source DOCX is read in place and never modified. Paragraphs and tables are
-walked in document-body order. This is a text transcription, not a visual
-layout reconstruction; images, text boxes, comments and tracked-change intent
-are not interpreted.
-"""
+"""Extract paragraph and table text from a DOCX without third-party packages."""
 from __future__ import annotations
 import argparse
 import hashlib
@@ -21,15 +11,14 @@ NS = {"w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main"}
 W = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
 
 def paragraph_text(node: ET.Element) -> str:
-    """Join text runs in a paragraph, preserving spaces and tabs where encoded."""
     parts: list[str] = []
     for child in node.iter():
         if child.tag == W + "t":
             parts.append(child.text or "")
         elif child.tag == W + "tab":
-            parts.append("\\t")
+            parts.append("\t")
         elif child.tag in (W + "br", W + "cr"):
-            parts.append("\\n")
+            parts.append("\n")
     return "".join(parts).strip()
 
 def cell_text(cell: ET.Element) -> str:
@@ -45,7 +34,15 @@ def extract_docx(path: Path) -> tuple[str, str]:
     body = root.find("w:body", NS)
     if body is None:
         raise ValueError("DOCX has no document body")
-    lines = [f"# Extracted DOCX transcription: {path.name}", "", f"- SHA-256: `{digest}`", "- Method: standard-library DOCX XML extraction", "- Scope: document-body paragraphs and tables in source order", "- Limitations: layout, images, text boxes, comments and tracked-change intent are not reconstructed", ""]
+    lines = [
+        "# Extracted DOCX transcription: " + path.name,
+        "",
+        "- SHA-256: " + digest,
+        "- Method: standard-library DOCX XML extraction",
+        "- Scope: document-body paragraphs and tables in source order",
+        "- Limitations: layout, images, text boxes, comments and tracked-change intent are not reconstructed",
+        "",
+    ]
     paragraph_no = 0
     table_no = 0
     for child in list(body):
@@ -57,13 +54,13 @@ def extract_docx(path: Path) -> tuple[str, str]:
         elif child.tag == W + "tbl":
             table_no += 1
             rows = child.findall("./w:tr", NS)
-            lines.extend([f"## Table {table_no}", ""])
+            lines.extend(["## Table " + str(table_no), ""])
             for row in rows:
                 cells = [cell_text(cell) for cell in row.findall("./w:tc", NS)]
-                lines.append("| " + " | ".join(value.replace("|", "\\|").replace("\\n", " ") for value in cells) + " |")
+                lines.append("| " + " | ".join(value.replace("|", "\\|").replace("\n", " ") for value in cells) + " |")
             lines.append("")
-    lines.extend([f"<!-- paragraphs: {paragraph_no}; tables: {table_no} -->", ""])
-    return "\\n".join(lines), digest
+    lines.extend(["<!-- paragraphs: " + str(paragraph_no) + "; tables: " + str(table_no) + " -->", ""])
+    return "\n".join(lines), digest
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -73,7 +70,7 @@ def main() -> int:
     text, digest = extract_docx(args.docx)
     if args.output:
         args.output.write_text(text, encoding="utf-8")
-        print(f"Wrote {args.output} (SHA-256 {digest})")
+        print("Wrote " + str(args.output) + " (SHA-256 " + digest + ")")
     else:
         print(text)
     return 0
