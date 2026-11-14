@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "mkdir -p public/research && python3 -m unittest discover -s tools -p "test_*.py" && python3 tools/extract_docx_structure.py sources/originals/Arcane_Language_Audit_Phase_4.docx --expected-sha256 c8204667c204227ba474fd0b5245fd66f1ba081565671f5a28cf65efb513eaea --output public/research/phase4-transcription.md && python3 tools/phase4_source_probe.py public/research/phase4-transcription.md --sections 3,6,8,9,10 && tsc --noEmit && vitest run && vite build",
+    "build": "mkdir -p public/research && python3 -m unittest discover -s tools -p 'test_*.py' && python3 tools/extract_docx_structure.py sources/originals/Arcane_Language_Audit_Phase_4.docx --expected-sha256 c8204667c204227ba474fd0b5245fd66f1ba081565671f5a28cf65efb513eaea --output public/research/phase4-transcription.md && python3 tools/phase4_source_probe.py public/research/phase4-transcription.md --sections 3,6,8,9,10 && tsc --noEmit && vitest run && vite build",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
