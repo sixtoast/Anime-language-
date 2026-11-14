@@ -22,7 +22,7 @@ def main() -> int:
         encoded = base64.b64encode(text.encode("utf-8")).decode("ascii")
         print("PHASE4_BODY_CHARACTERS", len(text))
         print("PHASE4_BODY_SHA256", hashlib.sha256(text.encode("utf-8")).hexdigest())
-        chunk_size = 2000
+        chunk_size = 1000
         for index, start in enumerate(range(0, len(encoded), chunk_size), 1):
             print(f"PHASE4-BODY-B64-{index:03d}:" + encoded[start:start + chunk_size])
         return 0
