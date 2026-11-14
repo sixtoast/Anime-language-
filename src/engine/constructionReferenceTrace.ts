@@ -147,7 +147,6 @@ export function traceConstructionReferenceEvents(
     });
   });
 
-  if (boundaryBlocked && status === "BOUND") status = "UNRESOLVED";
   return {
     steps,
     finalStatus: status,
