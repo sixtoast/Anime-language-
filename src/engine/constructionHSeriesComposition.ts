@@ -91,7 +91,7 @@ export function reviewHSeriesComposition(input: string): HSeriesCompositionRevie
 }
 
 export function reviewHandFlameCouplingPhrase(input: string) {
-  const normalized = input.trim().toLowerCase().replace(/\\s+/g, " ");
+  const normalized = input.trim().toLowerCase().replace(/\s+/g, " ");
   if (normalized !== "he ha") return {
     input, status: "NOT-RECORDED" as const, observation: null,
     message: "Only the exact he ha co-occurrence is recorded in this bounded fixture; no other pair is inferred."
