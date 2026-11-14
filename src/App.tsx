@@ -20,6 +20,7 @@ import { authorityDecisionFixtures } from "./engine/authorityDecisionFixtures";
 import { policyProfileCompositionFixtures } from "./engine/policyProfileCompositionFixtures";
 import { invocationLifecycleSequence, invocationOrderNote, validationGateSequence } from "./engine/incantationGateSequence";
 import { evaluateIncantationRuntimePreview, runtimePreviewScenarios, type RuntimePreviewScenario } from "./engine/incantationRuntimePreview";
+import { reviewIncantationObligations, type IncantationObligationReview } from "./engine/incantationObligationReview";
 import { evaluateResourceConservationPreview, resourceConservationPreviewScenarios, type ResourceConservationPreviewScenario } from "./engine/resourceConservationPreview";
 import { reviewConstructionRecord, type ConstructionRecord, type ConstructionEvidenceStatus } from "./engine/constructionRecordReview";
 import type { ConstructionStage } from "./engine/constructionOrderAudit";
@@ -289,6 +290,20 @@ function App() {
   const [contractResourceNotes, setContractResourceNotes] = useState("");
   const [contractAuthorityReference, setContractAuthorityReference] = useState("");
   const [contractConsentRequirement, setContractConsentRequirement] = useState("unresolved");
+  const [obligationInput, setObligationInput] = useState(() => JSON.stringify({
+    profile: "INCANTATION-OBLIGATIONS-1.0",
+    obligations: {
+      "OPERATION": { applicability: "REQUIRED", resolution: "UNRESOLVED" },
+      "TARGET-REFERENCE": { applicability: "REQUIRED", resolution: "UNRESOLVED" },
+      "MECHANISM-COUPLING": { applicability: "UNRESOLVED", resolution: "UNRESOLVED" },
+      "SPATIAL-ROLE": { applicability: "UNRESOLVED", resolution: "UNRESOLVED" },
+      "CONSTRAINTS": { applicability: "UNRESOLVED", resolution: "UNRESOLVED" },
+      "RESOURCE-FEASIBILITY": { applicability: "UNRESOLVED", resolution: "UNRESOLVED" },
+      "OUTCOME": { applicability: "REQUIRED", resolution: "UNRESOLVED" }
+    }
+  }, null, 2));
+  const [obligationReview, setObligationReview] = useState<IncantationObligationReview | null>(null);
+  const [obligationReviewError, setObligationReviewError] = useState<string | null>(null);
   const [mobileNav, setMobileNav] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState(docs[0].title);
   const [testQuery, setTestQuery] = useState("");
@@ -454,6 +469,17 @@ function App() {
       "Validation, mechanism feasibility, resources, authority, consent and execution are independent gates."
     ]
   }), [contractOperation, contractTarget, contractDesiredOutcome, contractMechanism, contractSpatialRole, contractPreconditions, contractConstraints, contractResourceNotes, contractAuthorityReference, contractConsentRequirement]);
+
+  const runObligationReview = () => {
+    try {
+      const input: unknown = JSON.parse(obligationInput);
+      setObligationReview(reviewIncantationObligations(input));
+      setObligationReviewError(null);
+    } catch (error) {
+      setObligationReview(null);
+      setObligationReviewError(error instanceof Error ? error.message : "The obligation ledger is not valid JSON.");
+    }
+  };
 
   const changeSection = (next: Section) => {
     setSection(next);
@@ -1146,6 +1172,33 @@ function App() {
             <div className="contract-worksheet-output-head"><div><span className="detail-kicker">GENERATED REVIEW RECORD</span><h3>Structured worksheet JSON</h3></div><span>Execution: NOT-EXECUTED</span></div>
             <textarea className="contract-worksheet-json" aria-label="Generated contract worksheet JSON" readOnly rows={20} value={JSON.stringify(contractWorksheet, null, 2)}/>
             <p className="contract-worksheet-caveat">This worksheet does not certify that the target exists, the mechanism works, the requested outcome is physically possible, resources are sufficient, authority is valid, consent exists or execution occurred. Those checks require separate evidence and implementations.</p>
+          </section>
+          <section className="contract-worksheet" aria-labelledby="incantation-obligation-review-title">
+            <div className="contract-worksheet-head">
+              <div><span className="detail-kicker">INCANTATION COMPANION · EVIDENCE REVIEW</span><h2 id="incantation-obligation-review-title">Semantic obligation reviewer</h2></div>
+              <span className="contract-draft-status">NO EXECUTION</span>
+            </div>
+            <p className="contract-worksheet-intro">Review the seven semantic obligations from Incantations v1.0. Edit the JSON to record applicability, evidence references and visible-binding or explicit bases. The starter ledger is intentionally unresolved. This tool checks accounting only; it does not parse or validate a spoken spell.</p>
+            <textarea className="contract-worksheet-json" aria-label="Incantation obligation evidence ledger JSON" rows={20} value={obligationInput} onChange={(event) => setObligationInput(event.target.value)}/>
+            <div className="contract-worksheet-output-head">
+              <div><span className="detail-kicker">LOCAL REVIEW</span><h3>Evidence accounting result</h3></div>
+              <button className="secondary-button" onClick={runObligationReview}>Review obligations <span>→</span></button>
+            </div>
+            {obligationReviewError && <p role="alert" className="contract-worksheet-caveat">{obligationReviewError}</p>}
+            {obligationReview && <>
+              <div className="runtime-preview-outcome">
+                <div><span>OBLIGATION DISPOSITION</span><strong>{obligationReview.disposition}</strong></div>
+                <div><span>ACCOUNTED FOR</span><strong>{obligationReview.accountedForCount} / {obligationReview.obligationCount}</strong></div>
+              </div>
+              <div className="audit-matrix">
+                {obligationReview.results.map((item) => <article className="audit-item" key={item.id}>
+                  <div className="audit-item-top"><code>{item.id}</code><span className="audit-readiness audit-design-level-only">{item.status}</span></div>
+                  <p>{item.explanation}</p>
+                  <div className="test-case-meta"><span>Evidence: {item.evidenceRef ?? "NOT RECORDED"}</span></div>
+                </article>)}
+              </div>
+              <p className="contract-worksheet-caveat">{obligationReview.limitation}</p>
+            </>}
           </section>
           <section className="lexicon-inspector" aria-labelledby="lexicon-inspector-title">
             <div className="lexicon-inspector-head">
