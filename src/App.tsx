@@ -789,7 +789,7 @@ function App() {
               <div className="construction-foot-parts">
                 {spatialValueModelSummary.kinds.map(kind => <span key={kind.id}><small>{kind.id}</small><strong>{kind.label}</strong><small>{kind.rule}</small></span>)}
               </div>
-              <p><strong>Worked fixture:</strong> frame FRAME-TEST-01; X=1 m, Y=2 m, Z=3 m. Under the proposed Euclidean displacement rule, magnitude = √14 m ≈ 3.742 m and self-dot-product = 14 m².</p>
+              <p><strong>Worked fixture:</strong> frame FRAME-TEST-01; X=1 m, Y=2 m, Z=3 m. Under the proposed Euclidean displacement rule, magnitude = {proposedDisplacementMagnitude(workedDisplacementFixture).value.toFixed(3)} m and self-dot-product = {proposedDisplacementDot(workedDisplacementFixture, workedDisplacementFixture).value} m².</p>
               <p><strong>Typed separation:</strong> displacement components use length dimensions; velocity components use length/time dimensions. A mana-state vector is not accepted as an ordinary spatial vector. A position additionally needs an origin/reference, and is not interchangeable with displacement.</p>
               <p className="fixture-browser-caveat">These are proposal-level research checks only. DRAN's full canonical input/norm contract, DREM's accepted types and result semantics, surface vector syntax, frame transforms and physical feasibility remain separate unresolved gates.</p>
             </div>
