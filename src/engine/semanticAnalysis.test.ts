@@ -1,3 +1,4 @@
+import {bundledLexiconLoad} from "./bundledLexicon";
 import { describe, expect, it } from "vitest";
 import { analyseSurfaceAst, analyseSurfaceParse } from "./semanticAnalysis";
 import { parseSurfaceExpression, type SurfaceNode } from "./surfaceParser";
@@ -59,7 +60,7 @@ describe("Phase 6H-A conservative semantic analysis", () => {
     expect(result.typedAst?.source).toEqual(parsed.ast);
   });
 
-  it("[SEM-A-008] preserves exact operator identity and does not silently canonicalise aliases", () => {
+  it("[SEM-A-008] preserves preferred operator identity while reusing its provisional legacy contract", () => {
     const ast: SurfaceNode = {
       kind: "call",
       operator: "FRAJA",
@@ -71,8 +72,9 @@ describe("Phase 6H-A conservative semantic analysis", () => {
     const result = analyseSurfaceAst(ast);
     expect(result.status).toBe("unresolved");
     expect(result.diagnostics.some((item) =>
-      item.code === "SEMANTIC_OPERATOR_UNKNOWN" && item.subject === "FRAJA"
+      item.code === "SEMANTIC_SIGNATURE_UNRESOLVED" && item.subject === "FRAJA"
     )).toBe(true);
+    expect(result.diagnostics.some((item)=>item.code==="SEMANTIC_OPERATOR_UNKNOWN")).toBe(false);
     expect(result.typedAst?.source).toEqual(ast);
   });
 
@@ -117,5 +119,13 @@ describe("Phase 6H-A conservative semantic analysis", () => {
     expect(result.status).toBe("unresolved");
     expect(result.typedAst?.children?.[0]?.type).toEqual({ kind: "scalar" });
     expect(result.diagnostics[0]?.code).toBe("SEMANTIC_BLOCK_RESULT_UNRESOLVED");
+  });
+
+  it("[SEM-A-013] routes a Phase 4 alias parse to the preferred provisional semantic contract",()=>{
+    const parsed=parseSurfaceExpression("frata ki sho to sho",{lexiconRegistry:bundledLexiconLoad.registry,allowLegacyAliases:true});
+    expect(parsed).toMatchObject({ok:true,ast:{kind:"call",operator:"FRAJA"}});
+    const result=analyseSurfaceParse(parsed);
+    expect(result.diagnostics.some(x=>x.code==="SEMANTIC_SIGNATURE_UNRESOLVED"&&x.subject==="FRAJA")).toBe(true);
+    expect(result.diagnostics.some(x=>x.code==="SEMANTIC_OPERATOR_UNKNOWN")).toBe(false);
   });
 });
