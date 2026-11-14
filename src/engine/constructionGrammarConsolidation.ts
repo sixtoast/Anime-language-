@@ -10,7 +10,7 @@ import { constructionFixtureProfile, auditConstructionFixtureParseTree } from ".
 import { constructionStageContractProfiles, constructionStageContractProfileLimits } from "./constructionStageContractProfiles";
 import { constructionStageRelationshipEvidence } from "./constructionStageRelationshipEvidence";
 import { constructionFootEvidenceBoundary } from "./constructionFootEvidence";
-import { auditConstructionOrder, type ConstructionStage } from "./constructionOrderAudit";
+import { auditConstructionOrder } from "./constructionOrderAudit";
 
 export type ConstructionEvidenceClassification =
   | "VALID"
