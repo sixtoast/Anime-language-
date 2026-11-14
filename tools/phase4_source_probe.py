@@ -2,6 +2,8 @@
 """Print bounded Phase 4 headings and compare the extracted opening to its archive-index excerpt."""
 from __future__ import annotations
 import argparse
+import base64
+import hashlib
 import re
 from pathlib import Path
 
@@ -12,9 +14,18 @@ def main() -> int:
     parser.add_argument("transcription", type=Path)
     parser.add_argument("--headings", default="3.1,3.2,3.3,6,8,9,10")
     parser.add_argument("--compare-index", type=Path)
+    parser.add_argument("--base64-output", action="store_true")
     args = parser.parse_args()
     text = args.transcription.read_text(encoding="utf-8")
     lines = text.splitlines()
+    if args.base64_output:
+        encoded = base64.b64encode(text.encode("utf-8")).decode("ascii")
+        print("PHASE4_BODY_CHARACTERS", len(text))
+        print("PHASE4_BODY_SHA256", hashlib.sha256(text.encode("utf-8")).hexdigest())
+        chunk_size = 2000
+        for index, start in enumerate(range(0, len(encoded), chunk_size), 1):
+            print(f"PHASE4-BODY-B64-{index:03d}:" + encoded[start:start + chunk_size])
+        return 0
     matches = []
     for i, line in enumerate(lines):
         match = re.match(r"^(?:(\d+(?:\.\d+)+)|(\d+)\.)\s+", line)
