@@ -947,4 +947,5 @@ export const workbenchTests: WorkbenchTest[] = [
   {id:"FOOT-MORPH-014",group:"Construction",title:"Separates relation and phonotactic codas",description:"Phase 4 coda semantics.",status:"authored-unverified",file:"src/engine/constructionFootMorphologyReview.test.ts",sourceRule:"Phase 4 §4 Table 4"},
   {id:"FOOT-MORPH-015",group:"Construction",title:"Keeps KREN and parameter families provisional",description:"Phase 4 Foot reviewer.",status:"authored-unverified",file:"src/engine/constructionFootMorphologyReview.test.ts",sourceRule:"Phase 4 §§3.2–3.3"},
   {id:"FOOT-MORPH-016",group:"Construction",title:"Separates fused reference mel from a Foot",description:"Phase 4 hand-flame reference analysis.",status:"authored-unverified",file:"src/engine/constructionFootMorphologyReview.test.ts",sourceRule:"Phase 4 §8 Table 14"},
+  {id:"SRC-CY-035",group:"Construction",title:"Records TRAK's frame group without individual consonant semantics",description:"Phase 4 primary transcription concordance.",status:"authored-unverified",file:"src/engine/constructionSourceConcordance.test.ts",sourceRule:"Phase 4 §3.2 Table 3; canon effect NONE"},
 ];
