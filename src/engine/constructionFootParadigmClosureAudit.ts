@@ -7,7 +7,7 @@ import { constructionFrameInventory, constructionParameterInventory, constructio
 import { constructionFootMorphologyAudit } from "./constructionFootMorphologyAudit";
 import { constructionFootSourceRecovery } from "./constructionFootSourceRecovery";
 import { constructionFootConflictAdjudication } from "./constructionFootSourceAdjudication";
-import { constructionFootComposition } from "./constructionFootComposition";
+import { reviewConstructionFootComposition } from "./constructionFootComposition";
 import { constructionLexicalSegmentationAudit } from "./constructionLexicalSegmentationAudit";
 
 type EvidenceState = "SOURCE-BACKED-INVENTORY" | "PROVISIONAL-ASSOCIATION" | "STRUCTURAL-STATEMENT-ONLY" | "EXAMPLE-OCCURRENCE-ONLY" | "UNRECOVERED" | "CONFLICT-OPEN";
@@ -82,7 +82,7 @@ export const constructionFootParadigmClosureAudit = {
     status: constructionFootConflictAdjudication.status,
     precedence: constructionFootConflictAdjudication.precedence,
     resolution: constructionFootConflictAdjudication.resolution,
-    readings: constructionFootComposition.readings.map(item => ({
+    readings: reviewConstructionFootComposition("pa").readings.map(item => ({
       sourceReading: item.sourceReading,
       codaRequirement: item.codaRequirement
     }))
