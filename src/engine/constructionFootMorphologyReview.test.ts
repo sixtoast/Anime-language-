@@ -20,4 +20,7 @@ it("[FOOT-MORPH-016] fails closed for malformed and empty inputs",()=>{expect(re
 
 it("[FOOT-MORPH-017] rejects a vowel as a CVC relation coda",()=>{for(const x of ["pae","pao","paa"])expect(reviewConstructionFootMorphology(x).status).toBe("UNRECOGNISED-SHAPE")});
 it("[FOOT-MORPH-018] accepts only the documented consonant or recognised digraph after a valid frame-vowel pair",()=>{expect(reviewConstructionFootMorphology("pam").status).toBe("CVC-STRUCTURE-CANDIDATE");expect(reviewConstructionFootMorphology("pang").codaMeaning).toBe("MAINTAIN-FEEDBACK");expect(reviewConstructionFootMorphology("pash").codaMeaning).toBe("RELEASE");expect(reviewConstructionFootMorphology("pae").relationCoda).toBeNull()});
+
+it("[FOOT-MORPH-020] accepts only Phase 4 phonotactically legal codas",()=>{for(const coda of ["m","n","ng","p","t","k","s","sh","l","r"])expect(reviewConstructionFootMorphology("pa"+coda).status).toBe("CVC-STRUCTURE-CANDIDATE");for(const coda of ["f","v","z","h","w","j"])expect(reviewConstructionFootMorphology("pa"+coda).status).toBe("UNRECOGNISED-SHAPE")});
+it("[FOOT-MORPH-021] exposes phonotactic-only codas separately from semantic relation codas",()=>{expect(reviewConstructionFootMorphology("pal").codaEvidenceClass).toBe("PHONOTACTIC-ONLY");expect(reviewConstructionFootMorphology("pam").codaEvidenceClass).toBe("RELATION-CODA");expect(reviewConstructionFootMorphology("kal").codaEvidenceClass).toBe("SOURCE-CONFLICT");expect(reviewConstructionFootMorphology("mel").codaEvidenceClass).toBe("SOURCE-CONFLICT")});
 });

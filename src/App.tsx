@@ -774,7 +774,8 @@ function App() {
                   <span><small>Review status</small><strong>{constructionFootMorphologyReview.status.replaceAll("-", " ")}</strong></span>
                   <span><small>Frame group</small><strong>{constructionFootMorphologyReview.macroAssociation}</strong></span>
                   <span><small>Parameter family</small><strong>{constructionFootMorphologyReview.parameterFamily ?? "—"}</strong></span>
-                  <span><small>Relation coda</small><strong>{constructionFootMorphologyReview.relationCoda ?? "—"}</strong></span>
+                  <span><small>Final coda</small><strong>{constructionFootMorphologyReview.relationCoda ?? "—"}</strong></span>
+                  <span><small>Coda evidence class</small><strong>{constructionFootMorphologyReview.codaEvidenceClass.replaceAll("-", " ")}</strong></span>
                   <span><small>Coda meaning</small><strong>{constructionFootMorphologyReview.codaMeaning.replaceAll("-", " ")}</strong></span>
                   <span><small>Lexical validity</small><strong>{constructionFootMorphologyReview.lexicalFootValidity.replaceAll("-", " ")}</strong></span>
                 </div>
