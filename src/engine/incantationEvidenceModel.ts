@@ -51,7 +51,7 @@ export function reviewPostcondition(input:unknown):{result:"NOT-EVALUATED"|"SATI
  if(!obj(input)||typeof input.executionAttempted!=="boolean")return{...base,result:"INVALID",reason:"Execution-attempt status must be explicit."};
  if(!input.executionAttempted)return{...base,result:"NOT-EVALUATED",reason:"An unattempted operation cannot pass its postcondition."};
  if(!["TRUE","FALSE","UNKNOWN","ERROR","INVALID","NOT-EVALUATED"].includes(String(input.predicateResult)))return{...base,result:"INVALID",reason:"A recognised predicate result is required."};
- if(input.predicateResult==="TRUE")return{...base,result:"SATISFIED",dependentStepEligible:true,reason:"Postcondition result is TRUE; eligibility is limited to this declared dependency and does not itself execute it.",execution:"NOT-PERFORMED",canonEffect:"NONE"};
+ if(input.predicateResult==="TRUE")return{...base,result:"SATISFIED",dependentStepEligible:true,reason:"Postcondition result is TRUE; eligibility is limited to this declared dependency and does not itself execute it.",canonEffect:"NONE"};
  if(input.predicateResult==="FALSE")return{...base,result:"FAILED",reason:"Postcondition is established false."};
  if(input.predicateResult==="UNKNOWN"||input.predicateResult==="ERROR"||input.predicateResult==="NOT-EVALUATED")return{...base,result:"UNVERIFIED",reason:"Postcondition has not been established."};
  return{...base,result:"INVALID",reason:"Invalid predicate result cannot verify an outcome."};

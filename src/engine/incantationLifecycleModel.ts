@@ -17,7 +17,7 @@ export function reviewInvocationLifecycle(input:unknown):LifecycleReview{
  input.events.forEach((raw,i)=>{const p="events["+i+"]";if(!obj(raw)){issues.push(p+" must be an event object.");return;}
  if(typeof raw.id!=="string"||!raw.id||ids.has(raw.id))issues.push(p+" has a missing or duplicate event id.");else ids.add(raw.id);
  if(raw.sequence!==i)issues.push(p+" sequence must be contiguous and append-only from zero.");
- if(!iso(raw.at))issues.push(p+" requires a UTC timestamp.");else{const t=Date.parse(raw.at);if(t<lastAt)issues.push(p+" timestamp precedes an earlier event.");lastAt=t;}
+ if(!iso(raw.at))issues.push(p+" requires a UTC timestamp.");else{const t=Date.parse(raw.at as string);if(t<lastAt)issues.push(p+" timestamp precedes an earlier event.");lastAt=t;}
  if(typeof raw.source!=="string"||!raw.source)issues.push(p+" requires an event source.");
  if(!INVOCATION_STATES.includes(raw.state as InvocationState)){issues.push(p+" has an unknown invocation state.");return;}
  const state=raw.state as InvocationState;

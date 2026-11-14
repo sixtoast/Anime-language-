@@ -1,5 +1,5 @@
 import{describe,it,expect}from"vitest";
-import{reviewEvidenceRecord,reviewEvidenceSet,reviewTemporalContract,reviewPostcondition,INCANTATION_EVIDENCE_PROFILE as P}from"./incantationEvidenceModel";
+import{reviewEvidenceRecord,reviewEvidenceSet,reviewTemporalContract,reviewPostcondition}from"./incantationEvidenceModel";
 const policy={acceptedClasses:["ASSERTED","DERIVED","OBSERVED","VERIFIED"],maxAgeSeconds:600,maxUncertainty:0.2,requiredCoverage:"FULL",requireDerivationRule:true,requireVerificationContract:true};
 const ev=(overrides:Record<string,unknown>={})=>({id:"e1",subjectId:"target1",predicateId:"occupied",result:"TRUE",class:"OBSERVED",source:"sensor-A",method:"declared-observation",observedAt:"2026-11-14T10:00:00Z",validUntil:"2026-11-14T10:10:00Z",uncertainty:0.1,coverage:"FULL",...overrides});
 const now="2026-11-14T10:05:00Z";
