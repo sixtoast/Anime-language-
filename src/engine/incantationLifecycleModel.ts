@@ -30,7 +30,7 @@ export function reviewInvocationLifecycle(input:unknown):LifecycleReview{
  if(failed&&!attempted)issues.push("An execution failure cannot be recorded without an attempt.");
  let interrupt:InterruptState|null=null;let intAt=-Infinity;
  input.interruptEvents.forEach((raw,i)=>{const p="interruptEvents["+i+"]";if(!obj(raw)){issues.push(p+" must be an object.");return;}
- if(raw.sequence!==i)issues.push(p+" sequence must be contiguous from zero.");if(!iso(raw.at))issues.push(p+" requires a UTC timestamp.");else{const t=Date.parse(raw.at);if(t<intAt)issues.push(p+" timestamp regressed.");intAt=t;}
+ if(raw.sequence!==i)issues.push(p+" sequence must be contiguous from zero.");if(!iso(raw.at))issues.push(p+" requires a UTC timestamp.");else{const t=Date.parse(raw.at as string);if(t<intAt)issues.push(p+" timestamp regressed.");intAt=t;}
  if(typeof raw.source!=="string"||!raw.source)issues.push(p+" requires a source.");
  if(!INTERRUPT_STATES.includes(raw.state as InterruptState)){issues.push(p+" has an unknown interruption state.");return;}
  const state=raw.state as InterruptState;if(interrupt===null&&state!=="NOT-ACTIVE")issues.push("Interruption history must begin with NOT-ACTIVE.");
