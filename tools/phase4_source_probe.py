@@ -17,7 +17,7 @@ def main() -> int:
     lines = text.splitlines()
     matches = []
     for i, line in enumerate(lines):
-        match = re.match(r"^(\d+(?:\.\d+)*)\.\s+", line)
+        match = re.match(r"^(\d+(?:\.\d+)*)(?:\.)?\s+", line)
         if match:
             number = match.group(1)
             matches.append((i, number, len(number.split("."))))
