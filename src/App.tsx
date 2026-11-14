@@ -24,6 +24,7 @@ import { evaluateResourceConservationPreview, resourceConservationPreviewScenari
 import { reviewConstructionRecord, type ConstructionRecord, type ConstructionEvidenceStatus } from "./engine/constructionRecordReview";
 import type { ConstructionStage } from "./engine/constructionOrderAudit";
 import { bindConstructionReference, type ConstructionReferenceToken } from "./engine/constructionReferenceContext";
+import { reviewConstructionReferenceBoundary } from "./engine/constructionReferenceBoundary";
 import { reviewConstructionFootShape } from "./engine/constructionFootShape";
 import { reviewConstructionFootComposition } from "./engine/constructionFootComposition";
 import { constructionFrameInventory, constructionParameterInventory, constructionFootEvidenceBoundary } from "./engine/constructionFootEvidence";
@@ -257,6 +258,10 @@ function App() {
   const constructionReference = useMemo(
     () => bindConstructionReference(constructionReferenceToken, constructionReferenceId),
     [constructionReferenceToken, constructionReferenceId]
+  );
+  const constructionBoundaryReview = useMemo(
+    () => reviewConstructionReferenceBoundary(constructionReference.current, { type: "PHRASE-BOUNDARY", marker: "·" }),
+    [constructionReference]
   );
   const constructionRecord: ConstructionRecord = {
     id: "playground-construction-record",
@@ -589,6 +594,16 @@ function App() {
               </div>
               <p className="construction-reference-status"><strong>{constructionReference.status}</strong>{constructionReference.current ? " · " + constructionReference.current.scope + " · persists until replaced" : " · " + constructionReference.issue}</p>
               <p className="fixture-browser-caveat">{constructionReference.limitation}</p>
+            </div>
+            <div className="construction-kseries-review">
+              <div className="detail-kicker">PHRASE BOUNDARY × REFERENCE CONTEXT · PHASE 8BI</div>
+              <p>The recovered hand-flame fixture uses a middle dot between phrases, while the reference contract persists until replaced. No source establishes that the punctuation itself replaces a reference or resets its scope.</p>
+              <div className="construction-coupling-result" role="status" aria-live="polite">
+                <strong>{constructionBoundaryReview.boundaryEffect.replaceAll("-", " ")}</strong>
+                <p>{constructionBoundaryReview.note}</p>
+                <p><strong>Current binding inspection:</strong> {constructionBoundaryReview.context.status}{constructionBoundaryReview.context.current ? " · " + constructionBoundaryReview.context.current.token + " → " + constructionBoundaryReview.context.current.referenceId : ""}</p>
+                <p className="fixture-browser-caveat">Scope reset inference: prohibited · new-reference inference: prohibited · canon effect: none.</p>
+              </div>
             </div>
             <div className="construction-kseries-review">
               <div className="detail-kicker">KAN · KEN · KAS / WORKED-EXAMPLE EVIDENCE</div>
