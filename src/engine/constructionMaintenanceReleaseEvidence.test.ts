@@ -5,12 +5,12 @@ describe("Phase 8CC maintenance and release evidence separation", () => {
   it("[CTRLREL-001] records KEN as a held-state fixture association", () => {
     const result = reviewMaintenanceReleaseEvidence("ken");
     expect(result.status).toBe("MAINTENANCE-ASSOCIATION-RECORDED");
-    expect(result.evidence?.reading).toContain("held");
+    if (result.status === "MAINTENANCE-ASSOCIATION-RECORDED") expect(result.evidence.reading).toContain("held");
   });
   it("[CTRLREL-002] records KAS as a release fixture association", () => {
     const result = reviewMaintenanceReleaseEvidence("kas");
     expect(result.status).toBe("RELEASE-ASSOCIATION-RECORDED");
-    expect(result.evidence?.reading).toBe("release");
+    if (result.status === "RELEASE-ASSOCIATION-RECORDED") expect(result.evidence.reading).toBe("release");
   });
   it("[CTRLREL-003] keeps KEN distinct from a general control grammar", () => {
     expect(maintenanceReleaseFixtureEvidence.maintenance.durationRule).toBe("NOT-ESTABLISHED");

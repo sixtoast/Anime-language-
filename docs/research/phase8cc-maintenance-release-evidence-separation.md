@@ -2,7 +2,7 @@
 
 **Date:** 2026-11-14  
 **Canon effect:** NONE · **Grammar changes:** none · **Tests authored:** CTRLREL-001–008  
-**Tests executed:** not executed locally
+**Tests executed:** not executed locally. The first Vercel type-check found an unsafe union-property access in two tests; Phase 8CC follow-up commit narrows each result by its discriminant before reading the branch-specific evidence.
 
 ## 1. Research question
 
