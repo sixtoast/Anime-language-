@@ -29,6 +29,7 @@ import { constructionStageInterfaceAudit, reviewConstructionStageInterfaceAudit 
 import { reviewConstructionFootShape } from "./engine/constructionFootShape";
 import { reviewConstructionFootComposition } from "./engine/constructionFootComposition";
 import { constructionFrameInventory, constructionParameterInventory, constructionFootEvidenceBoundary } from "./engine/constructionFootEvidence";
+import { constructionFootMorphologyAudit } from "./engine/constructionFootMorphologyAudit";
 import { constructionFootSourceRecovery, reviewConstructionFootSourceForm } from "./engine/constructionFootSourceRecovery";
 import { constructionFrameTerminology } from "./engine/constructionFrameTerminology";
 import { constructionFrameMacroAssociations } from "./engine/constructionFrameContrastEvidence";
@@ -702,6 +703,19 @@ function App() {
                 <p className="fixture-browser-caveat">{constructionFootEvidenceBoundary.relationCoda}</p>
                 <p className="fixture-browser-caveat"><strong>Structural source discrepancy:</strong> {constructionFootEvidenceBoundary.shapeEvidenceDiscrepancy.primary} {constructionFootEvidenceBoundary.shapeEvidenceDiscrepancy.conflictingSummary} {constructionFootEvidenceBoundary.shapeEvidenceDiscrepancy.treatment}</p>
                 <p className="fixture-browser-caveat">Open gaps: {constructionFootEvidenceBoundary.unresolved.join("; ")}.</p>
+                <div className="construction-foot-morphology-audit">
+                  <div className="detail-kicker">PHASE 8BK · PRODUCTIVE MORPHOLOGY COVERAGE AUDIT</div>
+                  <p>The 6 × 6 frame–vowel comparison is an inventory audit, not a proposed paradigm. Only six CV forms are explicitly documented; the other combinations remain unlicensed or unresolved, not automatically invalid.</p>
+                  <div className="construction-foot-parts">
+                    <span><small>Frame × vowel pairs reviewed</small><strong>{constructionFootMorphologyAudit.frameVowelMatrix.length}</strong></span>
+                    <span><small>Documented canonical CV forms</small><strong>{constructionFootMorphologyAudit.coverage.canonicalCvCount}</strong></span>
+                    <span><small>Other pairs unresolved</small><strong>{constructionFootMorphologyAudit.coverage.unresolvedPairCount}</strong></span>
+                    <span><small>Whole example tokens</small><strong>{constructionFootMorphologyAudit.wholeTokenEvidence.length}</strong></span>
+                  </div>
+                  <div className="construction-foot-parts">{constructionFootMorphologyAudit.frameVowelMatrix.map(item => <span key={item.form}><small>{item.status.replaceAll("-", " ")}</small><strong>{item.form}</strong></span>)}</div>
+                  <p className="fixture-browser-caveat">The observed forms kan, ken and kas remain whole-token examples. Their k/a/e/n/s segments are not assigned productive Foot meanings. Observed final letters n and s are not promoted to a coda inventory.</p>
+                  <p className="fixture-browser-caveat">The matrix does not resolve whether every complete Foot requires a coda. Phase 5.15 and Phase 5.16 C-02 remain separate source readings.</p>
+                </div>
                 <p><strong>Observed historical CVC-shaped tokens</strong> — whole-token evidence from the complete Phase 5.22 parser source; not a recovered segment-by-segment paradigm.</p>
                 <div className="construction-foot-parts">{constructionFootSourceRecovery.observedWholeTokens.map(entry => <span key={entry.token}><small>{entry.alias}</small>{entry.token}<small>{entry.surfaceShape}</small></span>)}</div>
                 <p className="fixture-browser-caveat">Observed final letters are n and s in these three examples only. This does not establish a complete coda inventory or assign independent coda meanings. Use the source-form lookup below to distinguish documented whole tokens from unresolved shapes.</p>
