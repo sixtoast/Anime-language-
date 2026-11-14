@@ -15,4 +15,5 @@ it("[ARC-COMP-010] rejects unknown reserved tokens on expansion",()=>expect(expa
 it("[ARC-COMP-011] rejects malformed dictionaries",()=>expect(compressArcaneText("alpha",[{fullForm:"two words",shortForm:"~T"}]).disposition).toBe("INVALID-DICTIONARY"));
 it("[ARC-COMP-012] marks expansion as mandatory before parsing",()=>expect(compressArcaneText("kan",[{fullForm:"kan",shortForm:"~K"}]).parserInput).toBe("EXPAND-BEFORE-PARSING"));
 it("[ARC-COMP-013] keeps canon and execution disabled",()=>{const r=compressArcaneText("kan",[{fullForm:"kan",shortForm:"~K"}]);expect(r.executable).toBe(false);expect(r.canonEffect).toBe("NONE")});
+it("[ARC-COMP-014] accepts valid short forms during expansion",()=>{const c=compressArcaneText("kan kan",[{fullForm:"kan",shortForm:"~K"}]);expect(expandArcaneText(c.compressedText,c.aliases)).toEqual({ok:true,text:"kan kan",issues:[]})});
 });
