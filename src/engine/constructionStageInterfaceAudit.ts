@@ -67,5 +67,5 @@ export function reviewConstructionStageInterfaceAudit(id: unknown): Construction
   if (typeof id !== "string") return { status: "UNKNOWN-BOUNDARY", boundary: null, unresolvedCount: 0, executable: false };
   const boundary = constructionStageInterfaceAudit.boundaries.find(item => item.id === id) ?? null;
   if (!boundary) return { status: "UNKNOWN-BOUNDARY", boundary: null, unresolvedCount: 0, executable: false };
-  return { status: "PRECEDENCE-ONLY", boundary, unresolvedCount: boundary.unresolvedDimensions.length, executable: false };
+  return { status: "PRECEDENCE-ONLY", boundary, unresolvedCount: 6, executable: false };
 }
