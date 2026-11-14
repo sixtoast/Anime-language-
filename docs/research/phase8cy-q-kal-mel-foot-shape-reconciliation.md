@@ -30,3 +30,12 @@ The source-aware reviewer now gives exact conflict classifications for `kal` and
 - lexical Foot validity.
 
 One morphology regression test and one source-concordance test are added and registered. Both remain non-executable evidence checks. No canon decision is made.
+
+
+## Test registry correction
+
+The concordance contains 28 claims (the 10 source artefacts are a separate inventory). The source-concordance test now asserts 28 claims. Its unique test identifiers distinguish the new `kal` conflict case from the existing `mel` conflict case. This is a registry/test-integrity correction only; it does not alter the evidence interpretation.
+
+## Preview verification constraint
+
+A preview deployment was requested for the feature-branch commit, but Vercel rejected the deployment API request because the team exceeded its 100-deployments-per-day API limit (retry window 24 hours). No deployment was created for this commit. The project is still on the feature branch; no production deployment was attempted. Tests remain authored, not executed for this increment.

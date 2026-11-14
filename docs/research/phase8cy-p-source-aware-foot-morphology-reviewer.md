@@ -28,3 +28,8 @@ The exact form `mel` returns `SOURCE-CLASSIFICATION-CONFLICT`: §8 Table 14 desc
 ## Tests and verification
 
 Two regression cases are added for vowel-final rejection and consonantal/digraph coda recognition. Tests are authored and registered, not yet executed for this commit. The Vercel preview is the next verification gate. No GitHub Actions workflow is dispatched, no PR is merged and production is untouched.
+
+
+## Preview status update
+
+Vercel's deployment API currently reports the team's daily deployment quota exhausted (more than 100 deployments; retry after 24 hours). The preview for this increment could not be created, so the regression tests and website wiring remain unverified by a fresh build. No GitHub Actions workflow was dispatched and no production change was made.
