@@ -37,4 +37,4 @@ Even a candidate is not yet licensed for compression. We have not established a 
 
 ## Tests
 
-Fourteen tests cover exact candidate identification, lifetime/state/resolution blockers, label/scope mismatch, operation multiplicity, identity separation, malformed inputs, immutability and non-execution boundaries.
+Sixteen tests cover exact candidate identification, lifetime/state/resolution blockers, label/scope mismatch, operation multiplicity, identity separation, malformed inputs, immutability and non-execution boundaries.
