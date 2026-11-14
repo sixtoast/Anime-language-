@@ -35,6 +35,7 @@ describe("Construction source concordance",()=>{
  it("[CON-SRC-031] records the BRAN family without physical certainty",()=>{const c=findConstructionSourceClaim("PHASE4-BRAN-COUPLINGS");expect(c?.statement).toContain("hə, he, ha, hu, hi and ho");expect(c?.boundary).toContain("provisional")});
  it("[CON-SRC-032] records reference persistence as a bounded rule",()=>{expect(findConstructionSourceClaim("PHASE4-REFERENCE-PERSISTENCE")?.statement).toContain("until replaced")});
  it("[CON-SRC-033] keeps the hand-flame reading fixture-only",()=>{expect(findConstructionSourceClaim("PHASE4-HANDFLAME-STRUCTURE")?.status).toBe("PARTIAL-EXAMPLE")});
- it("[CON-SRC-034] records the TRAK frame group without individual consonant meanings",()=>{const c=findConstructionSourceClaim("PHASE4-TRAK-FRAMES");expect(c?.statement).toContain("p, t and k");expect(c?.boundary).toContain("group-level association")});
+ it("[CON-SRC-035] records kal's Foot-shape and relation-coda discrepancy",()=>{const c=findConstructionSourceClaim("PHASE4-KAL-CODA-CONFLICT");expect(c?.status).toBe("CONFLICT-OPEN");expect(c?.statement).toContain("P4-T10");expect(c?.boundary).toContain("Do not accept or reject kal")});
+it("[CON-SRC-034] records the TRAK frame group without individual consonant meanings",()=>{const c=findConstructionSourceClaim("PHASE4-TRAK-FRAMES");expect(c?.statement).toContain("p, t and k");expect(c?.boundary).toContain("group-level association")});
  it("[CON-SRC-031] preserves the internal mel Foot/reference classification conflict",()=>{const c=findConstructionSourceClaim("PHASE4-MEL-CLASSIFICATION-CONFLICT");expect(c?.status).toBe("CONFLICT-OPEN");expect(c?.sourceLocation).toContain("P4-T10");expect(c?.boundary).toContain("Do not accept or reject mel")});
 });

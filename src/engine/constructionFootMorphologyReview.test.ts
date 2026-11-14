@@ -15,6 +15,7 @@ it("[FOOT-MORPH-012] preserves mel classification conflict",()=>{const x=reviewC
 it("[FOOT-MORPH-013] does not generalise mel to other m-initial forms",()=>expect(reviewConstructionFootMorphology("mal").status).toBe("UNRECOGNISED-SHAPE"));
 it("[FOOT-MORPH-014] keeps CVC optionality unresolved",()=>{expect(reviewConstructionFootMorphology("pas").codaRequirement).toBe("UNRESOLVED-SOURCE-DISCREPANCY");expect(footMorphologyEvidenceBoundary.productiveParadigmRecovered).toBe(false)});
 it("[FOOT-MORPH-015] keeps KREN proposed and non-executable",()=>{expect(reviewConstructionFootMorphology("ban").macroAssociation).toBe("KREN");expect(reviewConstructionFootMorphology("ban").executable).toBe(false)});
+it("[FOOT-MORPH-019] preserves kal's Foot-shape versus relation-coda conflict",()=>{const x=reviewConstructionFootMorphology("kal");expect(x.status).toBe("SOURCE-CLASSIFICATION-CONFLICT");expect(x.explanation).toContain("P4-T10");expect(x.explanation).toContain("relation codas")});
 it("[FOOT-MORPH-016] fails closed for malformed and empty inputs",()=>{expect(reviewConstructionFootMorphology("xa").status).toBe("UNRECOGNISED-SHAPE");expect(reviewConstructionFootMorphology("paa").status).toBe("UNRECOGNISED-SHAPE");expect(reviewConstructionFootMorphology("").status).toBe("EMPTY")});
 
 it("[FOOT-MORPH-017] rejects a vowel as a CVC relation coda",()=>{for(const x of ["pae","pao","paa"])expect(reviewConstructionFootMorphology(x).status).toBe("UNRECOGNISED-SHAPE")});

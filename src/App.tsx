@@ -780,7 +780,7 @@ function App() {
                 </div>
                 <p>{constructionFootMorphologyReview.explanation}</p>
                 <p className="fixture-browser-caveat"><strong>Mandatory coda:</strong> {constructionFootMorphologyReview.codaRequirement.replaceAll("-", " ")} · <strong>Executable:</strong> No · <strong>Canon effect:</strong> None.</p>
-                <p className="fixture-browser-caveat"><strong>Recovered relation codas:</strong> m/n = FREM open-loop maintenance; ng = FREM feedback maintenance; s/sh = SHREN release. The wider phonotactic coda set is not a semantic relation-coda list. <code>mel</code> is reported as a source-classification conflict, not a normal Foot.</p>
+                <p className="fixture-browser-caveat"><strong>Recovered relation codas:</strong> m/n = FREM open-loop maintenance; ng = FREM feedback maintenance; s/sh = SHREN release. The wider phonotactic coda set is not a semantic relation-coda list. <code>kal</code> and <code>mel</code> are reported as distinct source-classification conflicts, not accepted or rejected as lexical Feet.</p>
               </div>
               <div className="construction-foot-composition">
                 <div className="detail-kicker">SOURCE-READING COMPARISON · NO CANON SELECTION</div>
