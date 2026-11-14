@@ -41,6 +41,20 @@ class SourceIntakeTests(unittest.TestCase):
         self.assertIn("UNTIL-REPLACED", record["text"])
         self.assertEqual(record["metadata"]["tables"], 1)
 
+    def test_docx_extraction_descends_through_word_wrappers(self):
+        xml = f'''<w:document xmlns:w="{DOCX_NS}"><w:body>
+          <w:p><w:r><w:t>Before wrapper</w:t></w:r></w:p>
+          <w:sdt><w:sdtContent><w:p><w:r><w:t>Inside control</w:t></w:r></w:p></w:sdtContent></w:sdt>
+          <w:p><w:r><w:t>After wrapper</w:t></w:r></w:p>
+        </w:body></w:document>'''.encode()
+        out = io.BytesIO()
+        with zipfile.ZipFile(out, "w") as archive:
+            archive.writestr("word/document.xml", xml)
+        record = docx_record("wrapped.docx", out.getvalue(), "wrapped.docx")
+        self.assertEqual(record["status"], "EXTRACTED")
+        self.assertLess(record["text"].index("Before wrapper"), record["text"].index("Inside control"))
+        self.assertLess(record["text"].index("Inside control"), record["text"].index("After wrapper"))
+
     def test_zip_members_are_indexed_without_disk_extraction(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "archive.zip"

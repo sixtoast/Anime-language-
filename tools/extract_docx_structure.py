@@ -28,6 +28,21 @@ def cell_text(cell: ET.Element) -> str:
     paragraphs = [paragraph_text(p) for p in cell.findall(".//w:p", NS)]
     return " / ".join(value for value in paragraphs if value)
 
+def iter_body_blocks(node: ET.Element):
+    """Yield paragraphs and tables in source order, descending through wrapper elements.
+
+    Word frequently nests body content inside w:sdt, w:customXml, revision marks
+    and drawing wrappers. Only paragraphs/tables are emitted; their descendants
+    are consumed by paragraph_text/cell_text so text is not double-counted.
+    """
+    for child in list(node):
+        if child.tag == W + "p":
+            yield "paragraph", child
+        elif child.tag == W + "tbl":
+            yield "table", child
+        else:
+            yield from iter_body_blocks(child)
+
 def extract_docx_bytes(raw: bytes, filename: str = "source.docx") -> tuple[str, str]:
     """Extract document-body text from in-memory DOCX bytes."""
     digest = hashlib.sha256(raw).hexdigest()
@@ -48,13 +63,13 @@ def extract_docx_bytes(raw: bytes, filename: str = "source.docx") -> tuple[str, 
     ]
     paragraph_no = 0
     table_no = 0
-    for child in list(body):
-        if child.tag == W + "p":
+    for kind, child in iter_body_blocks(body):
+        if kind == "paragraph":
             value = paragraph_text(child)
             if value:
                 paragraph_no += 1
                 lines.extend([value, ""])
-        elif child.tag == W + "tbl":
+        else:
             table_no += 1
             rows = child.findall("./w:tr", NS)
             lines.extend(["## Table " + str(table_no), ""])

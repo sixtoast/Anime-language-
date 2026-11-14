@@ -67,6 +67,17 @@ def text_record(name: str, data: bytes, source: str) -> dict[str, Any]:
     return record
 
 
+def iter_body_blocks(node: ET.Element):
+    """Yield body paragraphs and tables in source order through Word wrapper nodes."""
+    for child in list(node):
+        if child.tag == W + "p":
+            yield "paragraph", child
+        elif child.tag == W + "tbl":
+            yield "table", child
+        else:
+            yield from iter_body_blocks(child)
+
+
 def docx_record(name: str, data: bytes, source: str) -> dict[str, Any]:
     base = {"source": source, "name": name, "bytes": len(data), "sha256": sha256(data),
             "format": "docx", "status": "EXTRACTED", "text": None,
@@ -83,13 +94,13 @@ def docx_record(name: str, data: bytes, source: str) -> dict[str, Any]:
             raise ValueError("DOCX has no document body")
         lines: list[str] = []
         paragraphs = tables = 0
-        for child in list(body):
-            if child.tag == W + "p":
+        for kind, child in iter_body_blocks(body):
+            if kind == "paragraph":
                 value = paragraph_text(child)
                 if value:
                     paragraphs += 1
                     lines.extend([value, ""])
-            elif child.tag == W + "tbl":
+            else:
                 tables += 1
                 lines.extend([f"## Table {tables}", ""])
                 for row in child.findall("./w:tr", DOCX_NS):

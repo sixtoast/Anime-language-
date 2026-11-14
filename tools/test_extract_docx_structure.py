@@ -41,6 +41,25 @@ class DocxExtractionTests(unittest.TestCase):
         self.assertLess(text.index("## Table 1"), text.index("End of transcription"))
         self.assertEqual(len(digest), 64)
 
+    def test_extracts_paragraphs_inside_word_wrapper_elements_in_order(self):
+        wrapped = f"""<w:document xmlns:w="{NS}"><w:body>
+          <w:p><w:r><w:t>Before wrapper</w:t></w:r></w:p>
+          <w:sdt><w:sdtContent>
+            <w:p><w:r><w:t>Inside content control</w:t></w:r></w:p>
+            <w:tbl><w:tr><w:tc><w:p><w:r><w:t>Nested table cell</w:t></w:r></w:p></w:tc></w:tr></w:tbl>
+          </w:sdtContent></w:sdt>
+          <w:p><w:r><w:t>After wrapper</w:t></w:r></w:p>
+        </w:body></w:document>""".encode("utf-8")
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / "wrapped.docx"
+            with zipfile.ZipFile(source, "w") as archive:
+                archive.writestr("word/document.xml", wrapped)
+            text, _ = extract_docx(source)
+        self.assertLess(text.index("Before wrapper"), text.index("Inside content control"))
+        self.assertLess(text.index("Inside content control"), text.index("## Table 1"))
+        self.assertLess(text.index("## Table 1"), text.index("After wrapper"))
+        self.assertIn("Nested table cell", text)
+
     def test_reports_missing_document_xml(self):
         with tempfile.TemporaryDirectory() as directory:
             source = Path(directory) / "invalid.docx"
