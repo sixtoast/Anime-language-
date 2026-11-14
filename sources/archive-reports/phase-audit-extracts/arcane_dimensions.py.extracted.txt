@@ -1,0 +1,87 @@
+ARCHIVE SOURCE: Arcane_Phase_6S_Typed_Expression_Integration/arcane_dimensions.py
+SHA-256: 38cf5cbeaa742dd722d44421edb4e762baa53a5ded5e478822b7a984259e2e28
+NOTE: Derived review copy; original ZIP member unchanged.
+========================================================================
+
+"""Arcane Phase 6R provisional dimensional quantity layer.
+
+This module is an experimental semantic extension, not canonical Arcane grammar.
+Base dimensions are abstract symbols; no real-world unit conversion is implied.
+"""
+from __future__ import annotations
+from dataclasses import dataclass
+from decimal import Decimal
+from typing import Mapping
+
+class DimensionError(Exception):
+    """Raised for invalid dimensional operations or quantity construction."""
+
+@dataclass(frozen=True)
+class Dimension:
+    """Canonical sparse dimension vector: symbol -> integer exponent."""
+    powers: tuple[tuple[str, int], ...] = ()
+
+    @classmethod
+    def of(cls, powers: Mapping[str, int] | None = None) -> 'Dimension':
+        clean = {}
+        for symbol, exponent in (powers or {}).items():
+            if not isinstance(symbol, str) or not symbol.strip():
+                raise DimensionError('dimension symbols must be non-empty strings')
+            if not isinstance(exponent, int) or isinstance(exponent, bool):
+                raise DimensionError('dimension exponents must be integers')
+            if exponent:
+                clean[symbol] = clean.get(symbol, 0) + exponent
+        return cls(tuple(sorted((s, e) for s, e in clean.items() if e)))
+
+    def combine(self, other: 'Dimension', sign: int = 1) -> 'Dimension':
+        powers = dict(self.powers)
+        for symbol, exponent in other.powers:
+            powers[symbol] = powers.get(symbol, 0) + sign * exponent
+        return Dimension.of(powers)
+
+    def __str__(self) -> str:
+        return 'dimensionless' if not self.powers else ' '.join(
+            f'{symbol}^{exp}' for symbol, exp in self.powers)
+
+DIMENSIONLESS = Dimension()
+
+@dataclass(frozen=True)
+class Quantity:
+    value: Decimal
+    dimension: Dimension = DIMENSIONLESS
+
+    def __post_init__(self):
+        if not isinstance(self.value, Decimal):
+            raise DimensionError('quantity value must be Decimal; convert explicitly')
+        if not isinstance(self.dimension, Dimension):
+            raise DimensionError('quantity dimension must be a Dimension')
+
+    def add(self, other: 'Quantity') -> 'Quantity':
+        self._require_quantity(other)
+        if self.dimension != other.dimension:
+            raise DimensionError(f'cannot add {self.dimension} to {other.dimension}')
+        return Quantity(self.value + other.value, self.dimension)
+
+    def subtract(self, other: 'Quantity') -> 'Quantity':
+        self._require_quantity(other)
+        if self.dimension != other.dimension:
+            raise DimensionError(f'cannot subtract {other.dimension} from {self.dimension}')
+        return Quantity(self.value - other.value, self.dimension)
+
+    def multiply(self, other: 'Quantity') -> 'Quantity':
+        self._require_quantity(other)
+        return Quantity(self.value * other.value, self.dimension.combine(other.dimension))
+
+    def divide(self, other: 'Quantity') -> 'Quantity':
+        self._require_quantity(other)
+        if other.value == 0:
+            raise DimensionError('division by zero')
+        return Quantity(self.value / other.value, self.dimension.combine(other.dimension, -1))
+
+    def negate(self) -> 'Quantity':
+        return Quantity(-self.value, self.dimension)
+
+    @staticmethod
+    def _require_quantity(other):
+        if not isinstance(other, Quantity):
+            raise DimensionError('operation requires another Quantity')

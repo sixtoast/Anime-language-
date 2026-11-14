@@ -1,0 +1,106 @@
+{
+  "phase": "5.17",
+  "title": "Construction Grammar Test Harness — evidence-bounded baseline",
+  "input": "Arcane_Lexicon_v5_draft.csv",
+  "tests_total": 13,
+  "counts": {
+    "PASS": 3,
+    "FAIL": 1,
+    "BLOCKED BY MISSING SPECIFICATION": 6,
+    "NOT YET TESTED": 3
+  },
+  "scope_warning": "This is a baseline audit harness, not a complete Arcane parser. BLOCKED and NOT YET TESTED are not passes.",
+  "results": [
+    {
+      "id": "P5.17-L01",
+      "test": "Homographs are either disambiguated by a proven grammar or explicitly approved",
+      "status": "FAIL",
+      "detail": "255 non-empty entries; 2 duplicated spellings; ra: radian [UNIT; Shared; CANON] vs TARGET-path [FUSED-REF; Performed; CANON (v2.0)]; re: 4 [DIGIT; Shared; CANON] vs TARGET-surface [FUSED-REF; Performed; CANON (v2.0)]",
+      "basis": "Direct exact-string check of the supplied Phase 5 lexicon CSV. Duplicate forms may be intentional, but no executable grammar test currently proves contextual disambiguation."
+    },
+    {
+      "id": "P5.17-L02",
+      "test": "Lexicon form and gloss are populated",
+      "status": "PASS",
+      "detail": "0 rows missing form or gloss",
+      "basis": "Direct CSV completeness check; does not validate meaning."
+    },
+    {
+      "id": "P5.17-L03",
+      "test": "Lexicon status provenance remains visible",
+      "status": "PASS",
+      "detail": "Status counts: {\"CANON\": 76, \"CANON (v2.0)\": 12, \"CANON (v2.0), reinterpreted\": 5, \"CANON (v3.0-L), reinterpreted\": 3, \"PROPOSED\": 152, \"RENAMED\": 7}",
+      "basis": "Checks only that each entry declares a status; does not promote proposals to canon."
+    },
+    {
+      "id": "P5.17-N01",
+      "test": "Canonical digit spellings are present",
+      "status": "PASS",
+      "detail": "All ten digit glosses map to their documented forms.",
+      "basis": "v3.0-L digit table; exact presence check against supplied CSV."
+    },
+    {
+      "id": "P5.17-C01",
+      "test": "Reference persists until replaced",
+      "status": "BLOCKED BY MISSING SPECIFICATION",
+      "detail": "Rule is documented, but the source pack does not define a complete token grammar or executable reference-state transition model; no valid end-to-end fixture can yet be parsed.",
+      "basis": "Phase 4 §3.3 states persistence; Phase 5.16 recovery matrix identifies full parser as missing."
+    },
+    {
+      "id": "P5.17-C02",
+      "test": "Reference replacement resets current target",
+      "status": "BLOCKED BY MISSING SPECIFICATION",
+      "detail": "Expected behaviour is implied by “persists until replaced”, but replacement token boundaries, scope encoding and invalid replacement handling are not fully specified.",
+      "basis": "Phase 4 §3.3; exact v2.0 morphology unavailable in supplied archive."
+    },
+    {
+      "id": "P5.17-C03",
+      "test": "Construction ordering is enforced",
+      "status": "BLOCKED BY MISSING SPECIFICATION",
+      "detail": "Intended order is documented (reference → spatial role/vector → Feet → couplings → quantity → control → release), but token classes and legal repetition/cardinality rules are incomplete.",
+      "basis": "Phase 4 §3.3. This is an ordering contract, not a parser pass."
+    },
+    {
+      "id": "P5.17-C04",
+      "test": "Foot morphology parses frame + parameter vowel + optional relation coda",
+      "status": "BLOCKED BY MISSING SPECIFICATION",
+      "detail": "The shape is documented, but the exact legal frame inventory, vowel-to-property mappings and coda inventory are not sufficiently canonical to validate arbitrary Feet.",
+      "basis": "Phase 4 §§3.3 and 12 mark parameter mapping provisional and exact v2.0 details unrecovered."
+    },
+    {
+      "id": "P5.17-C05",
+      "test": "h-coupling mappings are canonical",
+      "status": "BLOCKED BY MISSING SPECIFICATION",
+      "detail": "Phase 4 labels the mechanical/thermal/electromagnetic/chemical/biological/informational/mana mappings PROVISIONAL; the harness must not silently treat them as canon.",
+      "basis": "Phase 4 §3.3; Phase 5.16 recovery report C-07."
+    },
+    {
+      "id": "P5.17-C06",
+      "test": "Numeral closure and dimensional units are validated in a complete expression",
+      "status": "BLOCKED BY MISSING SPECIFICATION",
+      "detail": "Phase 4 says numerals close with units and SHO closes dimensionless numerals, but this harness lacks the operator signature table and parser needed to validate expression-level quantities.",
+      "basis": "Phase 4 §6 G-2; formal operator signatures and full parser are not included as an executable grammar."
+    },
+    {
+      "id": "P5.17-S01",
+      "test": "Hand-flame example is fully well-typed and feasible",
+      "status": "NOT YET TESTED",
+      "detail": "Known verdict remains: tokenised and partially structured; not proven well-typed and not physically validated. No result is inferred from lexical legality.",
+      "basis": "Phase 4 §8 explicitly says no whole-spell grammar parse was run and required energy, extent and coupled matter are unspecified."
+    },
+    {
+      "id": "P5.17-S02",
+      "test": "Physical mechanism and conservation are independently checked",
+      "status": "NOT YET TESTED",
+      "detail": "No resource/mechanism feasibility engine or canonical spell IR is present in the recovery archive.",
+      "basis": "Grammar Consistency Test Register T-013/T-014; Phase 5.16 recommended separate syntax and physical-feasibility layers."
+    },
+    {
+      "id": "P5.17-V01",
+      "test": "Vernacular parser and naturalness are validated",
+      "status": "NOT YET TESTED",
+      "detail": "The Phase 5 samples are word-defined and mechanically checked, but no machine parser or listener results are included.",
+      "basis": "Phase 5 §8 and §10."
+    }
+  ]
+}

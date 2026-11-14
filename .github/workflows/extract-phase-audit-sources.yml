@@ -1,0 +1,89 @@
+name: Extract selected phase audit sources
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/extract-phase-audit-sources.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  extract-selected-sources:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+      - name: Extract review copies from the archive
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import zipfile, pathlib, hashlib, datetime, json
+          archive = pathlib.Path("sources/originals/Arcana mega pack.zip")
+          outdir = pathlib.Path("sources/archive-reports/phase-audit-extracts")
+          outdir.mkdir(parents=True, exist_ok=True)
+          wanted = [
+            "ARCANE_PHASE_6G_SURFACE_PARSER.md",
+            "arcane_phase6g_surface_parser.py",
+            "ARCANE_PHASE_6R_DIMENSIONAL_MODEL.md",
+            "ARCANE_PHASE_6R_REPORT.md",
+            "arcane_dimensions.py",
+            "ARCANE_PHASE_6S_REPORT.md",
+            "ARCANE_PHASE_6S_TYPED_INTEGRATION.md",
+            "arcane_typed_runtime.py",
+            "ARCANE_PHASE_6M_EXECUTION_REPORT.md",
+            "arcane_phase6m_execution_audit.py",
+            "ARCANE_PHASE_6O_REPRODUCIBILITY_REPORT.md",
+            "run_phase6o_validation.py",
+            "PHASE_5_24_DECISION_RECORD.md",
+            "PHASE_5_24_TEST_RESULTS.json",
+            "PHASE_6R_TEST_OUTPUT.txt",
+            "PHASE_6S_TEST_OUTPUT.txt",
+          ]
+          extracted, missing, errors = [], [], []
+          with zipfile.ZipFile(archive) as zf:
+            names = zf.namelist()
+            for base in wanted:
+              matches = [n for n in names if pathlib.PurePosixPath(n).name == base]
+              if not matches:
+                missing.append(base)
+                continue
+              # Preserve all distinct matching paths, since duplicate names may exist in different folders.
+              for name in matches:
+                try:
+                  raw = zf.read(name)
+                  text = raw.decode("utf-8", errors="replace")
+                  dest = outdir / (base + ".extracted.txt")
+                  if dest.exists():
+                    dest = outdir / (pathlib.PurePosixPath(name).parent.name + "__" + base + ".extracted.txt")
+                  digest = hashlib.sha256(raw).hexdigest()
+                  dest.write_text("ARCHIVE SOURCE: "+name+"\nSHA-256: "+digest+"\nNOTE: Derived review copy; original ZIP member unchanged.\n"+"="*72+"\n\n"+text, encoding="utf-8")
+                  extracted.append({"source":name,"output":str(dest),"characters":len(text),"sha256":digest})
+                except Exception as e:
+                  errors.append({"source":name,"error":str(e)})
+          manifest = {"generated_utc":datetime.datetime.now(datetime.timezone.utc).isoformat(),"archive":str(archive),"archive_sha256":hashlib.sha256(archive.read_bytes()).hexdigest(),"requested_basenames":wanted,"extracted_count":len(extracted),"missing_basenames":missing,"errors":errors,"files":extracted,"safety":"Read in memory; no archived scripts executed; original ZIP unchanged."}
+          (outdir/"manifest.json").write_text(json.dumps(manifest,indent=2)+"\n",encoding="utf-8")
+          lines=["# Selected Phase Audit Source Extracts","",f"- Generated UTC: {manifest['generated_utc']}",f"- Original archive SHA-256: `{manifest['archive_sha256']}`",f"- Extracted files: {len(extracted)}",f"- Requested basenames not found: {len(missing)}",f"- Errors: {len(errors)}","","Derived review copies only; these are not canon replacements. The original ZIP remains unchanged and embedded scripts were not executed.","","## Files",""]
+          lines += [f"- `{x['source']}` → `{x['output']}` ({x['characters']} chars; SHA-256 `{x['sha256']}`)" for x in extracted]
+          if missing: lines += ["","## Not found",""] + [f"- `{x}`" for x in missing]
+          if errors: lines += ["","## Errors",""] + [f"- `{x['source']}`: {x['error']}" for x in errors]
+          (outdir/"README.md").write_text("\n".join(lines)+"\n",encoding="utf-8")
+          print(json.dumps({"extracted":len(extracted),"missing":missing,"errors":errors},indent=2))
+          if errors or missing: raise SystemExit(1)
+          PY
+      - name: Commit review copies
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add sources/archive-reports/phase-audit-extracts
+          if git diff --cached --quiet; then
+            echo "No extract changes to commit."
+          else
+            git commit -m "docs: extract selected phase audit sources for review"
+            git push origin HEAD:main
+          fi

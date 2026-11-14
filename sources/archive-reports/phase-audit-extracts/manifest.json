@@ -1,0 +1,125 @@
+{
+  "generated_utc": "2026-10-13T16:08:22.701987+00:00",
+  "archive": "sources/originals/Arcana mega pack.zip",
+  "archive_sha256": "c15fae095623943f46380014bca6364ede7f282eaa1af981efed19296496dfc8",
+  "requested_basenames": [
+    "ARCANE_PHASE_6G_SURFACE_PARSER.md",
+    "arcane_phase6g_surface_parser.py",
+    "ARCANE_PHASE_6R_DIMENSIONAL_MODEL.md",
+    "ARCANE_PHASE_6R_REPORT.md",
+    "arcane_dimensions.py",
+    "ARCANE_PHASE_6S_REPORT.md",
+    "ARCANE_PHASE_6S_TYPED_INTEGRATION.md",
+    "arcane_typed_runtime.py",
+    "ARCANE_PHASE_6M_EXECUTION_REPORT.md",
+    "arcane_phase6m_execution_audit.py",
+    "ARCANE_PHASE_6O_REPRODUCIBILITY_REPORT.md",
+    "run_phase6o_validation.py",
+    "PHASE_5_24_DECISION_RECORD.md",
+    "PHASE_5_24_TEST_RESULTS.json",
+    "PHASE_6R_TEST_OUTPUT.txt",
+    "PHASE_6S_TEST_OUTPUT.txt"
+  ],
+  "extracted_count": 16,
+  "missing_basenames": [],
+  "errors": [],
+  "files": [
+    {
+      "source": "Arcane_Phase_6S_Typed_Expression_Integration/ARCANE_PHASE_6G_SURFACE_PARSER.md",
+      "output": "sources/archive-reports/phase-audit-extracts/ARCANE_PHASE_6G_SURFACE_PARSER.md.extracted.txt",
+      "characters": 5867,
+      "sha256": "ceb521416330a43e54972a7b2ef7da8479b71d62ae976948bf6e60e588c1b702"
+    },
+    {
+      "source": "Arcane_Phase_6S_Typed_Expression_Integration/arcane_phase6g_surface_parser.py",
+      "output": "sources/archive-reports/phase-audit-extracts/arcane_phase6g_surface_parser.py.extracted.txt",
+      "characters": 12023,
+      "sha256": "c703697e792129b831cea16802342eba0add75ab8fbf4abd8c68805fffcaa77e"
+    },
+    {
+      "source": "Arcane_Phase_6S_Typed_Expression_Integration/ARCANE_PHASE_6R_DIMENSIONAL_MODEL.md",
+      "output": "sources/archive-reports/phase-audit-extracts/ARCANE_PHASE_6R_DIMENSIONAL_MODEL.md.extracted.txt",
+      "characters": 1629,
+      "sha256": "15024e3970bdb8ac8882745c04576f40995b35fc3e44b7ac147b727acab76968"
+    },
+    {
+      "source": "Arcane_Phase_6S_Typed_Expression_Integration/ARCANE_PHASE_6R_REPORT.md",
+      "output": "sources/archive-reports/phase-audit-extracts/ARCANE_PHASE_6R_REPORT.md.extracted.txt",
+      "characters": 1386,
+      "sha256": "71823932837304645725364b0bbbc2dd76873b5899f4bcc1f8177169286efd8c"
+    },
+    {
+      "source": "Arcane_Phase_6S_Typed_Expression_Integration/arcane_dimensions.py",
+      "output": "sources/archive-reports/phase-audit-extracts/arcane_dimensions.py.extracted.txt",
+      "characters": 3401,
+      "sha256": "38cf5cbeaa742dd722d44421edb4e762baa53a5ded5e478822b7a984259e2e28"
+    },
+    {
+      "source": "Arcane_Phase_6S_Typed_Expression_Integration/ARCANE_PHASE_6S_REPORT.md",
+      "output": "sources/archive-reports/phase-audit-extracts/ARCANE_PHASE_6S_REPORT.md.extracted.txt",
+      "characters": 2283,
+      "sha256": "6a4b4f1c1a50ba23a3c4399c8cd2fa740856d93306a1fb80e2e48d333e1a8edb"
+    },
+    {
+      "source": "Arcane_Phase_6S_Typed_Expression_Integration/ARCANE_PHASE_6S_TYPED_INTEGRATION.md",
+      "output": "sources/archive-reports/phase-audit-extracts/ARCANE_PHASE_6S_TYPED_INTEGRATION.md.extracted.txt",
+      "characters": 1841,
+      "sha256": "cb10974158d21324ec087605cc48a2bfd0c05e3c1f52f792e899d7e306594cd1"
+    },
+    {
+      "source": "Arcane_Phase_6S_Typed_Expression_Integration/arcane_typed_runtime.py",
+      "output": "sources/archive-reports/phase-audit-extracts/arcane_typed_runtime.py.extracted.txt",
+      "characters": 2578,
+      "sha256": "3981eed988e90b23fc4380f6c314c87152396f443dca6f289721229eaaee2de2"
+    },
+    {
+      "source": "Arcane_Phase_6S_Typed_Expression_Integration/ARCANE_PHASE_6M_EXECUTION_REPORT.md",
+      "output": "sources/archive-reports/phase-audit-extracts/ARCANE_PHASE_6M_EXECUTION_REPORT.md.extracted.txt",
+      "characters": 3417,
+      "sha256": "f25de76f588a7dc73e73e282451fa8f93c5d8fe4012372b56ad90dfafc588595"
+    },
+    {
+      "source": "Arcane_Phase_6S_Typed_Expression_Integration/arcane_phase6m_execution_audit.py",
+      "output": "sources/archive-reports/phase-audit-extracts/arcane_phase6m_execution_audit.py.extracted.txt",
+      "characters": 4417,
+      "sha256": "cc63c6d7147f21190523f6ddc11928ae07795365a7276c3abf9487b5df3c1268"
+    },
+    {
+      "source": "Arcane_Phase_6S_Typed_Expression_Integration/ARCANE_PHASE_6O_REPRODUCIBILITY_REPORT.md",
+      "output": "sources/archive-reports/phase-audit-extracts/ARCANE_PHASE_6O_REPRODUCIBILITY_REPORT.md.extracted.txt",
+      "characters": 3183,
+      "sha256": "2045b5302c3d8b78556a106014f1a5f7ec28e7ddb6b09e72a446a9de79c1c017"
+    },
+    {
+      "source": "Arcane_Phase_6S_Typed_Expression_Integration/run_phase6o_validation.py",
+      "output": "sources/archive-reports/phase-audit-extracts/run_phase6o_validation.py.extracted.txt",
+      "characters": 2959,
+      "sha256": "3360ec5da0496d71d55d8ffdf39425f3c9b8c5ecb8e0177b97ead3fd63ac200f"
+    },
+    {
+      "source": "Arcane_Phase_6S_Typed_Expression_Integration/PHASE_5_24_DECISION_RECORD.md",
+      "output": "sources/archive-reports/phase-audit-extracts/PHASE_5_24_DECISION_RECORD.md.extracted.txt",
+      "characters": 1447,
+      "sha256": "134664845fadda179a38f0dc44d597cfa5da92a969dd208412fae1ba37b318f8"
+    },
+    {
+      "source": "Arcane_Phase_6S_Typed_Expression_Integration/PHASE_5_24_TEST_RESULTS.json",
+      "output": "sources/archive-reports/phase-audit-extracts/PHASE_5_24_TEST_RESULTS.json.extracted.txt",
+      "characters": 1920,
+      "sha256": "ea6bad2ddba66146dab3646e892dd094e5dc050aac5d594126718dc540d0f70d"
+    },
+    {
+      "source": "Arcane_Phase_6S_Typed_Expression_Integration/PHASE_6R_TEST_OUTPUT.txt",
+      "output": "sources/archive-reports/phase-audit-extracts/PHASE_6R_TEST_OUTPUT.txt.extracted.txt",
+      "characters": 6418,
+      "sha256": "4c5cbf1418bf4ec52d3e5e9cf8d77ddcc38c552ce899b111465d56fb9086e098"
+    },
+    {
+      "source": "Arcane_Phase_6S_Typed_Expression_Integration/PHASE_6S_TEST_OUTPUT.txt",
+      "output": "sources/archive-reports/phase-audit-extracts/PHASE_6S_TEST_OUTPUT.txt.extracted.txt",
+      "characters": 8744,
+      "sha256": "6feb7a2a5c399eafa676fa3596f86dcaf624dc34ed86db5915d399106d9e4a3c"
+    }
+  ],
+  "safety": "Read in memory; no archived scripts executed; original ZIP unchanged."
+}

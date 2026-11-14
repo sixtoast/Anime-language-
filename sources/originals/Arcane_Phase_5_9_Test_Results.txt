@@ -1,0 +1,16 @@
+PASS | position plus displacement yields position | Quantity(kind='position', dim=(1, 0, 0, 0), frame='world', unit=None)
+PASS | position plus position rejected | ValueError: position + position is undefined; use a displacement operation
+PASS | frame mismatch rejected for position update | ValueError: frame mismatch; transform explicitly first
+PASS | displacement plus displacement accepted | Quantity(kind='displacement', dim=(1, 0, 0, 0), frame='world', unit=None)
+PASS | 1 km = 1000 m | Fraction(1000, 1)
+PASS | 250 cm = 5/2 m | Fraction(5, 2)
+PASS | 60 seconds = 1 minute | Fraction(1, 1)
+PASS | length cannot convert to time | ValueError: incompatible unit dimensions
+PASS | D-017 world basis cross X x Y gives +Z | (0, 0, 1)
+PASS | D-017 caster handedness gives -Z for X x Y | (0, 0, -1)
+PASS | cross product frame mismatch rejected | ValueError: cross product requires vectors in one declared frame
+PASS | angle remains semantically tagged | 'angle'
+PASS | position and scalar kind mismatch rejected | ValueError: incompatible semantic kinds: position and scalar
+PASS | unit registry has canonical metre | 'length'
+PASS | fractional conversion exact | Fraction(1, 1000)
+SUMMARY | 15/15 passed

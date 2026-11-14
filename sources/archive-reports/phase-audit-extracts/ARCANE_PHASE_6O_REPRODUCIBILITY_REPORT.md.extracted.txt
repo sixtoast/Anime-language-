@@ -1,0 +1,50 @@
+ARCHIVE SOURCE: Arcane_Phase_6S_Typed_Expression_Integration/ARCANE_PHASE_6O_REPRODUCIBILITY_REPORT.md
+SHA-256: 2045b5302c3d8b78556a106014f1a5f7ec28e7ddb6b09e72a446a9de79c1c017
+NOTE: Derived review copy; original ZIP member unchanged.
+========================================================================
+
+# Arcane Phase 6O — Phase 5 recovery and reproducibility report
+
+**Outcome:** Phase 5 generator reproduced successfully against the archived lexicon baseline.  
+**Canon changes:** None.  
+**Important limitation:** the original `arcane_lexicon_tools.py` was not present as a standalone source file. The helper in this package is a compatibility reconstruction based on the archived `arcane lexicon tools.pdf` printout and Phase 4 documentation, not a claim that the missing original source was recovered byte-for-byte.
+
+## What was done
+
+1. Extracted the Phase 4 lexicon-tool PDF and Phase 4/5 lexicon and source files from `Arcana pack.zip`.
+2. Reconstructed the helper functions used by the Phase 5 generator (`syllabify` and feature-distance `dist`) in `arcane_lexicon_tools.py`.
+3. Made a portable copy of `phase5_vernacular.py` that uses paths relative to its own project folder rather than `/home/claude` and `/mnt/user-data/outputs`.
+4. Ran the generator using the recovered Phase 4 lexicon as input.
+5. Compared the generated Phase 5 lexicon with the archived Phase 5 lexicon.
+
+## Results
+
+- The generator reports **P5-T01 through P5-T07: 7/7 PASS**.
+- The generated lexicon contains **255 data rows**, including **115 proposed vernacular roots**.
+- The generated CSV is **byte-for-byte identical** to the archived `Arcane_Lexicon_v5_draft.csv` (SHA-256 `4b38aec651a32b332d4f28068d34618c4dfb2f043d44a2f03c146dba2e31ad8a`).
+- Additional validation checks confirm that all seven original test IDs are present, the row count is 255, and the output matches the baseline.
+
+## Correction to the Phase 6N report
+
+The Phase 6N report previously identified `SMALL` in the “Modal + noun phrase” sample as an undefined token. That finding was incorrect: `SMALL` is defined in the Phase 5 concept inventory under the `ADJ` class. The recovered generator's P5-T07 check passes all 25 sample sentences. The old claim should be superseded by this evidence.
+
+## What the passing tests mean
+
+The seven Phase 5 checks cover phonotactic legality under the reconstructed helper, duplicate forms, separation from formal forms, feature-distance heuristics, shared closed-class forms, and defined keys in the sample corpus. The distance score is a phonological feature heuristic, not an acoustic study. These checks do **not** demonstrate naturalness, listener recognition, full grammar correctness, or the correctness of the absent Phase 6H parser/type checker/evaluator.
+
+## Reproduce
+
+From this directory, run:
+
+```bash
+python run_phase6o_validation.py
+```
+
+The command runs the portable generator and verifies the seven Phase 5 checks plus the archived output baseline. The validator exits nonzero if any check fails.
+
+## Next recommended milestone — Phase 6P
+
+1. Preserve this Phase 5 baseline and record the reconstructed-helper provenance.
+2. Recover the actual Phase 6H runtime from an earlier source or project workspace; do not treat the Phase 4 lexicon helper as that runtime.
+3. Once the runtime is available, run the grammar consistency suite against actual parser/type-checker/evaluator behaviour.
+4. Keep acoustic/listener validation as a separate, explicitly uncompleted workstream.

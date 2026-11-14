@@ -1,0 +1,16 @@
+PASS | legacy subtraction alias resolves | FRATA⟨Q:length, Q:length⟩ | ACCEPTED as Quantity; canonical operator FRAJA; Subtraction; operand order is significant.; quantity dimensions/kinds and coordinate-frame compatibility are not fully checked by this harness
+PASS | preferred subtraction form accepted | FRAJA⟨Q:length, Q:length⟩ | ACCEPTED as Quantity; canonical operator FRAJA; Subtraction; operand order is significant.; quantity dimensions/kinds and coordinate-frame compatibility are not fully checked by this harness
+PASS | legacy multiplication alias resolves | FRAKA⟨Q:length, Q:time⟩ | ACCEPTED as Quantity; canonical operator FRAMA; Multiplication; dimensional algebra required.; quantity dimensions/kinds and coordinate-frame compatibility are not fully checked by this harness
+PASS | legacy cross-product alias resolves | DRIM⟨V:3d, V:3d⟩ | ACCEPTED as Vector3; canonical operator DRUM; Cross product; Phase 4 D-017 frame rule applies.; quantity dimensions/kinds and coordinate-frame compatibility are not fully checked by this harness
+PASS | legacy NOT alias resolves | GRAK⟨Boolean⟩ | ACCEPTED as Boolean; canonical operator GRASH; Provisional NOT signature.; quantity dimensions/kinds and coordinate-frame compatibility are not fully checked by this harness
+PASS | legacy compare alias resolves | DRAL⟨Comparable, Comparable, Criterion⟩ | ACCEPTED as Boolean; canonical operator DRAS; Criterion encoding remains unresolved.; quantity dimensions/kinds and coordinate-frame compatibility are not fully checked by this harness
+PASS | missing FRAPA argument rejected | FRAPA⟨Q:length⟩ | REJECTED: FRAPA expects 2 argument(s), received 1
+PASS | extra FRAPA argument rejected | FRAPA⟨Q:length, Q:length, Q:length⟩ | REJECTED: FRAPA expects 2 argument(s), received 3
+PASS | wrong FRAPA type rejected | FRAPA⟨Boolean, Q:length⟩ | REJECTED: FRAPA argument 1 expects Quantity, received Boolean
+PASS | wrong GRASH type rejected | GRASH⟨Q:length⟩ | REJECTED: GRASH argument 1 expects Boolean, received Quantity
+PASS | wrong DRUM vector dimension rejected | DRUM⟨V:2d, V:2d⟩ | REJECTED: DRUM argument 1 expects Vector3, received Vector
+PASS | nested expression accepted | GRASH⟨DRAL⟨Comparable, Comparable, Criterion⟩⟩ | ACCEPTED as Boolean; canonical operator GRASH; Provisional NOT signature.; quantity dimensions/kinds and coordinate-frame compatibility are not fully checked by this harness
+PASS | malformed expression rejected | FRAPA⟨Q:length, Q:length | REJECTED: malformed operator expression; expected OPERATOR⟨...⟩
+PASS | unknown operator not guessed | BEN⟨Q:length⟩ | REJECTED: no validated signature in this reference subset for BEN
+PASS | region token not falsely treated as operator | BEN | REJECTED: unknown typed atom or malformed expression: 'BEN'
+SUMMARY | 15/15 regression checks passed

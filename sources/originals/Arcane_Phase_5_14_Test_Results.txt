@@ -1,0 +1,12 @@
+PASS	DRAS exists and remains provisional
+PASS	SIMA exists and remains open
+PASS	KWASH exists and remains open
+PASS	BEK remains open
+PASS	ZET remains open
+PASS	KREN construction contract remains open
+PASS	LABU is not canon
+PASS	renamed canonical forms retained
+PASS	canonical forms unique
+PASS	all aliases avoid another canonical form
+PASS	registry authority warns against promotion
+RESULT: 11/11 PASS

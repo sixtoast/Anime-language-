@@ -1,0 +1,17 @@
+PASS | length addition | FRAPA⟨Q[length],Q[length]⟩ | PASS | type = Q[length]
+PASS | length plus time rejected | FRAPA⟨Q[length],Q[time]⟩ | REJECT | FRAPA requires matching dimensions; got Q[length] and Q[time]
+PASS | legacy subtraction alias | FRATA⟨Q[time],Q[time]⟩ | PASS | type = Q[time]
+PASS | length times length gives area | FRAKA⟨Q[length],Q[length]⟩ | PASS | type = Q[area]
+PASS | length divided by time gives velocity | FRALA⟨Q[length],Q[time]⟩ | PASS | type = Q[velocity]
+PASS | magnitude preserves vector dimension | DRAN⟨V3[length;world]⟩ | PASS | type = Q[length]
+PASS | dot product adds dimensions | DREM⟨V3[length;world],V3[velocity;world]⟩ | PASS | type = Q[L^2 T^-1]
+PASS | dot product frame mismatch rejected | DREM⟨V3[length;world],V3[length;caster]⟩ | REJECT | DREM requires a common frame; got world and caster
+PASS | cross product output dimension | DRIM⟨V3[length;world],V3[length;world]⟩ | PASS | type = V3[area;world]
+PASS | cross product frame mismatch rejected | DRUM⟨V3[length;world],V3[length;caster]⟩ | REJECT | DRUM requires a common frame; got world and caster
+PASS | wrong cross product type rejected | DRUM⟨Q[length],Q[length]⟩ | REJECT | DRUM requires 3D vectors
+PASS | nested typed expression | FRAPA⟨DRAN⟨V3[length;world]⟩,Q[length]⟩ | PASS | type = Q[length]
+PASS | comparison returns Boolean | DRAL⟨Q[length],Q[length],Criterion⟩ | PASS | type = Bool
+PASS | comparison mismatched dimensions rejected | DRAS⟨Q[length],Q[time],Criterion⟩ | REJECT | DRAS operands must have compatible types; got Q[length] and Q[time]
+PASS | unknown operator fails closed | BEN⟨Q[length]⟩ | REJECT | no Phase 5.8 signature for BEN
+PASS | unbalanced syntax rejected | FRAPA⟨Q[length],Q[length] | REJECT | malformed expression; expected OP⟨...⟩
+SUMMARY | 16/16 regression checks passed

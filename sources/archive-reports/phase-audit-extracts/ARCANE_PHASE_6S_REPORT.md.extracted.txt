@@ -1,0 +1,41 @@
+ARCHIVE SOURCE: Arcane_Phase_6S_Typed_Expression_Integration/ARCANE_PHASE_6S_REPORT.md
+SHA-256: 6a4b4f1c1a50ba23a3c4399c8cd2fa740856d93306a1fb80e2e48d333e1a8edb
+NOTE: Derived review copy; original ZIP member unchanged.
+========================================================================
+
+# Arcane Phase 6S — Typed expression integration report
+
+**Status:** Complete for the scoped prototype milestone  
+**Verification:** 68/68 combined automated tests passed  
+**Canon changes:** None
+
+## What changed
+
+Phase 6S connects the Phase 6P/6Q expression AST to the Phase 6R dimensional model. The new `arcane_typed_runtime.py` exposes `evaluate_typed()` and a programmatic `QuantityLiteral` test node. The existing evaluator remains unchanged, so existing test-notation behaviour is preserved.
+
+### Typed behaviour
+- A parsed numeric literal becomes a dimensionless `Quantity`.
+- `FRAPA` and `FRAJA` use dimensional addition/subtraction and reject mismatched dimensions.
+- `FRAMA` and `FRALA` combine dimension vectors according to the Phase 6R model.
+- `FRASHA` negates a quantity's magnitude while preserving its dimension.
+- `GRAN`, `GRAT` and `GRASH` continue to operate on Booleans and reject quantity operands.
+- Typed dimension errors are reported as `TypedEvaluationError` with operator context.
+
+## Test evidence
+The combined test suite was executed with:
+
+```bash
+python -m unittest -v test_arcane_reference_runtime test_phase6q_grammar test_phase6r_dimensions test_phase6s_typed_runtime
+```
+
+Observed result: **68 tests passed**. The included `PHASE_6S_TEST_OUTPUT.txt` records the run.
+
+## Important boundaries
+- The historical Phase 6H runtime remains unavailable; this is a new reference prototype.
+- `QuantityLiteral` is a programmatic test node, not a new canonical surface-language construct.
+- Bare numeric literals are treated as dimensionless only in the typed evaluator. No unit names or conversion factors have been canonized.
+- Passing dimensional checks does not establish physical feasibility, conservation, measurement completeness or Logos resource sufficiency.
+- The original T-001–T-016 grammar register is not fully passed by these prototype tests.
+
+## Next step: Phase 6T
+Define a source-backed measurement record and completeness contract before implementing it. Extract the exact fields and applicability conditions from the recovered audits and decision ledger; if the source does not settle a field, leave it explicitly unresolved rather than making it a universal requirement. Then test validation independently from dimensional arithmetic.

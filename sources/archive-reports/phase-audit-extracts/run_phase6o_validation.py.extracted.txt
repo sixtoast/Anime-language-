@@ -1,0 +1,42 @@
+ARCHIVE SOURCE: Arcane_Phase_6S_Typed_Expression_Integration/run_phase6o_validation.py
+SHA-256: 3360ec5da0496d71d55d8ffdf39425f3c9b8c5ecb8e0177b97ead3fd63ac200f
+NOTE: Derived review copy; original ZIP member unchanged.
+========================================================================
+
+#!/usr/bin/env python3
+"""Re-run the portable Phase 5 generator and verify its archived output baseline."""
+from pathlib import Path
+import csv, json, subprocess, sys, hashlib
+BASE = Path(__file__).resolve().parent
+script = BASE / 'phase5_vernacular_portable.py'
+proc = subprocess.run([sys.executable, str(script)], cwd=BASE, capture_output=True, text=True)
+(BASE / 'phase6o_generator_stdout.txt').write_text(proc.stdout, encoding='utf-8')
+(BASE / 'phase6o_generator_stderr.txt').write_text(proc.stderr, encoding='utf-8')
+if proc.returncode:
+    print('FAIL: generator exited', proc.returncode)
+    print(proc.stderr)
+    raise SystemExit(proc.returncode)
+report = json.loads((BASE / 'phase5_report.json').read_text(encoding='utf-8'))
+checks = report['results']
+results=[]
+for r in checks:
+    results.append({'id':r['id'],'status':r['status'],'title':r['title'],'detail':r.get('detail','')})
+expected = ['P5-T01','P5-T02','P5-T03','P5-T04','P5-T05','P5-T06','P5-T07']
+if [r['id'] for r in results] != expected:
+    results.append({'id':'P6O-V01','status':'FAIL','title':'Expected seven original Phase 5 checks','detail':str([r['id'] for r in results])})
+else:
+    results.append({'id':'P6O-V01','status':'PASS','title':'All seven original Phase 5 checks were emitted','detail':'P5-T01 through P5-T07 present in expected order'})
+original = BASE / 'Arcane_Lexicon_v5_draft.csv'
+generated = BASE / 'Arcane_Lexicon_v5_draft.generated.csv'
+orig_bytes = original.read_bytes(); gen_bytes = generated.read_bytes()
+results.append({'id':'P6O-V02','status':'PASS' if orig_bytes == gen_bytes else 'FAIL','title':'Regenerated Phase 5 lexicon matches archived baseline byte-for-byte','detail':f'archived_sha256={hashlib.sha256(orig_bytes).hexdigest()}; generated_sha256={hashlib.sha256(gen_bytes).hexdigest()}; archived_bytes={len(orig_bytes)}; generated_bytes={len(gen_bytes)}'})
+with original.open(encoding='utf-8', newline='') as f: orig_rows=list(csv.DictReader(f))
+with generated.open(encoding='utf-8', newline='') as f: gen_rows=list(csv.DictReader(f))
+results.append({'id':'P6O-V03','status':'PASS' if len(orig_rows)==len(gen_rows)==255 else 'FAIL','title':'Both lexicons contain 255 data rows','detail':f'archived={len(orig_rows)}; generated={len(gen_rows)}'})
+results.append({'id':'P6O-V04','status':'PASS' if sum(r['status']=='PASS' for r in checks)==7 else 'FAIL','title':'All seven original Phase 5 checks pass','detail':f"{sum(r['status']=='PASS' for r in checks)}/7 PASS"})
+(BASE/'PHASE_6O_VALIDATION_RESULTS.json').write_text(json.dumps(results,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+with (BASE/'PHASE_6O_VALIDATION_RESULTS.csv').open('w',encoding='utf-8',newline='') as f:
+    w=csv.DictWriter(f,fieldnames=['id','status','title','detail']);w.writeheader();w.writerows(results)
+for r in results: print(f"{r['id']} {r['status']} — {r['title']}: {r['detail']}")
+failed=[r for r in results if r['status']!='PASS']
+if failed: raise SystemExit(1)

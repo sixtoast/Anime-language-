@@ -1,0 +1,67 @@
+ARCHIVE SOURCE: Arcane_Phase_6S_Typed_Expression_Integration/arcane_typed_runtime.py
+SHA-256: 3981eed988e90b23fc4380f6c314c87152396f443dca6f289721229eaaee2de2
+NOTE: Derived review copy; original ZIP member unchanged.
+========================================================================
+
+"""Phase 6S typed evaluator integration prototype.
+
+This is a provisional bridge between the Phase 6P/6Q expression AST and the
+Phase 6R Quantity model. QuantityLiteral is a test-harness AST node, not a new
+canonical surface-language construct.
+"""
+from __future__ import annotations
+from dataclasses import dataclass
+from decimal import Decimal
+from typing import Union
+
+from arcane_reference_runtime import Number, Boolean, Call, Expr, ArcaneRuntimeError
+from arcane_dimensions import Quantity, Dimension, DimensionError, DIMENSIONLESS
+
+class TypedEvaluationError(ArcaneRuntimeError):
+    """A typed expression could not be evaluated under the provisional contract."""
+
+@dataclass(frozen=True)
+class QuantityLiteral:
+    quantity: Quantity
+
+TypedExpr = Union[Expr, QuantityLiteral]
+
+def _eval(node: TypedExpr):
+    if isinstance(node, QuantityLiteral):
+        return node.quantity
+    if isinstance(node, Number):
+        return Quantity(node.value, DIMENSIONLESS)
+    if isinstance(node, Boolean):
+        return node.value
+    if not isinstance(node, Call):
+        raise TypedEvaluationError(f"unsupported typed AST node: {type(node).__name__}")
+
+    values = [_eval(arg) for arg in node.args]
+    op = node.operator
+    if op in {"frapa", "fraja", "frama", "frala", "frasha"}:
+        if not all(isinstance(v, Quantity) for v in values):
+            raise TypedEvaluationError(f"{op} requires numeric quantities")
+        try:
+            if op == "frapa": return values[0].add(values[1])
+            if op == "fraja": return values[0].subtract(values[1])
+            if op == "frama": return values[0].multiply(values[1])
+            if op == "frala": return values[0].divide(values[1])
+            return values[0].negate()
+        except DimensionError as exc:
+            raise TypedEvaluationError(f"{op}: {exc}") from exc
+    if op in {"gran", "grat", "grash"}:
+        if not all(isinstance(v, bool) for v in values):
+            raise TypedEvaluationError(f"{op} requires Boolean arguments")
+        if op == "gran": return values[0] and values[1]
+        if op == "grat": return values[0] or values[1]
+        return not values[0]
+    raise TypedEvaluationError(f"operator not implemented: {op}")
+
+def evaluate_typed(expr: TypedExpr):
+    """Evaluate existing AST nodes with dimension-aware numbers.
+
+    Bare numeric literals are dimensionless. Tests needing physical dimensions
+    construct QuantityLiteral nodes explicitly; syntax for such values remains
+    intentionally unspecified pending a source-backed grammar decision.
+    """
+    return _eval(expr)

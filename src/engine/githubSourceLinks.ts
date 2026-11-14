@@ -1,7 +1,7 @@
 const REPOSITORY = "https://github.com/sixtoast/Anime-language-";
 
 export function githubBlobUrl(path: string, ref: string): string {
-  const cleanPath = path.trim().replace(/^\\/+/, "");
+  const cleanPath = path.trim().replace(/^[/]+/, "");
   const cleanRef = ref.trim();
   if (!cleanPath || !cleanRef) throw new Error("A repository path and ref are required.");
   const [filePath, fragment] = cleanPath.split("#", 2);

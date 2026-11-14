@@ -1,0 +1,15 @@
+PASS	nested valid same-dimension addition
+PASS	canonical alias fraja accepted as subtraction-form registry entry
+PASS	legacy frata normalises to fraja
+PASS	length times time yields product dimensions
+PASS	division by zero rejected
+PASS	addition dimension mismatch rejected
+PASS	missing argument rejected
+PASS	extra argument rejected
+PASS	unknown operator rejected
+PASS	boolean AND accepted
+PASS	non-Boolean AND rejected
+PASS	NOT requires Boolean
+PASS	strict mode rejects provisional signature
+PASS	trailing token rejected
+RESULT: 14/14 PASS

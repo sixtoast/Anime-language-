@@ -1,0 +1,43 @@
+PASS | LEXICON_READABLE | 140 rows loaded from Arcane_Lexicon_v4_draft.csv
+PASS | REGISTRY_READABLE | 7 alias rows loaded
+PASS | EXPECTED_ALIAS_SET | expected ['dral', 'drim', 'fraka', 'frata', 'grak', 'kwak', 'ren']; found ['dral', 'drim', 'fraka', 'frata', 'grak', 'kwak', 'ren']
+PASS | NO_ALIAS_SELF_MAP | each legacy spelling maps to a distinct preferred spelling
+PASS | ALIAS_TARGET:frata | frata -> fraja; expected fraja
+PASS | PREFERRED_EXISTS:fraja | preferred form exists in lexicon
+PASS | PREFERRED_GLOSS:fraja | expected meaning compatible with 'subtract'
+PASS | LEGACY_NOT_SEPARATE_LEXEME:frata | legacy form absent as independent lexicon entry; registry remains the compatibility layer
+PASS | RESOLVE_PRESERVES_SOURCE:frata | source token FRATA can be retained; lookup key fraja
+PASS | ALIAS_TARGET:fraka | fraka -> frama; expected frama
+PASS | PREFERRED_EXISTS:frama | preferred form exists in lexicon
+PASS | PREFERRED_GLOSS:frama | expected meaning compatible with 'multiply'
+PASS | LEGACY_NOT_SEPARATE_LEXEME:fraka | legacy form absent as independent lexicon entry; registry remains the compatibility layer
+PASS | RESOLVE_PRESERVES_SOURCE:fraka | source token FRAKA can be retained; lookup key frama
+PASS | ALIAS_TARGET:drim | drim -> drum; expected drum
+PASS | PREFERRED_EXISTS:drum | preferred form exists in lexicon
+PASS | PREFERRED_GLOSS:drum | expected meaning compatible with 'cross product'
+PASS | LEGACY_NOT_SEPARATE_LEXEME:drim | legacy form absent as independent lexicon entry; registry remains the compatibility layer
+PASS | RESOLVE_PRESERVES_SOURCE:drim | source token DRIM can be retained; lookup key drum
+PASS | ALIAS_TARGET:ren | ren -> ben; expected ben
+PASS | PREFERRED_EXISTS:ben | preferred form exists in lexicon
+PASS | PREFERRED_GLOSS:ben | expected meaning compatible with 'region'
+PASS | LEGACY_NOT_SEPARATE_LEXEME:ren | legacy form absent as independent lexicon entry; registry remains the compatibility layer
+PASS | RESOLVE_PRESERVES_SOURCE:ren | source token REN can be retained; lookup key ben
+PASS | ALIAS_TARGET:grak | grak -> grash; expected grash
+PASS | PREFERRED_EXISTS:grash | preferred form exists in lexicon
+PASS | PREFERRED_GLOSS:grash | expected meaning compatible with 'not'
+PASS | LEGACY_NOT_SEPARATE_LEXEME:grak | legacy form absent as independent lexicon entry; registry remains the compatibility layer
+PASS | RESOLVE_PRESERVES_SOURCE:grak | source token GRAK can be retained; lookup key grash
+PASS | ALIAS_TARGET:kwak | kwak -> kwash; expected kwash
+PASS | PREFERRED_EXISTS:kwash | preferred form exists in lexicon
+PASS | PREFERRED_GLOSS:kwash | expected meaning compatible with 'live evaluation'
+PASS | LEGACY_NOT_SEPARATE_LEXEME:kwak | legacy form absent as independent lexicon entry; registry remains the compatibility layer
+PASS | RESOLVE_PRESERVES_SOURCE:kwak | source token KWAK can be retained; lookup key kwash
+PASS | ALIAS_TARGET:dral | dral -> dras; expected dras
+PASS | PREFERRED_EXISTS:dras | preferred form exists in lexicon
+PASS | PREFERRED_GLOSS:dras | expected meaning compatible with 'compare'
+PASS | LEGACY_NOT_SEPARATE_LEXEME:dral | legacy form absent as independent lexicon entry; registry remains the compatibility layer
+PASS | RESOLVE_PRESERVES_SOURCE:dral | source token DRAL can be retained; lookup key dras
+PASS | DUPLICATE_FORMS_CLASSIFIED | known register/class-sensitive overlaps: ['ra', 're']; other duplicates: []
+PASS | SCOPE_AWARE_DUPLICATE:ra | surface form appears in classes ['FUSED-REF', 'UNIT']; sources ['v2.0', 'v3.0-L']; resolver must use class/register/context
+PASS | SCOPE_AWARE_DUPLICATE:re | surface form appears in classes ['DIGIT', 'FUSED-REF']; sources ['v2.0', 'v3.0-L']; resolver must use class/register/context
+SUMMARY | 42/42 checks passed

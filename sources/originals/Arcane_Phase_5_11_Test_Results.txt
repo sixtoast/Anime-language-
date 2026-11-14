@@ -1,0 +1,15 @@
+PASS	same-dimension addition
+PASS	length plus time rejected
+PASS	length times length gives area
+PASS	length divided by time gives velocity dimensions
+PASS	division by zero rejected
+PASS	matching-type comparison works
+PASS	mismatched-type comparison rejected
+PASS	nested audit parse
+PASS	missing close bracket rejected
+PASS	trailing tokens rejected
+PASS	fixed arity accepted
+PASS	missing argument rejected
+PASS	extra argument rejected
+PASS	unknown operator rejected
+RESULT: 14/14 PASS
