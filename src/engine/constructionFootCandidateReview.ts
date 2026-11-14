@@ -5,7 +5,7 @@
  * productive Foot grammar. Whole example tokens are never segmented.
  */
 import { constructionFrameInventory, constructionParameterInventory } from "./constructionFootEvidence";
-import { constructionFootMorphologyAudit, reviewConstructionFootFrameVowel } from "./constructionFootMorphologyAudit";
+import { constructionFootMorphologyAudit } from "./constructionFootMorphologyAudit";
 import { constructionFootSourceRecovery } from "./constructionFootSourceRecovery";
 import { reviewConstructionFootComposition } from "./constructionFootComposition";
 import { reviewConstructionFrameMacroAssociation } from "./constructionFrameContrastEvidence";
@@ -42,7 +42,7 @@ export interface ConstructionFootCandidateReview {
 
 const canonicalForms = new Set(constructionFrameInventory.map(item => item.canonicalForm));
 const parameterFamilies = new Map(constructionParameterInventory.map(item => [item.vowel, item.family]));
-const wholeTokens = new Set(constructionFootSourceRecovery.observedWholeTokens.map(item => item.token));
+const wholeTokens = new Set<string>(constructionFootSourceRecovery.observedWholeTokens.map(item => item.token));
 const knownFrames = new Set(constructionFrameInventory.map(item => item.consonant));
 const knownVowels = new Set(constructionParameterInventory.map(item => item.vowel));
 const LIMITATION = "Evidence classification only. This is not a productive Foot grammar, lexical validator, physical model or execution engine.";
@@ -108,7 +108,6 @@ export function reviewConstructionFootCandidate(value: unknown): ConstructionFoo
   }
 
   if (value.length === 2 && knownFrames.has(value[0]) && knownVowels.has(value[1])) {
-    const cell = reviewConstructionFootFrameVowel(value[0], value[1]);
     const macro = reviewConstructionFrameMacroAssociation("TRAK")?.frameSet.includes(value[0])
       ? "TRAK" as const
       : reviewConstructionFrameMacroAssociation("KREN")?.frameSet.includes(value[0])
