@@ -8,7 +8,7 @@ it("[ARC-COMP-003] does not alter punctuation or whitespace",()=>{const s="alpha
 it("[ARC-COMP-004] refuses a short-form collision already in source",()=>expect(compressArcaneText("kan ~K",[{fullForm:"kan",shortForm:"~K"}]).disposition).toBe("INVALID-DICTIONARY"));
 it("[ARC-COMP-005] rejects duplicate aliases",()=>expect(compressArcaneText("alpha beta",[{fullForm:"alpha",shortForm:"~A"},{fullForm:"alpha",shortForm:"~B"}]).issues.length).toBeGreaterThan(0));
 it("[ARC-COMP-006] rejects ambiguous duplicate short forms",()=>expect(compressArcaneText("alpha beta",[{fullForm:"alpha",shortForm:"~X"},{fullForm:"beta",shortForm:"~X"}]).disposition).toBe("INVALID-DICTIONARY"));
-it("[ARC-COMP-007] rejects alias chains",()=>expect(compressArcaneText("alpha beta",[{fullForm:"alpha",shortForm:"beta"}]).issues.some(x=>x.includes("chains"))).toBe(true));
+it("[ARC-COMP-007] rejects alias chains",()=>expect(compressArcaneText("alpha",[{fullForm:"alpha",shortForm:"~B"},{fullForm:"~B",shortForm:"~C"}]).issues.some(x=>x.includes("chains"))).toBe(true));
 it("[ARC-COMP-008] reports no saving when alias is not used",()=>expect(compressArcaneText("alpha",[{fullForm:"beta",shortForm:"~B"}]).disposition).toBe("NO-SAVING"));
 it("[ARC-COMP-009] reports no saving when alias is longer",()=>expect(compressArcaneText("a a",[{fullForm:"a",shortForm:"~LONG"}]).disposition).toBe("NO-SAVING"));
 it("[ARC-COMP-010] rejects unknown reserved tokens on expansion",()=>expect(expandArcaneText("~UNKNOWN",[{fullForm:"kan",shortForm:"~K"}]).ok).toBe(false));
@@ -17,4 +17,5 @@ it("[ARC-COMP-012] marks expansion as mandatory before parsing",()=>expect(compr
 it("[ARC-COMP-013] keeps canon and execution disabled",()=>{const r=compressArcaneText("kan",[{fullForm:"kan",shortForm:"~K"}]);expect(r.executable).toBe(false);expect(r.canonEffect).toBe("NONE")});
 it("[ARC-COMP-014] accepts valid short forms during expansion",()=>{const c=compressArcaneText("kan kan",[{fullForm:"kan",shortForm:"~K"}]);expect(expandArcaneText(c.compressedText,c.aliases)).toEqual({ok:true,text:"kan kan",issues:[]})});
 it("[ARC-COMP-015] includes dictionary cost when it is not shared",()=>{const r=compressArcaneText("kan kan kan",[{fullForm:"kan",shortForm:"~K"}],false);expect(r.charactersSaved).toBe(r.textCharactersSaved-r.dictionaryCharacters);expect(r.disposition).toBe("NO-SAVING")});
+it("[ARC-COMP-016] reserves the transport namespace from canonical tokens",()=>expect(compressArcaneText("~OLD",[{fullForm:"~OLD",shortForm:"~NEW"}]).disposition).toBe("INVALID-DICTIONARY"));
 });

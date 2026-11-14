@@ -31,4 +31,4 @@ A later language-design phase may investigate approved clitics, scope binding, s
 
 ## Tests
 
-Fifteen cases cover round-trip identity, whitespace/punctuation preservation, collisions, duplicate aliases, alias chains, no-saving cases, unknown reserved tokens and non-execution boundaries.
+Sixteen cases cover round-trip identity, whitespace/punctuation preservation, collisions, duplicate aliases, alias chains, no-saving cases, unknown reserved tokens and non-execution boundaries.
