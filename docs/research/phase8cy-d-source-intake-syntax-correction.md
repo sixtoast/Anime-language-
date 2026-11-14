@@ -1,0 +1,3 @@
+# Phase 8CY-D — Repair source-intake Python syntax and newline handling
+
+The first recursive-extraction preview stopped in Python unittest discovery because `tools/source_intake.py` contained literal backslash-n characters between CLI argument statements, producing a SyntaxError. The same module's comparison Markdown writer joined lines using the literal two-character sequence `\\n` instead of newline characters. Corrected the CLI statements to actual source lines and the join delimiter to a real newline. Corrected the transcription comparison test fixtures to use actual newline-separated text. The preview build is the execution check; no test result is claimed until its logs confirm it.

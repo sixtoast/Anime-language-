@@ -310,7 +310,7 @@ def comparison_markdown(result: dict[str, Any]) -> str:
         lines.extend(["", "### Right"])
         lines.extend("    " + line for line in change["right"])
         lines.append("")
-    return "\\n".join(lines)
+    return "\n".join(lines)
 
 
 def main() -> int:
@@ -319,7 +319,10 @@ def main() -> int:
     parser.add_argument("--json-out", type=Path, default=Path("source-intake-manifest.json"))
     parser.add_argument("--markdown-out", type=Path, default=Path("source-intake-report.md"))
     parser.add_argument("--max-file-bytes", type=int, default=MAX_DEFAULT_BYTES)
-    parser.add_argument("--max-members", type=int, default=MAX_ARCHIVE_MEMBERS)\n    parser.add_argument("--compare", nargs=2, type=Path, metavar=("LEFT", "RIGHT"), help="Compare two UTF-8 text transcriptions line by line")\n    parser.add_argument("--comparison-json", type=Path, default=Path("transcription-comparison.json"))\n    parser.add_argument("--comparison-markdown", type=Path, default=Path("transcription-comparison.md"))
+    parser.add_argument("--max-members", type=int, default=MAX_ARCHIVE_MEMBERS)
+    parser.add_argument("--compare", nargs=2, type=Path, metavar=("LEFT", "RIGHT"), help="Compare two UTF-8 text transcriptions line by line")
+    parser.add_argument("--comparison-json", type=Path, default=Path("transcription-comparison.json"))
+    parser.add_argument("--comparison-markdown", type=Path, default=Path("transcription-comparison.md"))
     args = parser.parse_args()
     if args.compare:
         left_path, right_path = args.compare
@@ -331,7 +334,8 @@ def main() -> int:
         args.comparison_markdown.write_text(comparison_markdown(comparison), encoding="utf-8")
         print(f"Compared {left_path} and {right_path}: {comparison['change_count']} changed regions.")
         return 0
-    if not args.paths:\n        parser.error("provide one or more paths, or use --compare LEFT RIGHT")\n    paths: list[Path] = []
+    if not args.paths:
+        parser.error("provide one or more paths, or use --compare LEFT RIGHT")\n    paths: list[Path] = []
     for target in args.paths:
         if target.is_dir():
             paths.extend(sorted(p for p in target.rglob("*") if p.is_file() and not p.is_symlink()))

@@ -76,7 +76,7 @@ class SourceIntakeTests(unittest.TestCase):
         self.assertEqual(duplicate_groups([{"source": "a", "sha256": "1"}, {"source": "b", "sha256": "2"}]), [])
 
     def test_identical_transcriptions_have_no_changes(self):
-        result = compare_transcriptions("a.txt", "one\\ntwo\\n", "b.txt", "one\\ntwo\\n")
+        result = compare_transcriptions("a.txt", "one\ntwo\n", "b.txt", "one\ntwo\n")
         self.assertTrue(result["equal"])
         self.assertEqual(result["change_count"], 0)
 
