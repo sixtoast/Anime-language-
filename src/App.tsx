@@ -27,6 +27,7 @@ import { bindConstructionReference, type ConstructionReferenceToken } from "./en
 import { reviewConstructionReferenceBoundary } from "./engine/constructionReferenceBoundary";
 import { constructionStageInterfaceAudit, reviewConstructionStageInterfaceAudit } from "./engine/constructionStageInterfaceAudit";
 import { constructionSpatialEvidenceAudit } from "./engine/constructionSpatialEvidenceAudit";
+import { constructionSpatialGrammarEvidence, reviewConstructionSpatialCategory } from "./engine/constructionSpatialGrammarEvidence";
 import { createEmptyConstructionExpressionComposition, reviewConstructionExpressionComposition } from "./engine/constructionExpressionComposition";
 import { handFlameFixtureTraceability, reviewHandFlameFixtureTraceability } from "./engine/constructionFixtureTraceability";
 import { reviewConstructionFootShape } from "./engine/constructionFootShape";
@@ -772,6 +773,24 @@ function App() {
                 {profile.id === "HISTORICAL-PHASE-5.22-FIXTURE" ? "Fixture-local role, axis and quantity readings only." : "Separate inventory: relations JO/JUR/JA/JE/JI; geometry PI/LEN/PLA/SUR/VOM/PAR."}</span>
               </div>)}
               <p className="fixture-browser-caveat">The spelling da/DA is not enough to establish a shared token identity. Coordinate frame, origin, vector composition, quantity attachment and unit conversion remain unrecovered.</p>
+            </div>
+            <div className="construction-relationship-map">
+              <div className="detail-kicker">PHASE 8BP · SPATIAL GRAMMAR INVENTORY</div>
+              <p>The v3.0-L inventory is now classified into four evidence categories. These are lexical categories only: no token signature, phrase order or executable spatial operation is inferred.</p>
+              {constructionSpatialGrammarEvidence.categoryOrder.map(category => {
+                const categoryEntries = reviewConstructionSpatialCategory(category) ?? [];
+                return <div className="construction-foot-parts" key={category}>
+                  <span><small>{category.replaceAll("-", " ")} · {categoryEntries.length} recorded forms</small><strong>{categoryEntries.map(entry => entry.form).join(" · ")}</strong><small>Signatures: NOT RECOVERED</small></span>
+                </div>;
+              })}
+              <div className="fixture-browser-meta">
+                <div><span>Inventory entries</span><strong>{constructionSpatialGrammarEvidence.entries.length}</strong></div>
+                <div><span>Categories</span><strong>{constructionSpatialGrammarEvidence.categoryOrder.length}</strong></div>
+                <div><span>Open interfaces</span><strong>{constructionSpatialGrammarEvidence.openInterfaces.length}</strong></div>
+                <div><span>Executable rules</span><strong>0</strong></div>
+              </div>
+              <ol>{constructionSpatialGrammarEvidence.openInterfaces.map(item => <li key={item.id}><strong>{item.id.replaceAll("-", " ")}</strong><small>{item.question} · {item.status}</small></li>)}</ol>
+              <p className="fixture-browser-caveat">The historical po/da/0.2 metre phrase remains fixture-local. A category label is not a grammar rule; do not assemble FE, axis, relation and geometry tokens into a purported valid expression until signatures and combination rules are recovered.</p>
             </div>
             <div className="construction-relationship-map">
               <div className="detail-kicker">PHASE 8BJ · STAGE INTERFACE AUDIT</div>
