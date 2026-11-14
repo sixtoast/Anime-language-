@@ -31,6 +31,7 @@ import { constructionSpatialGrammarEvidence, reviewConstructionSpatialCategory }
 import { constructionSpatialCompositionEvidence, reviewConstructionSpatialCategoryPair } from "./engine/constructionSpatialCompositionEvidence";
 import { constructionAxisSemantics, reviewConstructionAxis } from "./engine/constructionAxisSemantics";
 import { spatialValueModelSummary, workedDisplacementFixture, assessSpatialVectorFixture, proposedDisplacementMagnitude, proposedDisplacementDot } from "./engine/spatialValueModel";
+import { positionRelationSummary, positionRelationFixtures, proposedPositionDifference, proposedTranslatePosition, proposedAddPositions } from "./engine/spatialPositionRelations";
 import { createEmptyConstructionExpressionComposition, reviewConstructionExpressionComposition } from "./engine/constructionExpressionComposition";
 import { handFlameFixtureTraceability, reviewHandFlameFixtureTraceability } from "./engine/constructionFixtureTraceability";
 import { reviewConstructionFootShape } from "./engine/constructionFootShape";
@@ -776,6 +777,22 @@ function App() {
                 {profile.id === "HISTORICAL-PHASE-5.22-FIXTURE" ? "Fixture-local role, axis and quantity readings only." : "Separate inventory: relations JO/JUR/JA/JE/JI; geometry PI/LEN/PLA/SUR/VOM/PAR."}</span>
               </div>)}
               <p className="fixture-browser-caveat">The spelling da/DA is not enough to establish a shared token identity. Coordinate frame, origin, vector composition, quantity attachment and unit conversion remain unrecovered.</p>
+            </div>
+            <div className="construction-relationship-map">
+              <div className="detail-kicker">PHASE 8BT · POSITION / DISPLACEMENT RELATIONSHIPS</div>
+              <p>Neutral mathematical research contracts only; not recovered Arcane operators or surface syntax.</p>
+              <div className="fixture-browser-meta">
+                <div><span>Position difference</span><strong>{proposedPositionDifference(positionRelationFixtures.sourcePosition, positionRelationFixtures.destinationPosition).status}</strong></div>
+                <div><span>Position translation</span><strong>{proposedTranslatePosition(positionRelationFixtures.sourcePosition, proposedPositionDifference(positionRelationFixtures.sourcePosition, positionRelationFixtures.destinationPosition).value).status}</strong></div>
+                <div><span>Position + position</span><strong>{proposedAddPositions(positionRelationFixtures.sourcePosition, positionRelationFixtures.destinationPosition).status}</strong></div>
+                <div><span>Candidate contracts</span><strong>{positionRelationSummary.candidates.length}</strong></div>
+              </div>
+              <div className="construction-foot-parts">
+                {positionRelationSummary.candidates.map(candidate => <span key={candidate.id}><small>{candidate.id}</small><strong>{candidate.formula}</strong><small>Result: {candidate.result} · {candidate.status}</small></span>)}
+              </div>
+              <p><strong>Worked example:</strong> Pₐ=(1,2,3) m and Pᵦ=(4,6,3) m in the same frame and origin. Pᵦ−Pₐ gives displacement (3,4,0) m. Adding that displacement to Pₐ returns Pᵦ.</p>
+              <p><strong>Safety gates:</strong> subtraction requires matching frame, coordinate convention and origin/reference. Translation requires a displacement—not velocity—and matching frame, convention, dimensions and units. Position + position remains blocked because no operation contract is defined.</p>
+              <p className="fixture-browser-caveat">No mapping to PO/FO/LO or JO/JUR/JA/JE/JI is made. These calculations do not establish physical movement, arrival, mechanism or canon.</p>
             </div>
             <div className="construction-relationship-map">
               <div className="detail-kicker">PHASE 8BS · TYPED SPATIAL VALUE MODEL</div>
