@@ -38,4 +38,14 @@ describe("Phase 8BZ H-series coupling composition evidence", () => {
     expect(reviewHSeriesComposition(" ").status).toBe("EMPTY");
     expect(reviewHandFlameCouplingPhrase("he hu").status).toBe("NOT-RECORDED");
   });
+  it("[HCOUP-009] normalises repeated whitespace in the exact fixture phrase", () => {
+    expect(reviewHandFlameCouplingPhrase("  HE   HA  ").status).toBe("FIXTURE-COOCCURRENCE-RECORDED");
+  });
+  it("[HCOUP-010] records archived HE/HA annotations as provisional fixture-only evidence", () => {
+    const result = reviewHandFlameCouplingPhrase("he ha");
+    expect(result.observation?.archivedParser.status).toBe("FIXTURE-ONLY-ARCHIVED-PARSER-ANNOTATION");
+    expect(result.observation?.archivedParser.he).toContain("provisional");
+    expect(result.observation?.archivedParser.ha).toContain("provisional");
+    expect(result.observation?.participantMapping).toBe("NOT-ESTABLISHED");
+  });
 });

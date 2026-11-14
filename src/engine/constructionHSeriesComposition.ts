@@ -44,6 +44,7 @@ export const handFlameCouplingObservation = {
   fixture: "Phase 5.22 hand-flame example",
   exactPhrase: "he ha",
   members: ["he", "ha"] as const,
+  archivedParser: { archiveMember: "Arcane_Phase_6S_Typed_Expression_Integration/arcane_phase_5_22_parser.py", sha256: "8041e7e40cd6e152aa9d38982e2a8986515a1aa7bc315dbfc1e7065e72ee2905", he: "matter / mechanical-or-chemical domain (provisional)", ha: "energy / thermal domain (provisional)", status: "FIXTURE-ONLY-ARCHIVED-PARSER-ANNOTATION" },
   observation: "The two H-series forms co-occur in this order in one bounded example phrase.",
   orderMeaning: "NOT-ESTABLISHED",
   participantMapping: "NOT-ESTABLISHED",
