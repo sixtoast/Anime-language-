@@ -25,6 +25,7 @@ import { reviewConstructionRecord, type ConstructionRecord, type ConstructionEvi
 import type { ConstructionStage } from "./engine/constructionOrderAudit";
 import { bindConstructionReference, type ConstructionReferenceToken } from "./engine/constructionReferenceContext";
 import { reviewConstructionReferenceBoundary } from "./engine/constructionReferenceBoundary";
+import { constructionStageInterfaceAudit, reviewConstructionStageInterfaceAudit } from "./engine/constructionStageInterfaceAudit";
 import { reviewConstructionFootShape } from "./engine/constructionFootShape";
 import { reviewConstructionFootComposition } from "./engine/constructionFootComposition";
 import { constructionFrameInventory, constructionParameterInventory, constructionFootEvidenceBoundary } from "./engine/constructionFootEvidence";
@@ -745,6 +746,26 @@ function App() {
                 </li>)}
               </ol>
               <p className="fixture-browser-caveat">No direct data-flow, mandatory-stage, cardinality, omission, dependency or execution rule is inferred. Each interface requires original v2.0 evidence or an explicitly approved replacement specification.</p>
+            </div>
+            <div className="construction-relationship-map">
+              <div className="detail-kicker">PHASE 8BJ · STAGE INTERFACE AUDIT</div>
+              <p>Six adjacent stage boundaries are recorded as precedence relationships. The audit below separates that recovered order from the interfaces that still need source evidence.</p>
+              <div className="fixture-browser-meta">
+                <div><span>Boundaries reviewed</span><strong>{constructionStageInterfaceAudit.boundaries.length}</strong></div>
+                <div><span>Order evidence</span><strong>6 / 6</strong></div>
+                <div><span>Input/output contracts</span><strong>0 recovered</strong></div>
+                <div><span>Bindings</span><strong>0 recovered</strong></div>
+              </div>
+              <ol>
+                {constructionStageInterfaceAudit.boundaries.map(boundary => {
+                  const review = reviewConstructionStageInterfaceAudit(boundary.id);
+                  return <li key={boundary.id}>
+                    <strong>{boundary.fromLabel}</strong> <span aria-label="precedes">→</span> <strong>{boundary.toLabel}</strong>
+                    <small>{review.status.replaceAll("-", " ")} · order source-backed · interface unresolved</small>
+                  </li>;
+                })}
+              </ol>
+              <p className="fixture-browser-caveat">The audit does not define a data-flow edge. Input/output types, attachment, cardinality, omission and failure behaviour remain unestablished for every boundary.</p>
             </div>
             <div className="construction-contract-profiles">
               <div className="detail-kicker">PHASE 8AO · STAGE CONTRACT EVIDENCE</div>
