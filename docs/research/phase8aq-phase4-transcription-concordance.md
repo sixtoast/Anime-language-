@@ -20,7 +20,7 @@ These are three distinct repository artefacts. The DOCX-derived and TXT-derived 
 ## Source concordance now represented in the workbench
 
 Added `src/engine/constructionSourceConcordance.ts` as a non-executable evidence catalogue. It separates:
-- original binary source presence;
+- original binary source presence and verified archive byte-identities;
 - archive-index transcription metadata;
 - Phase 5.15/5.16 matrix records;
 - claims and their evidence strength;
@@ -46,4 +46,4 @@ The existing extractor remains the correct next tool once the original binary ca
 
 ## Decision
 
-Do not invent the missing v2.0 morphology. Do not treat the 22,019-character TXT entry as a verified duplicate of the 21,121-character DOCX extraction. The concordance is now visible in code and tests so that future work can add verified transcription evidence without rewriting or conflating the existing records.
+Do not invent the missing v2.0 morphology. Do not conflate the DOCX source-byte hash with a hash of extracted text. The exact DOCX archive copies are verified; complete text transcription and semantic equivalence of the TXT variants remain unverified. The concordance is now visible in code and tests so that future work can add verified transcription evidence without rewriting or conflating the existing records.
