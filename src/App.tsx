@@ -26,6 +26,7 @@ import type { ConstructionStage } from "./engine/constructionOrderAudit";
 import { bindConstructionReference, type ConstructionReferenceToken } from "./engine/constructionReferenceContext";
 import { reviewConstructionReferenceBoundary } from "./engine/constructionReferenceBoundary";
 import { constructionStageInterfaceAudit, reviewConstructionStageInterfaceAudit } from "./engine/constructionStageInterfaceAudit";
+import { constructionSpatialEvidenceAudit } from "./engine/constructionSpatialEvidenceAudit";
 import { reviewConstructionFootShape } from "./engine/constructionFootShape";
 import { reviewConstructionFootComposition } from "./engine/constructionFootComposition";
 import { constructionFrameInventory, constructionParameterInventory, constructionFootEvidenceBoundary } from "./engine/constructionFootEvidence";
@@ -760,6 +761,15 @@ function App() {
                 </li>)}
               </ol>
               <p className="fixture-browser-caveat">No direct data-flow, mandatory-stage, cardinality, omission, dependency or execution rule is inferred. Each interface requires original v2.0 evidence or an explicitly approved replacement specification.</p>
+            </div>
+            <div className="construction-relationship-map">
+              <div className="detail-kicker">PHASE 8BL · SPATIAL VOCABULARY / VERSION BOUNDARIES</div>
+              <p>Two spatial vocabularies are visible in the evidence. They are displayed separately because their historical equivalence and shared-token identity are not established.</p>
+              {constructionSpatialEvidenceAudit.profiles.map(profile => <div key={profile.id} className="construction-foot-parts">
+                <span><small>{profile.version} · {profile.status}</small><strong>{profile.id === "HISTORICAL-PHASE-5.22-FIXTURE" ? "po · da · 0.2 metre" : "FE · PA/BA/TA/DA/KA/GA"}</strong>
+                {profile.id === "HISTORICAL-PHASE-5.22-FIXTURE" ? "Fixture-local role, axis and quantity readings only." : "Separate inventory: relations JO/JUR/JA/JE/JI; geometry PI/LEN/PLA/SUR/VOM/PAR."}</span>
+              </div>)}
+              <p className="fixture-browser-caveat">The spelling da/DA is not enough to establish a shared token identity. Coordinate frame, origin, vector composition, quantity attachment and unit conversion remain unrecovered.</p>
             </div>
             <div className="construction-relationship-map">
               <div className="detail-kicker">PHASE 8BJ · STAGE INTERFACE AUDIT</div>
