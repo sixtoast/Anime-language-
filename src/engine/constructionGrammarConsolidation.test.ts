@@ -27,7 +27,7 @@ describe("Phase 8AW Construction grammar evidence consolidation", () => {
     expect(constructionGrammarConsolidation.layers.find(layer => layer.id === "COUPLING-AND-MACROS")?.status).toBe("PROVISIONAL-OR-EXAMPLE-LEVEL");
   });
   it("CON-GRAM-006 does not generalise K-series example aliases", () => {
-    expect(constructionGrammarConsolidation.limitations.some(item => item.includes("KAN/KEN/KAS"))).toBe(true);
+    expect(constructionGrammarConsolidation.layers.find(layer => layer.id === "COUPLING-AND-MACROS")?.statement).toContain("KAN/KEN/KAS");
   });
   it("CON-GRAM-007 classifies arbitrary strings as unsupported", () => {
     expect(auditConstructionGrammarEvidence("mel po unknown").classification).toBe("UNSUPPORTED");
