@@ -81,7 +81,7 @@ class SourceIntakeTests(unittest.TestCase):
         self.assertEqual(result["change_count"], 0)
 
     def test_reports_inserted_line_with_source_locations(self):
-        result = compare_transcriptions("a.txt", "one\\ntwo", "b.txt", "one\\ninserted\\ntwo")
+        result = compare_transcriptions("a.txt", "one\ntwo", "b.txt", "one\ninserted\ntwo")
         self.assertEqual(result["change_count"], 1)
         self.assertEqual(result["changes"][0]["kind"], "insert")
         self.assertEqual(result["changes"][0]["right_start_line"], 2)
