@@ -23,7 +23,7 @@ The archived fixture preserves six dot-delimited phrases. Within those phrases, 
 | 5 | `sa shi za se` | sa, shi, za, se | Unresolved |
 | 6 | `kas` | kas | Partial interpretation |
 
-The total is 16 whitespace units across six phrases. These are surface tokens/units for this fixture only. This count does not prove that each unit is an independent lexical morpheme.
+The total is 17 whitespace units across six phrases (1 + 7 + 2 + 2 + 4 + 1). These are surface tokens/units for this fixture only. This count does not prove that each unit is an independent lexical morpheme.
 
 ## 3. Boundary decisions
 
