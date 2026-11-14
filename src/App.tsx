@@ -41,6 +41,7 @@ import { handFlameFixtureTraceability, reviewHandFlameFixtureTraceability } from
 import { reviewConstructionFootShape } from "./engine/constructionFootShape";
 import { reviewConstructionFootMorphology } from "./engine/constructionFootMorphologyReview";
 import { constructionFootParadigmSummary, constructionFootParadigmCandidates, reviewConstructionFootParadigmCandidate } from "./engine/constructionFootParadigmEvidenceMatrix";
+import { constructionFootParadigmReconciliation } from "./engine/constructionFootParadigmReconciliation";
 import { reviewConstructionFootComposition } from "./engine/constructionFootComposition";
 import { constructionFrameInventory, constructionParameterInventory, constructionFootEvidenceBoundary } from "./engine/constructionFootEvidence";
 import { constructionFootMorphologyAudit } from "./engine/constructionFootMorphologyAudit";
@@ -782,19 +783,19 @@ function App() {
                 </div>
                 <p>{constructionFootMorphologyReview.explanation}</p>
                 <p className="fixture-browser-caveat"><strong>Mandatory coda:</strong> {constructionFootMorphologyReview.codaRequirement.replaceAll("-", " ")} · <strong>Executable:</strong> No · <strong>Canon effect:</strong> None.</p>
-                <p className="fixture-browser-caveat"><strong>Recovered relation codas:</strong> m/n = FREM open-loop maintenance; ng = FREM feedback maintenance; s/sh = SHREN release. The wider phonotactic coda set is not a semantic relation-coda list. <code>kal</code> and <code>mel</code> are reported as distinct source-classification conflicts, not accepted or rejected as lexical Feet.</p>
+                <p className="fixture-browser-caveat"><strong>Source reconciliation warning:</strong> {constructionFootParadigmReconciliation.status.replaceAll("-", " ")}. The five-coda mapping from Phase 8CY-R conflicts with the earlier Phase 8CI closure, which records zero recovered relation-coda entries pending primary §3.1–§3.3 and P4-T05/P4-T10 inspection. Do not use the five-coda list as a verified inventory. <code>kal</code> and <code>mel</code> remain unresolved source-classification cases.</p>
                 <div className="construction-foot-composition">
-                  <div className="detail-kicker">PHASE 8CY-R · 6 × 6 × 5 PARADIGM EVIDENCE MATRIX</div>
+                  <div className="detail-kicker">PHASE 8CY-R · LEGACY HYPOTHESIS — SUPERSEDED FOR REVIEW</div>
                   <div className="construction-foot-parts">
                     <span><small>Frames</small><strong>{constructionFootParadigmSummary.frameCount}</strong></span>
                     <span><small>Parameter vowels</small><strong>{constructionFootParadigmSummary.parameterVowelCount}</strong></span>
                     <span><small>Relation codas</small><strong>{constructionFootParadigmSummary.relationCodaCount}</strong></span>
                     <span><small>Candidate space</small><strong>{constructionFootParadigmSummary.candidateSpaceSize}</strong></span>
                   </div>
-                  <p>These {constructionFootParadigmCandidates.length} combinations represent the Phase 4 design space, not 180 attested lexical Feet. Each is marked DESIGN-SPACE-ONLY; parameter families remain provisional, individual frame meanings are unresolved, and physical semantics are not defined.</p>
-                  <p><strong>Frame groups:</strong> TRAK p/t/k (described); KREN b/d/g (proposed; owner confirmation required). <strong>Relations:</strong> FREM m/n (open-loop), FREM ng (feedback), SHREN s/sh (release).</p>
-                  <p><strong>Lookup for current input:</strong> {reviewConstructionFootParadigmCandidate(constructionFootInput)?.evidenceStatus ?? "No exact 6×6×5 candidate record"}. <strong>Coda status:</strong> {constructionFootParadigmSummary.mandatoryCodaStatus.replaceAll("-", " ")}.</p>
-                  <p className="fixture-browser-caveat">No candidate is lexically attested by this matrix. No Foot is generated, parsed or executed; canon effect NONE.</p>
+                  <p>The earlier 180-record enumeration is retained for audit history only. It is not a source-verified paradigm: its five-coda dimension is disputed by the Phase 8CI closure audit. No candidate lookup is currently authorised. The defensible coverage is six frames × six provisional vowels (36 review pairs), with only six canonical CV frame forms explicitly recorded.</p>
+                  <p><strong>Frame groups:</strong> TRAK p/t/k (described); KREN b/d/g (proposed; owner confirmation required). <strong>Relation codas:</strong> UNRECOVERED FOR CURRENT REVIEW. Earlier coda assignments remain claims to reconcile, not validated morphology.</p>
+                  <p><strong>Candidate lookup:</strong> DISABLED PENDING SOURCE RECONCILIATION. <strong>Coda status:</strong> {constructionFootParadigmReconciliation.codaInventoryStatus.replaceAll("-", " ")}. <strong>Earlier optionality conflict:</strong> {constructionFootParadigmSummary.mandatoryCodaStatus.replaceAll("-", " ")}.</p>
+                  <p className="fixture-browser-caveat">No candidate is lexically attested by this matrix. No Foot is generated, parsed or executed; canon effect NONE. The legacy 180-item list must not be interpreted as evidence that the relation-coda inventory is complete.</p>
                 </div>
               </div>
               <div className="construction-foot-composition">
