@@ -6,6 +6,7 @@ import {
   type ResourceBalanceObservation
 } from "./resourceConservation";
 import type { LedgerAccount, LedgerEvent } from "./resourceLedger";
+import { assessResourceAccountingAuditStructure } from "./resourceAccountingAudit";
 
 /**
  * Deterministic, read-only v1.9 demonstration inputs for the Playground.
@@ -20,7 +21,8 @@ export type ResourceConservationPreviewScenario =
   | "ACCOUNT-DISCREPANCY"
   | "ESTIMATE-AS-MEASUREMENT"
   | "MEASUREMENT-POLICY-UNRESOLVED"
-  | "CONTRACT-EVIDENCE-UNRESOLVED";
+  | "CONTRACT-EVIDENCE-UNRESOLVED"
+  | "AUDIT-STRUCTURE-PRESENT-UNKNOWN-OUTCOME";
 
 export const resourceConservationPreviewScenarios: {
   id: ResourceConservationPreviewScenario;
@@ -32,7 +34,8 @@ export const resourceConservationPreviewScenarios: {
   { id: "ACCOUNT-DISCREPANCY", label: "Account discrepancy", description: "The measured account balance is two ticks below the ledger projection; no correction is applied." },
   { id: "ESTIMATE-AS-MEASUREMENT", label: "Estimate presented as measurement", description: "The account observation is classified as an estimate, so measurement reconciliation remains unresolved." },
   { id: "MEASUREMENT-POLICY-UNRESOLVED", label: "Measurement policy unresolved", description: "The observation's per-measurement uncertainty-policy acceptance is unknown, so it cannot reconcile." },
-  { id: "CONTRACT-EVIDENCE-UNRESOLVED", label: "Contract evidence unresolved", description: "The conservation contract evidence is unknown, so neither evaluation may claim a passing result." }
+  { id: "CONTRACT-EVIDENCE-UNRESOLVED", label: "Contract evidence unresolved", description: "The conservation contract evidence is unknown, so neither evaluation may claim a passing result." },
+  { id: "AUDIT-STRUCTURE-PRESENT-UNKNOWN-OUTCOME", label: "Audit structure present, outcome unknown", description: "All 14 top-level audit sections are represented as explicit unknown placeholders; RESOURCE-OUTCOME-UNKNOWN is preserved without interpretation." }
 ];
 
 const SAMPLE_RESOURCE_KIND = "preview-sample-stock";
@@ -53,7 +56,8 @@ function sampleQuantity(amountTicks: number, evidenceRef: string): ConservationQ
 }
 
 function sampleContract(scenario: ResourceConservationPreviewScenario): ConservationContractInput {
-  const contractEvidence = scenario === "CONTRACT-EVIDENCE-UNRESOLVED" ? "UNKNOWN" : "PASS";
+  const contractEvidence = scenario === "CONTRACT-EVIDENCE-UNRESOLVED" ||
+    scenario === "AUDIT-STRUCTURE-PRESENT-UNKNOWN-OUTCOME" ? "UNKNOWN" : "PASS";
   const closingBalance = scenario === "CONSERVATION-MISMATCH" ? 109 : 110;
   return {
     contractId: "preview-sample-conservation-contract",
@@ -108,6 +112,25 @@ function sampleEvents(): LedgerEvent[] {
   }];
 }
 
+function sampleAuditRecord(): Record<string, unknown> {
+  return {
+    resourceDefinitions: null,
+    accountSnapshots: null,
+    budgets: null,
+    sourceClaims: null,
+    reservations: null,
+    ledgerEvents: null,
+    transformations: null,
+    conservationChecks: null,
+    estimates: null,
+    observations: null,
+    reconciliation: null,
+    uncertainty: null,
+    unresolvedDiscrepancies: null,
+    contractVersions: null
+  };
+}
+
 function sampleObservation(scenario: ResourceConservationPreviewScenario): ResourceBalanceObservation {
   return {
     category: scenario === "ESTIMATE-AS-MEASUREMENT" ? "ESTIMATE" : "MEASUREMENT",
@@ -131,24 +154,35 @@ export function evaluateResourceConservationPreview(scenario: ResourceConservati
   const scenarioDescription = resourceConservationPreviewScenarios.find((item) => item.id === scenario);
   if (!scenarioDescription) throw new Error("Unsupported resource conservation preview scenario.");
 
+  const conservation = evaluateConservationContract(contract);
+  const reconciliation = reconcileResourceBalance({
+    reconciliationId: "preview-account-reconciliation",
+    contract,
+    accountId: "preview-account",
+    accounts,
+    events,
+    observation
+  });
+  const auditStructure = scenario === "AUDIT-STRUCTURE-PRESENT-UNKNOWN-OUTCOME"
+    ? assessResourceAccountingAuditStructure({
+        record: sampleAuditRecord(),
+        reportedResourceOutcome: "RESOURCE-OUTCOME-UNKNOWN"
+      })
+    : undefined;
+
   return {
     scenario,
     description: scenarioDescription.description,
-    conservation: evaluateConservationContract(contract),
-    reconciliation: reconcileResourceBalance({
-      reconciliationId: "preview-account-reconciliation",
-      contract,
-      accountId: "preview-account",
-      accounts,
-      events,
-      observation
-    }),
+    conservation,
+    reconciliation,
+    ...(auditStructure ? { auditStructure } : {}),
     assumptions: [
       "All quantities, evidence states and references are synthetic caller-supplied demonstration inputs, not authenticated facts or live measurements.",
       "The preview-sample-stock resource kind and tick unit exist only to exercise exact-match software accounting; they are not canonical resource vocabulary or physical units.",
       "The scalar-additive invariant and zero-tick tolerance are explicit assumptions in this demonstration contract, not universal physical laws or canonical tolerances.",
       "The confirmed consumption event is sample ledger data; projection does not prove that an incantation or physical operation occurred.",
       "Account reconciliation compares one gross account balance only and does not satisfy the complete v1.9 RESOURCE-RECONCILED stage.",
+      "The optional audit example checks only top-level section presence; null placeholders do not establish semantic audit completeness or evidence validity.",
       "Neither evaluation authorises, executes or verifies an incantation, mechanism, target-state change or physical effect."
     ]
   };

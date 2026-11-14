@@ -481,10 +481,16 @@ export const resourceAccountingCoverage: ResourceAccountingCoverage[] = [
   },
   {
     "fixtureId": "RES19-59",
-    "status": "SPECIFICATION-ONLY",
-    "testIds": [],
-    "note": "There is no versioned audit-record builder that can preserve a complete record alongside an unknown outcome."
-  },
+    "status": "PARTIAL",
+    "testIds": [
+      "RES19-AUDIT-001",
+      "RES19-AUDIT-002",
+      "RES19-AUDIT-003",
+      "RES19-AUDIT-004",
+      "RES19-AUDIT-005",
+      "RES19-AUDIT-006"
+    ],
+    "note": "A presence-only assessor checks that all 14 top-level v1.9 audit sections are represented and preserves a caller-reported unknown or failed outcome verbatim. It does not validate section content, contract-version values, evidence authenticity or semantic audit completeness."
   {
     "fixtureId": "RES19-60",
     "status": "SPECIFICATION-ONLY",

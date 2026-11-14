@@ -69,4 +69,19 @@ describe("read-only v1.9 conservation and account-reconciliation preview", () =>
       code: "RECONCILIATION-CONTRACT-EVIDENCE-UNRESOLVED"
     }));
   });
+
+  it("[RES19-PREVIEW-007] preserves an unknown resource outcome beside a structurally present audit record", () => {
+    const result = evaluateResourceConservationPreview("AUDIT-STRUCTURE-PRESENT-UNKNOWN-OUTCOME");
+    expect(result.conservation.outcome).toBe("CONSERVATION-UNRESOLVED");
+    expect(result.reconciliation.outcome).toBe("UNRESOLVED");
+    expect(result.auditStructure).toMatchObject({
+      status: "AUDIT-STRUCTURE-PRESENT",
+      reportedResourceOutcome: "RESOURCE-OUTCOME-UNKNOWN",
+      outcomeInterpretation: "NOT-ASSESSED",
+      missingSections: []
+    });
+    expect(result.auditStructure?.limitations).toContain(
+      "Only the presence of the 14 top-level v1.9 record sections is checked; their shapes, contents and internal completeness are not validated."
+    );
+  });
 });

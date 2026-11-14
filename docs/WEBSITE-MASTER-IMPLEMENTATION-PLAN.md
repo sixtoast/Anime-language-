@@ -447,3 +447,12 @@ The ledger regression suite was extended for valid reservation release, partial 
 The Playground now displays the engineering coverage classification beside each canonical fixture and a summary of the four coverage categories. This classification is not canonical, does not execute the 60 fixtures and does not claim physical or spell-runtime behaviour.
 
 Next: use the audit to select one specification gap only after the relevant domain contract and evidence model are defined. Prioritise missing temporal/concurrency or transformation contracts only when their source requirements are sufficiently complete; do not infer them from current ledger behaviour.
+
+
+### 2026-11-14 — v1.9 audit structure and unknown-outcome preservation
+
+Added a read-only, presence-only assessor for the 14 top-level sections in the v1.9 §8 resource-accounting audit record. Missing or undefined sections are reported; explicit null and empty values are treated as represented fields only. A caller-reported resource outcome is preserved verbatim and is never interpreted as conservation, feasibility, execution or overall success.
+
+The Playground includes a synthetic RES19-59 example in which all top-level sections are present as unknown placeholders while the resource outcome remains `RESOURCE-OUTCOME-UNKNOWN`. The example is explicitly partial: it does not validate section content, contract versions, evidence authenticity, semantic completeness or the truth of the reported outcome. It does not modify ledger state or claim a complete RESOURCE-RECONCILED result.
+
+The fixture-to-implementation audit now classifies RES19-59 as PARTIAL. The canonical v1.9 source and its 60 expected fixture outcomes remain unchanged.

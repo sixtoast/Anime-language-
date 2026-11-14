@@ -639,10 +639,10 @@ function App() {
           </section>
           <section className="fixture-browser runtime-preview-browser resource-conservation-preview" aria-labelledby="resource-conservation-preview-title">
             <div className="fixture-browser-head">
-              <div><span className="detail-kicker">V1.9 CONSERVATION · READ-ONLY SAMPLE</span><h2 id="resource-conservation-preview-title">Conservation and account reconciliation</h2></div>
-              <span>2 independent evaluations</span>
+              <div><span className="detail-kicker">V1.9 CONSERVATION & AUDIT · READ-ONLY SAMPLE</span><h2 id="resource-conservation-preview-title">Conservation and account reconciliation</h2></div>
+              <span>2 independent evaluators · separate audit example</span>
             </div>
-            <p className="fixture-browser-intro">This panel runs the bounded conservation evaluator and ledger-backed account reconciler against deterministic synthetic inputs. It does not use the 60 canonical specification fixtures as executed test cases.</p>
+            <p className="fixture-browser-intro">This panel runs the bounded conservation evaluator and ledger-backed account reconciler against deterministic synthetic inputs. The optional audit example checks only top-level section presence and preserves its reported outcome without interpretation. It does not use the 60 canonical specification fixtures as executed test cases.</p>
             <label className="fixture-select-label">Choose a resource-accounting scenario
               <select aria-label="Choose resource conservation preview scenario" value={resourceConservationScenario} onChange={(event) => setResourceConservationScenario(event.target.value as ResourceConservationPreviewScenario)}>
                 {resourceConservationPreviewScenarios.map((scenario) => <option key={scenario.id} value={scenario.id}>{scenario.label}</option>)}
@@ -676,6 +676,17 @@ function App() {
                   ? <ul className="resource-conservation-diagnostics">{resourceConservationPreview.reconciliation.diagnostics.map((item, index) => <li key={item.code + index}><code>{item.code}</code><span>{item.message}</span></li>)}</ul>
                   : <p className="resource-conservation-no-diagnostics">No diagnostics for this sample result.</p>}
               </article>
+              {resourceConservationPreview.auditStructure && <article className="resource-conservation-card" aria-label="Audit structure assessment">
+                <span>INVOCATION AUDIT · STRUCTURAL PRESENCE ONLY</span>
+                <strong className="runtime-unresolved">{resourceConservationPreview.auditStructure.status}</strong>
+                <div className="resource-conservation-metrics">
+                  <div><span>Reported resource outcome:</span><strong>{resourceConservationPreview.auditStructure.reportedResourceOutcome}</strong></div>
+                  <div><span>Outcome interpretation:</span><strong>{resourceConservationPreview.auditStructure.outcomeInterpretation}</strong></div>
+                  <div><span>Sections present:</span><strong>{resourceConservationPreview.auditStructure.presentSections.length}</strong></div>
+                  <div><span>Sections missing:</span><strong>{resourceConservationPreview.auditStructure.missingSections.length}</strong></div>
+                </div>
+                <p className="resource-conservation-no-diagnostics">Only top-level section presence is checked. Content, contract versions, evidence authenticity and semantic completeness are not assessed.</p>
+              </article>}
             </div>
             <details className="runtime-preview-details">
               <summary>Evidence assumptions and evaluator limitations</summary>

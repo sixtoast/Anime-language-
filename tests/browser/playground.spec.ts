@@ -184,7 +184,7 @@ test.describe("Playground Phase 6G parser integration", () => {
     const preview = page.locator(".resource-conservation-preview");
     await expect(preview.getByRole("heading", { name: "Conservation and account reconciliation" })).toBeVisible();
     const select = preview.getByRole("combobox", { name: "Choose resource conservation preview scenario" });
-    await expect(select.locator("option")).toHaveCount(6);
+    await expect(select.locator("option")).toHaveCount(7);
 
     await expect(preview).toContainText("CONSERVATION-SATISFIED");
     await expect(preview).toContainText("ACCOUNT-BALANCE-RECONCILED");
@@ -209,6 +209,14 @@ test.describe("Playground Phase 6G parser integration", () => {
     await expect(preview).toContainText("synthetic caller-supplied demonstration inputs");
     await expect(preview).toContainText("does not authenticate");
     await expect(preview).toContainText("authorises or executes an incantation");
+
+    await select.selectOption("AUDIT-STRUCTURE-PRESENT-UNKNOWN-OUTCOME");
+    await expect(preview).toContainText("CONSERVATION-UNRESOLVED");
+    await expect(preview).toContainText("RECONCILIATION-CONTRACT-EVIDENCE-UNRESOLVED");
+    await expect(preview).toContainText("AUDIT-STRUCTURE-PRESENT");
+    await expect(preview).toContainText("RESOURCE-OUTCOME-UNKNOWN");
+    await expect(preview).toContainText("NOT-ASSESSED");
+    await expect(preview).toContainText("Only top-level section presence is checked");
   });
 
   test("keeps the v1.9 evaluator preview within a 360px viewport", async ({ page }) => {
