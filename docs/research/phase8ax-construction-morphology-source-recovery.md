@@ -1,3 +1,5 @@
+> **HISTORICAL SOURCE-RECOVERY STATUS SUPERSEDED.** Phase 8CY-T subsequently reviewed the Phase 4 document-body transcription and confirmed the five relation codas and CVC shape. The Phase 5.22 parser remains a bounded whole-token fixture source and does not itself establish Foot segmentation. See phase8cy-t-primary-construction-foot-source-concordance.md and phase8cy-w-foot-evidence-synchronisation.md.
+
 # Phase 8AX — Construction morphology and direct source recovery
 
 **Status:** source recovery advanced; productive morphology remains unresolved.  

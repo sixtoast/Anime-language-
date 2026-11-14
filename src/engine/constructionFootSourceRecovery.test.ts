@@ -20,10 +20,10 @@ describe("Phase 8AX Construction Foot source recovery", () => {
   });
   it("CON-FOOT-SRC-005 does not treat n and s as a complete coda inventory", () => {
     expect(constructionFootSourceRecovery.observedFinalLetters).toEqual(["n", "s"]);
-    expect(constructionFootSourceRecovery.codaInventoryStatus).toBe("INCOMPLETE-AND-UNRESOLVED");
+    expect(constructionFootSourceRecovery.codaInventoryStatus).toBe("NOT-INFERRED-FROM-PHASE5.22; SEE-PHASE4-PRIMARY-INVENTORY");
   });
   it("CON-FOOT-SRC-006 preserves the CVC versus optional-coda conflict", () => {
-    expect(constructionFootSourceRecovery.footShapeDiscrepancy.status).toBe("UNRESOLVED-SOURCE-DISCREPANCY");
+    expect(constructionFootSourceRecovery.footShapeDiscrepancy.status).toBe("PRIMARY-SOURCE-FAVOURED-SECONDARY-SUMMARY-CONFLICT");
   });
   it("CON-FOOT-SRC-007 does not infer segment meanings from aliases", () => {
     expect(constructionFootSourceRecovery.observedWholeTokens.every(item => item.segmentationStatus === "NOT-ESTABLISHED")).toBe(true);
