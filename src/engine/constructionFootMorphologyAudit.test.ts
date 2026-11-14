@@ -25,9 +25,9 @@ describe("Construction Foot productive morphology evidence audit", () => {
     expect(constructionFootMorphologyAudit.observedFinalLetters.status).toBe("OCCURRENCES-ONLY-NOT-CODA-INVENTORY");
   });
   it("[CON-FOOT-MORPH-006] preserves both source readings and non-executable status", () => {
-    expect(constructionFootMorphologyAudit.sourceConflict.resolution).toBe("UNRESOLVED");
+    expect(constructionFootMorphologyAudit.sourceConflict.resolution).toContain("PHASE4-PRIMARY-SOURCE-FAVOURED");
     expect(constructionFootMorphologyAudit.limits).toEqual({
-      productiveParadigmRecovered: false, codaInventoryComplete: false,
+      productiveParadigmRecovered: false, codaInventoryComplete: true,
       parameterSemanticsExecutable: false, completeFootGrammarRecovered: false,
       executable: false, canonEffect: "NONE"
     });

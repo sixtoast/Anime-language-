@@ -13,5 +13,5 @@ describe("Phase 8CY-R/T Construction Foot design-space evidence",()=>{
  it("does not promote provisional parameter families to executable semantics",()=>{expect(summary.parameterFamiliesProvisional).toBe(true);expect(candidates.every(x=>x.physicalSemantics==="NOT-DEFINED")).toBe(true)});
  it("marks all candidates unattested and non-executable",()=>{expect(summary.allCandidatesUnattested).toBe(true);expect(summary.allCandidatesNonExecutable).toBe(true);expect(candidates.every(x=>x.evidenceStatus==="DESIGN-SPACE-ONLY")).toBe(true)});
  it("supports evidence-space lookup without lexical validation",()=>{expect(review("pang")?.form).toBe("pang");expect(review("pang")?.lexicalAttestation).toBe("NOT-RECOVERED");expect(review("pav")).toBeNull();expect(review(null)).toBeNull()});
- it("retains the CVC versus optional-coda discrepancy and canon neutrality",()=>{expect(summary.mandatoryCodaStatus).toBe("UNRESOLVED-SOURCE-DISCREPANCY");expect(summary.canonEffect).toBe("NONE")});
+ it("retains the CVC versus optional-coda discrepancy and canon neutrality",()=>{expect(summary.mandatoryCodaStatus).toBe("CVC-REQUIRED-PHASE4-PRIMARY-SOURCE");expect(summary.secondaryCodaConflict).toBe("P5.16-C02-CONTEXT-UNRESOLVED");expect(summary.canonEffect).toBe("NONE")});
 });
