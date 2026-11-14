@@ -63,9 +63,24 @@ export const operatorContracts: readonly OperatorContract[] = [
   }))
 ];
 
+export interface OperatorContractAlias { preferredForm:string; phase2Form:string; source:string; }
+export const operatorContractAliases:readonly OperatorContractAlias[]=[
+{preferredForm:"FRAJA",phase2Form:"FRATA",source:"Phase 4 §5.1 / D-032; Phase 5.5 alias registry; Phase 5.12 operator registry"},
+{preferredForm:"FRAMA",phase2Form:"FRAKA",source:"Phase 4 §5.1 / D-032; Phase 5.5 alias registry; Phase 5.12 operator registry"},
+{preferredForm:"DRUM",phase2Form:"DRIM",source:"Phase 4 §5.1 / D-032; Phase 5.5 alias registry; Phase 5.12 operator registry"},
+{preferredForm:"DRAS",phase2Form:"DRAL",source:"Phase 4 §5.1 / D-032; Phase 5.5 alias registry; Phase 5.12 operator registry"},
+{preferredForm:"GRASH",phase2Form:"GRAK",source:"Phase 4 §5.1 / D-032; Phase 5.5 alias registry; Phase 5.12 operator registry"},
+{preferredForm:"KWASH",phase2Form:"KWAK",source:"Phase 4 §5.1 / D-032; Phase 5.5 alias registry; Phase 5.12 operator registry"}
+] as const;
 export function getOperatorContract(operator: string): OperatorContract | undefined {
-  const normalized = operator.trim().toUpperCase();
-  return operatorContracts.find((contract) => contract.operator === normalized);
+ const normalized=operator.trim().toUpperCase();
+ const direct=operatorContracts.find((contract)=>contract.operator===normalized);
+ if(direct)return direct;
+ const alias=operatorContractAliases.find((item)=>item.preferredForm===normalized);
+ if(!alias)return undefined;
+ const legacy=operatorContracts.find((contract)=>contract.operator===alias.phase2Form);
+ if(!legacy)return undefined;
+ return {...legacy,operator:normalized,source:[...legacy.source,alias.source],openQuestions:[...legacy.openQuestions,"The preferred spelling "+normalized+" reuses the provisional "+alias.phase2Form+" contract; this alias link does not resolve the signature."]};
 }
 
 export const operatorContractPrinciples = [
