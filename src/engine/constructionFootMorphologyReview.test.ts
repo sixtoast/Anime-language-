@@ -16,4 +16,7 @@ it("[FOOT-MORPH-013] does not generalise mel to other m-initial forms",()=>expec
 it("[FOOT-MORPH-014] keeps CVC optionality unresolved",()=>{expect(reviewConstructionFootMorphology("pas").codaRequirement).toBe("UNRESOLVED-SOURCE-DISCREPANCY");expect(footMorphologyEvidenceBoundary.productiveParadigmRecovered).toBe(false)});
 it("[FOOT-MORPH-015] keeps KREN proposed and non-executable",()=>{expect(reviewConstructionFootMorphology("ban").macroAssociation).toBe("KREN");expect(reviewConstructionFootMorphology("ban").executable).toBe(false)});
 it("[FOOT-MORPH-016] fails closed for malformed and empty inputs",()=>{expect(reviewConstructionFootMorphology("xa").status).toBe("UNRECOGNISED-SHAPE");expect(reviewConstructionFootMorphology("paa").status).toBe("UNRECOGNISED-SHAPE");expect(reviewConstructionFootMorphology("").status).toBe("EMPTY")});
+
+it("[FOOT-MORPH-017] rejects a vowel as a CVC relation coda",()=>{for(const x of ["pae","pao","paa"])expect(reviewConstructionFootMorphology(x).status).toBe("UNRECOGNISED-SHAPE")});
+it("[FOOT-MORPH-018] accepts only the documented consonant or recognised digraph after a valid frame-vowel pair",()=>{expect(reviewConstructionFootMorphology("pam").status).toBe("CVC-STRUCTURE-CANDIDATE");expect(reviewConstructionFootMorphology("pang").codaMeaning).toBe("MAINTAIN-FEEDBACK");expect(reviewConstructionFootMorphology("pash").codaMeaning).toBe("RELEASE");expect(reviewConstructionFootMorphology("pae").relationCoda).toBeNull()});
 });

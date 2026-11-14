@@ -39,6 +39,7 @@ import { positionRelationSummary, positionRelationFixtures, proposedPositionDiff
 import { createEmptyConstructionExpressionComposition, reviewConstructionExpressionComposition } from "./engine/constructionExpressionComposition";
 import { handFlameFixtureTraceability, reviewHandFlameFixtureTraceability } from "./engine/constructionFixtureTraceability";
 import { reviewConstructionFootShape } from "./engine/constructionFootShape";
+import { reviewConstructionFootMorphology } from "./engine/constructionFootMorphologyReview";
 import { reviewConstructionFootComposition } from "./engine/constructionFootComposition";
 import { constructionFrameInventory, constructionParameterInventory, constructionFootEvidenceBoundary } from "./engine/constructionFootEvidence";
 import { constructionFootMorphologyAudit } from "./engine/constructionFootMorphologyAudit";
@@ -264,6 +265,7 @@ function App() {
   const [constructionFootInput, setConstructionFootInput] = useState("pa");
   const constructionFootReview = useMemo(() => reviewConstructionFootShape(constructionFootInput.trim()), [constructionFootInput]);
   const constructionFootCompositionReview = useMemo(() => reviewConstructionFootComposition(constructionFootInput.trim()), [constructionFootInput]);
+  const constructionFootMorphologyReview = useMemo(() => reviewConstructionFootMorphology(constructionFootInput), [constructionFootInput]);
   const [constructionCouplingInput, setConstructionCouplingInput] = useState("ha");
   const constructionCouplingReview = useMemo(() => reviewConstructionCoupling(constructionCouplingInput), [constructionCouplingInput]);
   const [constructionMacroInput, setConstructionMacroInput] = useState("TRAK");
@@ -752,7 +754,7 @@ function App() {
             </div>
             <div className="construction-foot-review">
               <div className="detail-kicker">RECOVERED FOOT SHAPE · STRUCTURAL CHECK ONLY</div>
-              <p>Check a form against the six explicitly recovered canonical CV forms and the documented CVC slot pattern. Punctuation and whitespace are rejected; an unfamiliar final letter is not assumed to be a consonant or a permitted relation coda. Other frame–vowel combinations and all coda-bearing forms remain unresolved until the productive paradigm and coda inventory are recovered.</p>
+              <p>Check the six recorded CV frame forms and the source-documented CVC outline. This structural check is separate from the source-aware morphology review below: a matching shape is not proof of a lexical Foot or a complete macro contract.</p>
               <label htmlFor="construction-foot-input">Construction Foot</label>
               <input id="construction-foot-input" value={constructionFootInput} onChange={event => setConstructionFootInput(event.target.value)} placeholder="e.g. pa or paz" spellCheck={false} />
               <div className="construction-foot-result" role="status" aria-live="polite">
@@ -766,8 +768,23 @@ function App() {
               </div>
               <p className="fixture-browser-caveat">{constructionFootReview.limitation}</p>
               <div className="construction-foot-composition">
+                <div className="detail-kicker">PHASE 8CY-P · SOURCE-AWARE FOOT MORPHOLOGY REVIEW</div>
+                <p>This reviewer applies the Phase 4 frame, provisional parameter-vowel and relation-coda evidence to the same input. It distinguishes a recorded shape from a lexical Foot and keeps the primary-source conflicts visible.</p>
+                <div className="construction-foot-parts">
+                  <span><small>Review status</small><strong>{constructionFootMorphologyReview.status.replaceAll("-", " ")}</strong></span>
+                  <span><small>Frame group</small><strong>{constructionFootMorphologyReview.macroAssociation}</strong></span>
+                  <span><small>Parameter family</small><strong>{constructionFootMorphologyReview.parameterFamily ?? "—"}</strong></span>
+                  <span><small>Relation coda</small><strong>{constructionFootMorphologyReview.relationCoda ?? "—"}</strong></span>
+                  <span><small>Coda meaning</small><strong>{constructionFootMorphologyReview.codaMeaning.replaceAll("-", " ")}</strong></span>
+                  <span><small>Lexical validity</small><strong>{constructionFootMorphologyReview.lexicalFootValidity.replaceAll("-", " ")}</strong></span>
+                </div>
+                <p>{constructionFootMorphologyReview.explanation}</p>
+                <p className="fixture-browser-caveat"><strong>Mandatory coda:</strong> {constructionFootMorphologyReview.codaRequirement.replaceAll("-", " ")} · <strong>Executable:</strong> No · <strong>Canon effect:</strong> None.</p>
+                <p className="fixture-browser-caveat"><strong>Recovered relation codas:</strong> m/n = FREM open-loop maintenance; ng = FREM feedback maintenance; s/sh = SHREN release. The wider phonotactic coda set is not a semantic relation-coda list. <code>mel</code> is reported as a source-classification conflict, not a normal Foot.</p>
+              </div>
+              <div className="construction-foot-composition">
                 <div className="detail-kicker">SOURCE-READING COMPARISON · NO CANON SELECTION</div>
-                <p>The same input is assessed independently against both recovered descriptions. These are competing source readings, not selectable grammar modes.</p><p className="fixture-browser-caveat"><strong>Source authority:</strong> Phase 5.15 and Phase 5.16 are secondary recovery matrices. The original Phase 4 DOCX §§3.1 and 10 has not yet been fully inspected, so neither summary is treated as authoritative over the other.</p>
+                <p>The same input is assessed independently against both recovered secondary descriptions. These are competing source readings, not selectable grammar modes; the Phase 4 primary source adds its own CVC statement and the separate mel classification conflict.</p><p className="fixture-browser-caveat"><strong>Source authority:</strong> Phase 5.15 and Phase 5.16 are secondary recovery matrices. The Phase 4 document-body transcription is now available and supports CVC in §3.1, while §10 P4-T10 separately labels mel Foot-shaped; the coda optionality conflict remains open.</p>
                 <div className="construction-foot-parts">
                   {constructionFootCompositionReview.readings.map(reading => (
                     <span key={reading.sourceReading}>
@@ -809,12 +826,12 @@ function App() {
                     <span><small>Whole example tokens</small><strong>{constructionFootMorphologyAudit.wholeTokenEvidence.length}</strong></span>
                   </div>
                   <div className="construction-foot-parts">{constructionFootMorphologyAudit.frameVowelMatrix.map(item => <span key={item.form}><small>{item.status.replaceAll("-", " ")}</small><strong>{item.form}</strong></span>)}</div>
-                  <p className="fixture-browser-caveat">The observed forms kan, ken and kas remain whole-token examples. Their k/a/e/n/s segments are not assigned productive Foot meanings. Observed final letters n and s are not promoted to a coda inventory.</p>
+                  <p className="fixture-browser-caveat">The observed forms kan, ken and kas remain whole-token examples. Their internal segments are not automatically promoted to independent lexical Feet or productive derivations. The separate Phase 4 relation-coda meanings are recorded below.</p>
                   <p className="fixture-browser-caveat">The matrix does not resolve whether every complete Foot requires a coda. Phase 5.15 and Phase 5.16 C-02 remain separate source readings.</p>
                 </div>
                 <p><strong>Observed historical CVC-shaped tokens</strong> — whole-token evidence from the complete Phase 5.22 parser source; not a recovered segment-by-segment paradigm.</p>
                 <div className="construction-foot-parts">{constructionFootSourceRecovery.observedWholeTokens.map(entry => <span key={entry.token}><small>{entry.alias}</small>{entry.token}<small>{entry.surfaceShape}</small></span>)}</div>
-                <p className="fixture-browser-caveat">Observed final letters are n and s in these three examples only. This does not establish a complete coda inventory or assign independent coda meanings. Use the source-form lookup below to distinguish documented whole tokens from unresolved shapes.</p>
+                <p className="fixture-browser-caveat">These historical whole tokens do not establish a productive segmentation rule. The source-aware reviewer below checks candidate structure against the independently recovered Phase 4 coda inventory.</p>
                 <label htmlFor="construction-foot-source-input">Construction Foot source form</label>
                 <input id="construction-foot-source-input" defaultValue="kan" onChange={event => setConstructionFootSourceReview(reviewConstructionFootSourceForm(event.target.value))} placeholder="e.g. kan" spellCheck={false} />
                 <div className="construction-coupling-result" role="status" aria-live="polite"><strong>{constructionFootSourceReview.status.replaceAll("-", " ")}</strong><p>{constructionFootSourceReview.message}</p></div>
