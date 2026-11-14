@@ -22,6 +22,7 @@ import { invocationLifecycleSequence, invocationOrderNote, validationGateSequenc
 import { evaluateIncantationRuntimePreview, runtimePreviewScenarios, type RuntimePreviewScenario } from "./engine/incantationRuntimePreview";
 import { reviewIncantationObligations, type IncantationObligationReview } from "./engine/incantationObligationReview";
 import { reviewIncantationArguments, type IncantationArgumentReview } from "./engine/incantationArgumentModel";
+import { reviewIntegratedIncantation, type IntegratedReview } from "./engine/incantationIntegratedReview";
 import { reviewIncantationRelationships, type IncantationRelationshipReview } from "./engine/incantationRelationshipModel";
 import { evaluateResourceConservationPreview, resourceConservationPreviewScenarios, type ResourceConservationPreviewScenario } from "./engine/resourceConservationPreview";
 import { reviewConstructionRecord, type ConstructionRecord, type ConstructionEvidenceStatus } from "./engine/constructionRecordReview";
@@ -329,6 +330,9 @@ function App() {
   }, null, 2));
   const [relationshipReview, setRelationshipReview] = useState<IncantationRelationshipReview | null>(null);
   const [relationshipReviewError, setRelationshipReviewError] = useState<string | null>(null);
+  const [integratedInput, setIntegratedInput] = useState(() => JSON.stringify({"profile":"INCANTATION-INTEGRATED-REVIEW-1.0","operations":[{"id":"operation-1","arguments":{"profile":"INCANTATION-ARGUMENTS-1.0","operation":"kren","references":[{"label":"TARGET-1","referenceClass":"TARGET","scope":"vom","resolution":"UNRESOLVED","lifetime":"SPELL","bindingState":"PROPOSED"}],"targetLabel":"TARGET-1","desiredState":{"type":"Record<State>","payload":{"example":"REPLACE-WITH-DECLARED-STATE"},"provenance":{"status":"UNRESOLVED"},"validity":{"status":"UNRESOLVED"},"uncertainty":{"status":"UNRESOLVED"}},"spatialRoles":[],"constraints":[]}}],"relationships":{"profile":"INCANTATION-RELATIONSHIPS-1.0","nodes":[{"id":"operation-1","type":"OPERATION","resolution":"DECLARED"},{"id":"goal-1","type":"GOAL","resolution":"UNRESOLVED"}],"edges":[]},"conditions":{"profile":"INCANTATION-CONDITIONS-1.0","conditions":[]},"evidence":{"records":[],"policy":{"acceptedClasses":["OBSERVED","VERIFIED"],"maxAgeSeconds":3600},"asOf":"2026-11-14T10:00:00Z"},"temporalContracts":[],"postconditions":[],"lifecycleRecords":[],"recoveryBranches":[]}, null, 2));
+  const [integratedReview, setIntegratedReview] = useState<IntegratedReview | null>(null);
+  const [integratedReviewError, setIntegratedReviewError] = useState<string | null>(null);
   const [mobileNav, setMobileNav] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState(docs[0].title);
   const [testQuery, setTestQuery] = useState("");
@@ -525,6 +529,17 @@ function App() {
     } catch (error) {
       setArgumentReview(null);
       setArgumentReviewError(error instanceof Error ? error.message : "The argument record is not valid JSON.");
+    }
+  };
+
+  const runIntegratedReview = () => {
+    try {
+      const input: unknown = JSON.parse(integratedInput);
+      setIntegratedReview(reviewIntegratedIncantation(input));
+      setIntegratedReviewError(null);
+    } catch (error) {
+      setIntegratedReview(null);
+      setIntegratedReviewError(error instanceof Error ? error.message : "The integrated contract is not valid JSON.");
     }
   };
 
@@ -1275,6 +1290,38 @@ function App() {
                 {argumentReview.issues.length===0 && <article className="audit-item"><div className="audit-item-top"><code>NO-STRUCTURAL-ISSUES</code></div><p>Required argument and reference records are structurally present. Semantic, type, geometry and feasibility checks remain separate.</p></article>}
               </div>
               <p className="contract-worksheet-caveat">{argumentReview.limitation}</p>
+            </>}
+          </section>
+          <section className="contract-worksheet" aria-labelledby="incantation-integrated-review-title">
+            <div className="contract-worksheet-head">
+              <div><span className="detail-kicker">INCANTATION COMPANION · INTEGRATED REVIEW</span><h2 id="incantation-integrated-review-title">Whole-contract reviewer</h2></div>
+              <span className="contract-draft-status">NO EXECUTION</span>
+            </div>
+            <p className="contract-worksheet-intro">Review operation arguments, semantic relationships, conditions, evidence, temporal contracts, postconditions, lifecycle records and explicit recovery branches together. The starter record deliberately contains an unresolved target. Edit the JSON and run the review; missing facts are not filled in automatically.</p>
+            <textarea className="contract-worksheet-json" aria-label="Integrated Incantation contract JSON" rows={30} value={integratedInput} onChange={(event) => setIntegratedInput(event.target.value)}/>
+            <div className="contract-worksheet-output-head">
+              <div><span className="detail-kicker">LOCAL REVIEW</span><h3>Integrated contract result</h3></div>
+              <button className="secondary-button" onClick={runIntegratedReview}>Review whole contract <span>→</span></button>
+            </div>
+            {integratedReviewError && <p role="alert" className="contract-worksheet-caveat">{integratedReviewError}</p>}
+            {integratedReview && <>
+              <div className="runtime-preview-outcome">
+                <div><span>DISPOSITION</span><strong>{integratedReview.disposition}</strong></div>
+                <div><span>OPERATIONS</span><strong>{integratedReview.operationCount}</strong></div>
+                <div><span>FINDINGS</span><strong>{integratedReview.issues.length}</strong></div>
+                <div><span>EXECUTION</span><strong>{integratedReview.gateSummary.execution}</strong></div>
+              </div>
+              <div className="audit-matrix">
+                {Object.entries(integratedReview.sections).map(([name,status]) => <article className="audit-item" key={name}>
+                  <div className="audit-item-top"><code>{name.toUpperCase()}</code><span className="audit-readiness audit-design-level-only">{status}</span></div>
+                </article>)}
+                {integratedReview.issues.map((item,index) => <article className="audit-item" key={item.code+item.path+index}>
+                  <div className="audit-item-top"><code>{item.code}</code><span className="audit-readiness audit-design-level-only">{item.severity} · {item.path}</span></div>
+                  <p>{item.message}</p>
+                </article>)}
+                {integratedReview.issues.length===0 && <article className="audit-item"><div className="audit-item-top"><code>NO-DECLARATION-ISSUES</code></div><p>Submitted declarations passed the bounded structural reviews. This does not establish semantic completeness, feasibility, authority, execution or real-world success.</p></article>}
+              </div>
+              <p className="contract-worksheet-caveat">{integratedReview.limitation}</p>
             </>}
           </section>
           <section className="lexicon-inspector" aria-labelledby="lexicon-inspector-title">
