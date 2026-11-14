@@ -3,7 +3,7 @@
  * Integrates existing source ledgers into one explicit slot/coverage matrix.
  * This is a gap register, not a generated lexicon or grammar.
  */
-import { constructionFrameInventory, constructionParameterInventory, constructionFootEvidenceBoundary } from "./constructionFootEvidence";
+import { constructionFrameInventory, constructionParameterInventory, constructionFootEvidenceBoundary, constructionRelationCodaInventory } from "./constructionFootEvidence";
 import { constructionFootMorphologyAudit } from "./constructionFootMorphologyAudit";
 import { constructionFootSourceRecovery } from "./constructionFootSourceRecovery";
 import { constructionFootConflictAdjudication } from "./constructionFootSourceAdjudication";
@@ -18,13 +18,13 @@ interface SlotEvidence {
   permittedConclusion: string;
   missingEvidence: readonly string[];
 }
-const codaLetters = [...new Set(constructionFootSourceRecovery.observedFinalLetters)];
+const relationCodas = constructionRelationCodaInventory.map(item => item.form);
 const wholeTokenForms = constructionFootSourceRecovery.observedWholeTokens.map(item => item.token);
 
 export const constructionFootParadigmClosureAudit = {
   phase: "8CI",
   sourceBoundary: [
-    "Phase 4 L-03 and §3.2 as cited by the recovered matrices",
+    "Phase 4 §3.1 Table 2 and §3.2 Table 3; reviewed document-body transcription",
     "Phase 5.15 Construction Contract Matrix",
     "Phase 5.16 Construction Recovery Matrix C-02/C-06/C-09",
     "Standalone Phase 5.22 parser source"
@@ -46,10 +46,10 @@ export const constructionFootParadigmClosureAudit = {
     },
     {
       slot: "RELATION-CODA" as const,
-      evidenceState: "UNRECOVERED" as const,
-      recoveredItems: [],
-      permittedConclusion: "A relation-coda position is described in the CVC account, but no complete coda inventory or coda-to-relation mapping is recovered.",
-      missingEvidence: ["Complete coda inventory", "Coda-to-relation meanings", "Phonological constraints", "Coda optionality context"]
+      evidenceState: "SOURCE-BACKED-INVENTORY" as const,
+      recoveredItems: relationCodas,
+      permittedConclusion: "Five relation codas and their FREM/SHREN relations are explicitly listed in Phase 4 §3.2 Table 3.",
+      missingEvidence: ["Productive frame × parameter × relation-coda licensing", "Whether Phase 5.16 C-02 describes a narrower optional-coda context", "Full Foot argument structure and composition"]
     }
   ] satisfies readonly SlotEvidence[],
   frameParameterCoverage: {
@@ -64,12 +64,13 @@ export const constructionFootParadigmClosureAudit = {
     productiveLicensing: "NOT-ESTABLISHED" as const
   },
   codaEvidence: {
-    inventory: codaLetters,
+    inventory: relationCodas,
     observedWholeTokens: wholeTokenForms,
-    observationCount: codaLetters.length,
-    interpretation: "The letters n and s are final-character occurrences in whole example tokens kan, ken and kas. They are not a coda inventory and are not licensed relation morphemes.",
-    segmentation: "NOT-ESTABLISHED" as const,
-    codaMembership: "NOT-ESTABLISHED" as const
+    observedFinalLetters: constructionFootSourceRecovery.observedFinalLetters,
+    observationCount: relationCodas.length,
+    interpretation: "Phase 4 Table 3 supplies the five relation codas and mappings. The final letters n and s in kan, ken and kas remain whole-token observations and do not prove internal segmentation.",
+    segmentation: "WHOLE-EXAMPLE-TOKEN-SEGMENTATION-NOT-ESTABLISHED" as const,
+    codaMembership: "SOURCE-BACKED-INVENTORY" as const
   },
   wholeTokenEvidence: constructionFootSourceRecovery.observedWholeTokens.map(item => ({
     surface: item.token,
@@ -100,17 +101,17 @@ export const constructionFootParadigmClosureAudit = {
   closure: {
     frameInventory: "RECOVERED",
     parameterInventory: "RECOVERED-PROVISIONAL",
-    relationCodaInventory: "NOT-RECOVERED",
+    relationCodaInventory: "RECOVERED-SOURCE-BACKED",
     productiveFrameParameterCodaParadigm: "NOT-RECOVERED",
     completeFootSemantics: "NOT-RECOVERED",
     parserReadiness: "NOT-READY",
-    sourceAdjudication: "BLOCKED-ON-PRIMARY-PHASE-4-INSPECTION"
+    sourceAdjudication: "PRIMARY-SOURCE-REVIEWED; SECONDARY-C02-CONTEXT-OPEN"
   },
   limits: [
     constructionFootEvidenceBoundary.shapeEvidenceDiscrepancy.treatment,
     "The 6 × 6 frame–parameter table is an evidence coverage matrix, not a set of 36 licensed forms.",
-    "No Cartesian product with observed final letters is generated; n and s are only occurrences in three whole example tokens.",
-    "No lexical, semantic, physical, resource or execution rule is inferred from orthographic shape."
+    "The 180-item cross-product is design-space only; no lexical attestation or productive combination licensing is inferred.",
+    "No lexical, physical, resource or execution rule is inferred from orthographic shape. The five coda-to-relation mappings are source-backed; complete Foot semantics remain unresolved."
   ],
   executable: false,
   canonEffect: "NONE"

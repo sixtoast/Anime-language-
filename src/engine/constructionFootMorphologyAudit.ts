@@ -58,12 +58,12 @@ export const constructionFootMorphologyAudit = {
   sourceConflict: {
     phase515: "CVC-FRAME-PARAMETER-RELATION-CODA",
     phase516C02: "RELATION-CODA-OPTIONAL",
-    resolution: "UNRESOLVED",
+    resolution: "PHASE4-PRIMARY-SOURCE-FAVOURED; P5.16-C02-CONTEXT-OPEN",
     canonEffect: "NONE"
   },
   limits: {
     productiveParadigmRecovered: false,
-    codaInventoryComplete: false,
+    codaInventoryComplete: true,
     parameterSemanticsExecutable: false,
     completeFootGrammarRecovered: false,
     executable: false,

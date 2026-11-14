@@ -27,7 +27,7 @@ export const constructionFootSourceRecovery = {
     { token: "kas", alias: "SHREN / release", surfaceShape: "CVC-ORTHOGRAPHIC", observedSegments: ["k", "a", "s"], segmentationStatus: "NOT-ESTABLISHED" }
   ],
   observedFinalLetters: ["n", "s"],
-  codaInventoryStatus: "INCOMPLETE-AND-UNRESOLVED",
+  codaInventoryStatus: "NOT-INFERRED-FROM-PHASE5.22; SEE-PHASE4-PRIMARY-INVENTORY",
   footShapeDiscrepancy: constructionFootEvidenceBoundary.shapeEvidenceDiscrepancy,
   interpretationLimits: [
     "The Phase 5.22 source treats kan, ken and kas as whole example-level tokens with aliases; it does not decompose them into frame, parameter vowel and relation coda.",
