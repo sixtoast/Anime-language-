@@ -28,6 +28,7 @@ import { reviewConstructionReferenceBoundary } from "./engine/constructionRefere
 import { constructionStageInterfaceAudit, reviewConstructionStageInterfaceAudit } from "./engine/constructionStageInterfaceAudit";
 import { constructionSpatialEvidenceAudit } from "./engine/constructionSpatialEvidenceAudit";
 import { createEmptyConstructionExpressionComposition, reviewConstructionExpressionComposition } from "./engine/constructionExpressionComposition";
+import { handFlameFixtureTraceability, reviewHandFlameFixtureTraceability } from "./engine/constructionFixtureTraceability";
 import { reviewConstructionFootShape } from "./engine/constructionFootShape";
 import { reviewConstructionFootComposition } from "./engine/constructionFootComposition";
 import { constructionFrameInventory, constructionParameterInventory, constructionFootEvidenceBoundary } from "./engine/constructionFootEvidence";
@@ -811,6 +812,30 @@ function App() {
                   </li>)}</ol>
                   <p className="fixture-browser-caveat">Records retain their own version, source, claims and unresolved questions. Multiple records can be preserved without assuming how many forms a stage permits. The six historical hand-flame phrases are not mapped one-to-one onto seven stages.</p>
                   <p className="fixture-browser-caveat">{review.limitation}</p>
+                </>;
+              })()}
+            </div>
+            <div className="construction-relationship-map">
+              <div className="detail-kicker">PHASE 8BN · FIXTURE PHRASE TRACEABILITY</div>
+              <p>Phrase-level evidence is attached to the exact Phase 5.22 hand-flame fixture. These six phrase groups are local to that example; they are not a general delimiter grammar or a one-to-one map onto the seven Construction stages.</p>
+              {(() => {
+                const review = reviewHandFlameFixtureTraceability();
+                return <>
+                  <div className="fixture-browser-meta">
+                    <div><span>Fixture phrases</span><strong>{review.phraseCount}</strong></div>
+                    <div><span>Unresolved phrases</span><strong>{review.unresolvedPhraseCount}</strong></div>
+                    <div><span>Stage mapping</span><strong>Not established</strong></div>
+                    <div><span>Grammar validity</span><strong>Not assessed</strong></div>
+                  </div>
+                  <div className="construction-example-chunks">
+                    {handFlameFixtureTraceability.phrases.map(phrase => <section key={phrase.phraseIndex}>
+                      <div><strong>{phrase.phraseIndex}. {phrase.surface}</strong><span>{phrase.interpretationStatus.replaceAll("-", " ")}</span></div>
+                      {phrase.recordedClaims.length > 0 && <p><strong>Recorded:</strong> {phrase.recordedClaims.join(" · ")}</p>}
+                      <p className="fixture-browser-caveat"><strong>Sources:</strong> {phrase.evidenceReferences.join(" · ")}</p>
+                      <p className="fixture-browser-caveat"><strong>Unresolved:</strong> {phrase.unresolved.join(" · ")}</p>
+                    </section>)}
+                  </div>
+                  <p className="fixture-browser-caveat">Cross-version spelling matches do not establish token identity or semantic equivalence. This traceability profile is non-executable and canon-neutral.</p>
                 </>;
               })()}
             </div>
