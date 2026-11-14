@@ -1,10 +1,12 @@
 """Regression tests for the standard-library DOCX transcription utility."""
+import base64
+import hashlib
 import tempfile
 import unittest
 import zipfile
 from pathlib import Path
 
-from extract_docx_structure import extract_docx
+from extract_docx_structure import decode_base64_docx, extract_docx, extract_docx_bytes
 
 NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
 
@@ -17,6 +19,13 @@ def docx_xml() -> bytes:
       <w:p><w:r><w:t>End of transcription</w:t></w:r></w:p>
       <w:sectPr/>
     </w:body></w:document>""".encode("utf-8")
+
+def docx_bytes() -> bytes:
+    with tempfile.TemporaryDirectory() as directory:
+        source = Path(directory) / "sample.docx"
+        with zipfile.ZipFile(source, "w") as archive:
+            archive.writestr("word/document.xml", docx_xml())
+        return source.read_bytes()
 
 class DocxExtractionTests(unittest.TestCase):
     def test_preserves_paragraph_table_order_and_text(self):
@@ -39,6 +48,28 @@ class DocxExtractionTests(unittest.TestCase):
                 archive.writestr("word/other.xml", "<root/>")
             with self.assertRaises(KeyError):
                 extract_docx(source)
+
+    def test_extracts_in_memory_docx_bytes_with_identical_digest(self):
+        raw = docx_bytes()
+        text, digest = extract_docx_bytes(raw, "memory.docx")
+        self.assertIn("Phase 4 §3.3", text)
+        self.assertEqual(digest, hashlib.sha256(raw).hexdigest())
+
+    def test_decodes_wrapped_base64_and_verifies_source_sha256(self):
+        raw = docx_bytes()
+        encoded = base64.b64encode(raw).decode("ascii")
+        wrapped = "\n".join(encoded[i:i+64] for i in range(0, len(encoded), 64))
+        self.assertEqual(decode_base64_docx(wrapped, hashlib.sha256(raw).hexdigest()), raw)
+
+    def test_rejects_invalid_base64(self):
+        with self.assertRaisesRegex(ValueError, "Invalid base64"):
+            decode_base64_docx("this is not valid base64!")
+
+    def test_rejects_sha256_mismatch(self):
+        raw = docx_bytes()
+        encoded = base64.b64encode(raw).decode("ascii")
+        with self.assertRaisesRegex(ValueError, "SHA-256 mismatch"):
+            decode_base64_docx(encoded, "0" * 64)
 
 if __name__ == "__main__":
     unittest.main()
