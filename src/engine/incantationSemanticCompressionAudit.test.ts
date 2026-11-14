@@ -1,7 +1,7 @@
 import {describe,it,expect} from "vitest";
 import {auditIncantationSemanticCompression} from "./incantationSemanticCompressionAudit";
 const ref=(overrides:Record<string,unknown>={})=>({label:"target",referenceClass:"TARGET",scope:"pi",resolution:"RESOLVED",lifetime:"SPELL",bindingState:"COMMITTED",referentId:"entity-1",...overrides});
-const op=(operationId:string,references:unknown[])=>({operationId,arguments:{profile:"INCANTATION-ARGUMENTS-1.0",operation:"frem",references}});
+const op=(operationId:string,references:unknown[])=>({operationId,arguments:{profile:"INCANTATION-ARGUMENTS-1.0",operation:"frem",targetLabel:"target",references}});
 describe("Incantation semantic compression audit",()=>{
 it("[SEM-COMP-001] identifies identical committed spell references shared by operations",()=>{const r=auditIncantationSemanticCompression({operations:[op("op-a",[ref()]),op("op-b",[ref()])]});expect(r.disposition).toBe("CANDIDATES-FOUND");expect(r.candidates[0].status).toBe("ELIGIBLE-DECLARATION-FACTORING-CANDIDATE");expect(r.potentialDuplicateOccurrences).toBe(1)});
 it("[SEM-COMP-002] blocks current-step references",()=>{const r=auditIncantationSemanticCompression({operations:[op("a",[ref({lifetime:"CURRENT-STEP"})]),op("b",[ref({lifetime:"CURRENT-STEP"})])]});expect(r.candidates[0].status).toBe("BLOCKED");expect(r.candidates[0].blockers.join(" ")).toContain("SPELL-lifetime")});
@@ -17,4 +17,6 @@ it("[SEM-COMP-011] rejects incomplete reference records",()=>expect(auditIncanta
 it("[SEM-COMP-012] reports no candidate for a single operation",()=>expect(auditIncantationSemanticCompression({operations:[op("a",[ref()])] }).disposition).toBe("NO-SAFE-CANDIDATES"));
 it("[SEM-COMP-013] never performs a transformation or enables execution",()=>{const r=auditIncantationSemanticCompression({operations:[op("a",[ref()]),op("b",[ref()])]});expect(r.transformationPerformed).toBe(false);expect(r.semanticEquivalence).toBe("NOT-PROVEN");expect(r.executable).toBe(false);expect(r.canonEffect).toBe("NONE")});
 it("[SEM-COMP-014] preserves source records",()=>{const input={operations:[op("a",[ref()]),op("b",[ref()])]};const before=JSON.stringify(input);auditIncantationSemanticCompression(input);expect(JSON.stringify(input)).toBe(before)});
+it("[SEM-COMP-015] blocks unused declarations",()=>{const a=op("a",[ref()]),b=op("b",[ref()]);b.arguments.targetLabel="other";const r=auditIncantationSemanticCompression({operations:[a,b]});expect(r.candidates[0].status).toBe("BLOCKED");expect(r.candidates[0].blockers.join(" ")).toContain("explicitly consumed")});
+it("[SEM-COMP-016] recognises BRAN participant use",()=>{const bran=(id:string)=>({operationId:id,arguments:{profile:"INCANTATION-ARGUMENTS-1.0",operation:"bran",references:[ref()],coupling:{participantA:"target",participantB:"other"}}});const r=auditIncantationSemanticCompression({operations:[bran("a"),bran("b")]});expect(r.candidates[0].status).toBe("ELIGIBLE-DECLARATION-FACTORING-CANDIDATE")});
 });

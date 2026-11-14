@@ -5,7 +5,7 @@ export interface IncantationSemanticCompressionAudit { profile:typeof INCANTATIO
 const LIMITATION = "This audit identifies repeated, identical, resolved, committed SPELL-lifetime reference declarations across operation records. It does not rewrite an Incantation, define binding syntax, prove scope hoisting safe, calculate character savings, parse spoken Arcane, establish semantic equivalence, authorise or execute a spell. Candidate means suitable for grammar-design review, not approved compression.";
 const isObject = (v:unknown):v is Record<string,unknown> => v !== null && typeof v === "object" && !Array.isArray(v);
 const nonEmpty = (v:unknown):v is string => typeof v === "string" && v.trim().length > 0;
-interface Entry { operationId:string; label:string; referenceClass:string; scope:string; resolution:string; lifetime:string; bindingState:string; referentId:string; }
+interface Entry { operationId:string; consumed:boolean; label:string; referenceClass:string; scope:string; resolution:string; lifetime:string; bindingState:string; referentId:string; }
 function invalid(issues:string[]):IncantationSemanticCompressionAudit { return {profile:INCANTATION_SEMANTIC_COMPRESSION_PROFILE,disposition:"INVALID-INPUT",operationCount:0,referenceOccurrenceCount:0,candidates:[],potentialDuplicateOccurrences:0,grammarCompressionStatus:"NOT-DEFINED",semanticEquivalence:"NOT-PROVEN",transformationPerformed:false,spokenSyntaxValidation:"NOT-PERFORMED",executable:false,canonEffect:"NONE",issues,limitation:LIMITATION}; }
 function signature(e:Entry):string { return JSON.stringify([e.label,e.referenceClass,e.scope,e.resolution,e.lifetime,e.bindingState,e.referentId]); }
 export function auditIncantationSemanticCompression(input:unknown):IncantationSemanticCompressionAudit {
@@ -20,7 +20,12 @@ export function auditIncantationSemanticCompression(input:unknown):IncantationSe
   raw.arguments.references.forEach((ref,refIndex) => {
    if (!isObject(ref)) { issues.push(path + ".arguments.references[" + refIndex + "] must be an object."); return; }
    if (!nonEmpty(ref.label) || !nonEmpty(ref.referenceClass) || !nonEmpty(ref.scope) || !nonEmpty(ref.resolution) || !nonEmpty(ref.lifetime) || !nonEmpty(ref.bindingState) || !nonEmpty(ref.referentId)) { issues.push(path + ".arguments.references[" + refIndex + "] is missing a required reference field."); return; }
-   entries.push({operationId:raw.operationId,label:ref.label,referenceClass:ref.referenceClass,scope:ref.scope,resolution:ref.resolution,lifetime:ref.lifetime,bindingState:ref.bindingState,referentId:ref.referentId});
+   const args = raw.arguments as Record<string,unknown>;
+   const coupling = isObject(args.coupling) ? args.coupling : {};
+   const consumed = args.operation === "bran"
+    ? coupling.participantA === ref.label || coupling.participantB === ref.label
+    : args.targetLabel === ref.label;
+   entries.push({operationId:raw.operationId,consumed,label:ref.label,referenceClass:ref.referenceClass,scope:ref.scope,resolution:ref.resolution,lifetime:ref.lifetime,bindingState:ref.bindingState,referentId:ref.referentId});
   });
  });
  if (issues.length) return invalid(issues);
@@ -32,6 +37,7 @@ export function auditIncantationSemanticCompression(input:unknown):IncantationSe
   if (distinctOperations.length < 2) continue;
   const blockers:string[] = [], first = group[0];
   if (group.some(e => signature(e) !== signature(first))) blockers.push("Reference declarations sharing this referent identity differ in label, class, scope, resolution, lifetime or binding state.");
+  if (group.some(e => !e.consumed)) blockers.push("Every occurrence must be explicitly consumed as the operation target or a BRAN coupling participant; other reference uses are not covered by this audit.");
   if (group.some(e => e.resolution !== "RESOLVED")) blockers.push("Every occurrence must be resolved.");
   if (group.some(e => e.bindingState !== "COMMITTED")) blockers.push("Every occurrence must be committed.");
   if (group.some(e => e.lifetime !== "SPELL")) blockers.push("Only SPELL-lifetime references are eligible; CURRENT-STEP references cannot be hoisted.");

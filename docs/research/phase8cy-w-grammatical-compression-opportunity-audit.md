@@ -21,7 +21,7 @@ A reference can be flagged for grammar-design review only when at least two dist
 
 CURRENT-STEP, unresolved, proposed, differently labelled, differently scoped or otherwise non-identical records are blocked. Repeated occurrences within one operation are also blocked because usage multiplicity may matter.
 
-The report counts potential duplicate declarations, but does not estimate character savings: a future grammar's binding marker, scope syntax and expansion overhead are not yet defined.
+The audit also requires each occurrence to be explicitly consumed as the operation target or, for BRAN, as a coupling participant. It does not infer use from an untyped constraints array or other unknown fields. The report counts potential duplicate declarations, but does not estimate character savings: a future grammar's binding marker, scope syntax and expansion overhead are not yet defined.
 
 ## What remains unproven
 
