@@ -28,7 +28,7 @@ const unresolvedDimensions: readonly ConstructionInterfaceDimension[] = [
   "CARDINALITY",
   "OMISSION",
   "FAILURE-BEHAVIOUR"
-];
+] as const;
 
 export const constructionStageInterfaceAudit: {
   source: string;

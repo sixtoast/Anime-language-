@@ -4,16 +4,22 @@ import { constructionSpatialEvidenceAudit, reviewConstructionSpatialProfile } fr
 describe("version-bounded Construction spatial evidence", () => {
   it("[CON-SPATIAL-001] keeps the historical fixture profile exact and local", () => {
     const p = reviewConstructionSpatialProfile("HISTORICAL-PHASE-5.22-FIXTURE");
-    expect(p?.roleToken).toEqual({ form: "po", reading: "position", status: "FIXTURE-READ" });
-    expect(p?.axisToken).toEqual({ form: "da", reading: "+Y", status: "FIXTURE-READ" });
-    expect(p?.generalisable).toBe(false);
+    expect(p?.id).toBe("HISTORICAL-PHASE-5.22-FIXTURE");
+    if (p?.id === "HISTORICAL-PHASE-5.22-FIXTURE") {
+      expect(p.roleToken).toEqual({ form: "po", reading: "position", status: "FIXTURE-READ" });
+      expect(p.axisToken).toEqual({ form: "da", reading: "+Y", status: "FIXTURE-READ" });
+      expect(p.generalisable).toBe(false);
+    }
   });
   it("[CON-SPATIAL-002] keeps v3.0-L spatial vocabulary separately versioned", () => {
     const p = reviewConstructionSpatialProfile("ARCANE-V3.0-L-SPATIAL-INVENTORY");
-    expect(p?.signedAxisForms).toEqual(["PA", "BA", "TA", "DA", "KA", "GA"]);
-    expect(p?.relationForms).toEqual(["JO", "JUR", "JA", "JE", "JI"]);
-    expect(p?.geometryForms).toEqual(["PI", "LEN", "PLA", "SUR", "VOM", "PAR"]);
-    expect(p?.historicalPhase4Equivalence).toBe("NOT-ESTABLISHED");
+    expect(p?.id).toBe("ARCANE-V3.0-L-SPATIAL-INVENTORY");
+    if (p?.id === "ARCANE-V3.0-L-SPATIAL-INVENTORY") {
+      expect(p.signedAxisForms).toEqual(["PA", "BA", "TA", "DA", "KA", "GA"]);
+      expect(p.relationForms).toEqual(["JO", "JUR", "JA", "JE", "JI"]);
+      expect(p.geometryForms).toEqual(["PI", "LEN", "PLA", "SUR", "VOM", "PAR"]);
+      expect(p.historicalPhase4Equivalence).toBe("NOT-ESTABLISHED");
+    }
   });
   it("[CON-SPATIAL-003] does not equate shared da spelling across profiles", () => {
     expect(constructionSpatialEvidenceAudit.crossProfileChecks.find(item => item.surface === "da")?.equivalence).toBe("NOT-ESTABLISHED");

@@ -27,6 +27,7 @@ import { bindConstructionReference, type ConstructionReferenceToken } from "./en
 import { reviewConstructionReferenceBoundary } from "./engine/constructionReferenceBoundary";
 import { constructionStageInterfaceAudit, reviewConstructionStageInterfaceAudit } from "./engine/constructionStageInterfaceAudit";
 import { constructionSpatialEvidenceAudit } from "./engine/constructionSpatialEvidenceAudit";
+import { createEmptyConstructionExpressionComposition, reviewConstructionExpressionComposition } from "./engine/constructionExpressionComposition";
 import { reviewConstructionFootShape } from "./engine/constructionFootShape";
 import { reviewConstructionFootComposition } from "./engine/constructionFootComposition";
 import { constructionFrameInventory, constructionParameterInventory, constructionFootEvidenceBoundary } from "./engine/constructionFootEvidence";
@@ -790,6 +791,28 @@ function App() {
                 })}
               </ol>
               <p className="fixture-browser-caveat">The audit does not define a data-flow edge. Input/output types, attachment, cardinality, omission and failure behaviour remain unestablished for every boundary.</p>
+            </div>
+            <div className="construction-relationship-map">
+              <div className="detail-kicker">PHASE 8BM · EVIDENCE-AWARE EXPRESSION COMPOSITION</div>
+              <p>A single review record groups evidence under the seven Construction stage labels. Empty slots mean no evidence has been attached to this review record; they do not mean a stage is optional or absent from the language.</p>
+              {(() => {
+                const composition = createEmptyConstructionExpressionComposition("workbench-template");
+                const review = reviewConstructionExpressionComposition(composition);
+                return <>
+                  <div className="fixture-browser-meta">
+                    <div><span>Stage slots</span><strong>{review.stageSummaries.length}</strong></div>
+                    <div><span>Evidence records in template</span><strong>{review.evidenceRecordCount}</strong></div>
+                    <div><span>Grammar validity</span><strong>Not assessed</strong></div>
+                    <div><span>Execution</span><strong>Disabled</strong></div>
+                  </div>
+                  <ol>{review.stageSummaries.map(item => <li key={item.stage}>
+                    <strong>{item.stage.replaceAll("-", " ")}</strong>
+                    <small>{item.status.replaceAll("-", " ")} · {item.recordCount} records in blank template</small>
+                  </li>)}</ol>
+                  <p className="fixture-browser-caveat">Records retain their own version, source, claims and unresolved questions. Multiple records can be preserved without assuming how many forms a stage permits. The six historical hand-flame phrases are not mapped one-to-one onto seven stages.</p>
+                  <p className="fixture-browser-caveat">{review.limitation}</p>
+                </>;
+              })()}
             </div>
             <div className="construction-contract-profiles">
               <div className="detail-kicker">PHASE 8AO · STAGE CONTRACT EVIDENCE</div>
