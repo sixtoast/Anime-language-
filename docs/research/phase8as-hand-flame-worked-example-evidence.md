@@ -1,3 +1,5 @@
+> **Superseded evidence note (Phase 8AT, 2026-11-14):** The archive index contains the earlier Phase 5.22 bounded parser for this exact fixture. The two configuration phrases are therefore not wholly uninterpreted: the archived parser reads the first as position role/+Y/metre-closed quantity and the second as duration in seconds. KAN/KEN/KAS and HE/HA also have additional example-level parser metadata. See [Phase 8AT — Historical Construction fixture parser recovery](phase8at-historical-construction-fixture-parser-recovery.md). The Phase 8AS document below is retained as the original incremental record; Phase 8AT is the corrected consolidated evidence map.
+
 # Phase 8AS — Hand-flame worked-example evidence map
 
 **Date:** 2026-11-14  

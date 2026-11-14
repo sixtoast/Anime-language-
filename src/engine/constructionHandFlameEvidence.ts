@@ -1,4 +1,4 @@
-/** Phase 8AS: source-bounded structural reading of the Phase 4 hand-flame example.
+/** Phase 8AS/8AT: source-bounded and historical fixture reading of the Phase 4 hand-flame example.
  * This is an evidence display model, not a parser, compiler, or physical simulator.
  */
 export type HandFlameEvidence = "EXAMPLE-BACKED" | "PARTIAL-EXAMPLE" | "ARCHIVED-FIXTURE-PARSE" | "UNRESOLVED";
@@ -19,7 +19,7 @@ export const handFlameSegments:readonly HandFlameSegment[] = [
  {id:"coupling",tokens:["he","ha"],surface:"he ha",evidence:"PARTIAL-EXAMPLE",sourceReading:"The archived Phase 5.22 parser labels HE as matter/mechanical-or-chemical domain and HA as energy/thermal domain, explicitly provisional; both are H-series heavy coupling syllables.",unresolved:"The physical/domain mapping is provisional; coupling order, participants, vector, magnitude and resource cost are not established.",parseScope:"PHASE5.22-FIXTURE-ONLY"},
  {id:"configuration-b",tokens:["sa","shi","za","se"],surface:"sa shi za se",evidence:"ARCHIVED-FIXTURE-PARSE",sourceReading:"The archived Phase 5.22 bounded parser reads this phrase as a duration quantity in seconds.",unresolved:"This does not establish the general syntax, units, timing semantics or quantity-stage contract beyond the documented fixture.",parseScope:"PHASE5.22-FIXTURE-ONLY"},
  {id:"release",tokens:["kas"],surface:"kas",evidence:"PARTIAL-EXAMPLE",sourceReading:"The archived Phase 5.22 parser records KAS as an example-level alias of SHREN / release.",unresolved:"This is not a universal SHREN expansion or general release signature; target and safety conditions remain absent.",parseScope:"PHASE5.22-FIXTURE-ONLY"}
-] as const;;
+] as const;
 export const handFlameHistoricalParserEvidence = {
  archiveMember:"Arcane_Phase_6S_Typed_Expression_Integration/arcane_phase_5_22_parser.py",
  parserSha256:"8041e7e40cd6e152aa9d38982e2a8986515a1aa7bc315dbfc1e7065e72ee2905",
