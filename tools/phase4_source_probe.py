@@ -17,9 +17,9 @@ def main() -> int:
     lines = text.splitlines()
     matches = []
     for i, line in enumerate(lines):
-        match = re.match(r"^(\d+(?:\.\d+)*)(?:\.)?\s+", line)
+        match = re.match(r"^(?:(\d+(?:\.\d+)+)|(\d+)\.)\s+", line)
         if match:
-            number = match.group(1)
+            number = match.group(1) or match.group(2)
             matches.append((i, number, len(number.split("."))))
     print("TRANSCRIPTION_CHARACTERS", len(text))
     print("TOP_LEVEL_SECTIONS", ",".join(number for _, number, depth in matches if depth == 1))
