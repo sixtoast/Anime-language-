@@ -29,6 +29,7 @@ import { constructionStageInterfaceAudit, reviewConstructionStageInterfaceAudit 
 import { constructionSpatialEvidenceAudit } from "./engine/constructionSpatialEvidenceAudit";
 import { constructionSpatialGrammarEvidence, reviewConstructionSpatialCategory } from "./engine/constructionSpatialGrammarEvidence";
 import { constructionSpatialCompositionEvidence, reviewConstructionSpatialCategoryPair } from "./engine/constructionSpatialCompositionEvidence";
+import { constructionAxisSemantics, reviewConstructionAxis } from "./engine/constructionAxisSemantics";
 import { createEmptyConstructionExpressionComposition, reviewConstructionExpressionComposition } from "./engine/constructionExpressionComposition";
 import { handFlameFixtureTraceability, reviewHandFlameFixtureTraceability } from "./engine/constructionFixtureTraceability";
 import { reviewConstructionFootShape } from "./engine/constructionFootShape";
@@ -774,6 +775,24 @@ function App() {
                 {profile.id === "HISTORICAL-PHASE-5.22-FIXTURE" ? "Fixture-local role, axis and quantity readings only." : "Separate inventory: relations JO/JUR/JA/JE/JI; geometry PI/LEN/PLA/SUR/VOM/PAR."}</span>
               </div>)}
               <p className="fixture-browser-caveat">The spelling da/DA is not enough to establish a shared token identity. Coordinate frame, origin, vector composition, quantity attachment and unit conversion remain unrecovered.</p>
+            </div>
+            <div className="construction-relationship-map">
+              <div className="detail-kicker">PHASE 8BR · CANONICAL SIGNED-AXIS SEMANTICS</div>
+              <p>The v3.0-L source explicitly assigns all six axis forms. These are directional labels in the canonical coordinate convention, not a vector literal or a frame constructor.</p>
+              <div className="fixture-browser-meta">
+                <div><span>Canonical axis assignments</span><strong>{constructionAxisSemantics.axes.length} / 6</strong></div>
+                <div><span>Coordinate dimensions</span><strong>3</strong></div>
+                <div><span>Vector constructors recovered</span><strong>0</strong></div>
+                <div><span>Frame transforms recovered</span><strong>0</strong></div>
+              </div>
+              <div className="construction-foot-parts">
+                {constructionAxisSemantics.axes.map(axis => {
+                  const review = reviewConstructionAxis(axis.form);
+                  return <span key={axis.form}><small>{axis.form} · {review?.coordinateAxis} {review?.sign}</small><strong>{review?.direction}</strong><small>V3.0-L §4 · CANONICAL</small></span>;
+                })}
+              </div>
+              <p><strong>Source-recorded symmetry:</strong> P/B, T/D and K/G are voiceless/voiced consonant pairs respectively, with opposite signs on the same coordinate dimension. The source describes this as a subtle internal symmetry; it does not establish a broader sound-to-meaning rule.</p>
+              <p className="fixture-browser-caveat">A direction assignment does not identify an origin, supply a frame identity, provide a component magnitude, construct a vector, or define how multiple axis forms combine. Those contracts remain open.</p>
             </div>
             <div className="construction-relationship-map">
               <div className="detail-kicker">PHASE 8BP · SPATIAL GRAMMAR INVENTORY</div>
