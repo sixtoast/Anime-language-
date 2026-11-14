@@ -266,6 +266,7 @@ function App() {
   const constructionReferenceInventoryReview = useMemo(() => reviewConstructionReferenceInventory(constructionReferenceInventoryInput), [constructionReferenceInventoryInput]);
   const [constructionFootInput, setConstructionFootInput] = useState("pa");
   const constructionFootReview = useMemo(() => reviewConstructionFootShape(constructionFootInput.trim()), [constructionFootInput]);
+  const constructionFootParadigmCandidate = useMemo(() => reviewConstructionFootParadigmCandidate(constructionFootInput), [constructionFootInput]);
   const constructionFootCompositionReview = useMemo(() => reviewConstructionFootComposition(constructionFootInput.trim()), [constructionFootInput]);
   const constructionFootMorphologyReview = useMemo(() => reviewConstructionFootMorphology(constructionFootInput), [constructionFootInput]);
   const [constructionCouplingInput, setConstructionCouplingInput] = useState("ha");
