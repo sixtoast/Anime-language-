@@ -45,4 +45,11 @@ describe("Phase 8CD Construction Foot morphology evidence review", () => {
   it("[FOOT-MORPH-010] never marks a recognised form executable", () => {
     for (const form of ["pa","ba","pat","bak"]) expect(reviewConstructionFootMorphology(form).executable).toBe(false);
   });
+
+ it("[FOOT-MORPH-011] maps m and n to open-loop maintenance",()=>{for(const x of ["kam","kan"])expect(reviewConstructionFootMorphology(x).codaMeaning).toBe("MAINTAIN-OPEN-LOOP")});
+ it("[FOOT-MORPH-012] maps ng to feedback maintenance",()=>{expect(reviewConstructionFootMorphology("kang").codaMeaning).toBe("MAINTAIN-FEEDBACK")});
+ it("[FOOT-MORPH-013] maps s and sh to release",()=>{for(const x of ["kas","kash"])expect(reviewConstructionFootMorphology(x).codaMeaning).toBe("RELEASE")});
+ it("[FOOT-MORPH-014] distinguishes phonotactic codas from relation codas",()=>{const x=reviewConstructionFootMorphology("pak");expect(x.relationCoda).toBe("k");expect(x.codaMeaning).toBe("NOT-RECOVERED");expect(footMorphologyEvidenceBoundary.relationCodaInventory).toEqual(["m","n","ng","s","sh"])});
+ it("[FOOT-MORPH-015] keeps KREN proposed and parameter families provisional",()=>{const x=reviewConstructionFootMorphology("ban");expect(x.macroAssociation).toBe("KREN");expect(x.parameterFamily).toBe("Energy");expect(x.lexicalFootValidity).toBe("NOT-ESTABLISHED")});
+ it("[FOOT-MORPH-016] does not mistake fused reference mel for a Construction Foot",()=>{expect(reviewConstructionFootMorphology("mel").status).toBe("UNRECOGNISED-SHAPE")});
 });
