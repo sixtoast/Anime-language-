@@ -335,7 +335,8 @@ def main() -> int:
         print(f"Compared {left_path} and {right_path}: {comparison['change_count']} changed regions.")
         return 0
     if not args.paths:
-        parser.error("provide one or more paths, or use --compare LEFT RIGHT")\n    paths: list[Path] = []
+        parser.error("provide one or more paths, or use --compare LEFT RIGHT")
+    paths: list[Path] = []
     for target in args.paths:
         if target.is_dir():
             paths.extend(sorted(p for p in target.rglob("*") if p.is_file() and not p.is_symlink()))
