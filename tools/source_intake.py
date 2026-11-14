@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import difflib
 import hashlib
 import io
 import json
@@ -257,14 +258,68 @@ def build_markdown(records: list[dict[str, Any]], skipped: list[dict[str, Any]])
     return "\n".join(lines)
 
 
+
+def compare_transcriptions(left_name: str, left_text: str, right_name: str, right_text: str) -> dict[str, Any]:
+    """Compare exact paragraph sequences without normalising away source differences."""
+    left = left_text.splitlines()
+    right = right_text.splitlines()
+    matcher = difflib.SequenceMatcher(a=left, b=right, autojunk=False)
+    changes = []
+    for tag, i1, i2, j1, j2 in matcher.get_opcodes():
+        if tag != "equal":
+            changes.append({
+                "kind": tag,
+                "left_start_line": i1 + 1,
+                "left_end_line": i2,
+                "right_start_line": j1 + 1,
+                "right_end_line": j2,
+                "left": left[i1:i2],
+                "right": right[j1:j2],
+            })
+    return {
+        "left_source": left_name, "right_source": right_name,
+        "left_line_count": len(left), "right_line_count": len(right),
+        "equal": not changes, "change_count": len(changes), "changes": changes,
+        "comparison": "exact line comparison; no whitespace, punctuation or semantic normalisation",
+        "warning": "A textual difference is a review lead, not proof of a substantive language-rule conflict."
+    }
+
+
+def comparison_markdown(result: dict[str, Any]) -> str:
+    lines = ["# Transcription comparison", "",
+             f"Left: {result['left_source']}", f"Right: {result['right_source']}", "",
+             f"Changed regions: {result['change_count']}", "",
+             result["comparison"], result["warning"], ""]
+    for number, change in enumerate(result["changes"], 1):
+        lines.extend([f"## Difference {number}: {change['kind']}",
+                      f"Left lines {change['left_start_line']}–{change['left_end_line']}",
+                      f"Right lines {change['right_start_line']}–{change['right_end_line']}", "",
+                      "### Left"])
+        lines.extend("    " + line for line in change["left"])
+        lines.extend(["", "### Right"])
+        lines.extend("    " + line for line in change["right"])
+        lines.append("")
+    return "\\n".join(lines)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("paths", nargs="+", type=Path, help="Files or directories to inspect")
     parser.add_argument("--json-out", type=Path, default=Path("source-intake-manifest.json"))
     parser.add_argument("--markdown-out", type=Path, default=Path("source-intake-report.md"))
     parser.add_argument("--max-file-bytes", type=int, default=MAX_DEFAULT_BYTES)
-    parser.add_argument("--max-members", type=int, default=MAX_ARCHIVE_MEMBERS)
+    parser.add_argument("--max-members", type=int, default=MAX_ARCHIVE_MEMBERS)\n    parser.add_argument("--compare", nargs=2, type=Path, metavar=("LEFT", "RIGHT"), help="Compare two UTF-8 text transcriptions line by line")\n    parser.add_argument("--comparison-json", type=Path, default=Path("transcription-comparison.json"))\n    parser.add_argument("--comparison-markdown", type=Path, default=Path("transcription-comparison.md"))
     args = parser.parse_args()
+    if args.compare:
+        left_path, right_path = args.compare
+        left_bytes, right_bytes = left_path.read_bytes(), right_path.read_bytes()
+        left_text = left_bytes.decode("utf-8-sig", errors="strict")
+        right_text = right_bytes.decode("utf-8-sig", errors="strict")
+        comparison = compare_transcriptions(str(left_path), left_text, str(right_path), right_text)
+        args.comparison_json.write_text(json.dumps(comparison, ensure_ascii=False, indent=2), encoding="utf-8")
+        args.comparison_markdown.write_text(comparison_markdown(comparison), encoding="utf-8")
+        print(f"Compared {left_path} and {right_path}: {comparison['change_count']} changed regions.")
+        return 0
     paths: list[Path] = []
     for target in args.paths:
         if target.is_dir():

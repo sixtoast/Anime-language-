@@ -6,7 +6,7 @@ import unittest
 import zipfile
 from pathlib import Path
 
-from source_intake import inspect_path, text_record, docx_record
+from source_intake import inspect_path, text_record, docx_record, compare_transcriptions
 
 DOCX_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
 
@@ -60,6 +60,27 @@ class SourceIntakeTests(unittest.TestCase):
     def test_distinct_hashes_are_not_collapsed(self):
         from source_intake import duplicate_groups
         self.assertEqual(duplicate_groups([{"source": "a", "sha256": "1"}, {"source": "b", "sha256": "2"}]), [])
+
+    def test_identical_transcriptions_have_no_changes(self):
+        result = compare_transcriptions("a.txt", "one\\ntwo\\n", "b.txt", "one\\ntwo\\n")
+        self.assertTrue(result["equal"])
+        self.assertEqual(result["change_count"], 0)
+
+    def test_reports_inserted_line_with_source_locations(self):
+        result = compare_transcriptions("a.txt", "one\\ntwo", "b.txt", "one\\ninserted\\ntwo")
+        self.assertEqual(result["change_count"], 1)
+        self.assertEqual(result["changes"][0]["kind"], "insert")
+        self.assertEqual(result["changes"][0]["right_start_line"], 2)
+        self.assertEqual(result["changes"][0]["right"], ["inserted"])
+
+    def test_does_not_normalise_whitespace_or_punctuation(self):
+        result = compare_transcriptions("a.txt", "word ", "b.txt", "word")
+        self.assertFalse(result["equal"])
+        self.assertIn("no whitespace", result["comparison"])
+
+    def test_comparison_warns_against_semantic_inference(self):
+        result = compare_transcriptions("a.txt", "MI", "b.txt", "mi")
+        self.assertIn("not proof", result["warning"])
 
     def test_oversized_file_is_skipped(self):
         with tempfile.TemporaryDirectory() as directory:
