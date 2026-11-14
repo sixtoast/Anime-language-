@@ -1,0 +1,28 @@
+import {describe,expect,it} from "vitest";
+import {INCANTATION_CONDITION_PROFILE as P,reviewIncantationConditions,reviewPrerequisiteGate} from "./incantationConditionModel";
+const condition=(overrides:Record<string,unknown>={})=>({id:"c1",kind:"PRECONDITION",predicateId:"target-current",predicateVersion:"1.0",argumentBindings:[],requiredResult:"TRUE",temporalOperator:"AT-START",checkTime:"BEFORE",scope:"operation:op1",evidencePolicy:{freshness:"declared"},failurePolicy:"BLOCK",safetyCritical:true,...overrides});
+const review=(conditions:unknown[])=>reviewIncantationConditions({profile:P,conditions});
+describe("Phase 8CT condition evidence and prerequisite gates",()=>{
+it("[INC-COND-001] requires exact profile",()=>expect(reviewIncantationConditions({profile:"x",conditions:[]}).disposition).toBe("CONDITION-RECORD-INVALID"));
+it("[INC-COND-002] requires a conditions array",()=>expect(reviewIncantationConditions({profile:P}).issues[0].code).toBe("CONDITIONS-ARRAY-REQUIRED"));
+it("[INC-COND-003] accepts complete declaration shape",()=>expect(review([condition()]).disposition).toBe("CONDITION-RECORD-STRUCTURALLY-COMPLETE"));
+it("[INC-COND-004] rejects duplicate ids",()=>expect(review([condition(),condition()]).issues.some(x=>x.code==="CONDITION-ID-DUPLICATE")).toBe(true));
+it("[INC-COND-005] requires predicate version",()=>expect(review([condition({predicateVersion:""})]).issues.some(x=>x.code==="PREDICATE-IDENTITY-MISSING")).toBe(true));
+it("[INC-COND-006] requires explicit required result",()=>expect(review([condition({requiredResult:"ANY"})]).disposition).toBe("CONDITION-RECORD-INVALID"));
+it("[INC-COND-007] preserves required FALSE",()=>expect(review([condition({requiredResult:"FALSE"})]).disposition).toBe("CONDITION-RECORD-STRUCTURALLY-COMPLETE"));
+it("[INC-COND-008] requires temporal operator",()=>expect(review([condition({temporalOperator:""})]).issues.some(x=>x.code==="TEMPORAL-OPERATOR-MISSING")).toBe(true));
+it("[INC-COND-009] requires explicit scope",()=>expect(review([condition({scope:""})]).issues.some(x=>x.code==="SCOPE-MISSING")).toBe(true));
+it("[INC-COND-010] blocks safety-critical report-only",()=>expect(review([condition({failurePolicy:"REPORT-ONLY"})]).issues.some(x=>x.code==="SAFETY-REPORT-ONLY-FORBIDDEN")).toBe(true));
+it("[INC-COND-011] does not evaluate predicates",()=>expect(review([condition()]).predicateEvaluation).toBe("NOT-PERFORMED"));
+it("[INC-COND-012] TRUE releases required TRUE gate",()=>expect(reviewPrerequisiteGate({requiredResult:"TRUE",actualResult:"TRUE"}).mayProceed).toBe(true));
+it("[INC-COND-013] FALSE blocks required TRUE gate",()=>expect(reviewPrerequisiteGate({requiredResult:"TRUE",actualResult:"FALSE"}).result).toBe("BLOCKED-FAILED"));
+it("[INC-COND-014] UNKNOWN blocks",()=>expect(reviewPrerequisiteGate({requiredResult:"TRUE",actualResult:"UNKNOWN"}).result).toBe("BLOCKED-UNRESOLVED"));
+it("[INC-COND-015] ERROR blocks",()=>expect(reviewPrerequisiteGate({requiredResult:"TRUE",actualResult:"ERROR"}).result).toBe("BLOCKED-ERROR"));
+it("[INC-COND-016] INVALID blocks",()=>expect(reviewPrerequisiteGate({requiredResult:"TRUE",actualResult:"INVALID"}).result).toBe("BLOCKED-INVALID"));
+it("[INC-COND-017] NOT-EVALUATED blocks",()=>expect(reviewPrerequisiteGate({requiredResult:"TRUE",actualResult:"NOT-EVALUATED"}).result).toBe("BLOCKED-NOT-EVALUATED"));
+it("[INC-COND-018] explicitly required FALSE can pass",()=>expect(reviewPrerequisiteGate({requiredResult:"FALSE",actualResult:"FALSE"}).mayProceed).toBe(true));
+it("[INC-COND-019] required FALSE does not invert UNKNOWN",()=>expect(reviewPrerequisiteGate({requiredResult:"FALSE",actualResult:"UNKNOWN"}).mayProceed).toBe(false));
+it("[INC-COND-020] malformed gate blocks",()=>expect(reviewPrerequisiteGate({requiredResult:"MAYBE",actualResult:"TRUE"}).result).toBe("INVALID-REQUIREMENT"));
+it("[INC-COND-021] gate never executes operation",()=>expect(reviewPrerequisiteGate({requiredResult:"TRUE",actualResult:"TRUE"}).execution).toBe("NOT-PERFORMED"));
+it("[INC-COND-022] no canon effect",()=>expect(reviewPrerequisiteGate({requiredResult:"TRUE",actualResult:"TRUE"}).canonEffect).toBe("NONE"));
+});
