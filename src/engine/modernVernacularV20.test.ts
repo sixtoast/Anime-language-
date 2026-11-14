@@ -21,10 +21,19 @@ describe("Modern Vernacular v2.0 completion and ongoing aspect", () => {
     expect(result.ast?.polarity).toBe(polarity);
   });
 
-  it("dispatches aspect clauses through the unified parser", () => {
+  it("[MV20-004] dispatches aspect clauses through the unified parser", () => {
     const result = parseModernVernacular("teshi kok mol gisho");
     expect(result.ok).toBe(true);
     expect(result.grammar).toBe("modern-vernacular-v2.0-locked");
+  });
+
+  it("[MV20-002] preserves clause-local negative aspect scope", () => {
+    expect(parseModernVernacularV20("teshi nava don mol gisho")).toMatchObject({ ok: true, ast: { aspect: "completed", polarity: "negative" } });
+    expect(parseModernVernacularV20("teshi nava kok mol gisho")).toMatchObject({ ok: true, ast: { aspect: "ongoing", polarity: "negative" } });
+  });
+
+  it("[MV20-005] rejects directive prefixes before aspect markers", () => {
+    for (const input of ["dema kok ful tava gezi", "sori don ful tava gezi", "mira kok mol gisho", "toku don zir rawu"]) expect(parseModernVernacularV20(input).ok).toBe(false);
   });
 
   it.each([
@@ -40,7 +49,7 @@ describe("Modern Vernacular v2.0 completion and ongoing aspect", () => {
     ["teshi don", "missing action verb"],
     ["teshi don mol", "incomplete underlying verb frame"],
     ["teshi don mol gisho kok", "multiple aspect markers"]
-  ])("rejects %s (%s)", input => {
+  ])("[MV20-003] rejects %s (%s)", input => {
     expect(parseModernVernacularV20(input).ok).toBe(false);
   });
 });

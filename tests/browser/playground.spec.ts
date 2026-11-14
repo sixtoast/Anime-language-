@@ -179,6 +179,58 @@ test.describe("Playground Phase 6G parser integration", () => {
     expect(sizes.page, "Resource specification browser should not overflow at 360px").toBeLessThanOrEqual(sizes.viewport);
   });
 
+  test("runs v1.9 conservation and account reconciliation as separate read-only evaluations", async ({ page }) => {
+    await openPlayground(page);
+    const preview = page.locator(".resource-conservation-preview");
+    await expect(preview.getByRole("heading", { name: "Conservation and account reconciliation" })).toBeVisible();
+    const select = preview.getByRole("combobox", { name: "Choose resource conservation preview scenario" });
+    await expect(select.locator("option")).toHaveCount(7);
+
+    await expect(preview).toContainText("CONSERVATION-SATISFIED");
+    await expect(preview).toContainText("ACCOUNT-BALANCE-RECONCILED");
+
+    await select.selectOption("CONSERVATION-MISMATCH");
+    await expect(preview).toContainText("CONSERVATION-MISMATCH");
+    await expect(preview).toContainText("ACCOUNT-BALANCE-RECONCILED");
+
+    await select.selectOption("ACCOUNT-DISCREPANCY");
+    await expect(preview).toContainText("ACCOUNT-BALANCE-DISCREPANCY");
+    await expect(preview).toContainText("-2 ticks");
+
+    await select.selectOption("ESTIMATE-AS-MEASUREMENT");
+    await expect(preview).toContainText("RECONCILIATION-EVIDENCE-CATEGORY-SUBSTITUTION");
+
+    await select.selectOption("MEASUREMENT-POLICY-UNRESOLVED");
+    await expect(preview).toContainText("RECONCILIATION-MEASUREMENT-POLICY-UNRESOLVED");
+
+    await select.selectOption("CONTRACT-EVIDENCE-UNRESOLVED");
+    await expect(preview).toContainText("CONSERVATION-UNRESOLVED");
+    await expect(preview).toContainText("RECONCILIATION-CONTRACT-EVIDENCE-UNRESOLVED");
+    await expect(preview).toContainText("synthetic caller-supplied demonstration inputs");
+    await expect(preview).toContainText("does not authenticate");
+    await expect(preview).toContainText("authorises or executes an incantation");
+
+    await select.selectOption("AUDIT-STRUCTURE-PRESENT-UNKNOWN-OUTCOME");
+    await expect(preview).toContainText("CONSERVATION-UNRESOLVED");
+    await expect(preview).toContainText("RECONCILIATION-CONTRACT-EVIDENCE-UNRESOLVED");
+    await expect(preview).toContainText("AUDIT-STRUCTURE-PRESENT");
+    await expect(preview).toContainText("RESOURCE-OUTCOME-UNKNOWN");
+    await expect(preview).toContainText("NOT-ASSESSED");
+    await expect(preview).toContainText("Only top-level section presence is checked");
+  });
+
+  test("keeps the v1.9 evaluator preview within a 360px viewport", async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 800 });
+    await openPlayground(page);
+    const preview = page.locator(".resource-conservation-preview");
+    await preview.getByRole("combobox", { name: "Choose resource conservation preview scenario" }).selectOption("ACCOUNT-DISCREPANCY");
+    const sizes = await page.evaluate(() => ({
+      viewport: document.documentElement.clientWidth,
+      page: document.documentElement.scrollWidth
+    }));
+    expect(sizes.page, "Resource conservation preview should not overflow at 360px").toBeLessThanOrEqual(sizes.viewport);
+  });
+
   test("browses all authority-decision specification fixtures without calling an authority service", async ({ page }) => {
     await openPlayground(page);
     const browser = page.locator(".authority-fixture-browser");
@@ -383,6 +435,37 @@ test.describe("Playground Phase 6G parser integration", () => {
       page: document.documentElement.scrollWidth
     }));
     expect(sizes.page, "Gate sequence explorer should not overflow at 360px").toBeLessThanOrEqual(sizes.viewport);
+  });
+
+
+  test("shows v1.9 fixture implementation coverage separately from normative outcomes", async ({ page }) => {
+    await openPlayground(page);
+    const browser = page.locator(".resource-fixture-browser");
+    const select = browser.getByRole("combobox", { name: "Choose resource-accounting specification fixture" });
+    await expect(browser.locator(".resource-coverage-summary")).toBeVisible();
+    await expect(browser).toContainText("60 design cases");
+    await select.selectOption("RES19-56");
+    await expect(browser.locator(".resource-coverage-detail")).toContainText("BOUNDED");
+    await expect(browser.locator(".resource-coverage-detail")).toContainText("RES19-RECON-010");
+    await select.selectOption("RES19-36");
+    await expect(browser.locator(".resource-coverage-detail")).toContainText("SEPARATE-GATE");
+    await expect(browser.locator(".resource-coverage-detail")).toContainText("AUTH20-TEST-004");
+    await select.selectOption("RES19-53");
+    await expect(browser.locator(".resource-coverage-detail")).toContainText("SPECIFICATION-ONLY");
+    await expect(browser.locator(".resource-coverage-detail")).toContainText("None — specification only");
+    await expect(browser).toContainText("do not change the canonical expected outcomes");
+  });
+
+  test("keeps the v1.9 fixture coverage audit within a 360px viewport", async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 800 });
+    await openPlayground(page);
+    const browser = page.locator(".resource-fixture-browser");
+    await browser.getByRole("combobox", { name: "Choose resource-accounting specification fixture" }).selectOption("RES19-60");
+    const sizes = await page.evaluate(() => ({
+      viewport: document.documentElement.clientWidth,
+      page: document.documentElement.scrollWidth
+    }));
+    expect(sizes.page, "Resource fixture coverage audit should not overflow at 360px").toBeLessThanOrEqual(sizes.viewport);
   });
 
 });

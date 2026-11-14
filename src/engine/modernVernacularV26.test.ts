@@ -37,17 +37,30 @@ describe("Modern Vernacular v2.6 typed measurement quantities", () => {
     ["nela nela to ma", "repeated approximation marker"],
     ["to shi za shi sa ma", "repeated decimal separator"],
     ["vobi to ma", "unlicensed Formal comparison form"]
-  ])("rejects %s (%s)", input => {
+  ])("[MV26-004] rejects %s (%s)", input => {
     expect(parseModernVernacularV26(input).ok).toBe(false);
   });
 
-  it("dispatches standalone quantities through the unified language entry point", () => {
+  it("[MV26-005] dispatches standalone quantities through the unified language entry point", () => {
     const result = parseModernVernacular("nela to shi sa ke");
     expect(result.ok).toBe(true);
     expect(result.grammar).toBe("modern-vernacular-v2.6-locked");
   });
 
-  it("preserves exact thousandth precision", () => {
+  it("[MV26-002] preserves bounded integer and fractional quantity values", () => {
+    expect(parseModernVernacularV26("pe pe pe pe ma").ast?.scaledValue).toBe(9999000);
+    expect(parseModernVernacularV26("to shi sa ke").ast?.scaledValue).toBe(2500);
+  });
+
+  it("[MV26-003] keeps the five canonical unit dimensions distinct", () => {
+    expect(parseModernVernacularV26("ki ma").ast?.dimension).toBe("LENGTH");
+    expect(parseModernVernacularV26("ki se").ast?.dimension).toBe("TIME");
+    expect(parseModernVernacularV26("ki ke").ast?.dimension).toBe("MASS");
+    expect(parseModernVernacularV26("ki ra").ast?.dimension).toBe("PLANE_ANGLE");
+    expect(parseModernVernacularV26("ki ku").ast?.dimension).toBe("THERMODYNAMIC_TEMPERATURE");
+  });
+
+  it("[MV26-006] preserves exact thousandth precision", () => {
     const result = parseModernVernacularV26("ki shi za za ku");
     expect(result.ast?.scaledValue).toBe(1000);
     expect(result.ast?.value).toBe(1);
