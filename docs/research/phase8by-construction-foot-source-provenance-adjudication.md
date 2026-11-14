@@ -1,4 +1,4 @@
-> **SUPERSEDED by Phase 8CY-T and synchronised in Phase 8CY-W.** The reviewed Phase 4 document-body transcription directly supports CVC in §3.1 Table 2 and §10 P4-T10. The five relation codas are directly recovered from §3.2 Table 3. The Phase 5.16 C-02 optional-coda statement remains a secondary-summary context discrepancy; see phase8cy-t-primary-construction-foot-source-concordance.md and phase8cy-w-foot-evidence-synchronisation.md.
+> **SUPERSEDED by Phase 8CY-T and synchronised in Phase 8CY-WF.** The reviewed Phase 4 document-body transcription directly supports CVC in §3.1 Table 2 and §10 P4-T10. The five relation codas are directly recovered from §3.2 Table 3. The Phase 5.16 C-02 optional-coda statement remains a secondary-summary context discrepancy; see phase8cy-t-primary-construction-foot-source-concordance.md and phase8cy-w-foot-evidence-synchronisation.md.
 
 # Phase 8BY — Construction Foot source-provenance adjudication
 

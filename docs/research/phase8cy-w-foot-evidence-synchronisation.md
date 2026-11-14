@@ -1,4 +1,4 @@
-# Phase 8CY-W — Construction Foot evidence synchronisation
+# Phase 8CY-WF — Construction Foot evidence synchronisation
 
 **Purpose:** remove stale pre-Phase-8CY-T conclusions from the active morphology evidence model.  
 **Canon effect:** NONE · **Grammar generation:** disabled · **Execution:** disabled.

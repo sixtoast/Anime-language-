@@ -1,4 +1,4 @@
-> **HISTORICAL CONCLUSION SUPERSEDED.** Phase 8CY-T directly reviewed the Phase 4 document-body transcription and confirmed the five relation codas. Phase 8CY-W synchronises the active evidence closure; the 180-item productive lexical paradigm remains unrecovered.
+> **HISTORICAL CONCLUSION SUPERSEDED.** Phase 8CY-T directly reviewed the Phase 4 document-body transcription and confirmed the five relation codas. Phase 8CY-WF synchronises the active evidence closure; the 180-item productive lexical paradigm remains unrecovered.
 
 # Phase 8CI — Construction Foot paradigm evidence-closure audit
 
