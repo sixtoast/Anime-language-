@@ -14,7 +14,7 @@ export function reviewConstructionFootMorphology(input:unknown):FootMorphologyRe
  const raw=typeof input==="string"?input:"",normalized=raw.trim().toLowerCase();
  if(!normalized)return makeResult(raw,normalized,"EMPTY",null,null,null,"NOT-APPLICABLE","NOT-APPLICABLE","Enter a candidate form. No Foot or operation is inferred.");
  const frame=normalized[0],vowel=normalized[1],knownFrame=frames.has(frame),knownVowel=vowels.has(vowel);
- if(normalized.length===2&&knownFrame&&normalized===frame+vowel)return makeResult(raw,normalized,"FRAME-FORM-RECORDED",frame,vowel,null,"NOT-APPLICABLE",frameMacro(frame),"This is a recorded CV frame form, not an established complete Foot. The parameter family remains provisional.");
+ if(normalized.length===2&&knownFrame&&normalized===frame+vowel)return makeResult(raw,normalized,"FRAME-FORM-RECORDED",frame,vowel,null,"NOT-APPLICABLE",frameMacro(frame),"This is a recorded CV frame form, not an established complete Foot. The parameter family remains provisional; the macro association is group-level and does not define individual consonant meaning. KREN remains a proposed, owner-confirmation reading.");
  const suffix=normalized.slice(2),legalCoda=suffix==="ng"||suffix==="sh"||(/^[a-z]$/.test(suffix)&&!vowels.has(suffix));
  if(knownFrame&&knownVowel&&legalCoda){
   const meaning=relationCodaMeanings[suffix]??"NOT-RECOVERED";
