@@ -70,7 +70,7 @@ The proposed displacement dot product additionally requires the same declared fr
 
 ## 6. Dimensional handling
 
-The fixture stores a dimensional exponent vector (length, time, mass, temperature, angle) with each component. Displacement expects L; velocity expects L·T⁻¹; force expects M·L·T⁻². The dimensional labels and m/m/s display labels are research metadata, not new canonical unit tokens. The current helper does not implement arbitrary unit conversion or derived-unit canonicalisation.
+The fixture stores a dimensional exponent vector (length, time, mass, temperature, angle) with each component. Displacement expects L; velocity expects L·T⁻¹; force expects M·L·T⁻². The dimensional labels and m/m/s display labels are research metadata, not new canonical unit tokens. The current helper requires matching component unit labels and does not implement unit conversion or derived-unit canonicalisation. Mixed labels are rejected rather than numerically combined.
 
 ## 7. Implementation
 
@@ -86,6 +86,6 @@ The model has no parser integration, no executable spell semantics and no physic
 
 ## 8. Verification and next step
 
-Twelve tests are authored but have not been executed locally. Vercel preview build status is reported separately. No GitHub Actions workflow is dispatched; main and production remain untouched.
+Thirteen tests are authored but have not been executed locally. Vercel preview build status is reported separately. No GitHub Actions workflow is dispatched; main and production remain untouched.
 
 Next useful phase: test position-minus-position and position-plus-displacement semantics as competing typed mathematical contracts, while keeping all relation and surface-expression signatures unapproved. Do not add an Arcane token or parser production for these operations.

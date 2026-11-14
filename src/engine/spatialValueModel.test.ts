@@ -13,5 +13,6 @@ describe("Phase 8BS typed spatial value model",()=>{
  it("[SPATIAL-VALUE-009] requires an origin/reference for spatial positions",()=>{const p={...clone(workedDisplacementFixture),kind:"SpatialPosition" as const,originReferenceId:""};expect(assessSpatialPositionFixture(p).status).toBe("REJECTED_BY_PROPOSED_TYPE_RULE");});
  it("[SPATIAL-VALUE-010] accepts a fully declared position under the proposal",()=>{const p={...clone(workedDisplacementFixture),kind:"SpatialPosition" as const,originReferenceId:"ORIGIN-TEST-01"};expect(assessSpatialPositionFixture(p).status).toBe("ACCEPTED_BY_PROPOSED_TYPE_RULE");});
  it("[SPATIAL-VALUE-011] rejects malformed and non-finite component values",()=>{const v=clone(workedDisplacementFixture);v.components.X.value=Number.NaN;expect(assessSpatialVectorFixture(v).status).toBe("REJECTED_BY_PROPOSED_TYPE_RULE");});
- it("[SPATIAL-VALUE-012] preserves proposal and non-canon boundaries",()=>{expect(workedDisplacementFixture.sourceStatus).toBe("PROPOSAL-FIXTURE");});
+ it("[SPATIAL-VALUE-012] rejects mixed component unit labels without conversion",()=>{const v=clone(workedDisplacementFixture);v.components.Z.unitLabel="cm";expect(assessSpatialVectorFixture(v).status).toBe("REJECTED_BY_PROPOSED_TYPE_RULE");});
+ it("[SPATIAL-VALUE-013] preserves proposal and non-canon boundaries",()=>{expect(workedDisplacementFixture.sourceStatus).toBe("PROPOSAL-FIXTURE");});
 });

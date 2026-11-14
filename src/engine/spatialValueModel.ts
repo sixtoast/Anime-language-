@@ -64,7 +64,9 @@ function baseShape(value:unknown,kind:SpatialValueKind):{issues:string[];compone
 export function assessSpatialPositionFixture(value:unknown):SpatialAssessment {
  const parsed=baseShape(value,"SpatialPosition");
  if(parsed.issues.length)return {status:"REJECTED_BY_PROPOSED_TYPE_RULE",issues:parsed.issues};
- const dims=Object.values(parsed.components!).map(c=>c.dimension);
+ const values=Object.values(parsed.components!);
+ const dims=values.map(c=>c.dimension);
+ if(!values.every(c=>c.unitLabel===values[0].unitLabel))return {status:"REJECTED_BY_PROPOSED_TYPE_RULE",issues:["Position coordinate unit labels must match; no conversion is implemented."]};
  const length={length:1,time:0,mass:0,temperature:0,angle:0};
  if(!dims.every(d=>sameDimension(d,length)))return {status:"REJECTED_BY_PROPOSED_TYPE_RULE",issues:["Position coordinates must all carry length dimensions under this proposal."]};
  return {status:"ACCEPTED_BY_PROPOSED_TYPE_RULE",issues:[]};
@@ -77,7 +79,9 @@ export function assessSpatialVectorFixture(value:unknown):SpatialAssessment {
  const parsed=baseShape(value,kind);
  if(parsed.issues.length)return {status:"REJECTED_BY_PROPOSED_TYPE_RULE",issues:parsed.issues};
  const expected=expectedDimensions[kind]!;
- const dimensions=Object.values(parsed.components!).map(c=>c.dimension);
+ const componentValues=Object.values(parsed.components!);
+ const dimensions=componentValues.map(c=>c.dimension);
+ if(!componentValues.every(c=>c.unitLabel===componentValues[0].unitLabel))return {status:"REJECTED_BY_PROPOSED_TYPE_RULE",issues:["Vector component unit labels must match; no conversion is implemented."]};
  if(!dimensions.every(d=>sameDimension(d,expected)))return {status:"REJECTED_BY_PROPOSED_TYPE_RULE",issues:["Component dimensions do not match the proposed dimensional signature for "+kind+"."]};
  return {status:"ACCEPTED_BY_PROPOSED_TYPE_RULE",issues:[]};
 }
@@ -95,7 +99,7 @@ export function proposedDisplacementMagnitude(value:unknown):{value:number;dimen
 export function proposedDisplacementDot(a:unknown,b:unknown):{value:number;dimension:SpatialDimension;unitLabel:string;status:"PROPOSAL-RESULT"} {
  assertDisplacement(a);assertDisplacement(b);
  if(a.frameIdentity!==b.frameIdentity)throw new Error("Dot product blocked: frame identities differ and no transform contract is supplied.");
- for(const axis of ["X","Y","Z"] as const)if(!sameDimension(a.components[axis].dimension,b.components[axis].dimension))throw new Error("Dot product blocked: component dimensions are incompatible.");
+ for(const axis of ["X","Y","Z"] as const){if(!sameDimension(a.components[axis].dimension,b.components[axis].dimension))throw new Error("Dot product blocked: component dimensions are incompatible.");if(a.components[axis].unitLabel!==b.components[axis].unitLabel)throw new Error("Dot product blocked: component unit labels differ and no conversion is implemented.");}
  const x=a.components.X,y=a.components.Y,z=a.components.Z;
  const value=x.value*b.components.X.value+y.value*b.components.Y.value+z.value*b.components.Z.value;
  if(!Number.isFinite(value))throw new Error("Dot product produced a non-finite result.");
