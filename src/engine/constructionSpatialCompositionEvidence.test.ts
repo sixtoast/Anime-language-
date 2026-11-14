@@ -1,0 +1,12 @@
+import { describe, expect, it } from "vitest";
+import { constructionSpatialCompositionEvidence, reviewConstructionSpatialCategoryPair } from "./constructionSpatialCompositionEvidence";
+describe("Phase 8BQ spatial category-composition evidence",()=>{
+ it("[CON-SPATIAL-COMP-001] enumerates six unordered category pairs",()=>{expect(constructionSpatialCompositionEvidence.categoryPairs).toHaveLength(6);});
+ it("[CON-SPATIAL-COMP-002] leaves v3.0-L composition contracts unestablished",()=>{expect(constructionSpatialCompositionEvidence.categoryPairs.every(pair=>pair.status==="NOT-ESTABLISHED")).toBe(true);});
+ it("[CON-SPATIAL-COMP-003] distinguishes unknown evidence from invalid grammar",()=>{expect(constructionSpatialCompositionEvidence.limits.unestablishedDoesNotMeanInvalid).toBe(true);expect(reviewConstructionSpatialCategoryPair("FRAME","SIGNED-AXIS")?.status).toBe("NOT-ESTABLISHED");});
+ it("[CON-SPATIAL-COMP-004] retains the historical fixture in its own version profile",()=>{const f=constructionSpatialCompositionEvidence.fixtureObservations[0];expect(f.version).toBe("PHASE-5.22-FIXTURE-LOCAL");expect(f.v3CategoryMapping).toBe("NOT-ESTABLISHED");expect(f.generalisable).toBe(false);});
+ it("[CON-SPATIAL-COMP-005] does not infer ordering or quantity attachment",()=>{const f=constructionSpatialCompositionEvidence.fixtureObservations[0];expect(f.orderingRule).toBe("NOT-ESTABLISHED");expect(f.attachmentRule).toBe("NOT-ESTABLISHED");expect(constructionSpatialCompositionEvidence.limits.coOccurrenceDoesNotEstablishSyntax).toBe(true);});
+ it("[CON-SPATIAL-COMP-006] fails closed for unknown, identical and malformed pairs",()=>{expect(reviewConstructionSpatialCategoryPair("UNKNOWN","FRAME")).toBeNull();expect(reviewConstructionSpatialCategoryPair("FRAME","FRAME")).toBeNull();expect(reviewConstructionSpatialCategoryPair(null,"FRAME")).toBeNull();});
+ it("[CON-SPATIAL-COMP-007] treats pair lookup symmetrically without establishing operand order",()=>{expect(reviewConstructionSpatialCategoryPair("FRAME","GEOMETRY")).toEqual(reviewConstructionSpatialCategoryPair("GEOMETRY","FRAME"));expect(constructionSpatialCompositionEvidence.limits.categoryPairOrderIsNotOperandOrder).toBe(true);});
+ it("[CON-SPATIAL-COMP-008] remains non-executable and canon-neutral",()=>{expect(constructionSpatialCompositionEvidence.limits.executable).toBe(false);expect(constructionSpatialCompositionEvidence.limits.canonEffect).toBe("NONE");});
+});

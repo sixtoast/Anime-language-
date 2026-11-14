@@ -28,6 +28,7 @@ import { reviewConstructionReferenceBoundary } from "./engine/constructionRefere
 import { constructionStageInterfaceAudit, reviewConstructionStageInterfaceAudit } from "./engine/constructionStageInterfaceAudit";
 import { constructionSpatialEvidenceAudit } from "./engine/constructionSpatialEvidenceAudit";
 import { constructionSpatialGrammarEvidence, reviewConstructionSpatialCategory } from "./engine/constructionSpatialGrammarEvidence";
+import { constructionSpatialCompositionEvidence, reviewConstructionSpatialCategoryPair } from "./engine/constructionSpatialCompositionEvidence";
 import { createEmptyConstructionExpressionComposition, reviewConstructionExpressionComposition } from "./engine/constructionExpressionComposition";
 import { handFlameFixtureTraceability, reviewHandFlameFixtureTraceability } from "./engine/constructionFixtureTraceability";
 import { reviewConstructionFootShape } from "./engine/constructionFootShape";
@@ -791,6 +792,22 @@ function App() {
               </div>
               <ol>{constructionSpatialGrammarEvidence.openInterfaces.map(item => <li key={item.id}><strong>{item.id.replaceAll("-", " ")}</strong><small>{item.question} · {item.status}</small></li>)}</ol>
               <p className="fixture-browser-caveat">The historical po/da/0.2 metre phrase remains fixture-local. A category label is not a grammar rule; do not assemble FE, axis, relation and geometry tokens into a purported valid expression until signatures and combination rules are recovered.</p>
+            </div>
+            <div className="construction-relationship-map">
+              <div className="detail-kicker">PHASE 8BQ · SPATIAL COMPOSITION EVIDENCE</div>
+              <p>This matrix separates category membership from evidence that two spatial categories can combine. No v3.0-L category pair has a recovered composition contract.</p>
+              <div className="fixture-browser-meta">
+                <div><span>Category pairs reviewed</span><strong>{constructionSpatialCompositionEvidence.categoryPairs.length}</strong></div>
+                <div><span>Composition contracts recovered</span><strong>{constructionSpatialCompositionEvidence.categoryPairs.filter(pair => pair.status === "RECOVERED").length}</strong></div>
+                <div><span>Historical fixture observations</span><strong>{constructionSpatialCompositionEvidence.fixtureObservations.length}</strong></div>
+                <div><span>Executable combinations</span><strong>0</strong></div>
+              </div>
+              <ol>{constructionSpatialCompositionEvidence.categoryPairs.map(pair => {
+                const review = reviewConstructionSpatialCategoryPair(pair.left, pair.right);
+                return <li key={pair.id}><strong>{pair.left.replaceAll("-", " ")}</strong> <span aria-label="with">↔</span> <strong>{pair.right.replaceAll("-", " ")}</strong><small>{review?.status.replaceAll("-", " ")} · signatures, ordering and attachment not recovered</small></li>;
+              })}</ol>
+              <p><strong>Fixture-only observation:</strong> Phase 5.22 records <code>po da za shi to za ma</code> as position · +Y · 0.2 metre. The role token, axis token and quantity reading belong to that historical fixture profile; this is not evidence for a v3.0-L category pair or general syntax.</p>
+              <p className="fixture-browser-caveat">A pair marked NOT ESTABLISHED is not proven invalid; it is unsupported by the recovered evidence. This matrix is not a grammar validator or a list of permitted combinations.</p>
             </div>
             <div className="construction-relationship-map">
               <div className="detail-kicker">PHASE 8BJ · STAGE INTERFACE AUDIT</div>
