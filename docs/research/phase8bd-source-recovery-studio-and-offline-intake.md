@@ -45,3 +45,10 @@ The browser MVP and CLI intentionally have different format coverage. The browse
 ## Validation
 
 Five Python tests were authored for Unicode text hashing, invalid JSON reporting, DOCX paragraph/table order, ZIP path traversal handling and oversized-file rejection. They have not been executed in this environment. No GitHub Actions were dispatched. Preview build is a website integration check, not a substitute for running the Python tests.
+
+
+## Phase 8BE — exact duplicate reporting
+
+The offline CLI now groups records only when original file SHA-256 values match. Duplicate groups appear in both the JSON manifest and Markdown report. Different hashes are never collapsed, even if extracted text appears similar; byte identity is not semantic equivalence or source authority.
+
+Two additional Python tests cover exact duplicate grouping and distinct-hash separation. Seven tests are authored in total; none were executed in this environment. This increment does not change canon, source originals or production.

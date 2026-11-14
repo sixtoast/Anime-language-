@@ -220,6 +220,17 @@ def inspect_path(path: Path, max_file_bytes: int, max_members: int) -> tuple[lis
              "text_length": 0, "warnings": ["Format is fingerprinted but not extracted."], "metadata": {}}], None
 
 
+
+def duplicate_groups(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Group exact byte duplicates by SHA-256; never infer semantic equivalence."""
+    grouped: dict[str, list[str]] = {}
+    for record in records:
+        digest = record.get("sha256")
+        if digest:
+            grouped.setdefault(digest, []).append(record.get("source", record.get("name", "unknown")))
+    return [{"sha256": digest, "sources": sources} for digest, sources in sorted(grouped.items()) if len(sources) > 1]
+
+
 def build_markdown(records: list[dict[str, Any]], skipped: list[dict[str, Any]]) -> str:
     lines = ["# Source intake report", "", "Read-only inventory and extraction report. Extracted content is evidence, not canon approval.", "",
              "| Source | Format | Status | Bytes | SHA-256 | Text characters |",
@@ -228,6 +239,14 @@ def build_markdown(records: list[dict[str, Any]], skipped: list[dict[str, Any]])
         lines.append(f"| {item['source']} | {item['format']} | {item['status']} | {item['bytes']} | {item['sha256']} | {item['text_length']} |")
         for warning in item["warnings"]:
             lines.append(f"  - Warning: {warning}")
+    duplicates = duplicate_groups(records)
+    lines.extend(["", "## Exact byte duplicates", ""])
+    if duplicates:
+        for group in duplicates:
+            lines.append("- SHA-256 " + group["sha256"] + ": " + "; ".join(group["sources"]))
+    else:
+        lines.append("No exact byte duplicates found in this intake batch.")
+    lines.append("Duplicate hashes establish byte identity only, not semantic equivalence or source authority.")
     for item in skipped:
         lines.append(f"| {item['source']} | — | {item['status']} | {item.get('bytes', '—')} | — | — |")
         lines.append(f"  - {item['warning']}")
@@ -260,7 +279,7 @@ def main() -> int:
         if skip:
             skipped.append(skip)
     manifest = {"schema": "anime-source-intake-manifest-v1", "read_only": True,
-                "generated_by": "tools/source_intake.py", "records": records, "skipped": skipped}
+                "generated_by": "tools/source_intake.py", "records": records, "skipped": skipped, "duplicate_groups": duplicate_groups(records)}
     args.json_out.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
     args.markdown_out.write_text(build_markdown(records, skipped), encoding="utf-8")
     print(f"Inspected {len(paths)} paths; {len(records)} records; {len(skipped)} skipped.")

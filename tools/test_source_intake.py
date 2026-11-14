@@ -52,6 +52,15 @@ class SourceIntakeTests(unittest.TestCase):
         self.assertTrue(any("safe text" in (r["text"] or "") for r in records))
         self.assertTrue(any("Unsafe member path" in warning for r in records for warning in r["warnings"]))
 
+    def test_exact_duplicate_groups_use_hash_only(self):
+        from source_intake import duplicate_groups
+        records = [{"source": "a.txt", "sha256": "abc"}, {"source": "copy/a.txt", "sha256": "abc"}, {"source": "b.txt", "sha256": "def"}, {"source": "unknown.bin", "sha256": None}]
+        self.assertEqual(duplicate_groups(records), [{"sha256": "abc", "sources": ["a.txt", "copy/a.txt"]}])
+
+    def test_distinct_hashes_are_not_collapsed(self):
+        from source_intake import duplicate_groups
+        self.assertEqual(duplicate_groups([{"source": "a", "sha256": "1"}, {"source": "b", "sha256": "2"}]), [])
+
     def test_oversized_file_is_skipped(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "large.txt"
