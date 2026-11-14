@@ -35,6 +35,9 @@ describe("Phase 8AX Construction Foot source recovery", () => {
   it("CON-FOOT-SRC-009 retains provisional parameter families", () => {
     expect(constructionFootSourceRecovery.parameterFamilies.every(item => item.status === "PROVISIONAL")).toBe(true);
   });
+  it("CON-FOOT-SRC-011 reflects the primary-source CVC adjudication", () => {
+    expect(constructionFootSourceRecovery.interpretationLimits.some(item => item.includes("reviewed Phase 4 primary source favours CVC"))).toBe(true);
+  });
   it("CON-FOOT-SRC-010 records source provenance and non-executable boundary", () => {
     expect(constructionFootSourceRecovery.source.gitBlobSha).toBe("e6202bdf9a3c726e4103aece1ba711a287d5899d");
     expect(constructionFootSourceRecovery.executable).toBe(false);

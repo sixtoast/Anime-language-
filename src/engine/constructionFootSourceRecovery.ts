@@ -36,7 +36,7 @@ export const constructionFootSourceRecovery = {
     "The differing a/e vowels do not establish executable parameter semantics.",
     "The aliases TRAK ENRA, FREM / structure held and SHREN / release remain whole-token associations, not independent segment meanings.",
     "The six canonical CV forms remain frame forms, not proven complete Feet.",
-    "The Phase 5.15 CVC statement and Phase 5.16 C-02 optional-coda statement remain unresolved.",
+    "The reviewed Phase 4 primary source favours CVC (§3.1 Table 2; §10 P4-T10); the Phase 5.16 C-02 optional-coda wording remains a secondary-summary context discrepancy.",
     "No productive frame × vowel × coda paradigm, general Foot parser, physical effect or execution contract is recovered."
   ],
   executable: false,
