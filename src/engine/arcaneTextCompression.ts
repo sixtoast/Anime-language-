@@ -19,6 +19,7 @@ function validate(source:string,aliases:ArcaneTextAlias[],allowShortFormsPresent
  aliases.forEach((a,i)=>{
   if(!a||typeof a.fullForm!=="string"||typeof a.shortForm!=="string"||!isToken(a.fullForm)||!isToken(a.shortForm)){issues.push("Alias "+i+" must contain non-empty, whitespace-free fullForm and shortForm tokens.");return;}
   if(a.fullForm===a.shortForm)issues.push("Alias "+i+" maps a token to itself.");
+  if(a.fullForm.startsWith("~"))issues.push("Full form "+a.fullForm+" cannot use the reserved ~TOKEN transport namespace.");
   if(!/^~[A-Za-z0-9]+$/.test(a.shortForm))issues.push("Short form "+a.shortForm+" must use the reserved ~TOKEN transport namespace.");
   if(full.has(a.fullForm))issues.push("Duplicate fullForm: "+a.fullForm);
   if(short.has(a.shortForm))issues.push("Duplicate shortForm: "+a.shortForm);
@@ -47,12 +48,12 @@ export function expandArcaneText(compressedText:string,aliases:ArcaneTextAlias[]
 export function compressArcaneText(source:string,aliases:ArcaneTextAlias[],dictionaryIsShared=true):ArcaneTextCompressionResult{
  const issues=typeof source!=="string"?["Source text must be a string."]:validate(source,aliases);
  const dictionaryCharacters=Array.isArray(aliases)?JSON.stringify(aliases).length:0;
- const base={profile:ARCANE_TEXT_COMPRESSION_PROFILE,originalText:typeof source==="string"?source:"",compressedText:typeof source==="string"?source:"",aliases:Array.isArray(aliases)?aliases.map(a=>({...a})):[],replacements:0,originalCharacters:typeof source==="string"?source.length:0,compressedCharacters:typeof source==="string"?source.length:0,charactersSaved:0,textCharactersSaved:0,dictionaryCharacters,dictionaryIsShared,exactRoundTrip:false,parserInput:"EXPAND-BEFORE-PARSING" as const,executable:false as const,canonEffect:"NONE" as const,issues,limitation:LIMIT};
+ const base:Omit<ArcaneTextCompressionResult,"disposition">={profile:ARCANE_TEXT_COMPRESSION_PROFILE,originalText:typeof source==="string"?source:"",compressedText:typeof source==="string"?source:"",aliases:Array.isArray(aliases)?aliases.map(a=>({...a})):[],replacements:0,originalCharacters:typeof source==="string"?source.length:0,compressedCharacters:typeof source==="string"?source.length:0,charactersSaved:0,textCharactersSaved:0,dictionaryCharacters,dictionaryIsShared,exactRoundTrip:false,parserInput:"EXPAND-BEFORE-PARSING" as const,executable:false as const,canonEffect:"NONE" as const,issues,limitation:LIMIT};
  if(issues.length)return {...base,disposition:"INVALID-DICTIONARY"};
  const forward=new Map(aliases.map(a=>[a.fullForm,a.shortForm]));
  const compressed=replaceTokens(source,forward);
  const expanded=expandArcaneText(compressed.text,aliases);
  const textSaved=source.length-compressed.text.length;
  const netSaved=textSaved-(dictionaryIsShared?0:dictionaryCharacters);
- return {...base,disposition:textSaved>0?"COMPRESSED":"NO-SAVING",compressedText:compressed.text,replacements:compressed.count,compressedCharacters:compressed.text.length,charactersSaved:netSaved,textCharactersSaved:textSaved,exactRoundTrip:expanded.ok&&expanded.text===source,issues:[]};
+ return {...base,disposition:netSaved>0?"COMPRESSED":"NO-SAVING",compressedText:compressed.text,replacements:compressed.count,compressedCharacters:compressed.text.length,charactersSaved:netSaved,textCharactersSaved:textSaved,exactRoundTrip:expanded.ok&&expanded.text===source,issues:[]};
 }
