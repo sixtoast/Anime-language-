@@ -304,7 +304,7 @@ def comparison_markdown(result: dict[str, Any]) -> str:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("paths", nargs="+", type=Path, help="Files or directories to inspect")
+    parser.add_argument("paths", nargs="*", type=Path, help="Files or directories to inspect")
     parser.add_argument("--json-out", type=Path, default=Path("source-intake-manifest.json"))
     parser.add_argument("--markdown-out", type=Path, default=Path("source-intake-report.md"))
     parser.add_argument("--max-file-bytes", type=int, default=MAX_DEFAULT_BYTES)
@@ -320,7 +320,7 @@ def main() -> int:
         args.comparison_markdown.write_text(comparison_markdown(comparison), encoding="utf-8")
         print(f"Compared {left_path} and {right_path}: {comparison['change_count']} changed regions.")
         return 0
-    paths: list[Path] = []
+    if not args.paths:\n        parser.error("provide one or more paths, or use --compare LEFT RIGHT")\n    paths: list[Path] = []
     for target in args.paths:
         if target.is_dir():
             paths.extend(sorted(p for p in target.rglob("*") if p.is_file() and not p.is_symlink()))
