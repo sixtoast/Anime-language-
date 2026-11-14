@@ -30,6 +30,7 @@ import { constructionSpatialEvidenceAudit } from "./engine/constructionSpatialEv
 import { constructionSpatialGrammarEvidence, reviewConstructionSpatialCategory } from "./engine/constructionSpatialGrammarEvidence";
 import { constructionSpatialCompositionEvidence, reviewConstructionSpatialCategoryPair } from "./engine/constructionSpatialCompositionEvidence";
 import { constructionAxisSemantics, reviewConstructionAxis } from "./engine/constructionAxisSemantics";
+import { spatialValueModelSummary, workedDisplacementFixture, assessSpatialVectorFixture, proposedDisplacementMagnitude, proposedDisplacementDot } from "./engine/spatialValueModel";
 import { createEmptyConstructionExpressionComposition, reviewConstructionExpressionComposition } from "./engine/constructionExpressionComposition";
 import { handFlameFixtureTraceability, reviewHandFlameFixtureTraceability } from "./engine/constructionFixtureTraceability";
 import { reviewConstructionFootShape } from "./engine/constructionFootShape";
@@ -775,6 +776,22 @@ function App() {
                 {profile.id === "HISTORICAL-PHASE-5.22-FIXTURE" ? "Fixture-local role, axis and quantity readings only." : "Separate inventory: relations JO/JUR/JA/JE/JI; geometry PI/LEN/PLA/SUR/VOM/PAR."}</span>
               </div>)}
               <p className="fixture-browser-caveat">The spelling da/DA is not enough to establish a shared token identity. Coordinate frame, origin, vector composition, quantity attachment and unit conversion remain unrecovered.</p>
+            </div>
+            <div className="construction-relationship-map">
+              <div className="detail-kicker">PHASE 8BS · TYPED SPATIAL VALUE MODEL</div>
+              <p>This abstract research model separates a position, a displacement, a velocity, a force-like vector and a mana-state vector. It is metadata for review, not Arcane surface syntax.</p>
+              <div className="fixture-browser-meta">
+                <div><span>Spatial value kinds</span><strong>{spatialValueModelSummary.kinds.length}</strong></div>
+                <div><span>Required spatial components</span><strong>X · Y · Z</strong></div>
+                <div><span>Worked displacement</span><strong>{assessSpatialVectorFixture(workedDisplacementFixture).status}</strong></div>
+                <div><span>Canonical vector constructor</span><strong>NOT RECOVERED</strong></div>
+              </div>
+              <div className="construction-foot-parts">
+                {spatialValueModelSummary.kinds.map(kind => <span key={kind.id}><small>{kind.id}</small><strong>{kind.label}</strong><small>{kind.rule}</small></span>)}
+              </div>
+              <p><strong>Worked fixture:</strong> frame FRAME-TEST-01; X=1 m, Y=2 m, Z=3 m. Under the proposed Euclidean displacement rule, magnitude = √14 m ≈ 3.742 m and self-dot-product = 14 m².</p>
+              <p><strong>Typed separation:</strong> displacement components use length dimensions; velocity components use length/time dimensions. A mana-state vector is not accepted as an ordinary spatial vector. A position additionally needs an origin/reference, and is not interchangeable with displacement.</p>
+              <p className="fixture-browser-caveat">These are proposal-level research checks only. DRAN's full canonical input/norm contract, DREM's accepted types and result semantics, surface vector syntax, frame transforms and physical feasibility remain separate unresolved gates.</p>
             </div>
             <div className="construction-relationship-map">
               <div className="detail-kicker">PHASE 8BR · CANONICAL SIGNED-AXIS SEMANTICS</div>
