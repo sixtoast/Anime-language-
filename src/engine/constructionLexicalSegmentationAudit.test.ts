@@ -14,6 +14,6 @@ describe("Phase 8CH Construction lexical segmentation audit",()=>{
  it("[LEX-CH-010] keeps duration phrase token readings unresolved",()=>{expect(audit.occurrences.filter(item=>item.phraseIndex===5).every(item=>item.evidenceClass==="FIXTURE-DURATION-PHRASE-UNIT")).toBe(true)});
  it("[LEX-CH-011] does not infer productive Foot morphology",()=>{expect(Object.values(audit.morphology).every(value=>value===false)).toBe(true)});
  it("[LEX-CH-012] occurrence lookup is exact and fixture-bounded",()=>{expect(reviewConstructionLexicalOccurrence("kan")?.occurrences).toHaveLength(1);expect(reviewConstructionLexicalOccurrence("KAN")?.identityStatus).toBe("SOURCE-RECORDED");expect(reviewConstructionLexicalOccurrence("unknown")).toBeNull()});
- it("[LEX-CH-013] can distinguish repeated token occurrences by phrase",()=>{expect(reviewConstructionLexicalOccurrence("za")?.occurrences).toHaveLength(2);expect(reviewConstructionLexicalOccurrence("za",2)?.occurrences).toHaveLength(2)});
+ it("[LEX-CH-013] can distinguish repeated token occurrences by phrase",()=>{expect(reviewConstructionLexicalOccurrence("za")?.occurrences).toHaveLength(3);expect(reviewConstructionLexicalOccurrence("za",2)?.occurrences).toHaveLength(2)});
  it("[LEX-CH-014] keeps audit non-executable and canon-neutral",()=>{expect(audit.executable).toBe(false);expect(audit.canonEffect).toBe("NONE")});
 });

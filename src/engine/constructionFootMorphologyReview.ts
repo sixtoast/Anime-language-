@@ -80,7 +80,7 @@ export function reviewConstructionFootMorphology(input: unknown): FootMorphology
     };
   }
 
-  if (normalized.length === 3 && knownFrame && knownVowel && /^[a-z]$/.test(normalized[2])) {
+  if (normalized.length === 3 && knownFrame && knownVowel && /^[a-z]$/.test(normalized[2]) && !vowels.has(normalized[2])) {
     return {
       input: raw, normalized, status: "CVC-STRUCTURE-CANDIDATE",
       frameConsonant: consonant,

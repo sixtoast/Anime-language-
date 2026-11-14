@@ -48,7 +48,7 @@ const LIMITATIONS = [
  "The display preserves source grouping and marks Phase 5.22 fixture-only interpretations separately from general grammar."
 ] as const;
 export function auditHandFlameSurface(value:unknown):HandFlameAudit {
- const validSurface=typeof value==="string" && value.trim()===handFlameSourceSequence;
+ const validSurface=typeof value==="string" && value===handFlameSourceSequence;
  const counts:Record<HandFlameEvidence,number>={"EXAMPLE-BACKED":0,"PARTIAL-EXAMPLE":0,"ARCHIVED-FIXTURE-PARSE":0,"UNRESOLVED":0};
  for(const segment of handFlameSegments) counts[segment.evidence]+=1;
  return {validSurface,segments:handFlameSegments,tokenCount:handFlameSegments.reduce((n,s)=>n+s.tokens.length,0),segmentCount:handFlameSegments.length,evidenceCounts:counts,historicalParser:handFlameHistoricalParserEvidence,executable:false,canonEffect:"NONE",limitations:LIMITATIONS};
