@@ -23,7 +23,6 @@ export interface ConstructionMacroContractAudit {
   compositionWithOtherMacros: "NOT-ESTABLISHED";
   executable: false;
 }
-const byForm = new Map(constructionMacroEvidence.map(entry => [entry.form, entry]));
 const records: readonly ConstructionMacroContractAudit[] = [
   {macro:"TRAK",gloss:"alter",roleEvidence:"RECORDED-ROLE-EVIDENCE",evidence:"Phase 4 §3.2 describes voiceless-stop frames p/t/k for discrete change.",footScope:"FRAME-GROUP-ASSOCIATION",inputSignature:"NOT-RECOVERED",outputSignature:"NOT-RECOVERED",footCardinality:"NOT-RECOVERED",sequenceScope:"NOT-RECOVERED",preconditions:"NOT-RECOVERED",resourceSemantics:"NOT-RECOVERED",sideEffects:"NOT-RECOVERED",termination:"NOT-RECOVERED",compositionWithOtherMacros:"NOT-ESTABLISHED",executable:false},
   {macro:"KREN",gloss:"establish",roleEvidence:"PROPOSED-UNCONFIRMED",evidence:"Phase 4 §3.2 proposes voiced-stop frames b/d/g as a reinforced counterpart; owner confirmation remains outstanding.",footScope:"FRAME-GROUP-ASSOCIATION",inputSignature:"NOT-RECOVERED",outputSignature:"NOT-RECOVERED",footCardinality:"NOT-RECOVERED",sequenceScope:"NOT-RECOVERED",preconditions:"NOT-RECOVERED",resourceSemantics:"NOT-RECOVERED",sideEffects:"NOT-RECOVERED",termination:"NOT-RECOVERED",compositionWithOtherMacros:"NOT-ESTABLISHED",executable:false},
