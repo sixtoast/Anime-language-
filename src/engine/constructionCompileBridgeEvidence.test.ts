@@ -1,5 +1,5 @@
 import {describe,expect,it} from "vitest";
-import {constructionBridgeEvidence,constructionCompileBridgeReadiness,incantationCompressionEvidence,reviewConstructionBridgeSubject,reviewCompressionTier,CONSTRUCTION_COMPILE_BRIDGE_PROFILE} from "./constructionCompileBridgeEvidence";
+import {constructionBridgeEvidence,constructionCompileBridgeReadiness,reviewConstructionBridgeSubject,reviewCompressionTier,CONSTRUCTION_COMPILE_BRIDGE_PROFILE} from "./constructionCompileBridgeEvidence";
 describe("Phase 8DI Expression-to-Construction bridge evidence",()=>{
  it("[BRIDGE-EVID-001] exposes a versioned evidence profile",()=>expect(CONSTRUCTION_COMPILE_BRIDGE_PROFILE).toContain("EVIDENCE"));
  it("[BRIDGE-EVID-002] keeps Expression and Construction distinct",()=>expect(reviewConstructionBridgeSubject("SUBSYSTEM-SPLIT")?.status).toBe("SUBSYSTEM-PRINCIPLE"));
