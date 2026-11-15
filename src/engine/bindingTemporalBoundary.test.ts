@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import { BINDING_TEMPORAL_BOUNDARY_PROFILE, reviewBindingTemporalBoundaries } from "./bindingTemporalBoundary";
 import { BINDING_LIFECYCLE_EVIDENCE_PROFILE, BINDING_LIFECYCLE_DIMENSIONS } from "./bindingLifecycleEvidence";
 import { INCANTATION_LIFECYCLE_PROFILE } from "./incantationLifecycleModel";
-import { INCANTATION_EVIDENCE_PROFILE } from "./incantationEvidenceModel";
 const binding={profile:BINDING_LIFECYCLE_EVIDENCE_PROFILE,bindingLabel:"b1",claims:BINDING_LIFECYCLE_DIMENSIONS.map(d=>({dimension:d,status:"UNRESOLVED",evidence:[]}))};
 const invocation={profile:INCANTATION_LIFECYCLE_PROFILE,invocationId:"i1",events:[{id:"e0",sequence:0,state:"VALIDATED",at:"2026-11-15T08:00:00Z",source:"test"}],interruptEvents:[]};
 const evidence={record:{id:"e1",subjectId:"sensor",predicateId:"active",result:"TRUE",class:"OBSERVED",source:"sensor-1",method:"sample",observedAt:"2026-11-15T08:00:00Z",validUntil:"2026-11-15T08:01:00Z"},policy:{acceptedClasses:["OBSERVED"],maxAgeSeconds:30},asOf:"2026-11-15T08:00:10Z"};

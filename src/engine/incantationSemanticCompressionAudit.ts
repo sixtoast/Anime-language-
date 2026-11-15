@@ -15,7 +15,7 @@ export function auditIncantationSemanticCompression(input:unknown):IncantationSe
   const path = "operations[" + index + "]";
   if (!isObject(raw) || !nonEmpty(raw.operationId)) { issues.push(path + " requires a non-empty operationId."); return; }
   if (operationIds.has(raw.operationId)) issues.push(path + ".operationId must be unique.");
-  operationIds.add(raw.operationId);
+  operationIds.add(raw.operationId as string);
   if (!isObject(raw.arguments) || raw.arguments.profile !== INCANTATION_ARGUMENT_PROFILE || !Array.isArray(raw.arguments.references)) { issues.push(path + ".arguments must contain an INCANTATION-ARGUMENTS-1.0 references array."); return; }
   raw.arguments.references.forEach((ref,refIndex) => {
    if (!isObject(ref)) { issues.push(path + ".arguments.references[" + refIndex + "] must be an object."); return; }
@@ -25,7 +25,7 @@ export function auditIncantationSemanticCompression(input:unknown):IncantationSe
    const consumed = args.operation === "bran"
     ? coupling.participantA === ref.label || coupling.participantB === ref.label
     : args.targetLabel === ref.label;
-   entries.push({operationId:raw.operationId,consumed,label:ref.label,referenceClass:ref.referenceClass,scope:ref.scope,resolution:ref.resolution,lifetime:ref.lifetime,bindingState:ref.bindingState,referentId:ref.referentId});
+   entries.push({operationId:raw.operationId as string,consumed,label:ref.label as string,referenceClass:ref.referenceClass as string,scope:ref.scope as string,resolution:ref.resolution as string,lifetime:ref.lifetime as string,bindingState:ref.bindingState as string,referentId:ref.referentId as string});
   });
  });
  if (issues.length) return invalid(issues);

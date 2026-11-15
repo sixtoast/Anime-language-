@@ -1,5 +1,5 @@
 import {describe,expect,it} from "vitest";
-import {constructionFootParadigmCandidates,constructionFootParadigmSummary,reviewConstructionFootParadigmCandidate} from "./constructionFootParadigmEvidenceMatrix";
+import {reviewConstructionFootParadigmCandidate} from "./constructionFootParadigmEvidenceMatrix";
 import {constructionFootParadigmReconciliation as audit} from "./constructionFootParadigmReconciliation";
 describe("Phase 8CY-T primary Construction Foot source concordance",()=>{
  it("[FOOT-RECON-T-001] confirms five relation codas from Phase 4 Table 3",()=>{expect(audit.status).toBe("PRIMARY-CODA-INVENTORY-CONFIRMED");expect(audit.relationCodas.map(x=>x.form)).toEqual(["m","n","ng","s","sh"]);expect(audit.relationCodas.every(x=>x.evidence==="EXPLICIT-PHASE4-TABLE3"||x.evidence==="EXPLICIT-PHASE4-TABLE3-AND-D036")).toBe(true)});

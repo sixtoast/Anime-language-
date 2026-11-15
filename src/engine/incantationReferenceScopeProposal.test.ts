@@ -3,7 +3,7 @@ import{reviewIncantationReferenceScopeProposal,INCANTATION_REFERENCE_SCOPE_PROPO
 const ref=(lifetime="SPELL")=>({label:"target",referenceClass:"TARGET",scope:"pi",resolution:"RESOLVED",lifetime,bindingState:"COMMITTED",referentId:"entity-1"});
 const spell={bindingId:"r1",lifetime:"SPELL",declaredAt:"PRELUDE",reference:ref()};
 const local={bindingId:"r2",lifetime:"CURRENT-STEP",declaredAt:"OPERATION",operationId:"op-a",reference:ref("CURRENT-STEP")};
-const input=(declarations=[spell],operations=[{operationId:"op-a",uses:[{bindingId:declarations[0].bindingId,operationId:"op-a"}]},{operationId:"op-b",uses:[{bindingId:declarations[0].bindingId,operationId:"op-b"}]}])=>({profile:P,declarations,operations});
+const input=(declarations: Array<Record<string,any>>=[spell],operations: Array<Record<string,any>>=[{operationId:"op-a",uses:[{bindingId:declarations[0].bindingId,operationId:"op-a"}]},{operationId:"op-b",uses:[{bindingId:declarations[0].bindingId,operationId:"op-b"}]}])=>({profile:P,declarations,operations});
 describe("Reference scope proposal",()=>{
 it("[REF-SCOPE-001] permits spell prelude binding across operations",()=>expect(reviewIncantationReferenceScopeProposal(input()).disposition).toBe("SCOPE-CONSISTENT-PROPOSAL"));
 it("[REF-SCOPE-002] permits current-step binding in its owner operation",()=>expect(reviewIncantationReferenceScopeProposal(input([local],[{operationId:"op-a",uses:[{bindingId:"r2",operationId:"op-a"}]}])).disposition).toBe("SCOPE-CONSISTENT-PROPOSAL"));
