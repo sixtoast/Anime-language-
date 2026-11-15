@@ -276,7 +276,7 @@ test.describe("Playground Phase 6G parser integration", () => {
 
   test("builds a non-executable incantation worksheet without invoking the parser", async ({ page }) => {
     await openPlayground(page);
-    const worksheet = page.locator(".contract-worksheet");
+    const worksheet = page.locator('section[aria-labelledby="contract-worksheet-title"]');
     await expect(worksheet.getByRole("heading", { name: "Incantation contract worksheet" })).toBeVisible();
     await expect(worksheet.getByRole("combobox", { name: "Operation class" }).locator("option")).toHaveCount(6);
     await expect(worksheet.getByRole("textbox", { name: "Generated contract worksheet JSON" })).toHaveValue(/NOT-EXECUTED/);
@@ -287,7 +287,7 @@ test.describe("Playground Phase 6G parser integration", () => {
 
   test("updates the structured worksheet while keeping authority, resources and consent unverified", async ({ page }) => {
     await openPlayground(page);
-    const worksheet = page.locator(".contract-worksheet");
+    const worksheet = page.locator('section[aria-labelledby="contract-worksheet-title"]');
     await worksheet.getByRole("combobox", { name: "Operation class" }).selectOption("trak");
     await worksheet.getByRole("textbox", { name: "Target reference" }).fill("target-17");
     await worksheet.getByRole("textbox", { name: "Requested outcome" }).fill("state becomes sealed");
@@ -311,7 +311,7 @@ test.describe("Playground Phase 6G parser integration", () => {
   test("keeps the incantation worksheet within a 360px viewport", async ({ page }) => {
     await page.setViewportSize({ width: 360, height: 800 });
     await openPlayground(page);
-    const worksheet = page.locator(".contract-worksheet");
+    const worksheet = page.locator('section[aria-labelledby="contract-worksheet-title"]');
     await worksheet.getByRole("textbox", { name: "Requested outcome" }).fill("A long requested outcome for narrow screens.");
     const sizes = await page.evaluate(() => ({
       viewport: document.documentElement.clientWidth,

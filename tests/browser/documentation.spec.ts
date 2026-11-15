@@ -1,5 +1,8 @@
 import { expect, test } from "@playwright/test";
 
+const sourceRef = process.env.VERCEL_GIT_COMMIT_REF || process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME || "main";
+const encodedSourceRef = sourceRef.split("/").map((segment) => encodeURIComponent(segment)).join("/");
+
 test.describe("Documentation catalogue browser acceptance", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
@@ -58,7 +61,8 @@ test.describe("Documentation catalogue browser acceptance", () => {
       const sourceLink = page.getByRole("link", { name: "Open source document: " + title });
       await expect(sourceLink).toBeVisible();
       const href = await sourceLink.getAttribute("href");
-      expect(href).toMatch(/^https:\/\/github\.com\/sixtoast\/Anime-language-\/blob\/main\//);
+      expect(href).toMatch(/^https:\/\/github\.com\/sixtoast\/Anime-language-\/blob\//);
+      expect(href).toContain(`/blob/${encodedSourceRef}/`);
     }
   });
 
