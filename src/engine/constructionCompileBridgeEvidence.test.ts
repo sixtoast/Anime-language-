@@ -1,0 +1,26 @@
+import {describe,expect,it} from "vitest";
+import {constructionBridgeEvidence,constructionCompileBridgeReadiness,incantationCompressionEvidence,reviewConstructionBridgeSubject,reviewCompressionTier,CONSTRUCTION_COMPILE_BRIDGE_PROFILE} from "./constructionCompileBridgeEvidence";
+describe("Phase 8DI Expression-to-Construction bridge evidence",()=>{
+ it("[BRIDGE-EVID-001] exposes a versioned evidence profile",()=>expect(CONSTRUCTION_COMPILE_BRIDGE_PROFILE).toContain("EVIDENCE"));
+ it("[BRIDGE-EVID-002] keeps Expression and Construction distinct",()=>expect(reviewConstructionBridgeSubject("SUBSYSTEM-SPLIT")?.status).toBe("SUBSYSTEM-PRINCIPLE"));
+ it("[BRIDGE-EVID-003] preserves the seven-stage performed order",()=>expect(reviewConstructionBridgeSubject("PERFORMED-ORDER")?.recovered[0]).toContain("Reference"));
+ it("[BRIDGE-EVID-004] distinguishes Foot shape from productive semantics",()=>expect(reviewConstructionBridgeSubject("FOOT-SHAPE")?.status).toBe("MORPHOLOGY-RECOVERED-SEMANTICS-INCOMPLETE"));
+ it("[BRIDGE-EVID-005] records TRAK's p/t/k family without compiling it",()=>expect(reviewConstructionBridgeSubject("TRAK")?.recovered[0]).toContain("p/t/k"));
+ it("[BRIDGE-EVID-006] keeps KREN proposed",()=>expect(reviewConstructionBridgeSubject("KREN")?.status).toBe("PROPOSED-OWNER-CONFIRMATION"));
+ it("[BRIDGE-EVID-007] preserves FREM m/n and ŋ evidence with gaps",()=>expect(reviewConstructionBridgeSubject("FREM")?.unresolved.length).toBeGreaterThan(0));
+ it("[BRIDGE-EVID-008] preserves SHREN s/sh evidence with gaps",()=>expect(reviewConstructionBridgeSubject("SHREN")?.recovered[0]).toContain("s/sh"));
+ it("[BRIDGE-EVID-009] records BRAN as provisional coupling mapping",()=>expect(reviewConstructionBridgeSubject("BRAN")?.status).toBe("PROVISIONAL-MAPPING"));
+ it("[BRIDGE-EVID-010] keeps VARE a modifier rather than a Foot",()=>expect(reviewConstructionBridgeSubject("VARE")?.recovered[0]).toContain("not a Foot"));
+ it("[BRIDGE-EVID-011] keeps parameter-vowel semantics provisional",()=>expect(reviewConstructionBridgeSubject("PARAMETER-FAMILIES")?.status).toBe("PROVISIONAL-MAPPING"));
+ it("[BRIDGE-EVID-012] keeps h-domain physical mappings provisional",()=>expect(reviewConstructionBridgeSubject("H-COUPLING-DOMAINS")?.status).toBe("PROVISIONAL-MAPPING"));
+ it("[BRIDGE-EVID-013] records historical reference compression without generalising",()=>expect(reviewConstructionBridgeSubject("REFERENCE-COMPRESSION")?.status).toBe("PROFILE-SPECIFIC-PERFORMED-EVIDENCE"));
+ it("[BRIDGE-EVID-014] records provisional performed control compression",()=>expect(reviewConstructionBridgeSubject("CONTROL-COMPRESSION")?.unresolved.length).toBeGreaterThan(0));
+ it("[BRIDGE-EVID-015] refuses to claim an end-to-end compiler",()=>expect(reviewConstructionBridgeSubject("END-TO-END-COMPILER")?.status).toBe("NOT-DEMONSTRATED"));
+ it("[BRIDGE-EVID-016] keeps compiler disabled and no evidence executable",()=>{expect(constructionCompileBridgeReadiness.compilerEnabled).toBe(false);expect(constructionBridgeEvidence.every(x=>!x.compilerUsable)).toBe(true);});
+ it("[BRIDGE-EVID-017] distinguishes semantic packing from physical simplification",()=>expect(reviewCompressionTier("COMP-01")?.claim).toContain("not physical simplification"));
+ it("[BRIDGE-EVID-018] records historical reference and control compression tiers",()=>{expect(reviewCompressionTier("COMP-02")?.status).toBe("HISTORICAL-PERFORMED-RULE");expect(reviewCompressionTier("COMP-03")?.status).toBe("HISTORICAL-PERFORMED-RULE");});
+ it("[BRIDGE-EVID-019] preserves binding reuse as review only",()=>expect(reviewCompressionTier("COMP-04")?.automaticRewrite).toBe(false));
+ it("[BRIDGE-EVID-020] prohibits unsupported arbitrary deletion",()=>expect(reviewCompressionTier("COMP-05")?.status).toBe("NOT-RECOVERED"));
+ it("[BRIDGE-EVID-021] unknown subjects do not produce mappings",()=>expect(reviewConstructionBridgeSubject("FRAPA-TRAK")).toBeNull());
+ it("[BRIDGE-EVID-022] records no canon change or executable rewrite",()=>{expect(constructionCompileBridgeReadiness.canonEffect).toBe("NONE");expect(reviewCompressionTier("COMP-04")?.semanticEquivalence).toBe("NOT-COMPUTED");});
+});
