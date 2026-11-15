@@ -1,0 +1,20 @@
+import { describe, expect, it } from "vitest";
+import { BINDING_TEMPORAL_BOUNDARY_PROFILE, reviewBindingTemporalBoundaries } from "./bindingTemporalBoundary";
+import { BINDING_LIFECYCLE_EVIDENCE_PROFILE, BINDING_LIFECYCLE_DIMENSIONS } from "./bindingLifecycleEvidence";
+import { INCANTATION_LIFECYCLE_PROFILE } from "./incantationLifecycleModel";
+import { INCANTATION_EVIDENCE_PROFILE } from "./incantationEvidenceModel";
+const binding={profile:BINDING_LIFECYCLE_EVIDENCE_PROFILE,bindingLabel:"b1",claims:BINDING_LIFECYCLE_DIMENSIONS.map(d=>({dimension:d,status:"UNRESOLVED",evidence:[]}))};
+const invocation={profile:INCANTATION_LIFECYCLE_PROFILE,invocationId:"i1",events:[{id:"e0",sequence:0,state:"VALIDATED",at:"2026-11-15T08:00:00Z",source:"test"}],interruptEvents:[]};
+const evidence={record:{id:"e1",subjectId:"sensor",predicateId:"active",result:"TRUE",class:"OBSERVED",source:"sensor-1",method:"sample",observedAt:"2026-11-15T08:00:00Z",validUntil:"2026-11-15T08:01:00Z"},policy:{acceptedClasses:["OBSERVED"],maxAgeSeconds:30},asOf:"2026-11-15T08:00:10Z"};
+describe("Binding temporal domain boundaries",()=>{
+ it("[BIND-TIME-001] uses exact boundary profile",()=>expect(reviewBindingTemporalBoundaries({}).profile).toBe(BINDING_TEMPORAL_BOUNDARY_PROFILE));
+ it("[BIND-TIME-002] reports evidence acceptance independently of binding lifetime",()=>{const r=reviewBindingTemporalBoundaries({evidence,binding});expect(r.domains.evidence.accepted).toBe(true);expect(r.domains.binding.lifetime).toBe("UNRESOLVED");});
+ it("[BIND-TIME-003] evidence staleness does not expire a binding",()=>{const stale={...evidence,asOf:"2026-11-15T08:02:00Z"};const r=reviewBindingTemporalBoundaries({evidence:stale,binding});expect(r.domains.evidence.decision).toBe("UNKNOWN-STALE");expect(r.domains.binding.lifetime).toBe("UNRESOLVED");});
+ it("[BIND-TIME-004] invocation state does not establish binding lifetime",()=>{const r=reviewBindingTemporalBoundaries({invocation,binding});expect(r.domains.invocation.currentState).toBe("VALIDATED");expect(r.domains.binding.lifetime).toBe("UNRESOLVED");});
+ it("[BIND-TIME-005] temporal contract does not silently define binding expiry",()=>{const r=reviewBindingTemporalBoundaries({temporalContract:{operator:"WITHIN-INTERVAL",intervalStart:"a",intervalEnd:"b"},binding});expect(r.domains.temporalContract.valid).toBe(true);expect(r.domains.binding.lifetime).toBe("UNRESOLVED");});
+ it("[BIND-TIME-006] keeps all four domains separately visible",()=>{const r=reviewBindingTemporalBoundaries({evidence,binding,invocation,temporalContract:{operator:"AT-CHECK"}});expect(r.domains.evidence.supplied&&r.domains.binding.supplied&&r.domains.invocation.supplied&&r.domains.temporalContract.supplied).toBe(true);});
+ it("[BIND-TIME-007] reports missing domains without inference",()=>{const r=reviewBindingTemporalBoundaries({});expect(r.domains.binding.supplied).toBe(false);expect(r.crossDomainInference).toBe("NOT-PERFORMED");});
+ it("[BIND-TIME-008] preserves independent invocation outcome",()=>{const r=reviewBindingTemporalBoundaries({invocation,binding});expect(r.domains.invocation.attempted).toBe(false);expect(r.domains.binding.disposition).toBe("INCOMPLETE");});
+ it("[BIND-TIME-009] never derives binding or invocation state",()=>{const r=reviewBindingTemporalBoundaries({evidence,binding,invocation});expect(r.bindingValidityDerivedFromEvidence).toBe(false);expect(r.bindingValidityDerivedFromInvocation).toBe(false);expect(r.invocationStateDerivedFromBinding).toBe(false);});
+ it("[BIND-TIME-010] remains non-executable and canon-neutral",()=>{const r=reviewBindingTemporalBoundaries({evidence,binding,invocation});expect(r.executable).toBe(false);expect(r.canonEffect).toBe("NONE");});
+});
