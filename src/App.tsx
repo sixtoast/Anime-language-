@@ -20,12 +20,48 @@ import { authorityDecisionFixtures } from "./engine/authorityDecisionFixtures";
 import { policyProfileCompositionFixtures } from "./engine/policyProfileCompositionFixtures";
 import { invocationLifecycleSequence, invocationOrderNote, validationGateSequence } from "./engine/incantationGateSequence";
 import { evaluateIncantationRuntimePreview, runtimePreviewScenarios, type RuntimePreviewScenario } from "./engine/incantationRuntimePreview";
+import { reviewIncantationObligations, type IncantationObligationReview } from "./engine/incantationObligationReview";
+import { reviewIncantationArguments, type IncantationArgumentReview } from "./engine/incantationArgumentModel";
+import { reviewIntegratedIncantation, type IntegratedReview } from "./engine/incantationIntegratedReview";
+import { readStructuredIncantation, type ReadableIncantationReport } from "./engine/incantationReadableReport";
+import { compressArcaneText, type ArcaneTextCompressionResult } from "./engine/arcaneTextCompression";
+import { reviewIncantationRelationships, type IncantationRelationshipReview } from "./engine/incantationRelationshipModel";
+import { evaluateResourceConservationPreview, resourceConservationPreviewScenarios, type ResourceConservationPreviewScenario } from "./engine/resourceConservationPreview";
 import { reviewConstructionRecord, type ConstructionRecord, type ConstructionEvidenceStatus } from "./engine/constructionRecordReview";
 import type { ConstructionStage } from "./engine/constructionOrderAudit";
 import { bindConstructionReference, type ConstructionReferenceToken } from "./engine/constructionReferenceContext";
+import { reviewConstructionReferenceBoundary } from "./engine/constructionReferenceBoundary";
+import { constructionStageInterfaceAudit, reviewConstructionStageInterfaceAudit } from "./engine/constructionStageInterfaceAudit";
+import { constructionSpatialEvidenceAudit } from "./engine/constructionSpatialEvidenceAudit";
+import { constructionSpatialGrammarEvidence, reviewConstructionSpatialCategory } from "./engine/constructionSpatialGrammarEvidence";
+import { constructionSpatialCompositionEvidence, reviewConstructionSpatialCategoryPair } from "./engine/constructionSpatialCompositionEvidence";
+import { constructionAxisSemantics, reviewConstructionAxis } from "./engine/constructionAxisSemantics";
+import { spatialValueModelSummary, workedDisplacementFixture, assessSpatialVectorFixture, proposedDisplacementMagnitude, proposedDisplacementDot } from "./engine/spatialValueModel";
+import { positionRelationSummary, positionRelationFixtures, proposedPositionDifference, proposedTranslatePosition, proposedAddPositions } from "./engine/spatialPositionRelations";
+import { createEmptyConstructionExpressionComposition, reviewConstructionExpressionComposition } from "./engine/constructionExpressionComposition";
+import { handFlameFixtureTraceability, reviewHandFlameFixtureTraceability } from "./engine/constructionFixtureTraceability";
 import { reviewConstructionFootShape } from "./engine/constructionFootShape";
+import { reviewConstructionFootMorphology } from "./engine/constructionFootMorphologyReview";
+import { constructionFootParadigmSummary, reviewConstructionFootParadigmCandidate } from "./engine/constructionFootParadigmEvidenceMatrix";
+import { constructionFootParadigmReconciliation } from "./engine/constructionFootParadigmReconciliation";
+import { reviewConstructionFootComposition } from "./engine/constructionFootComposition";
+import { constructionFrameInventory, constructionParameterInventory, constructionFootEvidenceBoundary } from "./engine/constructionFootEvidence";
+import { constructionFootMorphologyAudit } from "./engine/constructionFootMorphologyAudit";
+import { constructionFootSourceRecovery, reviewConstructionFootSourceForm } from "./engine/constructionFootSourceRecovery";
+import { constructionFrameTerminology } from "./engine/constructionFrameTerminology";
+import { constructionFrameMacroAssociations } from "./engine/constructionFrameContrastEvidence";
 import { reviewConstructionCoupling } from "./engine/constructionCouplingEvidence";
 import { reviewConstructionMacro } from "./engine/constructionMacroEvidence";
+import { handFlameConstructionExample } from "./engine/constructionWorkedExampleEvidence";
+import { constructionStageRelationshipEvidence } from "./engine/constructionStageRelationshipEvidence";
+import { constructionStageContractProfiles } from "./engine/constructionStageContractProfiles";
+import { reviewFusedConstructionReference } from "./engine/constructionFusedReferenceEvidence";
+import { reviewPerformedReferenceEvidence } from "./engine/constructionPerformedReferenceEvidence";
+import { reviewConstructionReferenceInventory } from "./engine/constructionReferenceInventory";
+import { reviewKSeriesExample } from "./engine/constructionKSeriesExampleEvidence";
+import { githubBlobUrl } from "./engine/githubSourceLinks";
+
+const GITHUB_SOURCE_REF = __GITHUB_SOURCE_REF__;
 
 type Section = "Overview" | "Documentation" | "Playground" | "Test suite" | "Research & review";
 
@@ -76,6 +112,102 @@ function prettyDate(value: string) {
   return new Date(value).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
 }
 
+type LocalSourceRecord = {
+  name: string;
+  type: string;
+  bytes: number;
+  sha256: string | null;
+  status: "EXTRACTED" | "INVALID" | "UNSUPPORTED" | "TOO-LARGE";
+  textLength: number;
+  lineCount: number;
+  detail: string;
+  preview: string;
+};
+
+function SourceRecoveryWorkbench() {
+  const [records, setRecords] = useState<LocalSourceRecord[]>([]);
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState("Files are processed locally in this browser. Nothing is uploaded.");
+  const maxBytes = 20 * 1024 * 1024;
+
+  async function inspectFiles(fileList: FileList | null) {
+    if (!fileList?.length) return;
+    setBusy(true);
+    setMessage("Reading selected files locally…");
+    const next: LocalSourceRecord[] = [];
+    for (const file of Array.from(fileList)) {
+      const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
+      const supported = ["txt", "md", "json", "csv"].includes(ext);
+      if (!supported) {
+        next.push({ name: file.name, type: ext || "unknown", bytes: file.size, sha256: null, status: "UNSUPPORTED", textLength: 0, lineCount: 0, detail: "Browser intake currently supports TXT, Markdown, JSON and CSV. Use the repository's offline source_intake.py for DOCX, PDF and ZIP archives.", preview: "" });
+        continue;
+      }
+      if (file.size > maxBytes) {
+        next.push({ name: file.name, type: ext, bytes: file.size, sha256: null, status: "TOO-LARGE", textLength: 0, lineCount: 0, detail: "File exceeds the 20 MiB browser intake limit.", preview: "" });
+        continue;
+      }
+      try {
+        const bytes = await file.arrayBuffer();
+        const digest = await crypto.subtle.digest("SHA-256", bytes);
+        const sha256 = Array.from(new Uint8Array(digest), value => value.toString(16).padStart(2, "0")).join("");
+        const content = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+        let detail = "UTF-8 text extracted. Original file remains unchanged.";
+        let status: LocalSourceRecord["status"] = "EXTRACTED";
+        if (ext === "json") {
+          try { JSON.parse(content); detail += " JSON syntax is valid."; }
+          catch (error) { status = "INVALID"; detail = "JSON syntax check failed: " + (error instanceof Error ? error.message : "invalid JSON"); }
+        }
+        if (ext === "csv") detail += " Row count is a physical-line estimate; quoted multiline CSV records are not parsed.";
+        next.push({ name: file.name, type: ext, bytes: file.size, sha256, status, textLength: content.length, lineCount: content.length ? content.split(/\r\n|\n|\r/).length : 0, detail, preview: content.slice(0, 700) });
+      } catch (error) {
+        next.push({ name: file.name, type: ext, bytes: file.size, sha256: null, status: "INVALID", textLength: 0, lineCount: 0, detail: error instanceof Error ? error.message : "Unable to decode file as UTF-8.", preview: "" });
+      }
+    }
+    setRecords(current => [...next, ...current]);
+    setMessage("Inspection complete. This is an intake record, not source approval or canon promotion.");
+    setBusy(false);
+  }
+
+  function downloadManifest() {
+    const payload = {
+      schema: "anime-source-intake-manifest-v1",
+      generatedAt: new Date().toISOString(),
+      execution: "browser-local",
+      upload: false,
+      records
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = "anime-source-intake-manifest.json";
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }
+
+  return <section className="audit-item source-recovery-workbench">
+    <div className="audit-item-top"><code>LOCAL SOURCE INTAKE · MVP</code><span className="audit-readiness audit-limited">READ-ONLY</span></div>
+    <h2>Source Recovery Studio</h2>
+    <p>Select local TXT, Markdown, JSON or CSV files to create a provenance record with exact byte size, SHA-256, extraction status and a bounded text preview. Files are not sent to a server.</p>
+    <label htmlFor="source-recovery-files"><strong>Select source files</strong></label>
+    <input id="source-recovery-files" type="file" multiple accept=".txt,.md,.json,.csv,text/plain,text/markdown,application/json,text/csv" disabled={busy} onChange={event => { void inspectFiles(event.target.files); event.currentTarget.value = ""; }} />
+    <p role="status" aria-live="polite">{message}</p>
+    {records.length > 0 && <>
+      <div className="test-case-meta"><span>{records.length} intake records</span><span>{records.filter(record => record.status === "EXTRACTED").length} extracted</span><span>{records.filter(record => record.status !== "EXTRACTED").length} require attention</span></div>
+      <div className="source-intake-records">{records.map((record, index) => <details key={record.name + record.sha256 + index}>
+        <summary><strong>{record.name}</strong> · {record.status} · {record.bytes.toLocaleString()} bytes</summary>
+        <p>{record.detail}</p>
+        <p><strong>Type:</strong> {record.type} · <strong>Characters:</strong> {record.textLength.toLocaleString()} · <strong>Lines:</strong> {record.lineCount.toLocaleString()}</p>
+        <p><strong>SHA-256:</strong> <code>{record.sha256 ?? "not computed"}</code></p>
+        {record.preview && <pre>{record.preview}</pre>}
+      </details>)}</div>
+      <button type="button" className="secondary-button" onClick={downloadManifest}>Download intake manifest (JSON)</button>
+      <button type="button" className="secondary-button" onClick={() => { setRecords([]); setMessage("Intake list cleared. No source files were modified."); }}>Clear intake list</button>
+    </>}
+    <p className="fixture-browser-caveat">DOCX, PDF and ZIP are deliberately not decoded by this browser-only MVP. Use <code>python tools/source_intake.py</code> for the offline repository workflow. Hashes identify bytes; they do not prove authorship, completeness or canon status.</p>
+  </section>;
+}
+
 function App() {
   const [section, setSection] = useState<Section>("Overview");
   const [query, setQuery] = useState("");
@@ -105,6 +237,7 @@ function App() {
   const [selectedValidationGateId, setSelectedValidationGateId] = useState("CON12-01");
   const [selectedInvocationStageId, setSelectedInvocationStageId] = useState("INV15-01");
   const [runtimePreviewScenario, setRuntimePreviewScenario] = useState<RuntimePreviewScenario>("READY-SAMPLE");
+  const [resourceConservationScenario, setResourceConservationScenario] = useState<ResourceConservationPreviewScenario>("BALANCED");
   const constructionStageLabels: { stage: ConstructionStage; label: string }[] = [
     { stage: "reference", label: "Reference" },
     { stage: "spatial-role-vector", label: "Spatial role / vector" },
@@ -125,15 +258,31 @@ function App() {
   });
   const [constructionReferenceToken, setConstructionReferenceToken] = useState<ConstructionReferenceToken>("MI");
   const [constructionReferenceId, setConstructionReferenceId] = useState("");
+  const [constructionKSeriesInput, setConstructionKSeriesInput] = useState("ken");
+  const constructionKSeriesReview = useMemo(() => reviewKSeriesExample(constructionKSeriesInput), [constructionKSeriesInput]);
+  const [constructionFusedReferenceInput, setConstructionFusedReferenceInput] = useState("mel");
+  const constructionFusedReferenceReview = useMemo(() => reviewFusedConstructionReference(constructionFusedReferenceInput), [constructionFusedReferenceInput]);
+  const [constructionPerformedReferenceInput, setConstructionPerformedReferenceInput] = useState("re");
+  const constructionPerformedReferenceReview = useMemo(() => reviewPerformedReferenceEvidence(constructionPerformedReferenceInput), [constructionPerformedReferenceInput]);
+  const [constructionReferenceInventoryInput, setConstructionReferenceInventoryInput] = useState("MI");
+  const constructionReferenceInventoryReview = useMemo(() => reviewConstructionReferenceInventory(constructionReferenceInventoryInput), [constructionReferenceInventoryInput]);
   const [constructionFootInput, setConstructionFootInput] = useState("pa");
   const constructionFootReview = useMemo(() => reviewConstructionFootShape(constructionFootInput.trim()), [constructionFootInput]);
+  const constructionFootParadigmCandidate = useMemo(() => reviewConstructionFootParadigmCandidate(constructionFootInput), [constructionFootInput]);
+  const constructionFootCompositionReview = useMemo(() => reviewConstructionFootComposition(constructionFootInput.trim()), [constructionFootInput]);
+  const constructionFootMorphologyReview = useMemo(() => reviewConstructionFootMorphology(constructionFootInput), [constructionFootInput]);
   const [constructionCouplingInput, setConstructionCouplingInput] = useState("ha");
   const constructionCouplingReview = useMemo(() => reviewConstructionCoupling(constructionCouplingInput), [constructionCouplingInput]);
   const [constructionMacroInput, setConstructionMacroInput] = useState("TRAK");
+  const [constructionFootSourceReview, setConstructionFootSourceReview] = useState(() => reviewConstructionFootSourceForm("kan"));
   const constructionMacroReview = useMemo(() => reviewConstructionMacro(constructionMacroInput), [constructionMacroInput]);
   const constructionReference = useMemo(
     () => bindConstructionReference(constructionReferenceToken, constructionReferenceId),
     [constructionReferenceToken, constructionReferenceId]
+  );
+  const constructionBoundaryReview = useMemo(
+    () => reviewConstructionReferenceBoundary(constructionReference.current, { type: "PHRASE-BOUNDARY", marker: "·" }),
+    [constructionReference]
   );
   const constructionRecord: ConstructionRecord = {
     id: "playground-construction-record",
@@ -151,6 +300,62 @@ function App() {
   const [contractResourceNotes, setContractResourceNotes] = useState("");
   const [contractAuthorityReference, setContractAuthorityReference] = useState("");
   const [contractConsentRequirement, setContractConsentRequirement] = useState("unresolved");
+  const [obligationInput, setObligationInput] = useState(() => JSON.stringify({
+    profile: "INCANTATION-OBLIGATIONS-1.0",
+    obligations: {
+      "OPERATION": { applicability: "REQUIRED", resolution: "UNRESOLVED" },
+      "TARGET-REFERENCE": { applicability: "REQUIRED", resolution: "UNRESOLVED" },
+      "MECHANISM-COUPLING": { applicability: "UNRESOLVED", resolution: "UNRESOLVED" },
+      "SPATIAL-ROLE": { applicability: "UNRESOLVED", resolution: "UNRESOLVED" },
+      "CONSTRAINTS": { applicability: "UNRESOLVED", resolution: "UNRESOLVED" },
+      "RESOURCE-FEASIBILITY": { applicability: "UNRESOLVED", resolution: "UNRESOLVED" },
+      "OUTCOME": { applicability: "REQUIRED", resolution: "UNRESOLVED" }
+    }
+  }, null, 2));
+  const [obligationReview, setObligationReview] = useState<IncantationObligationReview | null>(null);
+  const [obligationReviewError, setObligationReviewError] = useState<string | null>(null);
+  const [argumentInput, setArgumentInput] = useState(() => JSON.stringify({
+    profile: "INCANTATION-ARGUMENTS-1.0", operation: "kren",
+    references: [{ label: "T", referenceClass: "TARGET", scope: "vom", resolution: "UNRESOLVED", lifetime: "SPELL", bindingState: "PROPOSED" }],
+    targetLabel: "T",
+    desiredState: { type: "Record<State>", payload: { example: "REPLACE-WITH-TYPED-STATE" }, provenance: { status: "UNRESOLVED" }, validity: { status: "UNRESOLVED" }, uncertainty: { status: "UNRESOLVED" } },
+    spatialRoles: [], constraints: []
+  }, null, 2));
+  const [argumentReview, setArgumentReview] = useState<IncantationArgumentReview | null>(null);
+  const [argumentReviewError, setArgumentReviewError] = useState<string | null>(null);
+  const [relationshipInput, setRelationshipInput] = useState(() => JSON.stringify({
+    profile: "INCANTATION-RELATIONSHIPS-1.0",
+    nodes: [
+      { id: "goal-1", type: "GOAL", resolution: "DECLARED" },
+      { id: "transition-1", type: "TRANSITION", resolution: "DECLARED" },
+      { id: "mechanism-1", type: "MECHANISM", resolution: "UNRESOLVED" }
+    ],
+    edges: [
+      { id: "edge-1", type: "GOAL-PROPOSES-TRANSITION", from: "goal-1", to: "transition-1" },
+      { id: "edge-2", type: "MECHANISM-SUPPORTS-TRANSITION", from: "mechanism-1", to: "transition-1" }
+    ]
+  }, null, 2));
+  const [relationshipReview, setRelationshipReview] = useState<IncantationRelationshipReview | null>(null);
+  const [relationshipReviewError, setRelationshipReviewError] = useState<string | null>(null);
+  const [integratedInput, setIntegratedInput] = useState(() => JSON.stringify({"profile":"INCANTATION-INTEGRATED-REVIEW-1.0","operations":[{"id":"operation-1","arguments":{"profile":"INCANTATION-ARGUMENTS-1.0","operation":"kren","references":[{"label":"TARGET-1","referenceClass":"TARGET","scope":"vom","resolution":"UNRESOLVED","lifetime":"SPELL","bindingState":"PROPOSED"}],"targetLabel":"TARGET-1","desiredState":{"type":"Record<State>","payload":{"example":"REPLACE-WITH-DECLARED-STATE"},"provenance":{"status":"UNRESOLVED"},"validity":{"status":"UNRESOLVED"},"uncertainty":{"status":"UNRESOLVED"}},"spatialRoles":[],"constraints":[]}}],"relationships":{"profile":"INCANTATION-RELATIONSHIPS-1.0","nodes":[{"id":"operation-1","type":"OPERATION","resolution":"DECLARED"},{"id":"goal-1","type":"GOAL","resolution":"UNRESOLVED"}],"edges":[]},"conditions":{"profile":"INCANTATION-CONDITIONS-1.0","conditions":[]},"evidence":{"records":[],"policy":{"acceptedClasses":["OBSERVED","VERIFIED"],"maxAgeSeconds":3600},"asOf":"2026-11-14T10:00:00Z"},"temporalContracts":[],"postconditions":[],"lifecycleRecords":[],"recoveryBranches":[]}, null, 2));
+  const [integratedReview, setIntegratedReview] = useState<IntegratedReview | null>(null);
+  const [integratedReviewError, setIntegratedReviewError] = useState<string | null>(null);
+  const [readableReport, setReadableReport] = useState<ReadableIncantationReport | null>(null);
+  const [compressionInput, setCompressionInput] = useState("mel · po da za shi to za ma · kan ken · he ha · sa shi za se · kas");
+  const [compressionAliases, setCompressionAliases] = useState('[{"fullForm":"kan","shortForm":"~K"},{"fullForm":"za","shortForm":"~Z"}]');
+  const [compressionResult, setCompressionResult] = useState<ArcaneTextCompressionResult | null>(null);
+  const [compressionError, setCompressionError] = useState<string | null>(null);
+  const runArcaneCompression = () => {
+    try {
+      const aliases: unknown = JSON.parse(compressionAliases);
+      if (!Array.isArray(aliases)) throw new Error("Alias dictionary must be a JSON array.");
+      setCompressionResult(compressArcaneText(compressionInput, aliases as {fullForm:string;shortForm:string}[], true));
+      setCompressionError(null);
+    } catch (error) {
+      setCompressionResult(null);
+      setCompressionError(error instanceof Error ? error.message : "The alias dictionary is not valid JSON.");
+    }
+  };
   const [mobileNav, setMobileNav] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState(docs[0].title);
   const [testQuery, setTestQuery] = useState("");
@@ -291,6 +496,7 @@ function App() {
   const selectedValidationGate = useMemo(() => validationGateSequence.find((stage) => stage.id === selectedValidationGateId) ?? validationGateSequence[0], [selectedValidationGateId]);
   const selectedInvocationStage = useMemo(() => invocationLifecycleSequence.find((stage) => stage.id === selectedInvocationStageId) ?? invocationLifecycleSequence[0], [selectedInvocationStageId]);
   const runtimePreview = useMemo(() => evaluateIncantationRuntimePreview(runtimePreviewScenario), [runtimePreviewScenario]);
+  const resourceConservationPreview = useMemo(() => evaluateResourceConservationPreview(resourceConservationScenario), [resourceConservationScenario]);
   const contractWorksheet = useMemo(() => ({
     recordType: "ARCANE-INCANTATION-CONTRACT-WORKSHEET",
     specificationLayer: "Modern incantation design v1.0–v2.0",
@@ -315,6 +521,52 @@ function App() {
       "Validation, mechanism feasibility, resources, authority, consent and execution are independent gates."
     ]
   }), [contractOperation, contractTarget, contractDesiredOutcome, contractMechanism, contractSpatialRole, contractPreconditions, contractConstraints, contractResourceNotes, contractAuthorityReference, contractConsentRequirement]);
+
+  const runObligationReview = () => {
+    try {
+      const input: unknown = JSON.parse(obligationInput);
+      setObligationReview(reviewIncantationObligations(input));
+      setObligationReviewError(null);
+    } catch (error) {
+      setObligationReview(null);
+      setObligationReviewError(error instanceof Error ? error.message : "The obligation ledger is not valid JSON.");
+    }
+  };
+
+  const runRelationshipReview = () => {
+    try {
+      const input: unknown = JSON.parse(relationshipInput);
+      setRelationshipReview(reviewIncantationRelationships(input));
+      setRelationshipReviewError(null);
+    } catch (error) {
+      setRelationshipReview(null);
+      setRelationshipReviewError(error instanceof Error ? error.message : "The relationship graph is not valid JSON.");
+    }
+  };
+
+  const runArgumentReview = () => {
+    try {
+      const input: unknown = JSON.parse(argumentInput);
+      setArgumentReview(reviewIncantationArguments(input));
+      setArgumentReviewError(null);
+    } catch (error) {
+      setArgumentReview(null);
+      setArgumentReviewError(error instanceof Error ? error.message : "The argument record is not valid JSON.");
+    }
+  };
+
+  const runIntegratedReview = () => {
+    try {
+      const input: unknown = JSON.parse(integratedInput);
+      setIntegratedReview(reviewIntegratedIncantation(input));
+      setReadableReport(readStructuredIncantation(input));
+      setIntegratedReviewError(null);
+    } catch (error) {
+      setIntegratedReview(null);
+      setReadableReport(null);
+      setIntegratedReviewError(error instanceof Error ? error.message : "The integrated contract is not valid JSON.");
+    }
+  };
 
   const changeSection = (next: Section) => {
     setSection(next);
@@ -388,7 +640,7 @@ function App() {
             <p className="next-task-summary">The read-only invocation diagnostics are now connected in the Playground. The next Incantations milestone is to make the boundary between a formal expression, a complete construction and a feasible casting explicit. A valid expression must never be mistaken for a complete or physically realisable spell.</p>
             <div className="next-task-grid gate-architecture-grid">
               <div><span>GATE L · LINGUISTIC VALIDITY</span><p>Check versioned token provenance, approved signatures and arity, typed arguments, grouping and unique reference resolution. Current readiness: partial; unresolved signatures remain blocked rather than guessed.</p></div>
-              <div><span>GATE C · CONSTRUCTION COMPLETENESS</span><p>Check target and initial state, state transition, coupling participants and pathway, mechanism, spatial scope, constraints, resources, termination and failure behaviour. Current readiness: incomplete; the expression-to-construction bridge still needs source recovery.</p></div>
+              <div><span>GATE C · CONSTRUCTION COMPLETENESS</span><p>Check target and initial state, state transition, coupling participants and pathway, mechanism, spatial scope, constraints, resources, termination and failure behaviour. The Phase 4 Expression-to-Construction compile bridge is a separate, still-unrecovered contract; the panel below records only provisional AST-to-Incantation traceability.</p></div>
               <div><span>GATE P · CASTING FEASIBILITY</span><p>Assess resource demand, mana propagation, timing, coherence, target susceptibility, caster limits and stability against an explicit model. Current readiness: not assessed; wording alone cannot earn a feasibility pass.</p></div>
             </div>
             <div className="next-task-grid gate-architecture-support">
@@ -398,7 +650,7 @@ function App() {
             <div className="next-task-actions">
               <button className="secondary-button" onClick={() => changeSection("Playground")}>Open invocation diagnostics <span aria-hidden="true">→</span></button>
               <button className="secondary-button" onClick={() => changeSection("Documentation")}>Open Incantations canon <span aria-hidden="true">→</span></button>
-              <a className="secondary-button" href="https://github.com/sixtoast/Anime-language-/blob/main/docs/research/phase7w-incantation-readiness-and-construction-gate.md" target="_blank" rel="noreferrer">Open readiness and construction gate <span aria-hidden="true">↗</span></a>
+              <a className="secondary-button" href={githubBlobUrl("docs/research/phase7w-incantation-readiness-and-construction-gate.md", GITHUB_SOURCE_REF)} target="_blank" rel="noreferrer">Open readiness and construction gate <span aria-hidden="true">↗</span></a>
             </div>
             <p className="next-task-caveat">Evidence basis: Phase 7W readiness assessment and Incantations v1.0–v2.1. This is a development priority, not a new canon rule. Unknown signatures, construction mappings and physical parameters remain explicitly unresolved.</p>
           </section>
@@ -427,7 +679,7 @@ function App() {
               <div><span className="source-gap-marker" /><p><strong>Duplicates require interpretation.</strong> Byte-identical files are recorded for traceability; duplicates are not automatically deleted or treated as semantically redundant.</p></div>
             </div>
             <div className="source-recovery-actions">
-              <a className="secondary-button" href="https://github.com/sixtoast/Anime-language-/blob/main/sources/SOURCE-INVENTORY.md" target="_blank" rel="noreferrer">Open full source inventory <span aria-hidden="true">↗</span></a>
+              <a className="secondary-button" href={githubBlobUrl("sources/SOURCE-INVENTORY.md", GITHUB_SOURCE_REF)} target="_blank" rel="noreferrer">Open full source inventory <span aria-hidden="true">↗</span></a>
               <button className="secondary-button" onClick={() => changeSection("Documentation")}>Browse source catalogue <span>→</span></button>
               <button className="secondary-button" onClick={() => changeSection("Research & review")}>Review open evidence gaps <span>→</span></button>
             </div>
@@ -441,7 +693,7 @@ function App() {
           <div className="eyebrow"><span className="eyebrow-line"/> THE LANGUAGE REFERENCE</div><h1 className="page-title">Documentation<span>.</span></h1><p className="page-intro">A source-aware index for the recovered canonical specifications, provisional syntax audit, and continuity register. Source status, deployed application status, and automated test status are tracked separately.</p>
           <div className="search-bar"><Search size={18}/><input id="global-search" aria-label="Search documentation catalogue" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search titles, topics, source type, status…"/><kbd>SEARCH</kbd></div>
           <div className="doc-filter-bar"><label>Source status<select aria-label="Filter documentation by source status" value={docStatus} onChange={(e) => setDocStatus(e.target.value as Status | "All")}><option value="All">All statuses</option>{(["Canonical","Provisional","Open question","Deprecated"] as Status[]).map((status) => <option key={status} value={status}>{status}</option>)}</select></label><label>Provenance type<select aria-label="Filter documentation by provenance type" value={docSourceKind} onChange={(e) => setDocSourceKind(e.target.value)}><option value="All">All source types</option>{sourceKinds.map((kind) => <option key={kind} value={kind}>{kind}</option>)}</select></label><span className="doc-result-count" role="status">{filteredDocs.length} of {docs.length} sources</span><button className="secondary-button" onClick={() => { setQuery(""); setDocStatus("All"); setDocSourceKind("All"); }} disabled={!query && docStatus === "All" && docSourceKind === "All"}>Reset filters</button></div>
-          <div className="doc-layout"><div className="doc-list" aria-label="Documentation catalogue entries">{filteredDocs.map((doc) => <button key={doc.title} aria-pressed={selectedDocument.title === doc.title} className={"doc-row " + (selectedDocument.title === doc.title ? "doc-selected" : "")} onClick={() => setSelectedDoc(doc.title)}><div className="doc-icon"><FileText size={18}/></div><div className="doc-row-main"><strong>{doc.title}</strong><span>{doc.category}</span></div><StatusPill status={doc.status}/></button>)}{filteredDocs.length === 0 && <div className="empty-state" role="status">No sources match these filters. Try another status, source type, or search term.</div>}</div><div className="doc-detail">{(() => { const doc = selectedDocument; return <><div className="detail-top"><span className="detail-kicker">REFERENCE ENTRY</span><StatusPill status={doc.status}/></div><h2>{doc.title}</h2><p>{doc.description}</p><div className="detail-divider"/><div className="detail-meta"><span>Category</span><strong>{doc.category}</strong></div><div className="detail-meta"><span>Source citation</span><strong>{doc.sourcePath ? "Repository document" : "Not yet attached"}</strong></div><div className="detail-meta"><span>Source type</span><strong>{doc.sourceKind ?? "Not classified"}</strong></div><div className="detail-meta"><span>Provenance note</span><strong>{doc.sourceNote ?? "Source type needs review."}</strong></div><div className="detail-meta"><span>Implementation</span><strong>Not yet verified</strong></div>{doc.sourcePath && <a className="secondary-button source-link" href={"https://github.com/sixtoast/Anime-language-/blob/main/" + doc.sourcePath} target="_blank" rel="noreferrer">Open source document: {doc.title} <span aria-hidden="true">↗</span></a>}<div className="detail-callout"><CircleHelp size={17}/><p>Source status and implementation status are separate. Provisional audit notation is not silently promoted to canonical spoken grammar, and no test is labelled passed without execution evidence.</p></div><button className="secondary-button" onClick={() => changeSection("Research & review")}>Review source status <span>→</span></button></>; })()}</div></div>
+          <div className="doc-layout"><div className="doc-list" aria-label="Documentation catalogue entries">{filteredDocs.map((doc) => <button key={doc.title} aria-pressed={selectedDocument.title === doc.title} className={"doc-row " + (selectedDocument.title === doc.title ? "doc-selected" : "")} onClick={() => setSelectedDoc(doc.title)}><div className="doc-icon"><FileText size={18}/></div><div className="doc-row-main"><strong>{doc.title}</strong><span>{doc.category}</span></div><StatusPill status={doc.status}/></button>)}{filteredDocs.length === 0 && <div className="empty-state" role="status">No sources match these filters. Try another status, source type, or search term.</div>}</div><div className="doc-detail">{(() => { const doc = selectedDocument; return <><div className="detail-top"><span className="detail-kicker">REFERENCE ENTRY</span><StatusPill status={doc.status}/></div><h2>{doc.title}</h2><p>{doc.description}</p><div className="detail-divider"/><div className="detail-meta"><span>Category</span><strong>{doc.category}</strong></div><div className="detail-meta"><span>Source citation</span><strong>{doc.sourcePath ? "Repository document" : "Not yet attached"}</strong></div><div className="detail-meta"><span>Source type</span><strong>{doc.sourceKind ?? "Not classified"}</strong></div><div className="detail-meta"><span>Provenance note</span><strong>{doc.sourceNote ?? "Source type needs review."}</strong></div><div className="detail-meta"><span>Implementation</span><strong>Not yet verified</strong></div>{doc.sourcePath && <a className="secondary-button source-link" href={githubBlobUrl(doc.sourcePath, GITHUB_SOURCE_REF)} target="_blank" rel="noreferrer">Open source document: {doc.title} <span aria-hidden="true">↗</span></a>}<div className="detail-callout"><CircleHelp size={17}/><p>Source status and implementation status are separate. Provisional audit notation is not silently promoted to canonical spoken grammar, and no test is labelled passed without execution evidence.</p></div><button className="secondary-button" onClick={() => changeSection("Research & review")}>Review source status <span>→</span></button></>; })()}</div></div>
         </section>}
 
         {section === "Playground" && <section className="page-content">
@@ -466,9 +718,66 @@ function App() {
               <p className="construction-reference-status"><strong>{constructionReference.status}</strong>{constructionReference.current ? " · " + constructionReference.current.scope + " · persists until replaced" : " · " + constructionReference.issue}</p>
               <p className="fixture-browser-caveat">{constructionReference.limitation}</p>
             </div>
+            <div className="construction-kseries-review">
+              <div className="detail-kicker">PHRASE BOUNDARY × REFERENCE CONTEXT · PHASE 8BI</div>
+              <p>The recovered hand-flame fixture uses a middle dot between phrases, while the reference contract persists until replaced. No source establishes that the punctuation itself replaces a reference or resets its scope.</p>
+              <div className="construction-coupling-result" role="status" aria-live="polite">
+                <strong>{constructionBoundaryReview.boundaryEffect.replaceAll("-", " ")}</strong>
+                <p>{constructionBoundaryReview.note}</p>
+                <p><strong>Current binding inspection:</strong> {constructionBoundaryReview.context.status}{constructionBoundaryReview.context.current ? " · " + constructionBoundaryReview.context.current.token + " → " + constructionBoundaryReview.context.current.referenceId : ""}</p>
+                <p className="fixture-browser-caveat">Scope reset inference: prohibited · new-reference inference: prohibited · canon effect: none.</p>
+              </div>
+            </div>
+            <div className="construction-kseries-review">
+              <div className="detail-kicker">KAN · KEN · KAS / WORKED-EXAMPLE EVIDENCE</div>
+              <p>These three forms occur in the hand-flame evidence, but their rules are not equally recovered. Inspect each independently; their appearance together does not establish a pair rule.</p>
+              <label htmlFor="construction-kseries-input">K-series form</label>
+              <input id="construction-kseries-input" value={constructionKSeriesInput} onChange={event => setConstructionKSeriesInput(event.target.value)} placeholder="KAN, KEN or KAS" spellCheck={false} />
+              <div className="construction-coupling-result" role="status" aria-live="polite">
+                <strong>{constructionKSeriesReview.status.replaceAll("-", " ")}</strong>
+                {constructionKSeriesReview.entry && <><p>{constructionKSeriesReview.entry.evidence}</p><p><strong>Macro association:</strong> {constructionKSeriesReview.entry.macroAssociation}</p><p className="fixture-browser-caveat">{constructionKSeriesReview.entry.unresolved}</p></>}
+                <p>{constructionKSeriesReview.message}</p>
+              </div>
+            </div>
+            <div className="construction-fused-reference-review">
+              <div className="detail-kicker">PERFORMED FUSED REFERENCE · EXAMPLE EVIDENCE</div>
+              <p>The hand-flame example records one fused form. Inspect it separately from the formal reference-context binder above; this lookup never creates or changes a binding.</p>
+              <label htmlFor="construction-fused-reference-input">Performed form</label>
+              <input id="construction-fused-reference-input" value={constructionFusedReferenceInput} onChange={event => setConstructionFusedReferenceInput(event.target.value)} placeholder="e.g. mel" spellCheck={false} />
+              <div className="construction-coupling-result" role="status" aria-live="polite">
+                <strong>{constructionFusedReferenceReview.status.replaceAll("-", " ")}</strong>
+                {constructionFusedReferenceReview.entry && <div className="construction-coupling-gloss"><span>{constructionFusedReferenceReview.entry.form}</span><span>{constructionFusedReferenceReview.entry.decomposition}</span><span>{constructionFusedReferenceReview.entry.exampleReferent}</span></div>}
+                <p>{constructionFusedReferenceReview.message}</p>
+                {constructionFusedReferenceReview.entry && <><p><strong>Scope association:</strong> {constructionFusedReferenceReview.entry.associatedFormalScope}</p><p className="fixture-browser-caveat">{constructionFusedReferenceReview.entry.limitation}</p></>}
+              </div>
+            </div>
+            <div className="construction-fused-reference-review">
+              <div className="detail-kicker">PERFORMED REFERENCE FORMS · PHASE 4 CONSOLIDATION</div>
+              <p>Inspect the recovered readings for <code>re</code> and <code>ra</code>. These are slot-sensitive Performed reference forms with competing Shared Arcana readings; this evidence lookup never creates or changes a reference binding.</p>
+              <label htmlFor="construction-performed-reference-input">Performed reference form</label>
+              <input id="construction-performed-reference-input" value={constructionPerformedReferenceInput} onChange={event => setConstructionPerformedReferenceInput(event.target.value)} placeholder="e.g. re or ra" spellCheck={false} />
+              <div className="construction-coupling-result" role="status" aria-live="polite">
+                <strong>{constructionPerformedReferenceReview.status.replaceAll("-", " ")}</strong>
+                {constructionPerformedReferenceReview.entry && <div className="construction-coupling-gloss"><span>{constructionPerformedReferenceReview.entry.form}</span><span>{constructionPerformedReferenceReview.entry.performedReading}</span><span>{constructionPerformedReferenceReview.entry.sharedCollision}</span></div>}
+                <p>{constructionPerformedReferenceReview.message}</p>
+                {constructionPerformedReferenceReview.entry && <><p><strong>Evidence:</strong> {constructionPerformedReferenceReview.entry.sourceBasis}</p><p className="fixture-browser-caveat">{constructionPerformedReferenceReview.entry.limitation}</p></>}
+              </div>
+            </div>
+            <div className="construction-fused-reference-review">
+              <div className="detail-kicker">CASE-SENSITIVE REFERENCE INVENTORY · EVIDENCE ONLY</div>
+              <p>Compare formal reference tokens with the separately recorded Performed fused-reference inventory. Exact capitalisation matters: formal <code>MI</code> and Performed <code>mi</code> are not interchangeable. This inspector never creates a binding or parses a clause.</p>
+              <label htmlFor="construction-reference-inventory-input">Exact reference spelling</label>
+              <input id="construction-reference-inventory-input" value={constructionReferenceInventoryInput} onChange={event => setConstructionReferenceInventoryInput(event.target.value)} placeholder="e.g. MI, mi, re or mel" spellCheck={false} />
+              <div className="construction-coupling-result" role="status" aria-live="polite">
+                <strong>{constructionReferenceInventoryReview.status.replaceAll("-", " ")}</strong>
+                {constructionReferenceInventoryReview.entry && <div className="construction-coupling-gloss"><span>{constructionReferenceInventoryReview.entry.form}</span><span>{constructionReferenceInventoryReview.entry.kind}</span><span>{constructionReferenceInventoryReview.entry.scope ?? "scope unresolved"}</span></div>}
+                <p>{constructionReferenceInventoryReview.message}</p>
+                {constructionReferenceInventoryReview.entry && <><p>{constructionReferenceInventoryReview.entry.description}</p><p><strong>Persistence:</strong> {constructionReferenceInventoryReview.entry.persistence ?? "not recovered"}{constructionReferenceInventoryReview.entry.collision ? <> · <strong>Collision:</strong> {constructionReferenceInventoryReview.entry.collision}</> : null}</p><p><strong>Evidence:</strong> {constructionReferenceInventoryReview.entry.sourceBasis}</p><p className="fixture-browser-caveat">{constructionReferenceInventoryReview.entry.limitation}</p></>}
+              </div>
+            </div>
             <div className="construction-foot-review">
               <div className="detail-kicker">RECOVERED FOOT SHAPE · STRUCTURAL CHECK ONLY</div>
-              <p>Check a single recovered Construction Foot form against the recovered canonical CV frame form and CVC Foot pattern. A CV result recognises only a frame form, not a complete Foot; a supplied coda remains unresolved until its inventory is recovered.</p>
+              <p>Check the six recorded CV frame forms and the source-documented CVC outline. This structural check is separate from the source-aware morphology review below: a matching shape is not proof of a lexical Foot or a complete macro contract.</p>
               <label htmlFor="construction-foot-input">Construction Foot</label>
               <input id="construction-foot-input" value={constructionFootInput} onChange={event => setConstructionFootInput(event.target.value)} placeholder="e.g. pa or paz" spellCheck={false} />
               <div className="construction-foot-result" role="status" aria-live="polite">
@@ -481,7 +790,89 @@ function App() {
                 <ul>{constructionFootReview.notes.map((note, index) => <li key={index}>{note}</li>)}</ul>
               </div>
               <p className="fixture-browser-caveat">{constructionFootReview.limitation}</p>
+              <div className="construction-foot-composition">
+                <div className="detail-kicker">PHASE 8CY-P · SOURCE-AWARE FOOT MORPHOLOGY REVIEW</div>
+                <p>This reviewer applies the Phase 4 frame, provisional parameter-vowel and relation-coda evidence to the same input. It distinguishes a recorded shape from a lexical Foot and keeps the primary-source conflicts visible.</p>
+                <div className="construction-foot-parts">
+                  <span><small>Review status</small><strong>{constructionFootMorphologyReview.status.replaceAll("-", " ")}</strong></span>
+                  <span><small>Frame group</small><strong>{constructionFootMorphologyReview.macroAssociation}</strong></span>
+                  <span><small>Parameter family</small><strong>{constructionFootMorphologyReview.parameterFamily ?? "—"}</strong></span>
+                  <span><small>Final coda</small><strong>{constructionFootMorphologyReview.relationCoda ?? "—"}</strong></span>
+                  <span><small>Coda evidence class</small><strong>{constructionFootMorphologyReview.codaEvidenceClass.replaceAll("-", " ")}</strong></span>
+                  <span><small>Coda meaning</small><strong>{constructionFootMorphologyReview.codaMeaning.replaceAll("-", " ")}</strong></span>
+                  <span><small>Lexical validity</small><strong>{constructionFootMorphologyReview.lexicalFootValidity.replaceAll("-", " ")}</strong></span>
+                </div>
+                <p>{constructionFootMorphologyReview.explanation}</p>
+                <p className="fixture-browser-caveat"><strong>Mandatory coda:</strong> {constructionFootMorphologyReview.codaRequirement.replaceAll("-", " ")} · <strong>Executable:</strong> No · <strong>Canon effect:</strong> None.</p>
+                <p className="fixture-browser-caveat"><strong>Primary-source concordance:</strong> {constructionFootParadigmReconciliation.status.replaceAll("-", " ")}. Phase 4 §3.1 Table 2 and §3.2 Table 3 explicitly support five relation codas. The earlier Phase 8CI zero-entry closure is superseded by this direct transcription review. The separate CVC-versus-optional-coda conflict with Phase 5.16 C-02 remains open.</p>
+                <div className="construction-foot-composition">
+                  <div className="detail-kicker">PHASE 8CY-R/T · SOURCE-BOUNDED DESIGN-SPACE REVIEW</div>
+                  <div className="construction-foot-parts">
+                    <span><small>Frames</small><strong>{constructionFootParadigmSummary.frameCount}</strong></span>
+                    <span><small>Parameter vowels</small><strong>{constructionFootParadigmSummary.parameterVowelCount}</strong></span>
+                    <span><small>Relation codas</small><strong>{constructionFootParadigmSummary.relationCodaCount}</strong></span>
+                    <span><small>Candidate space</small><strong>{constructionFootParadigmSummary.candidateSpaceSize}</strong></span>
+                  </div>
+                  <p>The 180 records enumerate the source-listed six frames × six provisional parameter vowels × five relation codas. They are design-space candidates, not 180 attested lexical Feet. Individual meanings and productive licensing remain unresolved. Six canonical CV frame forms are explicitly recorded; the other 30 frame–vowel pairs remain unresolved.</p>
+                  <p><strong>Frame groups:</strong> TRAK p/t/k (described); KREN b/d/g (proposed; owner confirmation required). <strong>Relation codas:</strong> m/n = FREM open-loop; ng = FREM feedback; s/sh = SHREN release. <strong>Phonotactic-only codas:</strong> p/t/k/l/r.</p>
+                  <p><strong>Candidate lookup:</strong> {constructionFootParadigmCandidate?.form ?? "No matching design-space candidate"} — evidence-space match only, not lexical validation. <strong>Coda status:</strong> {constructionFootParadigmReconciliation.codaInventoryStatus.replaceAll("-", " ")}. <strong>Optionality:</strong> {constructionFootParadigmReconciliation.codaRequirement.status.replaceAll("-", " ")}.</p>
+                  <p className="fixture-browser-caveat">No candidate is lexically attested by this matrix. Lookup reports design-space membership only; no Foot is generated, parsed or executed. The five-coda inventory is source-backed, but the 180-item lexical paradigm and optionality context are not established. Canon effect NONE.</p>
+                </div>
+              </div>
+              <div className="construction-foot-composition">
+                <div className="detail-kicker">SOURCE-READING COMPARISON · NO CANON SELECTION</div>
+                <p>The same input is assessed independently against both recovered secondary descriptions. These are competing source readings, not selectable grammar modes; the Phase 4 primary source adds its own CVC statement and the separate mel classification conflict.</p><p className="fixture-browser-caveat"><strong>Source authority:</strong> Phase 5.15 and Phase 5.16 are secondary recovery matrices. The Phase 4 document-body transcription is now available and supports CVC in §3.1, while §10 P4-T10 separately labels mel Foot-shaped; the coda optionality conflict remains open.</p>
+                <div className="construction-foot-parts">
+                  {constructionFootCompositionReview.readings.map(reading => (
+                    <span key={reading.sourceReading}>
+                      <small>{reading.sourceReading === "P5.15-CVC-REQUIRED" ? "Phase 5.15 · CVC required" : "Phase 5.16 C-02 · coda optional"}</small>
+                      <strong>{reading.slotAssessment.replaceAll("-", " ")}</strong>
+                      <small>{reading.framePrefix.replaceAll("-", " ")} · {reading.codaEvidence.replaceAll("-", " ")}</small>
+                      {reading.explanation}
+                    </span>
+                  ))}
+                </div>
+                <p className="fixture-browser-caveat">{constructionFootCompositionReview.limitation}</p>
+              </div>
             </div>
+              <div className="construction-frame-terminology">
+                <div className="detail-kicker">TERMINOLOGY DISAMBIGUATION · INDEPENDENT FRAME SYSTEMS</div>
+                <p>“Frame” is used for different concepts in the recovered material. These systems must not be merged:</p>
+                <div className="construction-foot-parts">{constructionFrameTerminology.map(entry => <span key={entry.id}><small>{entry.source}</small><strong>{entry.label}</strong>{entry.description}</span>)}</div>
+                <p className="fixture-browser-caveat">The Phase 5.8/5.9 coordinate-frame model does not supply meanings for the six Construction Foot frame consonants.</p>
+              </div>
+              <div className="construction-foot-inventory">
+                <div className="detail-kicker">RECOVERED FOOT INVENTORY · EVIDENCE-INDEXED</div>
+                <p><strong>Frame consonants</strong> — six structural classes are source-backed; their semantic contrasts remain unresolved.</p>
+                <div className="construction-foot-parts">{constructionFrameInventory.map(entry => <span key={entry.consonant}><small>{entry.canonicalForm} · {entry.status}</small>{entry.consonant}</span>)}</div>
+                <p><strong>Frame-to-macro associations</strong> — pattern-level evidence only, not individual consonant definitions.</p>
+                <div className="construction-foot-parts">{constructionFrameMacroAssociations.map(entry => <span key={entry.macro}><small>{entry.frameSet.join(" · ")} · {entry.evidenceStatus}</small>{entry.macro}<small>{entry.pattern}</small></span>)}</div>
+                <p className="fixture-browser-caveat">TRAK's p/t/k association is described as alter / discrete change. KREN's b/d/g association is explicitly proposed and requires owner confirmation. Neither assigns a distinct meaning to each consonant.</p>
+                <p><strong>Parameter vowels</strong> — family labels are provisional, not executable meanings.</p>
+                <div className="construction-foot-parts">{constructionParameterInventory.map(entry => <span key={entry.vowel}><small>{entry.family} · {entry.status}</small>{entry.vowel}</span>)}</div>
+                <p className="fixture-browser-caveat">{constructionFootEvidenceBoundary.relationCoda}</p>
+                <p className="fixture-browser-caveat"><strong>Structural source discrepancy:</strong> {constructionFootEvidenceBoundary.shapeEvidenceDiscrepancy.primary} {constructionFootEvidenceBoundary.shapeEvidenceDiscrepancy.conflictingSummary} {constructionFootEvidenceBoundary.shapeEvidenceDiscrepancy.treatment}</p>
+                <p className="fixture-browser-caveat">Open gaps: {constructionFootEvidenceBoundary.unresolved.join("; ")}.</p>
+                <div className="construction-foot-morphology-audit">
+                  <div className="detail-kicker">PHASE 8BK · PRODUCTIVE MORPHOLOGY COVERAGE AUDIT</div>
+                  <p>The 6 × 6 frame–vowel comparison is an inventory audit, not a proposed paradigm. Only six CV forms are explicitly documented; the other combinations remain unlicensed or unresolved, not automatically invalid.</p>
+                  <div className="construction-foot-parts">
+                    <span><small>Frame × vowel pairs reviewed</small><strong>{constructionFootMorphologyAudit.frameVowelMatrix.length}</strong></span>
+                    <span><small>Documented canonical CV forms</small><strong>{constructionFootMorphologyAudit.coverage.canonicalCvCount}</strong></span>
+                    <span><small>Other pairs unresolved</small><strong>{constructionFootMorphologyAudit.coverage.unresolvedPairCount}</strong></span>
+                    <span><small>Whole example tokens</small><strong>{constructionFootMorphologyAudit.wholeTokenEvidence.length}</strong></span>
+                  </div>
+                  <div className="construction-foot-parts">{constructionFootMorphologyAudit.frameVowelMatrix.map(item => <span key={item.form}><small>{item.status.replaceAll("-", " ")}</small><strong>{item.form}</strong></span>)}</div>
+                  <p className="fixture-browser-caveat">The observed forms kan, ken and kas remain whole-token examples. Their internal segments are not automatically promoted to independent lexical Feet or productive derivations. The separate Phase 4 relation-coda meanings are recorded below.</p>
+                  <p className="fixture-browser-caveat">The matrix does not resolve whether every complete Foot requires a coda. Phase 5.15 and Phase 5.16 C-02 remain separate source readings.</p>
+                </div>
+                <p><strong>Observed historical CVC-shaped tokens</strong> — whole-token evidence from the complete Phase 5.22 parser source; not a recovered segment-by-segment paradigm.</p>
+                <div className="construction-foot-parts">{constructionFootSourceRecovery.observedWholeTokens.map(entry => <span key={entry.token}><small>{entry.alias}</small>{entry.token}<small>{entry.surfaceShape}</small></span>)}</div>
+                <p className="fixture-browser-caveat">These historical whole tokens do not establish a productive segmentation rule. The source-aware reviewer below checks candidate structure against the independently recovered Phase 4 coda inventory.</p>
+                <label htmlFor="construction-foot-source-input">Construction Foot source form</label>
+                <input id="construction-foot-source-input" defaultValue="kan" onChange={event => setConstructionFootSourceReview(reviewConstructionFootSourceForm(event.target.value))} placeholder="e.g. kan" spellCheck={false} />
+                <div className="construction-coupling-result" role="status" aria-live="polite"><strong>{constructionFootSourceReview.status.replaceAll("-", " ")}</strong><p>{constructionFootSourceReview.message}</p></div>
+              </div>
             <div className="construction-coupling-review">
               <div className="detail-kicker">V2.0 H-SERIES · EVIDENCE LOOKUP ONLY</div>
               <p>The recovered registry records six coupling glosses. This lookup identifies source vocabulary; it does not define argument order, coupling direction, physical mappings or an executable BRAN operation.</p>
@@ -508,6 +899,203 @@ function App() {
                 {constructionMacroReview.entry && <><p><b>Recovered Construction evidence:</b> {constructionMacroReview.entry.recoveredEvidence}</p><p><b>Open contract:</b> {constructionMacroReview.entry.unresolvedContract}</p></>}
               </div>
               <p className="fixture-browser-caveat">Source status is not a completion status. All six forms remain non-executable in this inspector.</p>
+            </div>
+            <div className="construction-relationship-map">
+              <div className="detail-kicker">PHASE 4 §3.3 · RECOVERED STAGE RELATIONSHIPS</div>
+              <p>The source establishes the relative performed order below. These arrows mean <strong>precedes</strong> only; they do not assert that one stage supplies arguments, values or physical outputs to the next.</p>
+              <ol>
+                {constructionStageRelationshipEvidence.precedence.map(edge => <li key={edge.from + "-" + edge.to}>
+                  <strong>{edge.fromLabel}</strong> <span aria-label="precedes">→</span> <strong>{edge.toLabel}</strong>
+                  <small>{edge.evidenceStatus} · interface {edge.interfaceStatus.toLowerCase()}</small>
+                </li>)}
+              </ol>
+              <p className="fixture-browser-caveat">No direct data-flow, mandatory-stage, cardinality, omission, dependency or execution rule is inferred. Each interface requires original v2.0 evidence or an explicitly approved replacement specification.</p>
+            </div>
+            <div className="construction-relationship-map">
+              <div className="detail-kicker">PHASE 8BL · SPATIAL VOCABULARY / VERSION BOUNDARIES</div>
+              <p>Two spatial vocabularies are visible in the evidence. They are displayed separately because their historical equivalence and shared-token identity are not established.</p>
+              {constructionSpatialEvidenceAudit.profiles.map(profile => <div key={profile.id} className="construction-foot-parts">
+                <span><small>{profile.version} · {profile.status}</small><strong>{profile.id === "HISTORICAL-PHASE-5.22-FIXTURE" ? "po · da · 0.2 metre" : "FE · PA/BA/TA/DA/KA/GA"}</strong>
+                {profile.id === "HISTORICAL-PHASE-5.22-FIXTURE" ? "Fixture-local role, axis and quantity readings only." : "Separate inventory: relations JO/JUR/JA/JE/JI; geometry PI/LEN/PLA/SUR/VOM/PAR."}</span>
+              </div>)}
+              <p className="fixture-browser-caveat">The spelling da/DA is not enough to establish a shared token identity. Coordinate frame, origin, vector composition, quantity attachment and unit conversion remain unrecovered.</p>
+            </div>
+            <div className="construction-relationship-map">
+              <div className="detail-kicker">PHASE 8BT · POSITION / DISPLACEMENT RELATIONSHIPS</div>
+              <p>Neutral mathematical research contracts only; not recovered Arcane operators or surface syntax.</p>
+              <div className="fixture-browser-meta">
+                <div><span>Position difference</span><strong>{proposedPositionDifference(positionRelationFixtures.sourcePosition, positionRelationFixtures.destinationPosition).status}</strong></div>
+                <div><span>Position translation</span><strong>{proposedTranslatePosition(positionRelationFixtures.sourcePosition, proposedPositionDifference(positionRelationFixtures.sourcePosition, positionRelationFixtures.destinationPosition).value).status}</strong></div>
+                <div><span>Position + position</span><strong>{proposedAddPositions(positionRelationFixtures.sourcePosition, positionRelationFixtures.destinationPosition).status}</strong></div>
+                <div><span>Candidate contracts</span><strong>{positionRelationSummary.candidates.length}</strong></div>
+              </div>
+              <div className="construction-foot-parts">
+                {positionRelationSummary.candidates.map(candidate => <span key={candidate.id}><small>{candidate.id}</small><strong>{candidate.formula}</strong><small>Result: {candidate.result} · {candidate.status}</small></span>)}
+              </div>
+              <p><strong>Worked example:</strong> Pₐ=(1,2,3) m and Pᵦ=(4,6,3) m in the same frame and origin. Pᵦ−Pₐ gives displacement (3,4,0) m. Adding that displacement to Pₐ returns Pᵦ.</p>
+              <p><strong>Safety gates:</strong> subtraction requires matching frame, coordinate convention and origin/reference. Translation requires a displacement—not velocity—and matching frame, convention, dimensions and units. Position + position remains blocked because no operation contract is defined.</p>
+              <p className="fixture-browser-caveat">No mapping to PO/FO/LO or JO/JUR/JA/JE/JI is made. These calculations do not establish physical movement, arrival, mechanism or canon.</p>
+            </div>
+            <div className="construction-relationship-map">
+              <div className="detail-kicker">PHASE 8BS · TYPED SPATIAL VALUE MODEL</div>
+              <p>This abstract research model separates a position, a displacement, a velocity, a force-like vector and a mana-state vector. It is metadata for review, not Arcane surface syntax.</p>
+              <div className="fixture-browser-meta">
+                <div><span>Spatial value kinds</span><strong>{spatialValueModelSummary.kinds.length}</strong></div>
+                <div><span>Required spatial components</span><strong>X · Y · Z</strong></div>
+                <div><span>Worked displacement</span><strong>{assessSpatialVectorFixture(workedDisplacementFixture).status}</strong></div>
+                <div><span>Canonical vector constructor</span><strong>NOT RECOVERED</strong></div>
+              </div>
+              <div className="construction-foot-parts">
+                {spatialValueModelSummary.kinds.map(kind => <span key={kind.id}><small>{kind.id}</small><strong>{kind.label}</strong><small>{kind.rule}</small></span>)}
+              </div>
+              <p><strong>Worked fixture:</strong> frame FRAME-TEST-01; X=1 m, Y=2 m, Z=3 m. Under the proposed Euclidean displacement rule, magnitude = {proposedDisplacementMagnitude(workedDisplacementFixture).value.toFixed(3)} m and self-dot-product = {proposedDisplacementDot(workedDisplacementFixture, workedDisplacementFixture).value} m².</p>
+              <p><strong>Typed separation:</strong> displacement components use length dimensions; velocity components use length/time dimensions. A mana-state vector is not accepted as an ordinary spatial vector. A position additionally needs an origin/reference, and is not interchangeable with displacement.</p>
+              <p className="fixture-browser-caveat">These are proposal-level research checks only. DRAN's full canonical input/norm contract, DREM's accepted types and result semantics, surface vector syntax, frame transforms and physical feasibility remain separate unresolved gates.</p>
+            </div>
+            <div className="construction-relationship-map">
+              <div className="detail-kicker">PHASE 8BR · CANONICAL SIGNED-AXIS SEMANTICS</div>
+              <p>The v3.0-L source explicitly assigns all six axis forms. These are directional labels in the canonical coordinate convention, not a vector literal or a frame constructor.</p>
+              <div className="fixture-browser-meta">
+                <div><span>Canonical axis assignments</span><strong>{constructionAxisSemantics.axes.length} / 6</strong></div>
+                <div><span>Coordinate dimensions</span><strong>3</strong></div>
+                <div><span>Vector constructors recovered</span><strong>0</strong></div>
+                <div><span>Frame transforms recovered</span><strong>0</strong></div>
+              </div>
+              <div className="construction-foot-parts">
+                {constructionAxisSemantics.axes.map(axis => {
+                  const review = reviewConstructionAxis(axis.form);
+                  return <span key={axis.form}><small>{axis.form} · {review?.coordinateAxis} {review?.sign}</small><strong>{review?.direction}</strong><small>V3.0-L §4 · CANONICAL</small></span>;
+                })}
+              </div>
+              <p><strong>Source-recorded symmetry:</strong> P/B, T/D and K/G are voiceless/voiced consonant pairs respectively, with opposite signs on the same coordinate dimension. The source describes this as a subtle internal symmetry; it does not establish a broader sound-to-meaning rule.</p>
+              <p className="fixture-browser-caveat">A direction assignment does not identify an origin, supply a frame identity, provide a component magnitude, construct a vector, or define how multiple axis forms combine. Those contracts remain open.</p>
+            </div>
+            <div className="construction-relationship-map">
+              <div className="detail-kicker">PHASE 8BP · SPATIAL GRAMMAR INVENTORY</div>
+              <p>The v3.0-L inventory is now classified into four evidence categories. These are lexical categories only: no token signature, phrase order or executable spatial operation is inferred.</p>
+              {constructionSpatialGrammarEvidence.categoryOrder.map(category => {
+                const categoryEntries = reviewConstructionSpatialCategory(category) ?? [];
+                return <div className="construction-foot-parts" key={category}>
+                  <span><small>{category.replaceAll("-", " ")} · {categoryEntries.length} recorded forms</small><strong>{categoryEntries.map(entry => entry.form).join(" · ")}</strong><small>Signatures: NOT RECOVERED</small></span>
+                </div>;
+              })}
+              <div className="fixture-browser-meta">
+                <div><span>Inventory entries</span><strong>{constructionSpatialGrammarEvidence.entries.length}</strong></div>
+                <div><span>Categories</span><strong>{constructionSpatialGrammarEvidence.categoryOrder.length}</strong></div>
+                <div><span>Open interfaces</span><strong>{constructionSpatialGrammarEvidence.openInterfaces.length}</strong></div>
+                <div><span>Executable rules</span><strong>0</strong></div>
+              </div>
+              <ol>{constructionSpatialGrammarEvidence.openInterfaces.map(item => <li key={item.id}><strong>{item.id.replaceAll("-", " ")}</strong><small>{item.question} · {item.status}</small></li>)}</ol>
+              <p className="fixture-browser-caveat">The historical po/da/0.2 metre phrase remains fixture-local. A category label is not a grammar rule; do not assemble FE, axis, relation and geometry tokens into a purported valid expression until signatures and combination rules are recovered.</p>
+            </div>
+            <div className="construction-relationship-map">
+              <div className="detail-kicker">PHASE 8BQ · SPATIAL COMPOSITION EVIDENCE</div>
+              <p>This matrix separates category membership from evidence that two spatial categories can combine. No v3.0-L category pair has a recovered composition contract.</p>
+              <div className="fixture-browser-meta">
+                <div><span>Category pairs reviewed</span><strong>{constructionSpatialCompositionEvidence.categoryPairs.length}</strong></div>
+                <div><span>Composition contracts recovered</span><strong>{constructionSpatialCompositionEvidence.categoryPairs.filter(pair => pair.status === "RECOVERED").length}</strong></div>
+                <div><span>Historical fixture observations</span><strong>{constructionSpatialCompositionEvidence.fixtureObservations.length}</strong></div>
+                <div><span>Executable combinations</span><strong>0</strong></div>
+              </div>
+              <ol>{constructionSpatialCompositionEvidence.categoryPairs.map(pair => {
+                const review = reviewConstructionSpatialCategoryPair(pair.left, pair.right);
+                return <li key={pair.id}><strong>{pair.left.replaceAll("-", " ")}</strong> <span aria-label="with">↔</span> <strong>{pair.right.replaceAll("-", " ")}</strong><small>{review?.status.replaceAll("-", " ")} · signatures, ordering and attachment not recovered</small></li>;
+              })}</ol>
+              <p><strong>Fixture-only observation:</strong> Phase 5.22 records <code>po da za shi to za ma</code> as position · +Y · 0.2 metre. The role token, axis token and quantity reading belong to that historical fixture profile; this is not evidence for a v3.0-L category pair or general syntax.</p>
+              <p className="fixture-browser-caveat">A pair marked NOT ESTABLISHED is not proven invalid; it is unsupported by the recovered evidence. This matrix is not a grammar validator or a list of permitted combinations.</p>
+            </div>
+            <div className="construction-relationship-map">
+              <div className="detail-kicker">PHASE 8BJ · STAGE INTERFACE AUDIT</div>
+              <p>Six adjacent stage boundaries are recorded as precedence relationships. The audit below separates that recovered order from the interfaces that still need source evidence.</p>
+              <div className="fixture-browser-meta">
+                <div><span>Boundaries reviewed</span><strong>{constructionStageInterfaceAudit.boundaries.length}</strong></div>
+                <div><span>Order evidence</span><strong>6 / 6</strong></div>
+                <div><span>Input/output contracts</span><strong>0 recovered</strong></div>
+                <div><span>Bindings</span><strong>0 recovered</strong></div>
+              </div>
+              <ol>
+                {constructionStageInterfaceAudit.boundaries.map(boundary => {
+                  const review = reviewConstructionStageInterfaceAudit(boundary.id);
+                  return <li key={boundary.id}>
+                    <strong>{boundary.fromLabel}</strong> <span aria-label="precedes">→</span> <strong>{boundary.toLabel}</strong>
+                    <small>{review.status.replaceAll("-", " ")} · order source-backed · interface unresolved</small>
+                  </li>;
+                })}
+              </ol>
+              <p className="fixture-browser-caveat">The audit does not define a data-flow edge. Input/output types, attachment, cardinality, omission and failure behaviour remain unestablished for every boundary.</p>
+            </div>
+            <div className="construction-relationship-map">
+              <div className="detail-kicker">PHASE 8BM · EVIDENCE-AWARE EXPRESSION COMPOSITION</div>
+              <p>A single review record groups evidence under the seven Construction stage labels. Empty slots mean no evidence has been attached to this review record; they do not mean a stage is optional or absent from the language.</p>
+              {(() => {
+                const composition = createEmptyConstructionExpressionComposition("workbench-template");
+                const review = reviewConstructionExpressionComposition(composition);
+                return <>
+                  <div className="fixture-browser-meta">
+                    <div><span>Stage slots</span><strong>{review.stageSummaries.length}</strong></div>
+                    <div><span>Evidence records in template</span><strong>{review.evidenceRecordCount}</strong></div>
+                    <div><span>Grammar validity</span><strong>Not assessed</strong></div>
+                    <div><span>Execution</span><strong>Disabled</strong></div>
+                  </div>
+                  <ol>{review.stageSummaries.map(item => <li key={item.stage}>
+                    <strong>{item.stage.replaceAll("-", " ")}</strong>
+                    <small>{item.status.replaceAll("-", " ")} · {item.recordCount} records in blank template</small>
+                  </li>)}</ol>
+                  <p className="fixture-browser-caveat">Records retain their own version, source, claims and unresolved questions. Multiple records can be preserved without assuming how many forms a stage permits. The six historical hand-flame phrases are not mapped one-to-one onto seven stages.</p>
+                  <p className="fixture-browser-caveat">{review.limitation}</p>
+                </>;
+              })()}
+            </div>
+            <div className="construction-relationship-map">
+              <div className="detail-kicker">PHASE 8BN · FIXTURE PHRASE TRACEABILITY</div>
+              <p>Phrase-level evidence is attached to the exact Phase 5.22 hand-flame fixture. These six phrase groups are local to that example; they are not a general delimiter grammar or a one-to-one map onto the seven Construction stages.</p>
+              {(() => {
+                const review = reviewHandFlameFixtureTraceability();
+                return <>
+                  <div className="fixture-browser-meta">
+                    <div><span>Fixture phrases</span><strong>{review.phraseCount}</strong></div>
+                    <div><span>Unresolved phrases</span><strong>{review.unresolvedPhraseCount}</strong></div>
+                    <div><span>Stage mapping</span><strong>Not established</strong></div>
+                    <div><span>Grammar validity</span><strong>Not assessed</strong></div>
+                  </div>
+                  <div className="construction-example-chunks">
+                    {handFlameFixtureTraceability.phrases.map(phrase => <section key={phrase.phraseIndex}>
+                      <div><strong>{phrase.phraseIndex}. {phrase.surface}</strong><span>{phrase.interpretationStatus.replaceAll("-", " ")}</span></div>
+                      {phrase.recordedClaims.length > 0 && <p><strong>Recorded:</strong> {phrase.recordedClaims.join(" · ")}</p>}
+                      <p className="fixture-browser-caveat"><strong>Sources:</strong> {phrase.evidenceReferences.join(" · ")}</p>
+                      <p className="fixture-browser-caveat"><strong>Unresolved:</strong> {phrase.unresolved.join(" · ")}</p>
+                    </section>)}
+                  </div>
+                  <p className="fixture-browser-caveat">Cross-version spelling matches do not establish token identity or semantic equivalence. This traceability profile is non-executable and canon-neutral.</p>
+                </>;
+              })()}
+            </div>
+            <div className="construction-contract-profiles">
+              <div className="detail-kicker">PHASE 8AO · STAGE CONTRACT EVIDENCE</div>
+              <p>These profiles separate recovered stage behaviour from missing interfaces. The spatial vocabulary shown below is version-tagged and is not automatically treated as the input grammar of the historical Construction stage.</p>
+              <div className="construction-example-chunks">
+                {constructionStageContractProfiles.map(profile => <section key={profile.stage}>
+                  <div><strong>{profile.label}</strong><span>{profile.contractStatus.replaceAll("-", " ")}</span></div>
+                  <p><strong>Recovered:</strong> {profile.recovered.join(" · ")}</p>
+                  <p><strong>Input / output:</strong> {profile.inputOutputStatus}</p>
+                  <p><strong>Cross-stage binding:</strong> {profile.bindingStatus}</p>
+                  {profile.versionBoundary && <p className="fixture-browser-caveat"><strong>Version boundary:</strong> {profile.versionBoundary}</p>}
+                  <p className="fixture-browser-caveat"><strong>Still open:</strong> {profile.unresolved.join(" · ")}</p>
+                </section>)}
+              </div>
+              <p className="fixture-browser-caveat">This is an evidence register, not a Construction validator or compiler. No stage output is inferred from the next stage's position in the sequence.</p>
+            </div>
+            <div className="construction-worked-example">
+              <div className="detail-kicker">PHASE 4 §8 · HAND-FLAME WORKED EXAMPLE</div>
+              <p className="construction-example-sequence">{handFlameConstructionExample.sourceSequence}</p>
+              <p><strong>Evidence status:</strong> {handFlameConstructionExample.sourceStatus.replaceAll("-", " ").toLowerCase()}.</p>
+              <div className="construction-example-chunks">
+                {handFlameConstructionExample.chunks.map((chunk, index) => <section key={chunk.sourceText}>
+                  <div><strong>{index + 1}. {chunk.sourceText}</strong><span>{chunk.evidenceStatus.replaceAll("-", " ")}</span></div>
+                  <p>{chunk.interpretation}</p><p className="fixture-browser-caveat">{chunk.unresolved}</p>
+                </section>)}
+              </div>
+              <ul>{handFlameConstructionExample.limits.map(limit => <li key={limit}>{limit}</li>)}</ul>
             </div>
             <div className="construction-stage-list">
               {constructionStageLabels.map(({ stage, label }, index) => <div className="construction-stage-row" key={stage}>
@@ -554,7 +1142,7 @@ function App() {
             {selectedResourceFixture && <div className="fixture-browser-detail">
               <div className="fixture-browser-meta"><div><span>Specification fixture ID</span><code>{selectedResourceFixture.id}</code></div><div><span>Fixture category</span><strong>Resource accounting / conservation</strong></div><div className="fixture-browser-meta-wide"><span>Case</span><strong>{selectedResourceFixture.caseDescription}</strong></div><div className="fixture-browser-meta-wide"><span>Expected design outcome</span><strong>{selectedResourceFixture.expectedResult}</strong></div><div className="fixture-browser-meta-wide"><span>Evidence class</span><strong>Normative specification fixture — not executed runtime behaviour</strong></div></div>
             </div>}
-            <div className="fixture-browser-actions"><a className="secondary-button" href="https://github.com/sixtoast/Anime-language-/blob/main/docs/canon/arcane-incantations-v1.9-resource-accounting-and-conservation-contracts.md" target="_blank" rel="noreferrer">Open full v1.9 specification ↗</a><span>Selection only displays the source expectation; it does not run a spell.</span></div>
+            <div className="fixture-browser-actions"><a className="secondary-button" href={githubBlobUrl("docs/canon/arcane-incantations-v1.9-resource-accounting-and-conservation-contracts.md", GITHUB_SOURCE_REF)} target="_blank" rel="noreferrer">Open full v1.9 specification ↗</a><span>Selection only displays the source expectation; it does not run a spell.</span></div>
             <p className="fixture-browser-caveat">Resource budgets do not prove a source exists. Reservation does not mean consumption. Dimensional arithmetic does not prove conservation. No universal mana-to-energy conversion or physical resource evaluator is implemented by this browser.</p>
           </section>
           <section className="fixture-browser authority-fixture-browser" aria-labelledby="authority-fixture-browser-title">
@@ -564,7 +1152,7 @@ function App() {
             {selectedAuthorityFixture && <div className="fixture-browser-detail">
               <div className="fixture-browser-meta"><div><span>Specification fixture ID</span><code>{selectedAuthorityFixture.id}</code></div><div><span>Fixture category</span><strong>Authority / authorisation decision</strong></div><div className="fixture-browser-meta-wide"><span>Case</span><strong>{selectedAuthorityFixture.caseDescription}</strong></div><div className="fixture-browser-meta-wide"><span>Expected design outcome</span><strong>{selectedAuthorityFixture.expectedOutcome}</strong></div><div className="fixture-browser-meta-wide"><span>Evidence class</span><strong>Normative specification fixture — not an executed authority check</strong></div></div>
             </div>}
-            <div className="fixture-browser-actions"><a className="secondary-button" href="https://github.com/sixtoast/Anime-language-/blob/main/docs/canon/arcane-incantations-v2.0-authority-and-authorization-decision-contracts.md" target="_blank" rel="noreferrer">Open full v2.0 specification ↗</a><span>Selection only displays the source expectation; no authorisation service is called.</span></div>
+            <div className="fixture-browser-actions"><a className="secondary-button" href={githubBlobUrl("docs/canon/arcane-incantations-v2.0-authority-and-authorization-decision-contracts.md", GITHUB_SOURCE_REF)} target="_blank" rel="noreferrer">Open full v2.0 specification ↗</a><span>Selection only displays the source expectation; no authorisation service is called.</span></div>
             <p className="fixture-browser-caveat">Only an explicitly permitted, current, trusted, in-scope decision can pass the authorisation gate when every required check succeeds. All non-permit, uncertain, unavailable, expired, revoked, malformed, or scope-mismatched outcomes block. Authority does not replace consent, feasibility, resource readiness, validation, or execution; passing this gate does not mean a spell ran.</p>
           </section>
 
@@ -575,7 +1163,7 @@ function App() {
             {selectedPolicyFixture && <div className="fixture-browser-detail">
               <div className="fixture-browser-meta"><div><span>Specification fixture ID</span><code>{selectedPolicyFixture.id}</code></div><div><span>Fixture category</span><strong>Policy-profile composition</strong></div><div className="fixture-browser-meta-wide"><span>Case</span><strong>{selectedPolicyFixture.caseDescription}</strong></div><div className="fixture-browser-meta-wide"><span>Expected design outcome</span><strong>{selectedPolicyFixture.expectedOutcome}</strong></div><div className="fixture-browser-meta-wide"><span>Evidence class</span><strong>Normative specification fixture — not an executed policy decision</strong></div></div>
             </div>}
-            <div className="fixture-browser-actions"><a className="secondary-button" href="https://github.com/sixtoast/Anime-language-/blob/main/docs/canon/arcane-incantations-v2.1-policy-profile-composition-and-conflict-resolution.md" target="_blank" rel="noreferrer">Open full v2.1 specification ↗</a><span>Selection displays source expectations only; no policy service or parser is called.</span></div>
+            <div className="fixture-browser-actions"><a className="secondary-button" href={githubBlobUrl("docs/canon/arcane-incantations-v2.1-policy-profile-composition-and-conflict-resolution.md", GITHUB_SOURCE_REF)} target="_blank" rel="noreferrer">Open full v2.1 specification ↗</a><span>Selection displays source expectations only; no policy service or parser is called.</span></div>
             <p className="fixture-browser-caveat">Policy names, issuer prestige, file order and recency are not implicit precedence. An unresolved conflict, unknown applicability, unavailable required profile or untrusted policy blocks without being mislabelled as an explicit denial. A composed permit still does not bypass v2.0 scope, consent, resource, feasibility or execution gates.</p>
           </section>
 
@@ -590,7 +1178,7 @@ function App() {
                 {selectedValidationGate && <div className="fixture-browser-detail">
                   <div className="fixture-browser-meta"><div><span>Source stage</span><strong>{selectedValidationGate.ordinal}. {selectedValidationGate.label}</strong></div><div className="gate-sequence-meta-wide"><span>Source description</span><strong>{selectedValidationGate.sourceDescription}</strong></div><div className="gate-sequence-meta-wide"><span>What this does not prove</span><strong>{selectedValidationGate.boundaryNote}</strong></div></div>
                 </div>}
-                <div className="fixture-browser-actions"><a className="secondary-button" href="https://github.com/sixtoast/Anime-language-/blob/main/docs/canon/arcane-incantations-v1.2-preconditions-constraints-and-failure.md#7-check-order-and-dependency-guards" target="_blank" rel="noreferrer">Open v1.2 source ↗</a></div>
+                <div className="fixture-browser-actions"><a className="secondary-button" href={githubBlobUrl("docs/canon/arcane-incantations-v1.2-preconditions-constraints-and-failure.md#7-check-order-and-dependency-guards", GITHUB_SOURCE_REF)} target="_blank" rel="noreferrer">Open v1.2 source ↗</a></div>
               </div>
               <div className="gate-sequence-lane">
                 <h3>v1.5 — Invocation lifecycle summary</h3>
@@ -599,7 +1187,7 @@ function App() {
                 {selectedInvocationStage && <div className="fixture-browser-detail">
                   <div className="fixture-browser-meta"><div><span>Source stage</span><strong>{selectedInvocationStage.ordinal}. {selectedInvocationStage.label}</strong></div><div className="gate-sequence-meta-wide"><span>Source note</span><strong>{selectedInvocationStage.sourceDescription}</strong></div><div className="gate-sequence-meta-wide"><span>What this does not prove</span><strong>{selectedInvocationStage.boundaryNote}</strong></div></div>
                 </div>}
-                <div className="fixture-browser-actions"><a className="secondary-button" href="https://github.com/sixtoast/Anime-language-/blob/main/docs/canon/arcane-incantations-v1.5-invocation-profiles-and-execution-contracts.md" target="_blank" rel="noreferrer">Open v1.5 source ↗</a></div>
+                <div className="fixture-browser-actions"><a className="secondary-button" href={githubBlobUrl("docs/canon/arcane-incantations-v1.5-invocation-profiles-and-execution-contracts.md", GITHUB_SOURCE_REF)} target="_blank" rel="noreferrer">Open v1.5 source ↗</a></div>
               </div>
             </div>
             <div className="fixture-browser-detail gate-sequence-order-note">
@@ -626,6 +1214,57 @@ function App() {
             <details className="runtime-preview-details"><summary>Evidence assumptions and evaluator limitations</summary><ul>{runtimePreview.assumptions.map((item) => <li key={item}>{item}</li>)}{runtimePreview.resource.limitations.map((item) => <li key={item}>{item}</li>)}{runtimePreview.policy.limitations.map((item) => <li key={item}>{item}</li>)}{runtimePreview.authority.limitations.map((item) => <li key={item}>{item}</li>)}{runtimePreview.invocation.limitations.map((item) => <li key={item}>{item}</li>)}</ul></details>
             <p className="fixture-browser-caveat">A passing preview means only that these sample inputs satisfy the implemented functions. External trust, live scope resolution, predicate acquisition, physical feasibility, executor contracts and outcome verification remain outside this panel. The v1.5 source-order discrepancy is still preserved separately above.</p>
           </section>
+          <section className="fixture-browser runtime-preview-browser resource-conservation-preview" aria-labelledby="resource-conservation-preview-title">
+            <div className="fixture-browser-head">
+              <div><span className="detail-kicker">V1.9 CONSERVATION · READ-ONLY SAMPLE</span><h2 id="resource-conservation-preview-title">Conservation and account reconciliation</h2></div>
+              <span>2 independent evaluations</span>
+            </div>
+            <p className="fixture-browser-intro">This panel runs the bounded conservation evaluator and ledger-backed account reconciler against deterministic synthetic inputs. It does not use the 60 canonical specification fixtures as executed test cases.</p>
+            <label className="fixture-select-label">Choose a resource-accounting scenario
+              <select aria-label="Choose resource conservation preview scenario" value={resourceConservationScenario} onChange={(event) => setResourceConservationScenario(event.target.value as ResourceConservationPreviewScenario)}>
+                {resourceConservationPreviewScenarios.map((scenario) => <option key={scenario.id} value={scenario.id}>{scenario.label}</option>)}
+              </select>
+            </label>
+            <p className="runtime-preview-description">{resourceConservationPreview.description}</p>
+            <div className="resource-conservation-grid">
+              <article className="resource-conservation-card" aria-label="Conservation evaluation result">
+                <span>CONSERVATION EVALUATION</span>
+                <strong className={resourceConservationPreview.conservation.outcome === "CONSERVATION-SATISFIED" ? "runtime-good" : resourceConservationPreview.conservation.outcome === "CONSERVATION-MISMATCH" ? "runtime-blocked" : "runtime-unresolved"}>{resourceConservationPreview.conservation.outcome}</strong>
+                <div className="resource-conservation-metrics">
+                  <div><span>Left total:</span><strong>{resourceConservationPreview.conservation.leftTotalTicks === undefined ? "Not computed" : resourceConservationPreview.conservation.leftTotalTicks + " ticks"}</strong></div>
+                  <div><span>Right total:</span><strong>{resourceConservationPreview.conservation.rightTotalTicks === undefined ? "Not computed" : resourceConservationPreview.conservation.rightTotalTicks + " ticks"}</strong></div>
+                  <div><span>Balance difference:</span><strong>{resourceConservationPreview.conservation.differenceTicks === undefined ? "Not computed" : resourceConservationPreview.conservation.differenceTicks + " ticks"}</strong></div>
+                  <div><span>Contract tolerance:</span><strong>{resourceConservationPreview.conservation.toleranceTicks === undefined ? "Not available" : resourceConservationPreview.conservation.toleranceTicks + " ticks"}</strong></div>
+                </div>
+                {resourceConservationPreview.conservation.diagnostics.length > 0
+                  ? <ul className="resource-conservation-diagnostics">{resourceConservationPreview.conservation.diagnostics.map((item, index) => <li key={item.code + index}><code>{item.code}</code><span>{item.message}</span></li>)}</ul>
+                  : <p className="resource-conservation-no-diagnostics">No diagnostics for this sample result.</p>}
+              </article>
+              <article className="resource-conservation-card" aria-label="Account reconciliation result">
+                <span>ACCOUNT RECONCILIATION · {resourceConservationPreview.reconciliation.scope}</span>
+                <strong className={resourceConservationPreview.reconciliation.outcome === "ACCOUNT-BALANCE-RECONCILED" ? "runtime-good" : resourceConservationPreview.reconciliation.outcome === "ACCOUNT-BALANCE-DISCREPANCY" ? "runtime-blocked" : "runtime-unresolved"}>{resourceConservationPreview.reconciliation.outcome}</strong>
+                <div className="resource-conservation-metrics">
+                  <div><span>Projected balance:</span><strong>{resourceConservationPreview.reconciliation.expectedBalanceTicks === undefined ? "Not computed" : resourceConservationPreview.reconciliation.expectedBalanceTicks + " ticks"}</strong></div>
+                  <div><span>Observed balance:</span><strong>{resourceConservationPreview.reconciliation.observedBalanceTicks === undefined ? "Not accepted" : resourceConservationPreview.reconciliation.observedBalanceTicks + " ticks"}</strong></div>
+                  <div><span>Discrepancy:</span><strong>{resourceConservationPreview.reconciliation.discrepancyTicks === undefined ? "Not computed" : resourceConservationPreview.reconciliation.discrepancyTicks + " ticks"}</strong></div>
+                  <div><span>Contract tolerance:</span><strong>{resourceConservationPreview.reconciliation.toleranceTicks === undefined ? "Not available" : resourceConservationPreview.reconciliation.toleranceTicks + " ticks"}</strong></div>
+                </div>
+                {resourceConservationPreview.reconciliation.diagnostics.length > 0
+                  ? <ul className="resource-conservation-diagnostics">{resourceConservationPreview.reconciliation.diagnostics.map((item, index) => <li key={item.code + index}><code>{item.code}</code><span>{item.message}</span></li>)}</ul>
+                  : <p className="resource-conservation-no-diagnostics">No diagnostics for this sample result.</p>}
+              </article>
+            </div>
+            <details className="runtime-preview-details">
+              <summary>Evidence assumptions and evaluator limitations</summary>
+              <ul>
+                {resourceConservationPreview.assumptions.map((item) => <li key={item}>{item}</li>)}
+                {resourceConservationPreview.conservation.limitations.map((item) => <li key={item}>{item}</li>)}
+                {resourceConservationPreview.reconciliation.limitations.map((item) => <li key={item}>{item}</li>)}
+              </ul>
+            </details>
+            <p className="fixture-browser-caveat">The sample resource kind and tick unit are synthetic demonstration data, not canonical vocabulary or physical units. The 60 v1.9 rows above remain source-only specification expectations. Neither result authenticates evidence, changes a ledger, authorises or executes an incantation, establishes physical feasibility, or verifies an effect.</p>
+          </section>
+
           <section className="contract-worksheet" aria-labelledby="contract-worksheet-title">
             <div className="contract-worksheet-head">
               <div><span className="detail-kicker">INCANTATION DESIGN LAB · NON-EXECUTABLE</span><h2 id="contract-worksheet-title">Incantation contract worksheet</h2></div>
@@ -650,10 +1289,121 @@ function App() {
             <textarea className="contract-worksheet-json" aria-label="Generated contract worksheet JSON" readOnly rows={20} value={JSON.stringify(contractWorksheet, null, 2)}/>
             <p className="contract-worksheet-caveat">This worksheet does not certify that the target exists, the mechanism works, the requested outcome is physically possible, resources are sufficient, authority is valid, consent exists or execution occurred. Those checks require separate evidence and implementations.</p>
           </section>
+          <section className="contract-worksheet" aria-labelledby="incantation-obligation-review-title">
+            <div className="contract-worksheet-head">
+              <div><span className="detail-kicker">INCANTATION COMPANION · EVIDENCE REVIEW</span><h2 id="incantation-obligation-review-title">Semantic obligation reviewer</h2></div>
+              <span className="contract-draft-status">NO EXECUTION</span>
+            </div>
+            <p className="contract-worksheet-intro">Review the seven semantic obligations from Incantations v1.0. Edit the JSON to record applicability, evidence references and visible-binding or explicit bases. The starter ledger is intentionally unresolved. This tool checks accounting only; it does not parse or validate a spoken spell.</p>
+            <textarea className="contract-worksheet-json" aria-label="Incantation obligation evidence ledger JSON" rows={20} value={obligationInput} onChange={(event) => setObligationInput(event.target.value)}/>
+            <div className="contract-worksheet-output-head">
+              <div><span className="detail-kicker">LOCAL REVIEW</span><h3>Evidence accounting result</h3></div>
+              <button className="secondary-button" onClick={runObligationReview}>Review obligations <span>→</span></button>
+            </div>
+            {obligationReviewError && <p role="alert" className="contract-worksheet-caveat">{obligationReviewError}</p>}
+            {obligationReview && <>
+              <div className="runtime-preview-outcome">
+                <div><span>OBLIGATION DISPOSITION</span><strong>{obligationReview.disposition}</strong></div>
+                <div><span>ACCOUNTED FOR</span><strong>{obligationReview.accountedForCount} / {obligationReview.obligationCount}</strong></div>
+              </div>
+              <div className="audit-matrix">
+                {obligationReview.results.map((item) => <article className="audit-item" key={item.id}>
+                  <div className="audit-item-top"><code>{item.id}</code><span className="audit-readiness audit-design-level-only">{item.status}</span></div>
+                  <p>{item.explanation}</p>
+                  <div className="test-case-meta"><span>Evidence: {item.evidenceRef ?? "NOT RECORDED"}</span></div>
+                </article>)}
+              </div>
+              <p className="contract-worksheet-caveat">{obligationReview.limitation}</p>
+            </>}
+          </section>
+          <section className="contract-worksheet" aria-labelledby="incantation-relationship-model-title">
+            <div className="contract-worksheet-head"><div><span className="detail-kicker">INCANTATION COMPANION · SEMANTIC GRAPH</span><h2 id="incantation-relationship-model-title">Relationship and dependency reviewer</h2></div><span className="contract-draft-status">NO EXECUTION</span></div>
+            <p className="contract-worksheet-intro">Represent goals, transitions, mechanisms, coupling, conditions, spatial values and outcomes as separate nodes. The starter mechanism is unresolved on purpose. The reviewer checks relationship structure and operation prerequisite cycles; it does not establish causation or completeness.</p>
+            <textarea className="contract-worksheet-json" aria-label="Incantation semantic relationship graph JSON" rows={18} value={relationshipInput} onChange={(event) => setRelationshipInput(event.target.value)}/>
+            <div className="contract-worksheet-output-head"><div><span className="detail-kicker">LOCAL REVIEW</span><h3>Semantic relationship result</h3></div><button className="secondary-button" onClick={runRelationshipReview}>Review graph <span>→</span></button></div>
+            {relationshipReviewError && <p role="alert" className="contract-worksheet-caveat">{relationshipReviewError}</p>}
+            {relationshipReview && <>
+              <div className="runtime-preview-outcome"><div><span>GRAPH DISPOSITION</span><strong>{relationshipReview.disposition}</strong></div><div><span>NODES / RELATIONSHIPS</span><strong>{relationshipReview.nodeCount} / {relationshipReview.edgeCount}</strong></div><div><span>UNRESOLVED NODES</span><strong>{relationshipReview.unresolvedNodeCount}</strong></div></div>
+              <div className="audit-matrix">
+                {relationshipReview.issues.map((item,index)=><article className="audit-item" key={item.code+item.path+index}><div className="audit-item-top"><code>{item.code}</code><span className="audit-readiness audit-design-level-only">{item.path}</span></div><p>{item.message}</p></article>)}
+                {relationshipReview.issues.length===0 && <article className="audit-item"><div className="audit-item-top"><code>NO-STRUCTURAL-ISSUES</code></div><p>Declared endpoints and relationship types are structurally coherent. Graph completeness, causal validity and feasibility remain unassessed.</p></article>}
+              </div>
+              <p className="contract-worksheet-caveat">{relationshipReview.limitation}</p>
+            </>}
+          </section>
+          <section className="contract-worksheet" aria-labelledby="incantation-argument-model-title">
+            <div className="contract-worksheet-head"><div><span className="detail-kicker">INCANTATION COMPANION · TYPED ARGUMENTS</span><h2 id="incantation-argument-model-title">Operation and argument reviewer</h2></div><span className="contract-draft-status">NO EXECUTION</span></div>
+            <p className="contract-worksheet-intro">Model a bounded v1.0 operation using v1.1 references and v1.6 typed values. The starter target is deliberately unresolved and uncommitted. This checks abstract record structure only; it does not parse spoken Arcane or evaluate a physical effect.</p>
+            <textarea className="contract-worksheet-json" aria-label="Incantation typed argument record JSON" rows={22} value={argumentInput} onChange={(event) => setArgumentInput(event.target.value)}/>
+            <div className="contract-worksheet-output-head"><div><span className="detail-kicker">LOCAL REVIEW</span><h3>Operation argument result</h3></div><button className="secondary-button" onClick={runArgumentReview}>Review arguments <span>→</span></button></div>
+            {argumentReviewError && <p role="alert" className="contract-worksheet-caveat">{argumentReviewError}</p>}
+            {argumentReview && <>
+              <div className="runtime-preview-outcome"><div><span>RECORD DISPOSITION</span><strong>{argumentReview.disposition}</strong></div><div><span>RESOLVED + COMMITTED REFERENCES</span><strong>{argumentReview.resolvedCommittedReferences} / {argumentReview.referenceCount}</strong></div></div>
+              <div className="audit-matrix">
+                {argumentReview.issues.map((item,index)=><article className="audit-item" key={item.code+item.path+index}><div className="audit-item-top"><code>{item.code}</code><span className="audit-readiness audit-design-level-only">{item.path}</span></div><p>{item.message}</p></article>)}
+                {argumentReview.issues.length===0 && <article className="audit-item"><div className="audit-item-top"><code>NO-STRUCTURAL-ISSUES</code></div><p>Required argument and reference records are structurally present. Semantic, type, geometry and feasibility checks remain separate.</p></article>}
+              </div>
+              <p className="contract-worksheet-caveat">{argumentReview.limitation}</p>
+            </>}
+          </section>
+          <section className="contract-worksheet" aria-labelledby="incantation-integrated-review-title">
+            <div className="contract-worksheet-head">
+              <div><span className="detail-kicker">INCANTATION COMPANION · INTEGRATED REVIEW</span><h2 id="incantation-integrated-review-title">Whole-contract reviewer</h2></div>
+              <span className="contract-draft-status">NO EXECUTION</span>
+            </div>
+            <p className="contract-worksheet-intro">Review operation arguments, semantic relationships, conditions, evidence, temporal contracts, postconditions, lifecycle records and explicit recovery branches together. The starter record deliberately contains an unresolved target. Edit the JSON and run the review; missing facts are not filled in automatically.</p>
+            <textarea className="contract-worksheet-json" aria-label="Integrated Incantation contract JSON" rows={30} value={integratedInput} onChange={(event) => setIntegratedInput(event.target.value)}/>
+            <div className="contract-worksheet-output-head">
+              <div><span className="detail-kicker">LOCAL REVIEW</span><h3>Integrated contract result</h3></div>
+              <button className="secondary-button" onClick={runIntegratedReview}>Review whole contract <span>→</span></button>
+            </div>
+            {integratedReviewError && <p role="alert" className="contract-worksheet-caveat">{integratedReviewError}</p>}
+            {integratedReview && <>
+              <div className="runtime-preview-outcome">
+                <div><span>DISPOSITION</span><strong>{integratedReview.disposition}</strong></div>
+                <div><span>OPERATIONS</span><strong>{integratedReview.operationCount}</strong></div>
+                <div><span>FINDINGS</span><strong>{integratedReview.issues.length}</strong></div>
+                <div><span>EXECUTION</span><strong>{integratedReview.gateSummary.execution}</strong></div>
+              </div>
+              <div className="audit-matrix">
+                {Object.entries(integratedReview.sections).map(([name,status]) => <article className="audit-item" key={name}>
+                  <div className="audit-item-top"><code>{name.toUpperCase()}</code><span className="audit-readiness audit-design-level-only">{status}</span></div>
+                </article>)}
+                {integratedReview.issues.map((item,index) => <article className="audit-item" key={item.code+item.path+index}>
+                  <div className="audit-item-top"><code>{item.code}</code><span className="audit-readiness audit-design-level-only">{item.severity} · {item.path}</span></div>
+                  <p>{item.message}</p>
+                </article>)}
+                {integratedReview.issues.length===0 && <article className="audit-item"><div className="audit-item-top"><code>NO-DECLARATION-ISSUES</code></div><p>Submitted declarations passed the bounded structural reviews. This does not establish semantic completeness, feasibility, authority, execution or real-world success.</p></article>}
+              </div>
+              {readableReport && <section className="audit-next" aria-label="Human-readable Incantation declarations">
+                <div className="detail-kicker">STRUCTURED READER · DECLARATIONS ONLY</div><h3>What this contract says</h3>
+                {readableReport.sections.map((section,index)=><article className="audit-item" key={section.title}>
+                  <div className="audit-item-top"><strong>{section.title}</strong><span className="audit-readiness audit-design-level-only">{section.lines.length} lines</span></div>
+                  {section.lines.map((line,lineIndex)=><p key={index+"-"+lineIndex}>{line}</p>)}
+                </article>)}
+                {readableReport.warnings.map((warning,index)=><p key={"warning-"+index}>{warning}</p>)}
+                <p className="contract-worksheet-caveat">{readableReport.limitation}</p>
+              </section>}
+              <p className="contract-worksheet-caveat">{integratedReview.limitation}</p>
+            </>}
+          </section>
+          <section className="contract-worksheet" aria-labelledby="arcane-compression-title">
+            <div className="contract-worksheet-head"><div><span className="detail-kicker">INCANTATION COMPANION · REVERSIBLE COMPRESSION</span><h2 id="arcane-compression-title">Shorten an Incantation</h2></div><span className="contract-draft-status">LOSSLESS · NO GRAMMAR CHANGE</span></div>
+            <p className="contract-worksheet-intro">Use a shared alias dictionary to create a shorter transport/display form. The original text is preserved exactly when expanded. This does not create spoken Arcane abbreviations: expand the result before parsing.</p>
+            <label className="lexicon-query-label">Canonical Incantation text<textarea className="contract-worksheet-json" aria-label="Canonical Incantation text to compress" rows={4} value={compressionInput} onChange={event=>setCompressionInput(event.target.value)}/></label>
+            <label className="lexicon-query-label">Shared alias dictionary (JSON)<textarea className="contract-worksheet-json" aria-label="Shared Arcane compression alias dictionary" rows={4} value={compressionAliases} onChange={event=>setCompressionAliases(event.target.value)}/></label>
+            <div className="contract-worksheet-output-head"><div><span className="detail-kicker">LOCAL COMPRESSION</span><h3>Reversible compression result</h3></div><button className="secondary-button" onClick={runArcaneCompression}>Compress text <span>→</span></button></div>
+            {compressionError && <p role="alert" className="contract-worksheet-caveat">{compressionError}</p>}
+            {compressionResult && <>
+              <div className="runtime-preview-outcome"><div><span>RESULT</span><strong>{compressionResult.disposition}</strong></div><div><span>NET CHARACTERS SAVED</span><strong>{compressionResult.charactersSaved}</strong></div><div><span>TEXT SAVED</span><strong>{compressionResult.textCharactersSaved}</strong></div><div><span>REPLACEMENTS</span><strong>{compressionResult.replacements}</strong></div><div><span>EXACT ROUND-TRIP</span><strong>{compressionResult.exactRoundTrip?"YES":"NO"}</strong></div></div>
+              <div className="audit-matrix"><article className="audit-item"><div className="audit-item-top"><strong>Compressed transport text</strong><span className="audit-readiness audit-design-level-only">{compressionResult.compressedCharacters} characters</span></div><p>{compressionResult.compressedText}</p></article>{compressionResult.issues.map((issue,index)=><p key={index}>{issue}</p>)}</div>
+              <p className="contract-worksheet-caveat">{compressionResult.limitation}</p>
+            </>}
+          </section>
           <section className="lexicon-inspector" aria-labelledby="lexicon-inspector-title">
             <div className="lexicon-inspector-head">
               <div><span className="detail-kicker">SOURCE LOOKUP</span><h2 id="lexicon-inspector-title">Lexicon inspector</h2><p>Exact-form lookup against the pinned {BUNDLED_LEXICON_SOURCE.version} source snapshot. This view reports source records; it does not decide canon or change parser alias settings.</p></div>
-              <a href="https://github.com/sixtoast/Anime-language-/blob/main/sources/originals/Arcane_Lexicon_v5_draft.csv" target="_blank" rel="noreferrer">Open lexicon CSV ↗</a>
+              <a href={githubBlobUrl("sources/originals/Arcane_Lexicon_v5_draft.csv", GITHUB_SOURCE_REF)} target="_blank" rel="noreferrer">Open lexicon CSV ↗</a>
             </div>
             <label className="lexicon-query-label">Form or recorded multiword entry<input aria-label="Inspect source lexicon form" value={lexiconQuery} onChange={(event) => setLexiconQuery(event.target.value)} placeholder="e.g. pa, ra, frata"/></label>
             {!lexiconQuery.trim() ? <p className="lexicon-empty" role="status">Enter a form to inspect its source records.</p> : lexiconInspection?.entry ? <>
@@ -739,7 +1489,7 @@ function App() {
             {registryResults && <div className="registry-results-meta">Test report commit <code>{registryResults.commit?.slice(0, 7) ?? "unknown"}</code> · generated {prettyDate(registryResults.generatedAt)} · <a href={`https://github.com/sixtoast/Anime-language-/actions/runs/${registryResults.runId}`} target="_blank" rel="noreferrer">Open matching CI run ↗</a></div>}
             <div className="test-case-list">
               {workbenchTests.filter((test) => (testGroup === "All" || test.group === testGroup) && (test.id + " " + test.title + " " + test.description + " " + test.sourceRule).toLowerCase().includes(testQuery.toLowerCase())).map((test) => <article className="test-case" key={test.id}>
-                <div className="test-case-main"><div className="test-case-title"><code>{test.id}</code><strong>{test.title}</strong></div><p>{test.description}</p><div className="test-case-meta"><span>Rules: {test.sourceRule}</span><a href={"https://github.com/sixtoast/Anime-language-/blob/main/" + test.file} target="_blank" rel="noreferrer">Open test source ↗</a></div></div>
+                <div className="test-case-main"><div className="test-case-title"><code>{test.id}</code><strong>{test.title}</strong></div><p>{test.description}</p><div className="test-case-meta"><span>Rules: {test.sourceRule}</span><a href={githubBlobUrl(test.file, GITHUB_SOURCE_REF)} target="_blank" rel="noreferrer">Open test source ↗</a></div></div>
                 <div className="test-case-status"><span className={"test-status-chip " + ((registryResults?.tests.find((result) => result.id === test.id)?.status === "passed") ? "test-status-passed" : (registryResults?.tests.find((result) => result.id === test.id)?.status === "failed") ? "test-status-failed" : (registryResults?.tests.find((result) => result.id === test.id)?.status === "pending" || registryResults?.tests.find((result) => result.id === test.id)?.status === "todo") ? "test-status-skipped" : "")}>{registryResults?.tests.find((result) => result.id === test.id) ? registryResults.tests.find((result) => result.id === test.id)?.status : "NOT VERIFIED"}</span><small>{test.group}</small>{registryResults?.tests.find((result) => result.id === test.id)?.durationMs != null && <small>{registryResults.tests.find((result) => result.id === test.id)?.durationMs} ms</small>}</div>
               </article>)}
               {workbenchTests.filter((test) => (testGroup === "All" || test.group === testGroup) && (test.id + " " + test.title + " " + test.description + " " + test.sourceRule).toLowerCase().includes(testQuery.toLowerCase())).length === 0 && <div className="empty-state">No test cases match those filters.</div>}
@@ -751,8 +1501,9 @@ function App() {
 
         {section === "Research & review" && <section className="page-content">
           <div className="eyebrow"><span className="eyebrow-line"/> EVIDENCE, QUESTIONS, DECISIONS</div><h1 className="page-title">Research & review<span>.</span></h1><p className="page-intro">Keep unresolved questions visible. Findings should be traceable to source material and should not become canonical by implication.</p>
-          <div className="review-banner"><FlaskConical size={20}/><div><strong>Active audit context</strong><p>Phase 2 is the priority source for the semantic audit. Preserve older forms as aliases unless an inconsistency is demonstrated.</p></div><span className="review-count">5 TOPICS</span></div>
-          <div className="review-cards">{[{n:"01",title:"FRAPA contract",status:"Open question" as Status,tag:"SOURCE EVIDENCE",desc:"Establish the contract only from available source evidence. Do not invent definitions to fill gaps.",sourcePath:"docs/audits/phase-2-formal-syntax.md"},{n:"02",title:"Phase 4 — syntax & ambiguity",status:"Provisional" as Status,tag:"AUDIT MATERIAL",desc:"Test unique structural interpretation, operator arity and safe handling of incomplete expressions.",sourcePath:"sources/originals/Arcane_Language_Audit_Phase_4.docx"},{n:"03",title:"Phase 5 — semantic audit",status:"Provisional" as Status,tag:"PHASE 2 PRIORITY",desc:"Compare semantic claims against Phase 2 first. Record conflicts and retain old forms unless inconsistency is demonstrated.",sourcePath:"sources/originals/Arcane_Language_Audit_Phase_5.docx"},{n:"04",title:"Phase 6G — source lexicon",status:"Provisional" as Status,tag:"DATA INTEGRITY",desc:"Audit the v5 draft vocabulary, preserve non-atomic forms, validate alias targets, and keep RE/RA collisions visible.",sourcePath:"docs/research/phase6g-v5-source-lexicon-audit-01.md"},{n:"05",title:"Phase 6G — parser fixtures",status:"Provisional" as Status,tag:"OBSERVATION ONLY",desc:"Compare recovered fixtures against the provisional parser without treating observations as canon approval or semantic validation.",sourcePath:"docs/research/phase6g-fixture-observation-harness-01.md"}].map((item) => <article className="review-card" key={item.n}><div className="review-card-top"><span className="review-number">{item.n}</span><StatusPill status={item.status}/></div><span className="detail-kicker">{item.tag}</span><h2>{item.title}</h2><p>{item.desc}</p><div className="review-card-bottom"><a href={"https://github.com/sixtoast/Anime-language-/blob/main/" + item.sourcePath} target="_blank" rel="noreferrer" aria-label={"Open source evidence for " + item.title}>Open source evidence <span aria-hidden="true">↗</span></a></div></article>)}</div>
+          <div className="review-banner"><FlaskConical size={20}/><div><strong>Active audit context</strong><p>Phase 2 is the priority source for the semantic audit. Preserve older forms as aliases unless an inconsistency is demonstrated.</p></div><span className="review-count">19 TOPICS</span></div>
+          <SourceRecoveryWorkbench />
+          <div className="review-cards">{[{n:"01",title:"FRAPA contract",status:"Open question" as Status,tag:"SOURCE EVIDENCE",desc:"Establish the contract only from available source evidence. Do not invent definitions to fill gaps.",sourcePath:"docs/audits/phase-2-formal-syntax.md"},{n:"02",title:"Phase 4 — syntax & ambiguity",status:"Provisional" as Status,tag:"AUDIT MATERIAL",desc:"Test unique structural interpretation, operator arity and safe handling of incomplete expressions.",sourcePath:"sources/originals/Arcane_Language_Audit_Phase_4.docx"},{n:"03",title:"Phase 5 — semantic audit",status:"Provisional" as Status,tag:"PHASE 2 PRIORITY",desc:"Compare semantic claims against Phase 2 first. Record conflicts and retain old forms unless inconsistency is demonstrated.",sourcePath:"sources/originals/Arcane_Language_Audit_Phase_5.docx"},{n:"04",title:"Phase 6G — source lexicon",status:"Provisional" as Status,tag:"DATA INTEGRITY",desc:"Audit the v5 draft vocabulary, preserve non-atomic forms, validate alias targets, and keep RE/RA collisions visible.",sourcePath:"docs/research/phase6g-v5-source-lexicon-audit-01.md"},{n:"05",title:"Phase 6G — parser fixtures",status:"Provisional" as Status,tag:"OBSERVATION ONLY",desc:"Compare recovered fixtures against the provisional parser without treating observations as canon approval or semantic validation.",sourcePath:"docs/research/phase6g-fixture-observation-harness-01.md"},{n:"06",title:"Phase 8AM — original Construction morphology",status:"Open question" as Status,tag:"SOURCE RECOVERY",desc:"The searchable archive preserves unresolved D-006/D-007 decisions and partial KAN/KEN/KAS evidence, but does not provide the missing complete v2.0 frame–vowel–coda specification. Do not infer a productive paradigm from partial sources.",sourcePath:"docs/research/phase8am-original-construction-morphology-recovery.md"}, {n:"07",title:"Phase 8AP — Phase 4 source transcription",status:"Open question" as Status,tag:"SOURCE RECOVERY",desc:"The Phase 4 DOCX is present and its text appears in the searchable archive index, but only excerpts are indexed. A structure-preserving extractor is provided to recover complete paragraphs and tables without changing the source.",sourcePath:"docs/research/phase8ap-phase4-docx-recovery-tooling.md"}, {n:"08",title:"Phase 8AQ — Phase 4 transcription concordance",status:"Open question" as Status,tag:"CONSTRUCTION EVIDENCE",desc:"The archive report verifies nine DOCX copies as byte-identical to the loose original. The checked-in text index remains excerpt-only; extracted-text completeness and TXT ancestry remain unresolved. The Construction evidence map preserves the CVC/optional-coda conflict.",sourcePath:"docs/research/phase8aq-phase4-transcription-concordance.md"}, {n:"09",title:"Phase 8AR — Construction macro evidence",status:"Open question" as Status,tag:"CONSTRUCTION EVIDENCE",desc:"Refines all six macro evidence statuses independently, records the heavy H-series syllable family and preserves the exact hand-flame token sequence with its parsing and feasibility limitations.",sourcePath:"docs/research/phase8ar-construction-macro-evidence-refinement.md"}, {n:"10",title:"Phase 8AS/8AT — Hand-flame evidence and archived parser recovery",status:"Open question" as Status,tag:"CONSTRUCTION EXAMPLE",desc:"Maps the exact 17-token hand-flame sequence into six source groups, integrating the archived Phase 5.22 bounded parse for position, axis, quantities and example-level KAN/KEN/KAS associations while preserving provisional coupling and general-grammar gaps.",sourcePath:"docs/research/phase8at-historical-construction-fixture-parser-recovery.md"},{n:"11",title:"Phase 8AU — archived fixture contract extraction",status:"Open question" as Status,tag:"CONSTRUCTION FIXTURE",desc:"Extracts the historical Phase 5.22 fixture token tables, quantity constraints and 17 reported regression outcomes into a version-bounded evidence contract; does not implement a general parser or physical feasibility.",sourcePath:"docs/research/phase8au-archived-fixture-contract-extraction.md"},{n:"12",title:"Phase 8AV — historical Construction parse-tree contract",status:"Open question" as Status,tag:"CONSTRUCTION GRAMMAR",desc:"Reconstructs the six phrase roles returned by the Phase 5.22 hand-flame fixture parser, including typed position and duration values, while retaining opaque Foot tokens and provisional coupling labels. Not a general grammar or executable spell model.",sourcePath:"docs/research/phase8av-construction-parse-tree-contract.md"},{n:"13",title:"Phase 8AW — Construction grammar evidence consolidation",status:"Open question" as Status,tag:"GRAMMAR BOUNDARIES",desc:"Unifies the recovered seven-stage order, six-phrase historical fixture tree, Foot morphology conflict, coupling uncertainty and version boundaries into one evidence profile. Classifications are scoped audits, not a general parser.",sourcePath:"docs/research/phase8aw-construction-grammar-consolidation.md"},{n:"14",title:"Phase 8AY — Phase 4 transcription inventory correction",status:"Open question" as Status,tag:"SOURCE CONCORDANCE",desc:"Corrects the transcription inventory: the archive report verifies the DOCX copies by source-byte hash, while the three indexed text records remain excerpt-only and their extracted-text equivalence is not assumed.",sourcePath:"docs/research/phase8ay-phase4-transcription-inventory-correction.md"},{n:"15",title:"Phase 8AZ — Phase 4 finalisation artefact boundary",status:"Open question" as Status,tag:"SOURCE RECOVERY",desc:"Adds the separately hashed Phase 4 finalisation PDF and its indexed generator script as related implementation artefacts. Neither is promoted to the original v2.0 Foot morphology specification.",sourcePath:"docs/research/phase8az-phase4-finalisation-artefact-boundary.md"},{n:"16",title:"Phase 8BA — branch-aware source links and Phase 4 generator boundary",status:"Provisional" as Status,tag:"WEBSITE RELIABILITY",desc:"Fixes repository-document links so Vercel previews open the source on the deployed branch, and records the limited Phase 4 generator excerpt without promoting it to morphology evidence.",sourcePath:"docs/research/phase8ba-branch-aware-source-links-and-generator-boundary.md"},{n:"17",title:"Phase 8BB — Performed reference homophone evidence",status:"Open question" as Status,tag:"CONSTRUCTION REFERENCES",desc:"Adds the Phase 5.20-recovered Performed readings for re and ra, records their competing Shared Arcana meanings and keeps them slot-sensitive, non-executable and separate from formal reference binding.",sourcePath:"docs/research/phase8bb-performed-reference-homophone-evidence.md"}, {n:"18",title:"Phase 8BC — Construction reference inventory and boundary recovery",status:"Open question" as Status,tag:"CONSTRUCTION REFERENCES",desc:"Separates formal MI/NI/RI/me evidence from the Performed fused-reference inventory, retains re/ra as partial homophones and MEL as a worked-example form, and records the unrecovered clause-boundary grammar.",sourcePath:"docs/research/phase8bc-construction-reference-inventory-and-boundary-recovery.md"}, {n:"19",title:"Phase 8BD — Source Recovery Studio and offline intake",status:"Provisional" as Status,tag:"SOURCE TOOLING",desc:"Introduces a browser-local intake MVP for text-based sources and a read-only offline CLI for DOCX, PDF, ZIP and text extraction, with hashes, provenance, safety limits and explicit review status.",sourcePath:"docs/research/phase8bd-source-recovery-studio-and-offline-intake.md"}, {n:"20",title:"Phase 8BT — Position and displacement relationships",status:"Provisional" as Status,tag:"SPATIAL VALUE MODEL",desc:"Adds proposal-only mathematical relationships for position difference and position translation, with frame, origin, unit and dimensional guards. It does not assign Arcane operators or define spoken syntax.",sourcePath:"docs/research/phase8bt-position-displacement-relations.md"}, {n:"21",title:"Phase 8BU — Phase 4 archive byte-identity correction",status:"Open question" as Status,tag:"SOURCE PROVENANCE",desc:"Corrects the Phase 4 source concordance using the archive report: nine archived DOCX names match the loose original by SHA-256 and size, while full transcription review remains incomplete.",sourcePath:"docs/research/phase8bu-phase4-archive-byte-identity-and-source-priority-correction.md"}, {n:"22",title:"Phase 8BV — Phase 4 compile-bridge boundary audit",status:"Open question" as Status,tag:"LANGUAGE ARCHITECTURE",desc:"Recovers the Phase 4 opening statement that v2.0 Construction and v3.0-L Expression are linked by a compile bridge, while separating that compiler from the current Phase 6G-to-Incantation traceability tool. Exact §3 rules remain unrecovered.",sourcePath:"docs/research/phase8bv-phase4-compile-bridge-boundary-audit.md"}, {n:"23",title:"Phase 8BW — Expression-to-Construction interface readiness",status:"Open question" as Status,tag:"COMPILER INTERFACE",desc:"Defines twelve evidence gates for the Phase 4 Expression-to-Construction compiler interface. Adds a fail-closed readiness evaluator; it never compiles or executes and remains blocked while §3 and mapping contracts are unrecovered.",sourcePath:"docs/research/phase8bw-expression-construction-interface-readiness.md"}, {n:"24",title:"Phase 8BX — Expression/Construction evidence crosswalk",status:"Open question" as Status,tag:"LANGUAGE MAPPING",desc:"Audits formal Expression operator families against the six Construction macros. The source matrices confirm that a formal mapping table and end-to-end trace are not demonstrated, so every pair remains explicitly unestablished.",sourcePath:"docs/research/phase8bx-expression-construction-evidence-crosswalk.md"}, {n:"25",title:"Phase 8BY — Construction Foot source-provenance adjudication",status:"Open question" as Status,tag:"MORPHOLOGY SOURCE CONFLICT",desc:"SUPERSEDED: the reviewed Phase 4 document-body transcription supports CVC; Phase 5.16 C-02 remains a secondary-summary context discrepancy.",sourcePath:"docs/research/phase8by-construction-foot-source-provenance-adjudication.md"}, {n:"26",title:"Phase 8BZ — H-series coupling composition evidence",status:"Open question" as Status,tag:"COUPLING COMPOSITION",desc:"Separates the six H-series domain glosses from complete coupling instructions. Records the he ha hand-flame co-occurrence and BRAN family association without assigning participant order, direction, physical law or executable semantics.",sourcePath:"docs/research/phase8bz-h-series-coupling-composition-evidence.md"}, {n:"27",title:"Phase 8CA — H-series fixture evidence enrichment",status:"Open question" as Status,tag:"FIXTURE EVIDENCE / REGRESSION",desc:"Adds the archived Phase 5.22 HE/HA annotations as provisional fixture-only evidence and verifies whitespace normalisation without generalising the physical mapping.",sourcePath:"docs/research/phase8ca-h-series-fixture-evidence-enrichment.md"}, {n:"28",title:"Phase 8CB — Coupling participant evidence boundary",status:"Open question" as Status,tag:"PARTICIPANT / REFERENCE CONTRACT",desc:"Separates H-series domain labels, existing Construction reference bindings and the still-unrecovered coupling-participant relationship. A valid reference is not treated as proof of a coupling participant.",sourcePath:"docs/research/phase8cb-coupling-participant-evidence-boundary.md"}, {n:"29",title:"Phase 8CC — Maintenance and release evidence separation",status:"Open question" as Status,tag:"CONTROL / RELEASE INTERFACE",desc:"Separates the fixture-level KEN held-state association from KAS release association. Records surface sequence without inferring a universal lifecycle, duration rule, causal transition or safety contract.",sourcePath:"docs/research/phase8cc-maintenance-release-evidence-separation.md"}, {n:"30",title:"Phase 8CD — Construction Foot morphology evidence reviewer",status:"Open question" as Status,tag:"FOOT / MORPHOLOGY",desc:"Distinguishes source-backed CV frame forms from CVC-shaped candidates, preserves provisional parameter families and the unresolved mandatory-versus-optional coda discrepancy, and prevents shape recognition from implying a valid Foot.",sourcePath:"docs/research/phase8cd-construction-foot-morphology-evidence-reviewer.md"}, {n:"31",title:"Phase 8CE — Construction macro contract audit",status:"Open question" as Status,tag:"MACRO / FOOT INTERFACE",desc:"Separates each macro’s recovered role evidence from missing input/output signatures, Foot scope, cardinality, conditions, effects and inter-macro composition. No macro is executable.",sourcePath:"docs/research/phase8ce-construction-macro-contract-audit.md"}, {n:"32",title:"Phase 8CF — Construction macro / stage scope evidence audit",status:"Open question" as Status,tag:"MACRO / STAGE BOUNDARY",desc:"Compares the six macro records with the seven performed Construction stages and the bounded hand-flame fixture. Separates observed token position from stage assignment, macro scope and causal dependency.",sourcePath:"docs/research/phase8cf-construction-macro-stage-scope-audit.md"}, {n:"33",title:"Phase 8CG — Hand-flame surface syntax reconstruction",status:"Open question" as Status,tag:"CONSTRUCTION / SURFACE GRAMMAR",desc:"Reconstructs only the exact archived hand-flame surface: phrase separators, whitespace token boundaries and phrase-to-source evidence. It does not generalise a Construction grammar.",sourcePath:"docs/research/phase8cg-hand-flame-surface-syntax-reconstruction.md"}, {n:"34",title:"Phase 8CH — Construction lexical segmentation and Foot-candidate audit",status:"Open question" as Status,tag:"CONSTRUCTION / LEXICAL EVIDENCE",desc:"Compares every hand-flame token occurrence against the recovered Foot, macro and H-series inventories, retaining fixture context and unresolved spelling overlaps.",sourcePath:"docs/research/phase8ch-construction-lexical-segmentation-audit.md"}, {n:"35",title:"Phase 8CI — Construction Foot paradigm evidence closure",status:"Open question" as Status,tag:"CONSTRUCTION / FOOT MORPHOLOGY",desc:"Historical closure audit: Phase 8CY-T recovered the five relation codas from Phase 4 Table 3; Phase 8CY-WF synchronises the active ledger. Productive lexical licensing remains open.",sourcePath:"docs/research/phase8ci-construction-foot-paradigm-evidence-closure.md"}, {n:"36",title:"Phase 8CJ — Construction macro version provenance",status:"Open question" as Status,tag:"CONSTRUCTION / VERSION TRACEABILITY",desc:"Cross-checks the six historical Construction macros against v3.0 canon and the v5 draft lexicon, retaining a section-citation mismatch and blocking backward promotion of evidence.",sourcePath:"docs/research/phase8cj-construction-macro-version-provenance.md"}, {n:"37",title:"Phase 8CK — Construction semantic relationship map",status:"Open question" as Status,tag:"CONSTRUCTION / SEMANTIC RELATIONSHIPS",desc:"Maps evidence-typed links between macros, frame groups, H-series, fixture tokens, VARE/REQUIRE and MEL without inferring signatures, composition or stage assignments.",sourcePath:"docs/research/phase8ck-construction-semantic-relationship-map.md"}, {n:"38",title:"Phase 8CL — Construction macro contract readiness",status:"Open question" as Status,tag:"CONSTRUCTION / CONTRACT READINESS",desc:"Applies a fail-closed nine-dimension compiler-readiness gate to all six macros, retaining owner-confirmation and fixture-only blockers.",sourcePath:"docs/research/phase8cl-construction-macro-contract-readiness.md"}, {n:"39",title:"Phase 8CM — Phase 4 DOCX retrieval and extraction",status:"Open question" as Status,tag:"SOURCE RECOVERY / PHASE 4",desc:"Adds a base64 retrieval path with source-byte SHA-256 verification and records the outstanding P4-T05/P4-T10 primary test definitions.",sourcePath:"docs/research/phase8cm-phase4-docx-retrieval-and-extraction.md"}, {n:"40",title:"Phase 8CN — Construction reference trace",status:"Open question" as Status,tag:"CONSTRUCTION / REFERENCE CONTINUITY",desc:"Adds a sequence-level diagnostic for explicit MI/NI/RI/me bindings while blocking unproven persistence across phrase and clause boundaries.",sourcePath:"docs/research/phase8cn-construction-reference-trace.md"}, {n:"41",title:"Phase 8CO — Unified Foot candidate review",status:"Open question" as Status,tag:"CONSTRUCTION / FOOT MORPHOLOGY",desc:"Consolidates frame, provisional vowel, whole-token and conflicting CVC evidence without inventing productive Foot grammar.",sourcePath:"docs/research/phase8co-construction-foot-candidate-review.md"}, {n:"42",title:"Phase 8CP — Integrated Construction grammar specification",status:"Open question" as Status,tag:"CONSTRUCTION / GRAMMAR EVIDENCE",desc:"Consolidates seven stages, Foot morphology, macro readiness, reference scope and Expression boundaries into a versioned non-executable evidence specification.",sourcePath:"docs/research/phase8cp-integrated-construction-grammar-evidence.md"}, {n:"43",title:"Phase 8CQ — Incantation semantic-obligation review",status:"Open question" as Status,tag:"INCANTATIONS / SEMANTIC OBLIGATIONS",desc:"Adds an evidence-aware ledger for operation, target, mechanism, spatial role, constraints, resources and outcome without inventing spoken syntax or enabling execution.",sourcePath:"docs/research/phase8cq-incantation-semantic-obligation-review.md"}, {n:"44",title:"Phase 8CR — Formal Incantation role and argument model",status:"Open question" as Status,tag:"INCANTATIONS / OPERATION ARGUMENTS",desc:"Adds typed operation argument and reference review for kren, trak, frem, shren and bran while preserving vare as a separate preference operator and keeping validation gates distinct.",sourcePath:"docs/research/phase8cr-formal-incantation-role-and-argument-model.md"}, {n:"45",title:"Phase 8CS — Incantation semantic relationship and dependency model",status:"Open question" as Status,tag:"INCANTATIONS / RELATIONSHIP GRAPH",desc:"Adds a typed semantic graph for goals, transitions, mechanisms, coupling, conditions, spatial values, feasibility and outcomes, with cycle checks for operation prerequisites.",sourcePath:"docs/research/phase8cs-incantation-semantic-relationship-model.md"}, {n:"46",title:"Phase 8CT — Condition evidence and prerequisite gate model",status:"Open question" as Status,tag:"INCANTATIONS / CONDITION GATES",desc:"Adds structural review for versioned condition declarations and fail-closed prerequisite result handling; no predicate evaluation or execution.",sourcePath:"docs/research/phase8ct-condition-evidence-and-prerequisite-gates.md"}, {n:"47",title:"Phase 8CU — Evidence provenance and temporal validity",status:"Open question" as Status,tag:"INCANTATIONS / EVIDENCE & TIME",desc:"Adds evidence freshness/provenance review, conflict detection, temporal contract checks and postcondition gating without claiming observation or execution.",sourcePath:"docs/research/phase8cu-evidence-provenance-and-temporal-validity.md"}, {n:"48",title:"Phase 8CV — Incantation lifecycle and failure propagation",status:"Open question" as Status,tag:"INCANTATIONS / LIFECYCLE",desc:"Adds append-only lifecycle and independent interruption-state review, preserves failures, blocks invalid progression and requires explicit recovery branches.",sourcePath:"docs/research/phase8cv-incantation-lifecycle-and-failure-propagation.md"}, {n:"49",title:"Phase 8CW — Integrated Incantation contract reviewer",status:"Open question" as Status,tag:"INCANTATIONS / INTEGRATION",desc:"Orchestrates argument, relationship, condition, evidence, temporal, postcondition, lifecycle and recovery reviews with cross-section consistency checks.",sourcePath:"docs/research/phase8cw-integrated-incantation-contract-reviewer.md"}, {n:"50",title:"Phase 8CY — Primary Phase 4 source concordance",status:"Open question" as Status,tag:"CONSTRUCTION / SOURCE EVIDENCE",desc:"Adds bounded primary-source claims for the Construction/Expression division, seven-stage ordering, G-4 modifier attachment, KAN/fire distinction and audit validation limits.",sourcePath:"docs/research/phase8cy-primary-phase4-claims-concordance.md"}, {n:"51",title:"Phase 8CY-N — Phase 4 coda inventory and Foot morphology",status:"Open question" as Status,tag:"CONSTRUCTION / FOOT MORPHOLOGY",desc:"Preserves the Phase 4 body transcription and source-backed five relation-coda mappings; the primary source favours CVC while the Phase 5.16 optional-coda context remains unresolved.",sourcePath:"docs/research/phase8cy-n-phase4-coda-inventory-and-foot-morphology.md"}, {n:"52",title:"Phase 8CY-O — Phase 4 Foot and mel classification conflict",status:"Open question" as Status,tag:"CONSTRUCTION / FOOT MORPHOLOGY",desc:"Implements the five recovered relation-coda meanings and exposes the internal Phase 4 mel Foot-shaped versus fused-reference conflict without resolving it.",sourcePath:"docs/research/phase8cy-o-mel-foot-classification-conflict.md"}, {n:"53",title:"Phase 8CY-P — Arcane operator alias compatibility",status:"Open question" as Status,tag:"FORMAL ARCANA / LEXICON",desc:"Audits all seven Phase 4 rename aliases against the explicit Phase 5.5 registry and the provisional Phase 6G parser, preserving operator versus lexical-atom roles and RE/RA homophone collisions.",sourcePath:"docs/research/phase8cy-p-arcane-alias-compatibility-audit.md"}, {n:"54",title:"Phase 8CY-Q — Preferred operator semantic-contract lookup",status:"Open question" as Status,tag:"FORMAL ARCANA / SEMANTICS",desc:"Links six Phase 4 preferred operator spellings to their existing Phase 2 provisional contracts without promoting arity, types or execution semantics.",sourcePath:"docs/research/phase8cy-q-preferred-operator-contract-aliases.md"}, {n:"59",title:"Phase 8CY-WF — Construction Foot evidence synchronisation",status:"Open question" as Status,tag:"CONSTRUCTION / SOURCE RECONCILIATION",desc:"Synchronises active Foot inventories and closure reviewers with the reviewed Phase 4 primary-source CVC shape and five relation codas, while preserving the Phase 5.16 optionality context question and unattested 180-item design space.",sourcePath:"docs/research/phase8cy-w-foot-evidence-synchronisation.md"},{n:"62",title:"Phase 8DA — Binding reuse eligibility and temporal preservation",status:"Open question" as Status,tag:"ARCANE / BINDING SEMANTICS",desc:"Adds a conservative evidence gate for repeated-expression reuse and prevents live KWAK evaluation from being replaced by static binding references.",sourcePath:"docs/research/phase8da-binding-reuse-eligibility-and-temporal-preservation.md"},{n:"61",title:"Phase 8CZ — Canonical binding operator reconciliation",status:"Open question" as Status,tag:"ARCANE / BINDING GRAMMAR",desc:"Reconciles KWAM, KWAT and KWAK against the provisional parser. Binding identifiers, arities and evaluation remain open.",sourcePath:"docs/research/phase8cz-canonical-binding-operator-reconciliation.md"},{n:"60",title:"Phase 8CY-Y — Proposed shared-reference scope rules",status:"Open question" as Status,tag:"INCANTATIONS / SCOPE PROPOSAL",desc:"Tests spell-prelude and operation-local visibility for shared references. No spoken syntax or canon rule is established.",sourcePath:"docs/research/phase8cy-y-proposed-shared-reference-scope-rules.md"},{n:"59",title:"Phase 8CY-X — Experimental shared-reference factoring",status:"Open question" as Status,tag:"INCANTATIONS / REVERSIBLE IR PROPOSAL",desc:"Packages repeated spell-lifetime references into explicit shared bindings and expands them back into ordered argument records. This is not spoken Arcana syntax or a canon grammar rule.",sourcePath:"docs/research/phase8cy-x-experimental-shared-reference-factoring.md"},{n:"58",title:"Phase 8CY-W — Grammatical compression opportunity audit",status:"Open question" as Status,tag:"INCANTATIONS / MEANING-PRESERVING COMPRESSION",desc:"Identifies exact repeated spell-lifetime reference declarations that may be candidates for shared grammatical binding. No syntax, rewrite or semantic equivalence is assumed.",sourcePath:"docs/research/phase8cy-w-grammatical-compression-opportunity-audit.md"},{n:"57",title:"Phase 8CY-V — Reversible Incantation text compression",status:"Open question" as Status,tag:"INCANTATIONS / LOSSLESS SHORTENING",desc:"Adds an exact reversible shared-alias layer for shorter storage/display text, with collision checks and mandatory expansion before parsing; does not change Arcane grammar.",sourcePath:"docs/research/phase8cy-v-reversible-incantation-text-compression.md"},{n:"56",title:"Phase 8CY-U — Structured Incantation reader",status:"Open question" as Status,tag:"INCANTATIONS / HUMAN-READABLE INTERPRETATION",desc:"Adds a declaration-only readable report for structured Incantation contracts, exposing operations, references, relationships, conditions, evidence and lifecycle without claiming spoken-Arcane parsing or execution.",sourcePath:"docs/research/phase8cy-u-structured-incantation-reader.md"},{n:"55",title:"Phase 8CY-R — Construction Foot paradigm evidence matrix",status:"Open question" as Status,tag:"CONSTRUCTION / PARADIGM EVIDENCE",desc:"Enumerates the Phase 4 6×6×5 Foot design space as 180 unverified candidates, keeping provisional parameter families, group-level macro associations, five relation-coda meanings and unresolved lexical/physical semantics distinct.",sourcePath:"docs/research/phase8cy-r-construction-foot-paradigm-evidence-matrix.md"}].map((item) => <article className="review-card" key={item.n}><div className="review-card-top"><span className="review-number">{item.n}</span><StatusPill status={item.status}/></div><span className="detail-kicker">{item.tag}</span><h2>{item.title}</h2><p>{item.desc}</p><div className="review-card-bottom"><a href={githubBlobUrl(item.sourcePath, GITHUB_SOURCE_REF)} target="_blank" rel="noreferrer" aria-label={"Open source evidence for " + item.title}>Open source evidence <span aria-hidden="true">↗</span></a></div></article>)}</div>
           <div className="section-heading lower-heading"><div><div className="eyebrow">PHASE 6G · LIVE LOCAL OBSERVATIONS</div><h2>Recovered parser fixture review</h2></div><span className="section-caption">{phase6gFixtureAudit.fixtureCount} FIXTURES</span></div>
           <p className="page-intro">These observations are computed in this browser build against the provisional Phase 6G parser. They are not CI results, source approval, semantic validation, or canon acceptance. A context-dependent case is deliberately not counted as a direct pass.</p>
           <div className="audit-matrix">

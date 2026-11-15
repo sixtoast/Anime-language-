@@ -20,15 +20,17 @@ export const constructionStageOrder = [
 
 export type ConstructionStage = typeof constructionStageOrder[number];
 export type ConstructionOrderStatus =
+  | "INVALID_SEQUENCE"
   | "INSUFFICIENT_SEQUENCE"
   | "ORDER_CONSISTENT"
   | "ORDER_INCONSISTENT";
 
 export interface ConstructionOrderIssue {
-  code: "STAGE_OUT_OF_ORDER";
-  stage: ConstructionStage;
+  code: "SEQUENCE_NOT_ARRAY" | "UNKNOWN_STAGE" | "STAGE_OUT_OF_ORDER";
   index: number;
-  expectedAfter: ConstructionStage;
+  stageValue?: unknown;
+  stage?: ConstructionStage;
+  expectedAfter?: ConstructionStage;
   message: string;
 }
 
@@ -46,16 +48,53 @@ const stageIndex = new Map<ConstructionStage, number>(
   constructionStageOrder.map((stage, index) => [stage, index])
 );
 
-export function auditConstructionOrder(
-  stages: readonly ConstructionStage[]
-): ConstructionOrderAudit {
+const unresolved = [
+  "Whether any stage may be omitted.",
+  "How many references, spatial roles, Feet, couplings or quantities a construction may contain.",
+  "How a stage's internal syntax and semantics are represented.",
+  "The exact v2.0 Foot, coupling, landmark and KAN/KEN/KAS rules."
+] as const;
+
+const limitation =
+  "An order-consistent sequence is not a complete construction, a valid Arcane parse, a feasibility result, or evidence of execution.";
+
+export function auditConstructionOrder(input: unknown): ConstructionOrderAudit {
+  if (!Array.isArray(input)) {
+    return {
+      status: "INVALID_SEQUENCE",
+      ordered: null,
+      stages: [],
+      issues: [{
+        code: "SEQUENCE_NOT_ARRAY",
+        index: -1,
+        stageValue: input,
+        message: "Construction order input must be an array of stage values."
+      }],
+      checkedRule: constructionStageOrder.join(" → "),
+      unresolved: [...unresolved],
+      limitation
+    };
+  }
+
   const issues: ConstructionOrderIssue[] = [];
+  const stages: ConstructionStage[] = [];
   let highestSeen = -1;
   let previousStage: ConstructionStage | undefined;
 
-  stages.forEach((stage, index) => {
-    const rank = stageIndex.get(stage);
-    if (rank === undefined) return;
+  input.forEach((candidate: unknown, index: number) => {
+    if (typeof candidate !== "string" || !stageIndex.has(candidate as ConstructionStage)) {
+      issues.push({
+        code: "UNKNOWN_STAGE",
+        index,
+        stageValue: candidate,
+        message: "The supplied value is not a recognised Construction stage; its position cannot be audited."
+      });
+      return;
+    }
+
+    const stage = candidate as ConstructionStage;
+    stages.push(stage);
+    const rank = stageIndex.get(stage)!;
     if (rank < highestSeen) {
       issues.push({
         code: "STAGE_OUT_OF_ORDER",
@@ -71,22 +110,29 @@ export function auditConstructionOrder(
     }
   });
 
-  const status: ConstructionOrderStatus = stages.length === 0
+  const hasInvalidInput = issues.some(issue =>
+    issue.code === "UNKNOWN_STAGE"
+  );
+  const hasOrderError = issues.some(issue =>
+    issue.code === "STAGE_OUT_OF_ORDER"
+  );
+  const status: ConstructionOrderStatus = input.length === 0
     ? "INSUFFICIENT_SEQUENCE"
-    : issues.length > 0 ? "ORDER_INCONSISTENT" : "ORDER_CONSISTENT";
+    : hasInvalidInput
+      ? "INVALID_SEQUENCE"
+      : hasOrderError
+        ? "ORDER_INCONSISTENT"
+        : "ORDER_CONSISTENT";
 
   return {
     status,
-    ordered: status === "INSUFFICIENT_SEQUENCE" ? null : issues.length === 0,
-    stages: [...stages],
+    ordered: status === "INSUFFICIENT_SEQUENCE" || status === "INVALID_SEQUENCE"
+      ? null
+      : !hasOrderError,
+    stages,
     issues,
     checkedRule: constructionStageOrder.join(" → "),
-    unresolved: [
-      "Whether any stage may be omitted.",
-      "How many references, spatial roles, Feet, couplings or quantities a construction may contain.",
-      "How a stage's internal syntax and semantics are represented.",
-      "The exact v2.0 Foot, coupling, landmark and KAN/KEN/KAS rules."
-    ],
-    limitation: "An order-consistent sequence is not a complete construction, a valid Arcane parse, a feasibility result, or evidence of execution."
+    unresolved: [...unresolved],
+    limitation
   };
 }

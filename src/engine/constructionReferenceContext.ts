@@ -18,43 +18,65 @@ export interface ConstructionReferenceBinding {
 export interface ConstructionReferenceContext {
   current: ConstructionReferenceBinding | null;
   status: "BOUND" | "UNBOUND" | "UNRESOLVED";
-  issue: "NONE" | "REFERENCE_ID_EMPTY" | "TOKEN_SCOPE_UNRESOLVED";
+  issue:
+    | "NONE"
+    | "REFERENCE_ID_EMPTY"
+    | "TOKEN_SCOPE_UNRESOLVED"
+    | "REFERENCE_BINDING_INVALID"
+    | "REPLACEMENT_BINDING_INVALID";
   limitation: string;
 }
 
 const LIMITATION =
   "Recovered reference persistence and default scope only. This does not resolve anatomical landmarks, surface boundaries, reference identity semantics, token parsing, spatial transformations, or construction completeness.";
 
-export function bindConstructionReference(
-  token: string,
-  referenceId: string
+function unresolved(
+  issue: Exclude<ConstructionReferenceContext["issue"], "NONE">
 ): ConstructionReferenceContext {
-  if (!referenceId.trim()) {
-    return {
-      current: null,
-      status: "UNRESOLVED",
-      issue: "REFERENCE_ID_EMPTY",
-      limitation: LIMITATION
-    };
+  return { current: null, status: "UNRESOLVED", issue, limitation: LIMITATION };
+}
+
+function scopeForToken(token: unknown): ConstructionReferenceScope | null {
+  if (token === "MI" || token === "NI" || token === "RI") return "DEFAULT-VOLUME";
+  if (token === "me") return "SELF-SURFACE";
+  return null;
+}
+
+/** Validates a binding at an untrusted runtime boundary. */
+function validateBinding(value: unknown): ConstructionReferenceBinding | null {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return null;
+  const candidate = value as Record<string, unknown>;
+  const expectedScope = scopeForToken(candidate.token);
+  if (
+    expectedScope === null ||
+    typeof candidate.referenceId !== "string" ||
+    candidate.referenceId.trim().length === 0 ||
+    candidate.scope !== expectedScope ||
+    candidate.persistence !== "UNTIL-REPLACED"
+  ) return null;
+
+  return {
+    token: candidate.token as ConstructionReferenceToken,
+    referenceId: candidate.referenceId.trim(),
+    scope: expectedScope,
+    persistence: "UNTIL-REPLACED"
+  };
+}
+
+export function bindConstructionReference(
+  token: unknown,
+  referenceId: unknown
+): ConstructionReferenceContext {
+  if (typeof referenceId !== "string" || !referenceId.trim()) {
+    return unresolved("REFERENCE_ID_EMPTY");
   }
 
-  let scope: ConstructionReferenceScope;
-  if (token === "MI" || token === "NI" || token === "RI") {
-    scope = "DEFAULT-VOLUME";
-  } else if (token === "me") {
-    scope = "SELF-SURFACE";
-  } else {
-    return {
-      current: null,
-      status: "UNRESOLVED",
-      issue: "TOKEN_SCOPE_UNRESOLVED",
-      limitation: LIMITATION
-    };
-  }
+  const scope = scopeForToken(token);
+  if (scope === null) return unresolved("TOKEN_SCOPE_UNRESOLVED");
 
   return {
     current: {
-      token,
+      token: token as ConstructionReferenceToken,
       referenceId: referenceId.trim(),
       scope,
       persistence: "UNTIL-REPLACED"
@@ -67,15 +89,39 @@ export function bindConstructionReference(
 
 /**
  * A null update means no new reference was supplied, so the current binding
- * persists. A binding replaces the previous reference as a whole.
+ * persists. A valid replacement replaces the previous reference as a whole.
+ * Malformed updates fail closed rather than preserving an unverified binding.
  */
 export function advanceConstructionReferenceContext(
-  current: ConstructionReferenceBinding | null,
-  replacement: ConstructionReferenceBinding | null
+  current: unknown,
+  replacement: unknown
 ): ConstructionReferenceContext {
+  if (replacement !== null) {
+    const validatedReplacement = validateBinding(replacement);
+    if (!validatedReplacement) return unresolved("REPLACEMENT_BINDING_INVALID");
+    return {
+      current: validatedReplacement,
+      status: "BOUND",
+      issue: "NONE",
+      limitation: LIMITATION
+    };
+  }
+
+  if (current === null) {
+    return {
+      current: null,
+      status: "UNBOUND",
+      issue: "NONE",
+      limitation: LIMITATION
+    };
+  }
+
+  const validatedCurrent = validateBinding(current);
+  if (!validatedCurrent) return unresolved("REFERENCE_BINDING_INVALID");
+
   return {
-    current: replacement ?? current,
-    status: (replacement ?? current) ? "BOUND" : "UNBOUND",
+    current: validatedCurrent,
+    status: "BOUND",
     issue: "NONE",
     limitation: LIMITATION
   };

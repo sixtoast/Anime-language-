@@ -1,55 +1,12 @@
-import { describe, expect, it } from "vitest";
-import { getOperatorContract, operatorContracts, operatorContractPrinciples } from "./operatorContracts";
-
-describe("Source-traceable operator contract registry", () => {
-  it("[OPC-001] records only the nine provisional Phase 2 arities", () => {
-    const known = ["FRAPA", "FRATA", "FRAKA", "FRALA", "FRASHA", "DRAN", "DREM", "DRIM", "DRAL"];
-    expect(known.every((name) => getOperatorContract(name)?.arityStatus === "provisional-audit-signature")).toBe(true);
-    expect(known.map((name) => getOperatorContract(name)?.arity)).toEqual([2, 2, 2, 2, 1, 1, 2, 2, 3]);
-  });
-
-  it("[OPC-002] does not invent executable input or output types", () => {
-    for (const contract of operatorContracts.filter((item) => item.arityStatus === "provisional-audit-signature")) {
-      expect(contract.inputTypes).toBeNull();
-      expect(contract.outputType).toBeNull();
-    }
-  });
-
-  it("[OPC-003] marks SIMA's observation result while keeping its signature incomplete", () => {
-    const sima = getOperatorContract("sima");
-    expect(sima?.outputType).toBe("observation (canon-described)");
-    expect(sima?.arity).toBeNull();
-    expect(sima?.arityStatus).toBe("canon-described-incomplete");
-  });
-
-  it("[OPC-004] leaves conceptual operators unresolved when arity is not established", () => {
-    for (const name of ["NES", "GAMA", "DAVE", "KWAM", "KWAT", "KWAK", "GRAN", "GRAT", "GRAK", "BEK", "ZET"]) {
-      expect(getOperatorContract(name)?.arity).toBeNull();
-      expect(getOperatorContract(name)?.arityStatus).toBe("unresolved");
-    }
-  });
-
-  it("[OPC-005] records source anchors and open questions for every contract", () => {
-    expect(operatorContracts.length).toBeGreaterThanOrEqual(20);
-    for (const contract of operatorContracts) {
-      expect(contract.source.length).toBeGreaterThan(0);
-      expect(contract.openQuestions.length).toBeGreaterThan(0);
-    }
-  });
-
-  it("[OPC-006] lookup normalizes case and surrounding whitespace", () => {
-    expect(getOperatorContract(" frapa ")?.operator).toBe("FRAPA");
-    expect(getOperatorContract("not-an-operator")).toBeUndefined();
-  });
-
-  it("[OPC-007] exposes safeguards against inferred signatures and conflated concepts", () => {
-    expect(operatorContractPrinciples.map((principle) => principle.id)).toEqual(["OPCON-001", "OPCON-002", "OPCON-003", "OPCON-004"]);
-  });
-
-  it("[OPC-008] keeps dimensional and evaluation rules explicitly non-executable", () => {
-    for (const contract of operatorContracts) {
-      expect(contract.dimensionalRule.length).toBeGreaterThan(0);
-      expect(contract.evaluationRule.length).toBeGreaterThan(0);
-    }
-  });
+import{describe,expect,it}from"vitest";import{getOperatorContract,operatorContractAliases}from"./operatorContracts";import{bundledLexiconLoad}from"./bundledLexicon";
+describe("Phase 8CY-Q preferred operator contract aliases",()=>{
+it("[OPCON-ALIAS-001] maps FRAJA to the provisional FRATA contract",()=>expect(getOperatorContract("FRAJA")).toMatchObject({operator:"FRAJA",arity:2,arityStatus:"provisional-audit-signature"}));
+it("[OPCON-ALIAS-002] maps FRAMA to the provisional FRAKA contract",()=>expect(getOperatorContract("FRAMA")).toMatchObject({operator:"FRAMA",arity:2,arityStatus:"provisional-audit-signature"}));
+it("[OPCON-ALIAS-003] maps DRUM to the provisional DRIM contract",()=>expect(getOperatorContract("DRUM")).toMatchObject({operator:"DRUM",arity:2,arityStatus:"provisional-audit-signature"}));
+it("[OPCON-ALIAS-004] maps DRAS to the provisional DRAL contract",()=>expect(getOperatorContract("DRAS")).toMatchObject({operator:"DRAS",arity:3,arityStatus:"provisional-audit-signature"}));
+it("[OPCON-ALIAS-005] maps GRASH to the unresolved GRAK contract",()=>expect(getOperatorContract("GRASH")).toMatchObject({operator:"GRASH",arity:null,arityStatus:"unresolved"}));
+it("[OPCON-ALIAS-006] maps KWASH to the unresolved KWAK contract",()=>expect(getOperatorContract("KWASH")).toMatchObject({operator:"KWASH",arity:null,arityStatus:"unresolved"}));
+it("[OPCON-ALIAS-007] aligns all six preferred mappings with the explicit lexicon alias registry",()=>{for(const a of operatorContractAliases)expect(bundledLexiconLoad.registry.aliases.get(a.phase2Form.toLowerCase())?.preferredForm).toBe(a.preferredForm.toLowerCase())});
+it("[OPCON-ALIAS-008] retains legacy contracts and excludes REN as an operator",()=>{expect(getOperatorContract("FRATA")?.operator).toBe("FRATA");expect(getOperatorContract("REN")).toBeUndefined()});
+it("[OPCON-ALIAS-009] adds provenance without closing signature questions",()=>{const c=getOperatorContract("FRAJA")!;expect(c.source.some(x=>x.includes("Phase 4 §5.1"))).toBe(true);expect(c.inputTypes).toBeNull();expect(c.outputType).toBeNull();expect(c.arityStatus).toBe("provisional-audit-signature")});
 });

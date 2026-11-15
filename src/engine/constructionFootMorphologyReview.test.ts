@@ -1,0 +1,26 @@
+import{describe,expect,it}from"vitest";import{reviewConstructionFootMorphology,footMorphologyEvidenceBoundary}from"./constructionFootMorphologyReview";
+describe("Phase 8CY-O source-aware Construction Foot morphology review",()=>{
+it("[FOOT-MORPH-001] recognises six canonical CV frame forms",()=>expect(["pa","ba","ta","da","ka","ga"].map(x=>reviewConstructionFootMorphology(x).status)).toEqual(Array(6).fill("FRAME-FORM-RECORDED")));
+it("[FOOT-MORPH-002] does not classify CV as complete Foot",()=>{expect(reviewConstructionFootMorphology("pa").lexicalFootValidity).toBe("NOT-ESTABLISHED");expect(footMorphologyEvidenceBoundary.frameFormsAreCompleteFeet).toBe(false)});
+it("[FOOT-MORPH-003] recognises CVC only as structural candidate",()=>expect(reviewConstructionFootMorphology("pat").status).toBe("CVC-STRUCTURE-CANDIDATE"));
+it("[FOOT-MORPH-004] does not infer meaning from arbitrary coda",()=>expect(reviewConstructionFootMorphology("pak").codaMeaning).toBe("NOT-RECOVERED"));
+it("[FOOT-MORPH-005] keeps parameter families provisional",()=>{expect(reviewConstructionFootMorphology("pa").parameterFamily).toBe("Energy");expect(footMorphologyEvidenceBoundary.parameterFamiliesAreProvisional).toBe(true)});
+it("[FOOT-MORPH-006] keeps TRAK and KREN groups distinct",()=>{expect(reviewConstructionFootMorphology("pa").macroAssociation).toBe("TRAK");expect(reviewConstructionFootMorphology("ba").macroAssociation).toBe("KREN")});
+it("[FOOT-MORPH-007] does not infer individual frame meanings",()=>expect(reviewConstructionFootMorphology("ta").lexicalFootValidity).toBe("NOT-ESTABLISHED"));
+it("[FOOT-MORPH-008] maps m and n to open-loop maintenance",()=>{for(const x of ["pam","pan"])expect(reviewConstructionFootMorphology(x).codaMeaning).toBe("MAINTAIN-OPEN-LOOP")});
+it("[FOOT-MORPH-009] maps ng to feedback maintenance",()=>{const x=reviewConstructionFootMorphology("pang");expect(x.relationCoda).toBe("ng");expect(x.codaMeaning).toBe("MAINTAIN-FEEDBACK")});
+it("[FOOT-MORPH-010] maps s and sh to release",()=>{for(const x of ["pas","pash"])expect(reviewConstructionFootMorphology(x).codaMeaning).toBe("RELEASE")});
+it("[FOOT-MORPH-011] separates relation and phonotactic codas",()=>{expect(reviewConstructionFootMorphology("pak").codaMeaning).toBe("NOT-RECOVERED");expect(footMorphologyEvidenceBoundary.generalPhonotacticCodaInventory).toContain("l")});
+it("[FOOT-MORPH-012] preserves mel classification conflict",()=>{const x=reviewConstructionFootMorphology("mel");expect(x.status).toBe("SOURCE-CLASSIFICATION-CONFLICT");expect(x.explanation).toContain("P4-T10");expect(x.explanation).toContain("Table 14")});
+it("[FOOT-MORPH-013] does not generalise mel to other m-initial forms",()=>expect(reviewConstructionFootMorphology("mal").status).toBe("UNRECOGNISED-SHAPE"));
+it("[FOOT-MORPH-014] keeps CVC optionality unresolved",()=>{expect(reviewConstructionFootMorphology("pas").codaRequirement).toContain("CVC-REQUIRED-PHASE4-PRIMARY");expect(footMorphologyEvidenceBoundary.productiveParadigmRecovered).toBe(false)});
+it("[FOOT-MORPH-015] keeps KREN proposed and non-executable",()=>{expect(reviewConstructionFootMorphology("ban").macroAssociation).toBe("KREN");expect(reviewConstructionFootMorphology("ban").executable).toBe(false)});
+it("[FOOT-MORPH-019] preserves kal's Foot-shape versus relation-coda conflict",()=>{const x=reviewConstructionFootMorphology("kal");expect(x.status).toBe("SOURCE-CLASSIFICATION-CONFLICT");expect(x.explanation).toContain("P4-T10");expect(x.explanation).toContain("relation codas")});
+it("[FOOT-MORPH-016] fails closed for malformed and empty inputs",()=>{expect(reviewConstructionFootMorphology("xa").status).toBe("UNRECOGNISED-SHAPE");expect(reviewConstructionFootMorphology("paa").status).toBe("UNRECOGNISED-SHAPE");expect(reviewConstructionFootMorphology("").status).toBe("EMPTY")});
+
+it("[FOOT-MORPH-017] rejects a vowel as a CVC relation coda",()=>{for(const x of ["pae","pao","paa"])expect(reviewConstructionFootMorphology(x).status).toBe("UNRECOGNISED-SHAPE")});
+it("[FOOT-MORPH-018] accepts only the documented consonant or recognised digraph after a valid frame-vowel pair",()=>{expect(reviewConstructionFootMorphology("pam").status).toBe("CVC-STRUCTURE-CANDIDATE");expect(reviewConstructionFootMorphology("pang").codaMeaning).toBe("MAINTAIN-FEEDBACK");expect(reviewConstructionFootMorphology("pash").codaMeaning).toBe("RELEASE");expect(reviewConstructionFootMorphology("pae").relationCoda).toBeNull()});
+
+it("[FOOT-MORPH-020] accepts only Phase 4 phonotactically legal codas",()=>{for(const coda of ["m","n","ng","p","t","k","s","sh","l","r"])expect(reviewConstructionFootMorphology("pa"+coda).status).toBe("CVC-STRUCTURE-CANDIDATE");for(const coda of ["f","v","z","h","w","j"])expect(reviewConstructionFootMorphology("pa"+coda).status).toBe("UNRECOGNISED-SHAPE")});
+it("[FOOT-MORPH-021] exposes phonotactic-only codas separately from semantic relation codas",()=>{expect(reviewConstructionFootMorphology("pal").codaEvidenceClass).toBe("PHONOTACTIC-ONLY");expect(reviewConstructionFootMorphology("pam").codaEvidenceClass).toBe("RELATION-CODA");expect(reviewConstructionFootMorphology("kal").codaEvidenceClass).toBe("SOURCE-CONFLICT");expect(reviewConstructionFootMorphology("mel").codaEvidenceClass).toBe("SOURCE-CONFLICT")});
+});

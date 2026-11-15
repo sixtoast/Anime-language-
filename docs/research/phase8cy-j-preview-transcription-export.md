@@ -1,0 +1,3 @@
+# Phase 8CY-J — Export verified transcription from preview build
+
+The primary DOCX extraction is SHA-verified and the recursive body transcription is generated in the Vercel preview workspace. The next preview now emits the complete UTF-8 transcription as numbered base64 chunks in the build log, together with the extracted character count and SHA-256 of the transcription itself. This is a temporary transport so the generated derivative can be committed as a normal text source and reviewed directly through GitHub. The original DOCX remains unchanged; the transcription will be explicitly labelled as document-body extraction, not a perfect reconstruction of all Word parts or layout.

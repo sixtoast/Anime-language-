@@ -1,0 +1,20 @@
+import {describe,expect,it} from "vitest";
+import {handFlameSourceSequence} from "./constructionHandFlameEvidence";
+import {reconstructHandFlameSurface,handFlameSurfaceSyntaxProfile} from "./handFlameSurfaceSyntaxReconstruction";
+describe("Phase 8CG exact hand-flame surface reconstruction",()=>{
+ const parsed=reconstructHandFlameSurface(handFlameSourceSequence);
+ it("[SURFACE-CG-001] reconstructs the exact six phrase surface",()=>{expect(parsed.status).toBe("EXACT-FIXTURE-RECONSTRUCTED");expect(parsed.phraseCount).toBe(6)});
+ it("[SURFACE-CG-002] preserves the exact middle-dot phrase delimiter",()=>{expect(parsed.delimiter).toBe(" · ");expect(handFlameSurfaceSyntaxProfile.phraseSeparator).toBe(" · ")});
+ it("[SURFACE-CG-003] preserves phrase order and exact source spellings",()=>{expect(parsed.phrases.map(p=>p.surface)).toEqual(["mel","po da za shi to za ma","kan ken","he ha","sa shi za se","kas"])});
+ it("[SURFACE-CG-004] tokenises whitespace only within exact fixture profile",()=>{expect(parsed.phrases.map(p=>p.tokens)).toEqual([["mel"],["po","da","za","shi","to","za","ma"],["kan","ken"],["he","ha"],["sa","shi","za","se"],["kas"]])});
+ it("[SURFACE-CG-005] does not split tokens into inferred morphemes",()=>{expect(parsed.phrases.every(p=>p.morphology==="NOT-ANALYSED")).toBe(true)});
+ it("[SURFACE-CG-006] retains fixture-specific status for phrase one",()=>{expect(parsed.phrases[0].interpretationStatus).toBe("PARTIAL-INTERPRETATION")});
+ it("[SURFACE-CG-007] retains fixture-specific status for spatial phrase",()=>{expect(parsed.phrases[1].interpretationStatus).toBe("INTERPRETATION-RECORDED")});
+ it("[SURFACE-CG-008] retains partial interpretation for kan ken",()=>{expect(parsed.phrases[2].interpretationStatus).toBe("PARTIAL-INTERPRETATION")});
+ it("[SURFACE-CG-009] retains provisional interpretation for he ha",()=>{expect(parsed.phrases[3].interpretationStatus).toBe("PARTIAL-INTERPRETATION")});
+ it("[SURFACE-CG-010] retains unresolved status for sa shi za se",()=>{expect(parsed.phrases[4].interpretationStatus).toBe("UNRESOLVED")});
+ it("[SURFACE-CG-011] retains partial interpretation for kas",()=>{expect(parsed.phrases[5].interpretationStatus).toBe("PARTIAL-INTERPRETATION")});
+ it("[SURFACE-CG-012] rejects altered delimiter, reordered and unknown surfaces",()=>{expect(reconstructHandFlameSurface(handFlameSourceSequence.replaceAll(" · "," | ")).status).toBe("SURFACE-MISMATCH");expect(reconstructHandFlameSurface(handFlameSourceSequence.replace("kan ken","ken kan")).status).toBe("SURFACE-MISMATCH");expect(reconstructHandFlameSurface("foo bar").status).toBe("SURFACE-MISMATCH")});
+ it("[SURFACE-CG-013] does not claim general grammar validity or stage mapping",()=>{expect(parsed.grammarValidity).toBe("NOT-ASSESSED");expect(parsed.phrases.every(p=>p.stageAssignment==="NOT-ESTABLISHED")).toBe(true);expect(parsed.generalisation).toBe("NOT-PERMITTED")});
+ it("[SURFACE-CG-014] fails closed for empty and non-string inputs",()=>{expect(reconstructHandFlameSurface(" ").status).toBe("EMPTY-INPUT");expect(reconstructHandFlameSurface(null).status).toBe("INVALID-INPUT")});
+});

@@ -404,3 +404,34 @@ Latest inspected main commit: `1a66fd8b`. GitHub Actions [#692](https://github.c
 The Overview workbench badge has been corrected from v1.8 to v2.1. Its next-task recommendation now points to WEB-INC-RUNTIME-01: a read-only Playground panel that invokes only existing pure evaluator modules with explicit deterministic sample inputs and displays their independent results, diagnostics and limitations. It must not call external identity/policy services, mutate resource state, or imply that a spell has been executed. The Overview browser assertion has been updated to protect the version badge and recommendation.
 
 GitHub Actions usage is currently limited according to the project owner. Do not deliberately trigger new workflows until the limit resets. Changes after commit `1a66fd8b` therefore remain unverified by CI unless the owner reports that Actions are available again or an alternative local verification environment is used. See the current [Website Feature Register](WEBSITE-FEATURE-REGISTER.md).
+
+
+### 2026-11-07 — v1.9 bounded conservation evaluator and account-balance reconciliation
+
+A draft implementation now adds a scalar-additive conservation evaluator and a read-only account-balance reconciler. The evaluator requires one exact resource/unit contract, a declared system boundary and valid interval, integer ticks, an explicit tolerance, and caller-supplied contract/boundary/uncertainty-rule evidence references. Unsupported invariants and non-passing evidence remain unresolved.
+
+The reconciler derives its expected gross account balance by projecting the supplied ledger accounts and events. It rejects partial or unresolved ledger projections, requires the selected account to match the named contract, checks the observation against the contract interval, and preserves signed discrepancies without changing ledger records. A held reservation remains part of gross balance and is not treated as consumption.
+
+This is account-balance-only reconciliation, not the full v1.9 RESOURCE-RECONCILED stage. It does not authenticate evidence, interpret an uncertainty model, implement transformations or cross-account invariants, infer conversions, establish physical conservation, authorise or execute operations, or verify effects. The feature is in a draft development branch; CI and Vercel preview verification are pending.
+
+Next: enforce the v1.9 observation evidence boundary before exposing deterministic sample conservation and account-reconciliation results in the read-only Playground runtime preview.
+
+
+### 2026-11-09 — v1.9 observation evidence boundary
+
+The account-balance reconciler now requires an explicitly classified observation. An estimate cannot be substituted for a measurement. A measurement must carry references for its method, observation time, uncertainty and provenance, plus a caller-supplied evidence reference and an explicit per-observation acceptance reference under the named uncertainty policy. The policy-acceptance state must be PASS before the observation can contribute to reconciliation.
+
+This is a presence and classification gate, not a measurement system or uncertainty calculator. The references and evidence states remain caller-supplied and unauthenticated; the evaluator does not validate an instrument, resolve provenance, calculate uncertainty bounds, or interpret the policy itself. Missing, failed, unknown or unavailable policy acceptance remains unresolved. The v1.9 RES19-56 and RES19-57 distinctions are preserved without adding a new resource law, conversion, tolerance or spoken form.
+
+Next: expose the bounded evaluator through deterministic read-only Playground examples only after the review branch is synchronised with main; keep the 60 canonical resource fixtures visibly separate from executed evaluator tests.
+
+
+### 2026-11-10 — read-only v1.9 conservation and reconciliation preview
+
+The Playground now invokes the bounded v1.9 conservation evaluator and ledger-backed account-balance reconciler through a separate deterministic sample preview. Six selectable scenarios cover a balanced sample, a conservation mismatch, an account discrepancy, estimate-to-measurement substitution, unknown per-measurement policy acceptance, and unresolved contract evidence. Conservation and account reconciliation remain visibly separate results with their own metrics and diagnostics.
+
+The preview uses only synthetic `preview-sample-stock` / `tick` identifiers, a declared scalar-additive demonstration contract, a zero-tick demonstration tolerance, a synthetic confirmed ledger consumption event, and caller-supplied evidence references. These are software demonstration inputs, not canonical resource vocabulary, physical units, live measurements, or new physical laws. The preview does not authenticate evidence, interpret uncertainty, modify ledger records, authorise, execute or verify an incantation. The 60 canonical RES19 specification fixtures remain a separate source-only browser and are not represented as executed evaluator tests.
+
+The v1.9 review branch now includes the only intervening main-branch change, `docs/IMG_1895.jpeg`, as the second parent of the feature commit. This synchronises the branch without changing main or merging a pull request.
+
+Next: keep the preview read-only and synthetic. Do not expand to transformations, cross-account invariants, distributed consistency or trusted measurement until their domain contracts, evidence requirements and negative fixtures are defined. Main CI remains blocked by the 13-test regression set in [run #767](https://github.com/sixtoast/Anime-language-/actions/runs/42394664885); the draft regression branch and v1.9 branch have separate successful workflows.
