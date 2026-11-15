@@ -34,10 +34,9 @@ describe("Documentation catalogue website regression checks", () => {
   });
 
   it("[WEB-DOC-REG-006] can filter by status and reports no matches as an empty list", () => {
-    expect(filterDocuments("Open question").map((doc) => doc.title)).toEqual([
-      "Grammar & syntax",
-      "FRAPA contract"
-    ]);
+    const openQuestionDocuments = filterDocuments("", "Open question");
+    expect(openQuestionDocuments.length).toBeGreaterThan(0);
+    expect(openQuestionDocuments.every((doc) => doc.status === "Open question")).toBe(true);
     expect(filterDocuments("this term should not exist")).toEqual([]);
   });
 

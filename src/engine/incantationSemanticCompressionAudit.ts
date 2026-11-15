@@ -13,19 +13,35 @@ export function auditIncantationSemanticCompression(input:unknown):IncantationSe
  const issues:string[] = [], operationIds = new Set<string>(), entries:Entry[] = [];
  input.operations.forEach((raw,index) => {
   const path = "operations[" + index + "]";
-  if (!isObject(raw) || !nonEmpty(raw.operationId)) { issues.push(path + " requires a non-empty operationId."); return; }
-  if (operationIds.has(raw.operationId)) issues.push(path + ".operationId must be unique.");
-  operationIds.add(raw.operationId);
-  if (!isObject(raw.arguments) || raw.arguments.profile !== INCANTATION_ARGUMENT_PROFILE || !Array.isArray(raw.arguments.references)) { issues.push(path + ".arguments must contain an INCANTATION-ARGUMENTS-1.0 references array."); return; }
-  raw.arguments.references.forEach((ref,refIndex) => {
-   if (!isObject(ref)) { issues.push(path + ".arguments.references[" + refIndex + "] must be an object."); return; }
-   if (!nonEmpty(ref.label) || !nonEmpty(ref.referenceClass) || !nonEmpty(ref.scope) || !nonEmpty(ref.resolution) || !nonEmpty(ref.lifetime) || !nonEmpty(ref.bindingState) || !nonEmpty(ref.referentId)) { issues.push(path + ".arguments.references[" + refIndex + "] is missing a required reference field."); return; }
-   const args = raw.arguments as Record<string,unknown>;
+  if (!isObject(raw)) { issues.push(path + " requires a non-empty operationId."); return; }
+  const operationId = raw.operationId;
+  if (!nonEmpty(operationId)) { issues.push(path + " requires a non-empty operationId."); return; }
+  if (operationIds.has(operationId)) issues.push(path + ".operationId must be unique.");
+  operationIds.add(operationId);
+  const args = raw.arguments;
+  if (!isObject(args) || args.profile !== INCANTATION_ARGUMENT_PROFILE || !Array.isArray(args.references)) {
+   issues.push(path + ".arguments must contain an INCANTATION-ARGUMENTS-1.0 references array.");
+   return;
+  }
+  args.references.forEach((rawReference,refIndex) => {
+   const referencePath = path + ".arguments.references[" + refIndex + "]";
+   if (!isObject(rawReference)) { issues.push(referencePath + " must be an object."); return; }
+   const label = rawReference.label;
+   const referenceClass = rawReference.referenceClass;
+   const scope = rawReference.scope;
+   const resolution = rawReference.resolution;
+   const lifetime = rawReference.lifetime;
+   const bindingState = rawReference.bindingState;
+   const referentId = rawReference.referentId;
+   if (!nonEmpty(label) || !nonEmpty(referenceClass) || !nonEmpty(scope) || !nonEmpty(resolution) || !nonEmpty(lifetime) || !nonEmpty(bindingState) || !nonEmpty(referentId)) {
+    issues.push(referencePath + " is missing a required reference field.");
+    return;
+   }
    const coupling = isObject(args.coupling) ? args.coupling : {};
    const consumed = args.operation === "bran"
-    ? coupling.participantA === ref.label || coupling.participantB === ref.label
-    : args.targetLabel === ref.label;
-   entries.push({operationId:raw.operationId,consumed,label:ref.label,referenceClass:ref.referenceClass,scope:ref.scope,resolution:ref.resolution,lifetime:ref.lifetime,bindingState:ref.bindingState,referentId:ref.referentId});
+    ? coupling.participantA === label || coupling.participantB === label
+    : args.targetLabel === label;
+   entries.push({operationId,consumed,label,referenceClass,scope,resolution,lifetime,bindingState,referentId});
   });
  });
  if (issues.length) return invalid(issues);

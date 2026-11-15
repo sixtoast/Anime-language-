@@ -1,5 +1,5 @@
 import {describe,expect,it} from "vitest";
-import {constructionFootParadigmCandidates,constructionFootParadigmSummary,reviewConstructionFootParadigmCandidate} from "./constructionFootParadigmEvidenceMatrix";
+import {reviewConstructionFootParadigmCandidate} from "./constructionFootParadigmEvidenceMatrix";
 import {constructionFootParadigmReconciliation as audit} from "./constructionFootParadigmReconciliation";
 describe("Phase 8CY-T primary Construction Foot source concordance",()=>{
  it("[FOOT-RECON-T-001] confirms five relation codas from Phase 4 Table 3",()=>{expect(audit.status).toBe("PRIMARY-CODA-INVENTORY-CONFIRMED");expect(audit.relationCodas.map(x=>x.form)).toEqual(["m","n","ng","s","sh"]);expect(audit.relationCodas.every(x=>x.evidence==="EXPLICIT-PHASE4-TABLE3"||x.evidence==="EXPLICIT-PHASE4-TABLE3-AND-D036")).toBe(true)});
@@ -8,5 +8,5 @@ describe("Phase 8CY-T primary Construction Foot source concordance",()=>{
  it("[FOOT-RECON-T-004] keeps P4-T10 shape checks distinct from lexical semantics",()=>{expect(audit.examples.p4t10).toEqual(["kan","ken","kas","kal","mel"]);expect(audit.examples.p4t10Meaning).toBe("SHAPE-TEST-ONLY-NOT-SEMANTIC-LICENSING");expect(audit.examples.mel.classification).toBe("FUSED-REFERENCE-EXAMPLE");expect(audit.examples.kal.finalL).toContain("PHONOTACTIC-ONLY")});
  it("[FOOT-RECON-T-005] enables evidence lookup without lexical attestation",()=>{expect(reviewConstructionFootParadigmCandidate("pang")?.evidenceStatus).toBe("DESIGN-SPACE-ONLY");expect(reviewConstructionFootParadigmCandidate("pang")?.lexicalAttestation).toBe("NOT-RECOVERED");expect(reviewConstructionFootParadigmCandidate("pav")).toBeNull();expect(audit.candidateSpace.count).toBe(180)});
  it("[FOOT-RECON-T-006] corrects the previous zero-coda conclusion",()=>{expect(audit.phase8ci.priorStatus).toBe("UNRECOVERED");expect(audit.phase8ci.correction).toContain("Superseded by direct inspection")});
- it("preserves 36 review pairs, no execution and no canon promotion",()=>{expect(audit.frameParameterReviewPairs).toBe(36);expect(audit.canonicalCvForms).toEqual(["pa","ba","ta","da","ka","ga"]);expect(audit.unresolvedPairs).toBe(30);expect(audit.executable).toBe(false);expect(audit.canonEffect).toBe("NONE")});
+ it("[FOOT-RECON-T-007] preserves 36 review pairs, no execution and no canon promotion",()=>{expect(audit.frameParameterReviewPairs).toBe(36);expect(audit.canonicalCvForms).toEqual(["pa","ba","ta","da","ka","ga"]);expect(audit.unresolvedPairs).toBe(30);expect(audit.executable).toBe(false);expect(audit.canonEffect).toBe("NONE")});
 });

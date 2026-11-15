@@ -42,7 +42,7 @@ import { createEmptyConstructionExpressionComposition, reviewConstructionExpress
 import { handFlameFixtureTraceability, reviewHandFlameFixtureTraceability } from "./engine/constructionFixtureTraceability";
 import { reviewConstructionFootShape } from "./engine/constructionFootShape";
 import { reviewConstructionFootMorphology } from "./engine/constructionFootMorphologyReview";
-import { constructionFootParadigmSummary, constructionFootParadigmCandidates, reviewConstructionFootParadigmCandidate } from "./engine/constructionFootParadigmEvidenceMatrix";
+import { constructionFootParadigmSummary, reviewConstructionFootParadigmCandidate } from "./engine/constructionFootParadigmEvidenceMatrix";
 import { constructionFootParadigmReconciliation } from "./engine/constructionFootParadigmReconciliation";
 import { reviewConstructionFootComposition } from "./engine/constructionFootComposition";
 import { constructionFrameInventory, constructionParameterInventory, constructionFootEvidenceBoundary } from "./engine/constructionFootEvidence";
