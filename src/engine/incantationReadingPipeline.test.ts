@@ -1,0 +1,25 @@
+import {describe,expect,it} from "vitest";
+import {assessIncantationReading,INCANTATION_READING_PIPELINE_PROFILE,incantationReadingPipelinePrinciples} from "./incantationReadingPipeline";
+const allLanguage={lexicalRecognition:"PASS" as const,structuralParsing:"PASS" as const,scopeResolution:"PASS" as const,semanticTyping:"PASS" as const};
+const allContract={targetResolution:"PASS" as const,preconditions:"PASS" as const,resourceAccounting:"PASS" as const,authority:"PASS" as const,policy:"PASS" as const,lifecycleAndOutcome:"PASS" as const};
+const allConstruction={reference:"PASS" as const,spatialRole:"PASS" as const,constructionFeet:"PASS" as const,couplings:"PASS" as const,quantity:"PASS" as const,control:"PASS" as const,release:"PASS" as const};
+describe("Phase 8DH layered incantation-reading pipeline",()=>{
+ it("[READ-PIPE-001] exposes a versioned pipeline",()=>expect(assessIncantationReading().profile).toBe(INCANTATION_READING_PIPELINE_PROFILE));
+ it("[READ-PIPE-002] does not mark an empty reading as readable",()=>expect(assessIncantationReading().overall).toBe("INCOMPLETE"));
+ it("[READ-PIPE-003] recognises language only when all four reading stages pass",()=>expect(assessIncantationReading({language:allLanguage}).language.state).toBe("READABLE"));
+ it("[READ-PIPE-004] keeps structural parsing separate from semantic typing",()=>expect(assessIncantationReading({language:{lexicalRecognition:"PASS",structuralParsing:"PASS"}}).language.stages.semanticTyping).toBe("NOT-RUN"));
+ it("[READ-PIPE-005] blocks completion while scope is unresolved",()=>expect(assessIncantationReading({language:{...allLanguage,scopeResolution:"UNRESOLVED"}}).overall).toBe("INCOMPLETE"));
+ it("[READ-PIPE-006] rejects a failed language stage",()=>expect(assessIncantationReading({language:{...allLanguage,structuralParsing:"FAIL"}}).overall).toBe("REJECTED"));
+ it("[READ-PIPE-007] preserves unresolved semantic typing",()=>expect(assessIncantationReading({language:{...allLanguage,semanticTyping:"UNRESOLVED"}}).language.unresolved).toContain("semanticTyping"));
+ it("[READ-PIPE-008] a readable expression may have incomplete incantation contracts",()=>{const r=assessIncantationReading({language:allLanguage});expect(r.overall).toBe("READING-ONLY");expect(r.incantationContract.state).toBe("INCOMPLETE");});
+ it("[READ-PIPE-009] tracks all six contract domains independently",()=>expect(Object.keys(assessIncantationReading().incantationContract.stages)).toHaveLength(6));
+ it("[READ-PIPE-010] tracks all seven Construction stages independently",()=>expect(Object.keys(assessIncantationReading().manaConstruction.stages)).toHaveLength(7));
+ it("[READ-PIPE-011] Construction PRECEDES does not auto-pass stages",()=>expect(assessIncantationReading().manaConstruction.stages.constructionFeet).toBe("NOT-RUN"));
+ it("[READ-PIPE-012] failed Construction review remains layer-local",()=>{const r=assessIncantationReading({language:allLanguage,manaConstruction:{...allConstruction,release:"FAIL"}});expect(r.overall).toBe("READING-ONLY");expect(r.manaConstruction.state).toBe("REJECTED");});
+ it("[READ-PIPE-013] failed authority review does not masquerade as parse failure",()=>{const r=assessIncantationReading({language:allLanguage,incantationContract:{...allContract,authority:"FAIL"}});expect(r.language.state).toBe("READABLE");expect(r.incantationContract.state).toBe("REJECTED");});
+ it("[READ-PIPE-014] complete contract review remains distinct from reading",()=>{const r=assessIncantationReading({language:allLanguage,incantationContract:allContract});expect(r.overall).toBe("READING-ONLY");expect(r.incantationContract.state).toBe("CONTRACT-REVIEWED");});
+ it("[READ-PIPE-015] complete Construction review remains distinct from execution",()=>expect(assessIncantationReading({language:allLanguage,manaConstruction:allConstruction}).manaConstruction.state).toBe("CONSTRUCTION-REVIEWED"));
+ it("[READ-PIPE-016] never authorises execution",()=>expect(assessIncantationReading({language:allLanguage,incantationContract:allContract,manaConstruction:allConstruction}).executionPermitted).toBe(false));
+ it("[READ-PIPE-017] never establishes physical feasibility",()=>expect(assessIncantationReading({language:allLanguage,incantationContract:allContract,manaConstruction:allConstruction}).physicalFeasibilityEstablished).toBe(false));
+ it("[READ-PIPE-018] records no canon change and documents layer separations",()=>{const r=assessIncantationReading();expect(r.canonEffect).toBe("NONE");expect(incantationReadingPipelinePrinciples).toHaveLength(8);});
+});
