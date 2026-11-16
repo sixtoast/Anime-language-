@@ -20,6 +20,8 @@ export interface LedgerAccount {
   unit: string;
   unitContractId: string;
   openingBalanceTicks: number;
+  /** Timestamp of the opening balance snapshot; required by time-scoped reconciliation. */
+  openingBalanceAsOf?: string;
 }
 
 export interface LedgerEvent {
@@ -36,6 +38,8 @@ export interface LedgerEvent {
   evidence: LedgerEvidence;
   sourceOrConversionRef?: string;
   idempotencyKey: string;
+  /** Canonical ledger-event valid time; time-scoped reconciliation requires this value. */
+  validTime?: string;
   reservationId?: string;
   permittedLoss?: boolean;
   correctionReason?: string;
@@ -129,6 +133,7 @@ export function projectResourceLedger(
     eventKind: event.eventKind, fromAccount: event.fromAccount ?? null,
     toAccount: event.toAccount ?? null, amountTicks: event.amountTicks,
     unit: event.unit, unitContractId: event.unitContractId,
+    validTime: event.validTime ?? null,
     status: event.status, evidence: event.evidence,
     sourceOrConversionRef: event.sourceOrConversionRef ?? null,
     reservationId: event.reservationId ?? null,

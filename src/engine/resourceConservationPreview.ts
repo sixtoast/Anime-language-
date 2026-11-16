@@ -3,9 +3,10 @@ import {
   reconcileResourceBalance,
   type ConservationContractInput,
   type ConservationQuantity,
-  type ResourceBalanceObservation
+  type ResourceBalanceObservation,
+  type ResourceReconciliationAccount,
+  type ResourceReconciliationEvent
 } from "./resourceConservation";
-import type { LedgerAccount, LedgerEvent } from "./resourceLedger";
 import { assessResourceAccountingAuditStructure } from "./resourceAccountingAudit";
 
 /**
@@ -86,17 +87,18 @@ function sampleContract(scenario: ResourceConservationPreviewScenario): Conserva
   };
 }
 
-function sampleAccounts(): LedgerAccount[] {
+function sampleAccounts(): ResourceReconciliationAccount[] {
   return [{
     accountId: "preview-account",
     resourceKind: SAMPLE_RESOURCE_KIND,
     unit: SAMPLE_UNIT,
     unitContractId: SAMPLE_UNIT_CONTRACT,
-    openingBalanceTicks: 100
+    openingBalanceTicks: 100,
+    openingBalanceAsOf: SAMPLE_INTERVAL.start
   }];
 }
 
-function sampleEvents(): LedgerEvent[] {
+function sampleEvents(): ResourceReconciliationEvent[] {
   return [{
     eventId: "preview-consumption-event",
     invocationId: "preview-invocation",
@@ -108,7 +110,8 @@ function sampleEvents(): LedgerEvent[] {
     unitContractId: SAMPLE_UNIT_CONTRACT,
     status: "CONFIRMED",
     evidence: "PASS",
-    idempotencyKey: "preview-consumption-event"
+    idempotencyKey: "preview-consumption-event",
+    validTime: "2026-05-01T00:00:00Z"
   }];
 }
 
@@ -180,6 +183,7 @@ export function evaluateResourceConservationPreview(scenario: ResourceConservati
       "All quantities, evidence states and references are synthetic caller-supplied demonstration inputs, not authenticated facts or live measurements.",
       "The preview-sample-stock resource kind and tick unit exist only to exercise exact-match software accounting; they are not canonical resource vocabulary or physical units.",
       "The scalar-additive invariant and zero-tick tolerance are explicit assumptions in this demonstration contract, not universal physical laws or canonical tolerances.",
+      "The opening balance is timestamped at the sample interval start, and the supplied event is strictly ordered before the sample observation; boundary-equal times are deliberately unresolved.",
       "The confirmed consumption event is sample ledger data; projection does not prove that an incantation or physical operation occurred.",
       "Account reconciliation compares one gross account balance only and does not satisfy the complete v1.9 RESOURCE-RECONCILED stage.",
       "The optional audit example checks only top-level section presence; null placeholders do not establish semantic audit completeness or evidence validity.",

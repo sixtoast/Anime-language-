@@ -456,3 +456,10 @@ Added a read-only, presence-only assessor for the 14 top-level sections in the v
 The Playground includes a synthetic RES19-59 example in which all top-level sections are present as unknown placeholders while the resource outcome remains `RESOURCE-OUTCOME-UNKNOWN`. The example is explicitly partial: it does not validate section content, contract versions, evidence authenticity, semantic completeness or the truth of the reported outcome. It does not modify ledger state or claim a complete RESOURCE-RECONCILED result.
 
 The fixture-to-implementation audit now classifies RES19-59 as PARTIAL. The canonical v1.9 source and its 60 expected fixture outcomes remain unchanged.
+
+
+### 2026-11-16 — time-scoped v1.9 account reconciliation
+
+The account reconciler now requires each projected account's opening balance to be timestamped at the conservation contract interval start. Every supplied ledger event must carry a valid time, fall strictly after that opening snapshot and strictly before the measurement observation, and appear in strictly increasing time order. The reconciler rejects missing, out-of-window, boundary-equal and out-of-order timestamps rather than sorting, filtering or inventing same-time ordering. The ledger idempotency fingerprint now includes event valid time.
+
+This is a conservative implementation subset of the v1.9 account/event VALID-TIME fields and §7 temporal-validity requirements, not a new canon rule. Endpoint inclusion, same-time event ordering and event-batch completeness remain unresolved contract matters. The caller still supplies unauthenticated timestamps and a purportedly complete event batch. The comparison remains gross account-balance-only; it does not authenticate evidence, implement distributed consistency, transformations or cross-account conservation, or claim the full RESOURCE-RECONCILED stage. The canonical v1.9 document and all 60 expected fixture outcomes remain unchanged.

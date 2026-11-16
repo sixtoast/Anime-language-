@@ -19,6 +19,9 @@ describe("read-only v1.9 conservation and account-reconciliation preview", () =>
       discrepancyTicks: 0,
       toleranceTicks: 0
     });
+    expect(result.assumptions).toContain(
+      "The opening balance is timestamped at the sample interval start, and the supplied event is strictly ordered before the sample observation; boundary-equal times are deliberately unresolved."
+    );
   });
 
   it("[RES19-PREVIEW-002] keeps conservation mismatch separate from account reconciliation", () => {

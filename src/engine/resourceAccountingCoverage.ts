@@ -168,9 +168,10 @@ export const resourceAccountingCoverage: ResourceAccountingCoverage[] = [
     "fixtureId": "RES19-18",
     "status": "BOUNDED",
     "testIds": [
-      "RES19-LEDGER-005"
+      "RES19-LEDGER-005",
+      "RES19-LEDGER-023"
     ],
-    "note": "A retry with the same idempotency key and identical event fingerprint is not applied twice."
+    "note": "A retry with the same idempotency key and identical event fingerprint is not applied twice; changing its valid time is different event content and remains a collision."
   },
   {
     "fixtureId": "RES19-19",
@@ -352,9 +353,12 @@ export const resourceAccountingCoverage: ResourceAccountingCoverage[] = [
       "RES19-RECON-001",
       "RES19-RECON-002",
       "RES19-RECON-003",
-      "RES19-RECON-008"
+      "RES19-RECON-008",
+      "RES19-RECON-013",
+      "RES19-RECON-014",
+      "RES19-RECON-015"
     ],
-    "note": "The reconciler compares one account's gross projected balance with an accepted observation; it does not complete whole-resource reconciliation."
+    "note": "The reconciler compares one account's gross projected balance with an accepted observation and now requires an opening snapshot anchored to the interval start plus a strictly ordered, pre-observation event batch. Caller-supplied completeness and evidence remain unauthenticated; this does not complete whole-resource reconciliation."
   },
   {
     "fixtureId": "RES19-41",
@@ -467,9 +471,10 @@ export const resourceAccountingCoverage: ResourceAccountingCoverage[] = [
     "status": "PARTIAL",
     "testIds": [
       "RES19-RECON-011",
-      "RES19-RECON-012"
+      "RES19-RECON-012",
+      "RES19-RECON-016"
     ],
-    "note": "Measurement method, time, uncertainty, provenance and explicit policy acceptance references are required; the policy and evidence are not authenticated or interpreted."
+    "note": "Measurement method, time, uncertainty, provenance and explicit policy acceptance references are required. Observation timestamps on interval boundaries remain unresolved because endpoint inclusion is not inferred; policy and evidence are not authenticated or interpreted."
   },
   {
     "fixtureId": "RES19-58",

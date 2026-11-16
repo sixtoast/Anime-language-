@@ -220,4 +220,19 @@ describe("Arcane Incantations v1.9 resource ledger projection", () => {
     ]);
   });
 
+  it("[RES19-LEDGER-023] treats a changed valid time as different idempotency content", () => {
+    const first = event({ validTime: "2026-05-01T00:00:00Z" });
+    const changedTime = event({
+      eventId: "event-2",
+      validTime: "2026-05-02T00:00:00Z"
+    });
+    const result = projectResourceLedger(accounts(), [first, changedTime]);
+    expect(result.balances.a).toBe(90);
+    expect(result.events[1]).toMatchObject({
+      applied: false,
+      duplicate: false,
+      issue: { code: "IDEMPOTENCY-COLLISION" }
+    });
+  });
+
 });

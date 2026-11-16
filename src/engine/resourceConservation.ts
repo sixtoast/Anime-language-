@@ -322,12 +322,22 @@ export interface ResourceBalanceObservation {
   policyAcceptanceEvidenceRef: string;
 }
 
+export type ResourceReconciliationAccount = LedgerAccount & {
+  /** Opening-balance snapshot time, required to anchor the projection to the contract interval. */
+  openingBalanceAsOf: string;
+};
+
+export type ResourceReconciliationEvent = LedgerEvent & {
+  /** Event valid time, required for a time-scoped account projection. */
+  validTime: string;
+};
+
 export interface ResourceReconciliationInput {
   reconciliationId: string;
   contract: ResourceReconciliationContract;
   accountId: string;
-  accounts: LedgerAccount[];
-  events: LedgerEvent[];
+  accounts: ResourceReconciliationAccount[];
+  events: ResourceReconciliationEvent[];
   observation: ResourceBalanceObservation;
 }
 
@@ -360,6 +370,10 @@ const RECONCILIATION_LIMITATIONS = [
   "Measurement method, time, uncertainty and provenance are caller-supplied; the evaluator checks required references and timestamp format but does not authenticate them.",
   "Per-observation acceptance under the uncertainty policy is caller-supplied evidence; the evaluator requires PASS but does not interpret or authenticate the policy decision.",
   "The comparison uses gross account balance. A held reservation remains in that balance and is not treated as physical consumption.",
+  "Every projected account must identify an opening-balance snapshot as of the conservation interval start; snapshot times are caller-supplied and unauthenticated.",
+  "The supplied event batch must carry valid times in strictly increasing order, strictly after the opening snapshot and strictly before the observation; the reconciler does not sort or silently filter events.",
+  "Boundary-equal observations/events, missing event times, out-of-window events and ambiguous event ordering remain unresolved because endpoint and same-time ordering semantics are not universal.",
+  "The caller must supply a complete event batch since the opening snapshot; batch completeness and event timestamps are not authenticated.",
   "This is an account-balance comparison only; it does not by itself satisfy the whole-resource RESOURCE-RECONCILED stage.",
   "Discrepancies are reported without changing ledger entries or balances. Reconciliation is not proof of conservation, authority, mechanism validity, execution or a successful effect."
 ];
@@ -450,10 +464,38 @@ export function reconcileResourceBalance(
     );
   }
 
+  const intervalStart = Date.parse(input.contract.validInterval.start);
+  const intervalEnd = Date.parse(input.contract.validInterval.end);
   const observedTime = Date.parse(observation.observedAt);
-  if (observedTime < Date.parse(input.contract.validInterval.start) ||
-      observedTime > Date.parse(input.contract.validInterval.end)) {
+  if (observedTime < intervalStart || observedTime > intervalEnd) {
     return invalid("RECONCILIATION-OUTSIDE-VALID-INTERVAL", "The observation time is outside the named contract's valid interval.");
+  }
+  if (observedTime === intervalStart || observedTime === intervalEnd) {
+    return unresolved("RECONCILIATION-OBSERVATION-BOUNDARY-AMBIGUOUS", "The observation is exactly on a contract interval boundary; this bounded reconciler does not infer endpoint inclusion.");
+  }
+
+  for (const candidate of input.accounts) {
+    if (!candidate || !isIsoTime(candidate.openingBalanceAsOf)) {
+      return unresolved("RECONCILIATION-OPENING-SNAPSHOT-TIME-MISSING", "Every account used by the ledger projection requires a valid opening-balance snapshot time.");
+    }
+    if (Date.parse(candidate.openingBalanceAsOf) !== intervalStart) {
+      return unresolved("RECONCILIATION-OPENING-SNAPSHOT-SCOPE", "Every opening balance must be timestamped at the conservation contract interval start; no rebasing is inferred.");
+    }
+  }
+
+  let previousEventTime = intervalStart;
+  for (const event of input.events) {
+    if (!event || !isIsoTime(event.validTime)) {
+      return unresolved("RECONCILIATION-EVENT-VALID-TIME-MISSING", "Every supplied ledger event requires a valid timestamp before it can contribute to a time-scoped balance.");
+    }
+    const eventTime = Date.parse(event.validTime);
+    if (eventTime <= intervalStart || eventTime >= observedTime) {
+      return unresolved("RECONCILIATION-EVENT-OUTSIDE-AS-OF-WINDOW", "A ledger event is on or outside the open interval between the opening snapshot and observation; boundary ordering is not inferred and future events are not projected.");
+    }
+    if (eventTime <= previousEventTime) {
+      return unresolved("RECONCILIATION-EVENT-ORDER-AMBIGUOUS", "Ledger events must be supplied in strictly increasing valid-time order; the reconciler does not sort events or infer ordering for equal timestamps.");
+    }
+    previousEventTime = eventTime;
   }
 
   const matchingAccounts = input.accounts.filter((account) =>

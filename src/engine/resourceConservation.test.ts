@@ -6,9 +6,11 @@ import {
   type ConservationQuantity,
   type ConservationLossQuantity,
   type ResourceReconciliationInput,
+  type ResourceReconciliationAccount,
+  type ResourceReconciliationEvent,
   type ResourceBalanceObservation
 } from "./resourceConservation";
-import { projectResourceLedger, type LedgerAccount, type LedgerEvent } from "./resourceLedger";
+import { projectResourceLedger } from "./resourceLedger";
 
 const quantity = (amountTicks: number, overrides: Partial<ConservationQuantity> = {}): ConservationQuantity => ({
   resourceKind: "mana-token",
@@ -58,15 +60,16 @@ const contract = (overrides: Partial<ConservationContractInput> = {}): Conservat
   ...overrides
 });
 
-const accounts = (): LedgerAccount[] => [{
+const accounts = (): ResourceReconciliationAccount[] => [{
   accountId: "account-a",
   resourceKind: "mana-token",
   unit: "tick",
   unitContractId: "mana-tick-v1",
-  openingBalanceTicks: 100
+  openingBalanceTicks: 100,
+  openingBalanceAsOf: "2026-01-01T00:00:00Z"
 }];
 
-const ledgerEvent = (overrides: Partial<LedgerEvent> = {}): LedgerEvent => ({
+const ledgerEvent = (overrides: Partial<ResourceReconciliationEvent> = {}): ResourceReconciliationEvent => ({
   eventId: "consume-1",
   invocationId: "invocation-1",
   resourceKind: "mana-token",
@@ -78,6 +81,7 @@ const ledgerEvent = (overrides: Partial<LedgerEvent> = {}): LedgerEvent => ({
   status: "CONFIRMED",
   evidence: "PASS",
   idempotencyKey: "consume-1",
+  validTime: "2026-05-01T00:00:00Z",
   ...overrides
 });
 
@@ -362,6 +366,89 @@ describe("Arcane Incantations v1.9 conservation and reconciliation", () => {
     expect(missingAcceptanceReference.diagnostics).toContainEqual(expect.objectContaining({
       code: "RECONCILIATION-MEASUREMENT-METADATA-MISSING"
     }));
+  });
+
+  it("[RES19-RECON-013] requires every opening balance snapshot to match the contract interval start", () => {
+    const missingTime = { ...accounts()[0]! } as ResourceReconciliationAccount;
+    delete (missingTime as Partial<ResourceReconciliationAccount>).openingBalanceAsOf;
+    const missing = reconcileResourceBalance(reconciliation({ accounts: [missingTime] }));
+    expect(missing.outcome).toBe("UNRESOLVED");
+    expect(missing.diagnostics).toContainEqual(expect.objectContaining({
+      code: "RECONCILIATION-OPENING-SNAPSHOT-TIME-MISSING"
+    }));
+
+    const misaligned = reconcileResourceBalance(reconciliation({
+      accounts: [{ ...accounts()[0]!, openingBalanceAsOf: "2026-01-02T00:00:00Z" }]
+    }));
+    expect(misaligned.outcome).toBe("UNRESOLVED");
+    expect(misaligned.diagnostics).toContainEqual(expect.objectContaining({
+      code: "RECONCILIATION-OPENING-SNAPSHOT-SCOPE"
+    }));
+  });
+
+  it("[RES19-RECON-014] rejects missing, boundary-equal and future ledger event times", () => {
+    const cases = [
+      { validTime: "" },
+      { validTime: "2026-01-01T00:00:00Z" },
+      { validTime: "2026-06-01T00:00:00Z" },
+      { validTime: "2026-06-02T00:00:00Z" }
+    ];
+    for (const override of cases) {
+      const result = reconcileResourceBalance(reconciliation({
+        events: [ledgerEvent(override)]
+      }));
+      expect(result.outcome).toBe("UNRESOLVED");
+    }
+    expect(reconcileResourceBalance(reconciliation({
+      events: [ledgerEvent({ validTime: "" })]
+    })).diagnostics).toContainEqual(expect.objectContaining({
+      code: "RECONCILIATION-EVENT-VALID-TIME-MISSING"
+    }));
+  });
+
+  it("[RES19-RECON-015] refuses to sort or infer same-time ledger event ordering", () => {
+    const later = ledgerEvent({
+      eventId: "event-later",
+      idempotencyKey: "event-later",
+      validTime: "2026-05-02T00:00:00Z"
+    });
+    const earlier = ledgerEvent({
+      eventId: "event-earlier",
+      idempotencyKey: "event-earlier",
+      validTime: "2026-05-01T00:00:00Z"
+    });
+    const outOfOrder = reconcileResourceBalance(reconciliation({ events: [later, earlier] }));
+    expect(outOfOrder.outcome).toBe("UNRESOLVED");
+    expect(outOfOrder.diagnostics).toContainEqual(expect.objectContaining({
+      code: "RECONCILIATION-EVENT-ORDER-AMBIGUOUS"
+    }));
+
+    const sameTime = reconcileResourceBalance(reconciliation({
+      events: [
+        earlier,
+        { ...later, validTime: earlier.validTime }
+      ]
+    }));
+    expect(sameTime.outcome).toBe("UNRESOLVED");
+    expect(sameTime.diagnostics).toContainEqual(expect.objectContaining({
+      code: "RECONCILIATION-EVENT-ORDER-AMBIGUOUS"
+    }));
+  });
+
+  it("[RES19-RECON-016] leaves observation timestamps on interval boundaries unresolved", () => {
+    for (const observedAt of [
+      "2026-01-01T00:00:00Z",
+      "2027-01-01T00:00:00Z"
+    ]) {
+      const result = reconcileResourceBalance(reconciliation({
+        observation: measurementObservation({ observedAt }),
+        events: []
+      }));
+      expect(result.outcome).toBe("UNRESOLVED");
+      expect(result.diagnostics).toContainEqual(expect.objectContaining({
+        code: "RECONCILIATION-OBSERVATION-BOUNDARY-AMBIGUOUS"
+      }));
+    }
   });
 
 });
