@@ -19,6 +19,14 @@ export type ResourceCheckOutcome =
 
 export type EvidenceState = "PASS" | "FAIL" | "UNKNOWN" | "UNAVAILABLE";
 
+export interface ResourceAvailabilityWindow {
+  validFrom: string;
+  validUntil: string;
+  evaluationTime: string;
+  evidenceRef: string;
+  provenanceRef: string;
+}
+
 export interface ResourcePreflightInput {
   resourceKind: string;
   accountId: string;
@@ -37,6 +45,7 @@ export interface ResourcePreflightInput {
   conservativeConsumptionUpperBound?: number;
   budgetEvidence: EvidenceState;
   sourceAvailableAmount?: number;
+  availabilityWindow?: ResourceAvailabilityWindow;
 }
 
 export interface ResourcePreflightDiagnostic {
@@ -54,7 +63,8 @@ export interface ResourcePreflightResult {
 }
 
 const LIMITATIONS = [
-  "Evidence states and quantities are supplied by callers; this evaluator does not authenticate or measure them.",
+  "Evidence states, quantities, availability windows and provenance references are supplied by callers; this evaluator does not authenticate or measure them.",
+  "Availability-window timestamps are accepted only strictly inside the declared interval; endpoint inclusivity is unresolved by v1.9.",
   "Only exact unit-string matches are accepted. No implicit or inferred unit conversion is performed.",
   "This evaluator does not execute an operation, create or hold reservations, mutate accounts, or debit resources.",
   "RESOURCE-READY is a preflight result only; it is not evidence of execution, consumption, conservation or a successful effect."
@@ -78,6 +88,32 @@ function validNonNegative(value: number): boolean {
   return Number.isFinite(value) && value >= 0;
 }
 
+function nonEmptyString(value: unknown): value is string {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
+function isIsoTime(value: unknown): value is string {
+  if (typeof value !== "string") return false;
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.\d{1,9})?(Z|([+-])(\d{2}):(\d{2}))$/);
+  if (!match) return false;
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const hour = Number(match[4]);
+  const minute = Number(match[5]);
+  const second = Number(match[6]);
+  const leapYear = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+  const monthDays = [31, leapYear ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  if (year < 1 || month < 1 || month > 12 || day < 1 || day > monthDays[month - 1] ||
+      hour > 23 || minute > 59 || second > 59) return false;
+  if (match[8] !== "Z") {
+    const offsetHour = Number(match[10]);
+    const offsetMinute = Number(match[11]);
+    if (offsetHour > 23 || offsetMinute > 59) return false;
+  }
+  return Number.isFinite(Date.parse(value));
+}
+
 export function evaluateResourcePreflight(input: ResourcePreflightInput): ResourcePreflightResult {
   const diagnostics: ResourcePreflightDiagnostic[] = [];
   const add = (code: string, message: string) => diagnostics.push({ code, message });
@@ -99,6 +135,25 @@ export function evaluateResourcePreflight(input: ResourcePreflightInput): Resour
   if (input.sourceEvidence !== "PASS") {
     add("SOURCE-" + input.sourceEvidence, "Source provenance and availability evidence have not passed.");
     return result(input.sourceEvidence === "FAIL" ? "SOURCE-UNVERIFIED" : "RESOURCE-OUTCOME-UNKNOWN", "RESOURCE-OUTCOME-UNKNOWN", input.requiredAmount, diagnostics);
+  }
+  const window = input.availabilityWindow;
+  if (!window || !isIsoTime(window.validFrom) || !isIsoTime(window.validUntil) ||
+      !isIsoTime(window.evaluationTime) || !nonEmptyString(window.evidenceRef) ||
+      !nonEmptyString(window.provenanceRef) ||
+      Date.parse(window.validFrom) >= Date.parse(window.validUntil)) {
+    add("AVAILABILITY-WINDOW-UNRESOLVED", "A valid source availability window, evaluation time, evidence reference and provenance reference are required.");
+    return result("RESOURCE-OUTCOME-UNKNOWN", "RESOURCE-OUTCOME-UNKNOWN", input.requiredAmount, diagnostics);
+  }
+  const validFrom = Date.parse(window.validFrom);
+  const validUntil = Date.parse(window.validUntil);
+  const evaluationTime = Date.parse(window.evaluationTime);
+  if (evaluationTime < validFrom || evaluationTime > validUntil) {
+    add("RESOURCE-EVIDENCE-STALE", "The source availability evidence is outside its declared valid-time window.");
+    return result("RESOURCE-EVIDENCE-STALE", "RESOURCE-OUTCOME-UNKNOWN", input.requiredAmount, diagnostics);
+  }
+  if (evaluationTime === validFrom || evaluationTime === validUntil) {
+    add("AVAILABILITY-WINDOW-BOUNDARY-AMBIGUOUS", "The v1.9 source contract does not define whether availability-window endpoints are inclusive; boundary-time evidence remains unresolved.");
+    return result("RESOURCE-OUTCOME-UNKNOWN", "RESOURCE-OUTCOME-UNKNOWN", input.requiredAmount, diagnostics);
   }
   if (input.evidenceFreshness !== "PASS") {
     add("EVIDENCE-" + input.evidenceFreshness, "Availability evidence is stale or its freshness cannot be established.");
