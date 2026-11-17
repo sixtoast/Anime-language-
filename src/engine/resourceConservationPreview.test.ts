@@ -87,4 +87,17 @@ describe("read-only v1.9 conservation and account-reconciliation preview", () =>
       "Only the presence of the 14 top-level v1.9 record sections is checked; their shapes, contents and internal completeness are not validated."
     );
   });
+
+  it("[RES19-PREVIEW-008] keeps unknown event-batch completeness separate from a passing conservation balance", () => {
+    const result = evaluateResourceConservationPreview("EVENT-BATCH-COMPLETENESS-UNRESOLVED");
+    expect(result.conservation.outcome).toBe("CONSERVATION-SATISFIED");
+    expect(result.reconciliation.outcome).toBe("UNRESOLVED");
+    expect(result.reconciliation.diagnostics).toContainEqual(expect.objectContaining({
+      code: "RECONCILIATION-EVENT-BATCH-COMPLETENESS-UNRESOLVED"
+    }));
+    expect(result.assumptions).toContain(
+      "Event-batch completeness is a synthetic caller-supplied assertion scoped to the sample contract, boundary, account set and observation time; it is not authenticated or independently verified."
+    );
+  });
+
 });
