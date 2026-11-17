@@ -5,6 +5,7 @@ import {
   type ConservationQuantity,
   type ResourceBalanceObservation,
   type ResourceReconciliationAccount,
+  type ResourceReconciliationBatchEvidence,
   type ResourceReconciliationEvent
 } from "./resourceConservation";
 import { assessResourceAccountingAuditStructure } from "./resourceAccountingAudit";
@@ -23,7 +24,8 @@ export type ResourceConservationPreviewScenario =
   | "ESTIMATE-AS-MEASUREMENT"
   | "MEASUREMENT-POLICY-UNRESOLVED"
   | "CONTRACT-EVIDENCE-UNRESOLVED"
-  | "AUDIT-STRUCTURE-PRESENT-UNKNOWN-OUTCOME";
+  | "AUDIT-STRUCTURE-PRESENT-UNKNOWN-OUTCOME"
+  | "EVENT-BATCH-COMPLETENESS-UNRESOLVED";
 
 export const resourceConservationPreviewScenarios: {
   id: ResourceConservationPreviewScenario;
@@ -36,7 +38,8 @@ export const resourceConservationPreviewScenarios: {
   { id: "ESTIMATE-AS-MEASUREMENT", label: "Estimate presented as measurement", description: "The account observation is classified as an estimate, so measurement reconciliation remains unresolved." },
   { id: "MEASUREMENT-POLICY-UNRESOLVED", label: "Measurement policy unresolved", description: "The observation's per-measurement uncertainty-policy acceptance is unknown, so it cannot reconcile." },
   { id: "CONTRACT-EVIDENCE-UNRESOLVED", label: "Contract evidence unresolved", description: "The conservation contract evidence is unknown, so neither evaluation may claim a passing result." },
-  { id: "AUDIT-STRUCTURE-PRESENT-UNKNOWN-OUTCOME", label: "Audit structure present, outcome unknown", description: "All 14 top-level audit sections are represented as explicit unknown placeholders; RESOURCE-OUTCOME-UNKNOWN is preserved without interpretation." }
+  { id: "AUDIT-STRUCTURE-PRESENT-UNKNOWN-OUTCOME", label: "Audit structure present, outcome unknown", description: "All 14 top-level audit sections are represented as explicit unknown placeholders; RESOURCE-OUTCOME-UNKNOWN is preserved without interpretation." },
+  { id: "EVENT-BATCH-COMPLETENESS-UNRESOLVED", label: "Event-batch completeness unresolved", description: "The event-batch completeness assertion is unknown, so an otherwise matching account balance cannot be reconciled." }
 ];
 
 const SAMPLE_RESOURCE_KIND = "preview-sample-stock";
@@ -115,6 +118,20 @@ function sampleEvents(): ResourceReconciliationEvent[] {
   }];
 }
 
+function sampleEventBatchEvidence(
+  scenario: ResourceConservationPreviewScenario
+): ResourceReconciliationBatchEvidence {
+  return {
+    contractId: "preview-sample-conservation-contract",
+    systemBoundary: "preview-sample-account-boundary",
+    accountIds: ["preview-account"],
+    openingSnapshotAsOf: SAMPLE_INTERVAL.start,
+    observationTime: SAMPLE_TIME,
+    completenessEvidence: scenario === "EVENT-BATCH-COMPLETENESS-UNRESOLVED" ? "UNKNOWN" : "PASS",
+    completenessEvidenceRef: "preview:event-batch-completeness"
+  };
+}
+
 function sampleAuditRecord(): Record<string, unknown> {
   return {
     resourceDefinitions: null,
@@ -164,6 +181,7 @@ export function evaluateResourceConservationPreview(scenario: ResourceConservati
     accountId: "preview-account",
     accounts,
     events,
+    eventBatchEvidence: sampleEventBatchEvidence(scenario),
     observation
   });
   const auditStructure = scenario === "AUDIT-STRUCTURE-PRESENT-UNKNOWN-OUTCOME"
@@ -184,6 +202,7 @@ export function evaluateResourceConservationPreview(scenario: ResourceConservati
       "The preview-sample-stock resource kind and tick unit exist only to exercise exact-match software accounting; they are not canonical resource vocabulary or physical units.",
       "The scalar-additive invariant and zero-tick tolerance are explicit assumptions in this demonstration contract, not universal physical laws or canonical tolerances.",
       "The opening balance is timestamped at the sample interval start, and the supplied event is strictly ordered before the sample observation; boundary-equal times are deliberately unresolved.",
+      "Event-batch completeness is a synthetic caller-supplied assertion scoped to the sample contract, boundary, account set and observation time; it is not authenticated or independently verified.",
       "The confirmed consumption event is sample ledger data; projection does not prove that an incantation or physical operation occurred.",
       "Account reconciliation compares one gross account balance only and does not satisfy the complete v1.9 RESOURCE-RECONCILED stage.",
       "The optional audit example checks only top-level section presence; null placeholders do not establish semantic audit completeness or evidence validity.",
