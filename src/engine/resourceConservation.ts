@@ -87,6 +87,9 @@ const nonEmptyString = (value: unknown): value is string =>
 const safeTicks = (value: unknown): value is number =>
   typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
 
+const isConservationEvidence = (value: unknown): value is ConservationEvidence =>
+  value === "PASS" || value === "FAIL" || value === "UNKNOWN" || value === "UNAVAILABLE";
+
 const isIsoTime = (value: unknown): value is string => {
   if (typeof value !== "string") return false;
   const match = value.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.\d{1,9})?(Z|([+-])(\d{2}):(\d{2}))$/);
@@ -332,12 +335,27 @@ export type ResourceReconciliationEvent = LedgerEvent & {
   validTime: string;
 };
 
+/**
+ * Caller-supplied assertion that the event batch covers the exact account and
+ * time scope being reconciled. This is a traceable input, not authenticated proof.
+ */
+export interface ResourceReconciliationBatchEvidence {
+  contractId: string;
+  systemBoundary: string;
+  accountIds: string[];
+  openingSnapshotAsOf: string;
+  observationTime: string;
+  completenessEvidence: ConservationEvidence;
+  completenessEvidenceRef: string;
+}
+
 export interface ResourceReconciliationInput {
   reconciliationId: string;
   contract: ResourceReconciliationContract;
   accountId: string;
   accounts: ResourceReconciliationAccount[];
   events: ResourceReconciliationEvent[];
+  eventBatchEvidence: ResourceReconciliationBatchEvidence;
   observation: ResourceBalanceObservation;
 }
 
@@ -358,6 +376,8 @@ export interface ResourceReconciliationResult {
   observedBalanceTicks?: number;
   discrepancyTicks?: number;
   toleranceTicks?: number;
+  eventBatchCompletenessEvidence?: ConservationEvidence;
+  eventBatchEvidenceRef?: string;
   diagnostics: ConservationDiagnostic[];
   limitations: string[];
 }
@@ -373,7 +393,7 @@ const RECONCILIATION_LIMITATIONS = [
   "Every projected account must identify an opening-balance snapshot as of the conservation interval start; snapshot times are caller-supplied and unauthenticated.",
   "The supplied event batch must carry valid times in strictly increasing order, strictly after the opening snapshot and strictly before the observation; the reconciler does not sort or silently filter events.",
   "Boundary-equal observations/events, missing event times, out-of-window events and ambiguous event ordering remain unresolved because endpoint and same-time ordering semantics are not universal.",
-  "The caller must supply a complete event batch since the opening snapshot; batch completeness and event timestamps are not authenticated.",
+  "A caller-supplied event-batch completeness assertion is required and scoped to the exact contract, boundary, account set, opening snapshot and observation time; the assertion and timestamps are not authenticated or independently verified.",
   "This is an account-balance comparison only; it does not by itself satisfy the whole-resource RESOURCE-RECONCILED stage.",
   "Discrepancies are reported without changing ledger entries or balances. Reconciliation is not proof of conservation, authority, mechanism validity, execution or a successful effect."
 ];
@@ -390,6 +410,10 @@ export function reconcileResourceBalance(
       reconciliationId: nonEmptyString(input?.reconciliationId) ? input.reconciliationId : "",
       ...(nonEmptyString(input?.contract?.contractId) ? { contractId: input.contract.contractId } : {}),
       ...(nonEmptyString(input?.accountId) ? { accountId: input.accountId } : {}),
+      ...(isConservationEvidence(input?.eventBatchEvidence?.completenessEvidence)
+        ? { eventBatchCompletenessEvidence: input.eventBatchEvidence.completenessEvidence } : {}),
+      ...(nonEmptyString(input?.eventBatchEvidence?.completenessEvidenceRef)
+        ? { eventBatchEvidenceRef: input.eventBatchEvidence.completenessEvidenceRef } : {}),
       diagnostics,
       limitations: [...RECONCILIATION_LIMITATIONS]
     };
@@ -407,6 +431,10 @@ export function reconcileResourceBalance(
       reconciliationId: nonEmptyString(input?.reconciliationId) ? input.reconciliationId : "",
       ...(nonEmptyString(input?.contract?.contractId) ? { contractId: input.contract.contractId } : {}),
       ...(nonEmptyString(input?.accountId) ? { accountId: input.accountId } : {}),
+      ...(isConservationEvidence(input?.eventBatchEvidence?.completenessEvidence)
+        ? { eventBatchCompletenessEvidence: input.eventBatchEvidence.completenessEvidence } : {}),
+      ...(nonEmptyString(input?.eventBatchEvidence?.completenessEvidenceRef)
+        ? { eventBatchEvidenceRef: input.eventBatchEvidence.completenessEvidenceRef } : {}),
       ...(ledgerOutcome ? { ledgerOutcome } : {}),
       ...(expectedBalanceTicks === undefined ? {} : { expectedBalanceTicks }),
       diagnostics,
@@ -431,7 +459,15 @@ export function reconcileResourceBalance(
       !input.observation || typeof input.observation !== "object" ||
       (input.observation.category !== "ESTIMATE" && input.observation.category !== "MEASUREMENT") ||
       !isIsoTime(input.observation.observedAt) ||
-      !nonEmptyString(input.observation.evidenceRef)) {
+      !nonEmptyString(input.observation.evidenceRef) ||
+      !input.eventBatchEvidence || typeof input.eventBatchEvidence !== "object" ||
+      !nonEmptyString(input.eventBatchEvidence.contractId) ||
+      !nonEmptyString(input.eventBatchEvidence.systemBoundary) ||
+      !Array.isArray(input.eventBatchEvidence.accountIds) ||
+      !isIsoTime(input.eventBatchEvidence.openingSnapshotAsOf) ||
+      !isIsoTime(input.eventBatchEvidence.observationTime) ||
+      !isConservationEvidence(input.eventBatchEvidence.completenessEvidence) ||
+      !nonEmptyString(input.eventBatchEvidence.completenessEvidenceRef)) {
     return invalid("RECONCILIATION-RECORD-INVALID", "Reconciliation identity, contract boundary, interval and safe non-negative contract tolerance, evidence references, account/event records, valid observation time and evidence reference are required.");
   }
 
@@ -472,6 +508,34 @@ export function reconcileResourceBalance(
   }
   if (observedTime === intervalStart || observedTime === intervalEnd) {
     return unresolved("RECONCILIATION-OBSERVATION-BOUNDARY-AMBIGUOUS", "The observation is exactly on a contract interval boundary; this bounded reconciler does not infer endpoint inclusion.");
+  }
+
+  const batchEvidence = input.eventBatchEvidence;
+  if (batchEvidence.contractId !== input.contract.contractId ||
+      batchEvidence.systemBoundary !== input.contract.systemBoundary ||
+      Date.parse(batchEvidence.openingSnapshotAsOf) !== intervalStart ||
+      Date.parse(batchEvidence.observationTime) !== observedTime) {
+    return invalid("RECONCILIATION-EVENT-BATCH-SCOPE-MISMATCH", "Event-batch completeness evidence must match the exact conservation contract, system boundary, opening snapshot and observation time.");
+  }
+
+  const declaredAccountIds = batchEvidence.accountIds;
+  const projectedAccountIds = input.accounts.map((candidate) => candidate?.accountId);
+  const declaredAccountIdSet = new Set(declaredAccountIds);
+  const projectedAccountIdSet = new Set(projectedAccountIds);
+  if (declaredAccountIds.some((id) => !nonEmptyString(id)) ||
+      declaredAccountIdSet.size !== declaredAccountIds.length ||
+      projectedAccountIds.some((id) => !nonEmptyString(id)) ||
+      projectedAccountIdSet.size !== projectedAccountIds.length ||
+      declaredAccountIdSet.size !== projectedAccountIdSet.size ||
+      [...declaredAccountIdSet].some((id) => !projectedAccountIdSet.has(id))) {
+    return invalid("RECONCILIATION-EVENT-BATCH-ACCOUNT-COVERAGE-MISMATCH", "The event-batch assertion must identify every projected account exactly once, with no missing, extra or duplicate account identifiers.");
+  }
+
+  if (batchEvidence.completenessEvidence === "FAIL") {
+    return unresolved("RECONCILIATION-EVENT-BATCH-INCOMPLETE", "The supplied event-batch completeness evidence reports an incomplete batch; no account balance is reconciled.");
+  }
+  if (batchEvidence.completenessEvidence !== "PASS") {
+    return unresolved("RECONCILIATION-EVENT-BATCH-COMPLETENESS-UNRESOLVED", "The supplied event-batch completeness evidence is not passing; no account balance is reconciled.");
   }
 
   for (const candidate of input.accounts) {
@@ -570,6 +634,8 @@ export function reconcileResourceBalance(
     observedBalanceTicks: observation.balanceTicks!,
     discrepancyTicks,
     toleranceTicks: input.contract.toleranceTicks,
+    eventBatchCompletenessEvidence: batchEvidence.completenessEvidence,
+    eventBatchEvidenceRef: batchEvidence.completenessEvidenceRef,
     diagnostics,
     limitations: [...RECONCILIATION_LIMITATIONS]
   };
