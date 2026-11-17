@@ -7,6 +7,7 @@ import {
   type ConservationLossQuantity,
   type ResourceReconciliationInput,
   type ResourceReconciliationAccount,
+  type ResourceReconciliationBatchEvidence,
   type ResourceReconciliationEvent,
   type ResourceBalanceObservation
 } from "./resourceConservation";
@@ -101,12 +102,26 @@ const measurementObservation = (
   ...overrides
 });
 
+const batchEvidence = (
+  overrides: Partial<ResourceReconciliationBatchEvidence> = {}
+): ResourceReconciliationBatchEvidence => ({
+  contractId: "conservation-v1",
+  systemBoundary: "bounded-test-system",
+  accountIds: ["account-a"],
+  openingSnapshotAsOf: "2026-01-01T00:00:00Z",
+  observationTime: "2026-06-01T00:00:00Z",
+  completenessEvidence: "PASS",
+  completenessEvidenceRef: "event-batch:evidence",
+  ...overrides
+});
+
 const reconciliation = (overrides: Partial<ResourceReconciliationInput> = {}): ResourceReconciliationInput => ({
   reconciliationId: "recon-1",
   contract: contract(),
   accountId: "account-a",
   accounts: accounts(),
   events: [ledgerEvent()],
+  eventBatchEvidence: batchEvidence(),
   observation: measurementObservation(),
   ...overrides
 });
@@ -449,6 +464,107 @@ describe("Arcane Incantations v1.9 conservation and reconciliation", () => {
         code: "RECONCILIATION-OBSERVATION-BOUNDARY-AMBIGUOUS"
       }));
     }
+  });
+
+
+  it("[RES19-RECON-017] requires an explicit event-batch completeness assertion", () => {
+    const missing = reconcileResourceBalance(reconciliation({
+      eventBatchEvidence: undefined as unknown as ResourceReconciliationBatchEvidence
+    }));
+    expect(missing.outcome).toBe("INVALID-RECONCILIATION");
+    expect(missing.diagnostics).toContainEqual(expect.objectContaining({
+      code: "RECONCILIATION-RECORD-INVALID"
+    }));
+
+    const missingReference = reconcileResourceBalance(reconciliation({
+      eventBatchEvidence: batchEvidence({ completenessEvidenceRef: "" })
+    }));
+    expect(missingReference.outcome).toBe("INVALID-RECONCILIATION");
+  });
+
+  it("[RES19-RECON-018] keeps incomplete or unresolved event batches from reconciling", () => {
+    const incomplete = reconcileResourceBalance(reconciliation({
+      eventBatchEvidence: batchEvidence({ completenessEvidence: "FAIL" })
+    }));
+    expect(incomplete.outcome).toBe("UNRESOLVED");
+    expect(incomplete.diagnostics).toContainEqual(expect.objectContaining({
+      code: "RECONCILIATION-EVENT-BATCH-INCOMPLETE"
+    }));
+
+    for (const evidence of ["UNKNOWN", "UNAVAILABLE"] as const) {
+      const result = reconcileResourceBalance(reconciliation({
+        eventBatchEvidence: batchEvidence({ completenessEvidence: evidence })
+      }));
+      expect(result.outcome).toBe("UNRESOLVED");
+      expect(result.diagnostics).toContainEqual(expect.objectContaining({
+        code: "RECONCILIATION-EVENT-BATCH-COMPLETENESS-UNRESOLVED"
+      }));
+    }
+  });
+
+  it("[RES19-RECON-019] binds completeness evidence to the exact contract and observation window", () => {
+    const cases: Partial<ResourceReconciliationBatchEvidence>[] = [
+      { contractId: "other-contract" },
+      { systemBoundary: "other-boundary" },
+      { openingSnapshotAsOf: "2026-01-02T00:00:00Z" },
+      { observationTime: "2026-05-31T00:00:00Z" }
+    ];
+    for (const overrides of cases) {
+      const result = reconcileResourceBalance(reconciliation({
+        eventBatchEvidence: batchEvidence(overrides)
+      }));
+      expect(result.outcome).toBe("INVALID-RECONCILIATION");
+      expect(result.diagnostics).toContainEqual(expect.objectContaining({
+        code: "RECONCILIATION-EVENT-BATCH-SCOPE-MISMATCH"
+      }));
+    }
+  });
+
+  it("[RES19-RECON-020] requires exact, duplicate-free coverage of every projected account", () => {
+    const peerAccount = { ...accounts()[0]!, accountId: "account-b" };
+    const exactCoverage = reconcileResourceBalance(reconciliation({
+      accounts: [accounts()[0]!, peerAccount],
+      events: [],
+      eventBatchEvidence: batchEvidence({ accountIds: ["account-b", "account-a"] }),
+      observation: measurementObservation({ balanceTicks: 100 })
+    }));
+    expect(exactCoverage.outcome).toBe("ACCOUNT-BALANCE-RECONCILED");
+
+    for (const accountIds of [
+      ["account-a"],
+      ["account-a", "account-b", "account-b"],
+      ["account-a", "account-b", "account-extra"]
+    ]) {
+      const result = reconcileResourceBalance(reconciliation({
+        accounts: [accounts()[0]!, peerAccount],
+        events: [],
+        eventBatchEvidence: batchEvidence({ accountIds })
+      }));
+      expect(result.outcome).toBe("INVALID-RECONCILIATION");
+      expect(result.diagnostics).toContainEqual(expect.objectContaining({
+        code: "RECONCILIATION-EVENT-BATCH-ACCOUNT-COVERAGE-MISMATCH"
+      }));
+    }
+  });
+
+  it("[RES19-RECON-021] accepts an empty event batch only with passing completeness evidence", () => {
+    const completeEmptyBatch = reconcileResourceBalance(reconciliation({
+      events: [],
+      observation: measurementObservation({ balanceTicks: 100 })
+    }));
+    expect(completeEmptyBatch).toMatchObject({
+      outcome: "ACCOUNT-BALANCE-RECONCILED",
+      expectedBalanceTicks: 100,
+      eventBatchCompletenessEvidence: "PASS",
+      eventBatchEvidenceRef: "event-batch:evidence"
+    });
+
+    const unresolvedEmptyBatch = reconcileResourceBalance(reconciliation({
+      events: [],
+      eventBatchEvidence: batchEvidence({ completenessEvidence: "UNKNOWN" }),
+      observation: measurementObservation({ balanceTicks: 100 })
+    }));
+    expect(unresolvedEmptyBatch.outcome).toBe("UNRESOLVED");
   });
 
 });
