@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   evaluateConservationContract,
   reconcileResourceBalance,
+  reconcileResourceAccountSet,
   type ConservationContractInput,
   type ConservationQuantity,
   type ConservationLossQuantity,
@@ -9,7 +10,9 @@ import {
   type ResourceReconciliationAccount,
   type ResourceReconciliationBatchEvidence,
   type ResourceReconciliationEvent,
-  type ResourceBalanceObservation
+  type ResourceBalanceObservation,
+  type ResourceAccountBalanceObservation,
+  type ResourceAccountSetReconciliationInput
 } from "./resourceConservation";
 import { projectResourceLedger } from "./resourceLedger";
 
@@ -125,6 +128,38 @@ const reconciliation = (overrides: Partial<ResourceReconciliationInput> = {}): R
   observation: measurementObservation(),
   ...overrides
 });
+
+
+const accountSetReconciliation = (
+  overrides: Partial<ResourceAccountSetReconciliationInput> = {}
+): ResourceAccountSetReconciliationInput => {
+  const accountA: ResourceReconciliationAccount = {
+    accountId: "account-a", resourceKind: "mana-token", unit: "tick",
+    unitContractId: "mana-tick-v1", openingBalanceTicks: 100,
+    openingBalanceAsOf: "2026-01-01T00:00:00Z"
+  };
+  const accountB: ResourceReconciliationAccount = {
+    accountId: "account-b", resourceKind: "mana-token", unit: "tick",
+    unitContractId: "mana-tick-v1", openingBalanceTicks: 10,
+    openingBalanceAsOf: "2026-01-01T00:00:00Z"
+  };
+  const observations: ResourceAccountBalanceObservation[] = [
+    { accountId: "account-a", ...measurementObservation({ balanceTicks: 80 }) },
+    { accountId: "account-b", ...measurementObservation({ balanceTicks: 30 }) }
+  ];
+  return {
+    reconciliationId: "recon-account-set-1",
+    contract: contract(),
+    accounts: [accountA, accountB],
+    events: [ledgerEvent({
+      eventId: "transfer-1", eventKind: "TRANSFER", fromAccount: "account-a",
+      toAccount: "account-b", amountTicks: 20, idempotencyKey: "transfer-1"
+    })],
+    eventBatchEvidence: batchEvidence({ accountIds: ["account-a", "account-b"] }),
+    observations,
+    ...overrides
+  };
+};
 
 describe("Arcane Incantations v1.9 conservation and reconciliation", () => {
   it("[RES19-CONS-001] evaluates a balanced scalar contract within its declared boundary", () => {
@@ -565,6 +600,86 @@ describe("Arcane Incantations v1.9 conservation and reconciliation", () => {
       observation: measurementObservation({ balanceTicks: 100 })
     }));
     expect(unresolvedEmptyBatch.outcome).toBe("UNRESOLVED");
+  });
+
+  it("[RES19-RECON-022] reconciles both accounts in one complete transfer batch", () => {
+    const result = reconcileResourceAccountSet(accountSetReconciliation());
+    expect(result).toMatchObject({
+      outcome: "ACCOUNT-SET-RECONCILED",
+      scope: "ACCOUNT-SET-BALANCES",
+      accountResults: [
+        { outcome: "ACCOUNT-BALANCE-RECONCILED", accountId: "account-a", expectedBalanceTicks: 80, observedBalanceTicks: 80 },
+        { outcome: "ACCOUNT-BALANCE-RECONCILED", accountId: "account-b", expectedBalanceTicks: 30, observedBalanceTicks: 30 }
+      ]
+    });
+  });
+
+  it("[RES19-RECON-023] requires exactly one observation for every account", () => {
+    const base = accountSetReconciliation();
+    const first = base.observations[0]!;
+    const second = base.observations[1]!;
+    const cases: ResourceAccountSetReconciliationInput[] = [
+      { ...base, observations: [first] },
+      { ...base, observations: [first, { ...first }] },
+      { ...base, observations: [first, { ...second, accountId: "account-c" }] }
+    ];
+    for (const candidate of cases) {
+      expect(reconcileResourceAccountSet(candidate)).toMatchObject({
+        outcome: "INVALID-RECONCILIATION",
+        diagnostics: [expect.objectContaining({ code: "RECONCILIATION-OBSERVATION-ACCOUNT-COVERAGE" })]
+      });
+    }
+  });
+
+  it("[RES19-RECON-024] preserves a discrepancy for one account without correcting either balance", () => {
+    const input = accountSetReconciliation();
+    input.observations[1] = { ...input.observations[1]!, balanceTicks: 28 };
+    const result = reconcileResourceAccountSet(input);
+    expect(result.outcome).toBe("ACCOUNT-SET-DISCREPANCY");
+    expect(result.accountResults.map((item) => item.outcome)).toEqual([
+      "ACCOUNT-BALANCE-RECONCILED", "ACCOUNT-BALANCE-DISCREPANCY"
+    ]);
+    expect(result.accountResults[1]).toMatchObject({
+      expectedBalanceTicks: 30, observedBalanceTicks: 28, discrepancyTicks: -2
+    });
+    expect(input.accounts.map((item) => item.openingBalanceTicks)).toEqual([100, 10]);
+  });
+
+  it("[RES19-RECON-025] blocks a transfer when its source debit cannot be applied", () => {
+    const input = accountSetReconciliation({
+      events: [ledgerEvent({
+        eventId: "transfer-missing-source", eventKind: "TRANSFER", fromAccount: undefined,
+        toAccount: "account-b", amountTicks: 20, idempotencyKey: "transfer-missing-source"
+      })]
+    });
+    const projection = projectResourceLedger(input.accounts, input.events);
+    const result = reconcileResourceAccountSet(input);
+    expect(projection.outcome).toBe("LEDGER-PARTIAL");
+    expect(projection.balances).toEqual({ "account-a": 100, "account-b": 10 });
+    expect(projection.issues.length).toBeGreaterThan(0);
+    expect(result.outcome).toBe("UNRESOLVED");
+    expect(result.accountResults).toHaveLength(2);
+    expect(result.accountResults.every((item) => item.outcome === "UNRESOLVED")).toBe(true);
+  });
+
+  it("[RES19-RECON-026] rejects empty and mixed-contract account sets", () => {
+    const base = accountSetReconciliation();
+    expect(reconcileResourceAccountSet({
+      ...base, accounts: [], observations: [], eventBatchEvidence: batchEvidence({ accountIds: [] })
+    })).toMatchObject({
+      outcome: "INVALID-RECONCILIATION",
+      diagnostics: [expect.objectContaining({ code: "RECONCILIATION-ACCOUNT-SET-INVALID" })]
+    });
+    expect(reconcileResourceAccountSet({
+      ...base,
+      accounts: [
+        base.accounts[0]!,
+        { ...base.accounts[1]!, resourceKind: "energy", unit: "joule", unitContractId: "energy-joule-v1" }
+      ]
+    })).toMatchObject({
+      outcome: "INVALID-RECONCILIATION",
+      diagnostics: [expect.objectContaining({ code: "RECONCILIATION-ACCOUNT-SET-CONTRACT-MISMATCH" })]
+    });
   });
 
 });

@@ -100,4 +100,25 @@ describe("read-only v1.9 conservation and account-reconciliation preview", () =>
     );
   });
 
+  it("[RES19-PREVIEW-009] demonstrates matching source and destination account balances", () => {
+    const result = evaluateResourceConservationPreview("TRANSFER-RECONCILED");
+    expect(result.conservation.outcome).toBe("CONSERVATION-SATISFIED");
+    expect(result.accountSetReconciliation).toMatchObject({
+      outcome: "ACCOUNT-SET-RECONCILED",
+      accountResults: [
+        { accountId: "preview-account-source", expectedBalanceTicks: 80, observedBalanceTicks: 80 },
+        { accountId: "preview-account-destination", expectedBalanceTicks: 30, observedBalanceTicks: 30 }
+      ]
+    });
+  });
+
+  it("[RES19-PREVIEW-010] keeps a source-less transfer unresolved despite a balanced aggregate sample", () => {
+    const result = evaluateResourceConservationPreview("TRANSFER-SOURCE-DEBIT-MISSING");
+    expect(result.conservation).toMatchObject({
+      outcome: "CONSERVATION-SATISFIED", leftTotalTicks: 110, rightTotalTicks: 110
+    });
+    expect(result.accountSetReconciliation?.outcome).toBe("UNRESOLVED");
+    expect(result.accountSetReconciliation?.accountResults.every((item) => item.outcome === "UNRESOLVED")).toBe(true);
+  });
+
 });

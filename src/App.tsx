@@ -640,9 +640,9 @@ function App() {
           <section className="fixture-browser runtime-preview-browser resource-conservation-preview" aria-labelledby="resource-conservation-preview-title">
             <div className="fixture-browser-head">
               <div><span className="detail-kicker">V1.9 CONSERVATION & AUDIT · READ-ONLY SAMPLE</span><h2 id="resource-conservation-preview-title">Conservation and account reconciliation</h2></div>
-              <span>2 independent evaluators · separate audit example</span>
+              <span>2 independent evaluators · optional account-set reconciliation</span>
             </div>
-            <p className="fixture-browser-intro">This panel runs the bounded conservation evaluator and ledger-backed account reconciler against deterministic synthetic inputs. The optional audit example checks only top-level section presence and preserves its reported outcome without interpretation. It does not use the 60 canonical specification fixtures as executed test cases.</p>
+            <p className="fixture-browser-intro">This panel runs bounded scalar conservation and ledger-backed single-account or account-set reconciliation against deterministic synthetic inputs. The optional audit example checks only top-level section presence and preserves its reported outcome without interpretation. It does not use the 60 canonical specification fixtures as executed test cases.</p>
             <label className="fixture-select-label">Choose a resource-accounting scenario
               <select aria-label="Choose resource conservation preview scenario" value={resourceConservationScenario} onChange={(event) => setResourceConservationScenario(event.target.value as ResourceConservationPreviewScenario)}>
                 {resourceConservationPreviewScenarios.map((scenario) => <option key={scenario.id} value={scenario.id}>{scenario.label}</option>)}
@@ -676,6 +676,20 @@ function App() {
                   ? <ul className="resource-conservation-diagnostics">{resourceConservationPreview.reconciliation.diagnostics.map((item, index) => <li key={item.code + index}><code>{item.code}</code><span>{item.message}</span></li>)}</ul>
                   : <p className="resource-conservation-no-diagnostics">No diagnostics for this sample result.</p>}
               </article>
+              {resourceConservationPreview.accountSetReconciliation && <article className="resource-conservation-card" aria-label="Account-set reconciliation result">
+                <span>ACCOUNT-SET RECONCILIATION · {resourceConservationPreview.accountSetReconciliation.scope}</span>
+                <strong className={resourceConservationPreview.accountSetReconciliation.outcome === "ACCOUNT-SET-RECONCILED" ? "runtime-good" : resourceConservationPreview.accountSetReconciliation.outcome === "ACCOUNT-SET-DISCREPANCY" ? "runtime-blocked" : "runtime-unresolved"}>{resourceConservationPreview.accountSetReconciliation.outcome}</strong>
+                <div className="resource-conservation-metrics">
+                  <div><span>Accounts checked:</span><strong>{resourceConservationPreview.accountSetReconciliation.accountResults.length}</strong></div>
+                  {resourceConservationPreview.accountSetReconciliation.accountResults.map((item, index) => <div key={item.accountId ?? index}>
+                    <span>{item.accountId ?? "Unidentified account"}:</span>
+                    <strong>{item.outcome} · {item.expectedBalanceTicks === undefined ? "Not computed" : item.expectedBalanceTicks + " ticks"} / {item.observedBalanceTicks === undefined ? "Not accepted" : item.observedBalanceTicks + " ticks"}</strong>
+                  </div>)}
+                </div>
+                {resourceConservationPreview.accountSetReconciliation.diagnostics.length > 0
+                  ? <ul className="resource-conservation-diagnostics">{resourceConservationPreview.accountSetReconciliation.diagnostics.map((item, index) => <li key={item.code + index}><code>{item.code}</code><span>{item.message}</span></li>)}</ul>
+                  : <p className="resource-conservation-no-diagnostics">No diagnostics for this account set.</p>}
+              </article>}
               {resourceConservationPreview.auditStructure && <article className="resource-conservation-card" aria-label="Audit structure assessment">
                 <span>INVOCATION AUDIT · STRUCTURAL PRESENCE ONLY</span>
                 <strong className="runtime-unresolved">{resourceConservationPreview.auditStructure.status}</strong>
@@ -694,6 +708,7 @@ function App() {
                 {resourceConservationPreview.assumptions.map((item) => <li key={item}>{item}</li>)}
                 {resourceConservationPreview.conservation.limitations.map((item) => <li key={item}>{item}</li>)}
                 {resourceConservationPreview.reconciliation.limitations.map((item) => <li key={item}>{item}</li>)}
+                {resourceConservationPreview.accountSetReconciliation?.limitations.map((item) => <li key={item}>{item}</li>)}
               </ul>
             </details>
             <p className="fixture-browser-caveat">The sample resource kind and tick unit are synthetic demonstration data, not canonical vocabulary or physical units. The 60 v1.9 rows above remain source-only specification expectations. Neither result authenticates evidence, changes a ledger, authorises or executes an incantation, establishes physical feasibility, or verifies an effect.</p>

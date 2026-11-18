@@ -186,17 +186,19 @@ export const resourceAccountingCoverage: ResourceAccountingCoverage[] = [
     "fixtureId": "RES19-20",
     "status": "BOUNDED",
     "testIds": [
-      "RES19-LEDGER-002"
+      "RES19-LEDGER-002",
+      "RES19-RECON-022"
     ],
-    "note": "A transfer applies source debit and destination credit together when both accounts match the event's exact resource and unit contract."
+    "note": "One TRANSFER event applies source debit and destination credit together under the same exact resource/unit contract; account-set reconciliation compares both resulting gross balances in the same complete batch."
   },
   {
     "fixtureId": "RES19-21",
-    "status": "PARTIAL",
+    "status": "BOUNDED",
     "testIds": [
-      "RES19-LEDGER-019"
+      "RES19-LEDGER-019",
+      "RES19-RECON-025"
     ],
-    "note": "A transfer missing its source account fails before destination credit; separate debit/credit event reconciliation is not implemented."
+    "note": "A transfer record without an applicable source debit is rejected before destination credit; the shared ledger projection remains unresolved and the account set cannot reconcile."
   },
   {
     "fixtureId": "RES19-22",

@@ -640,3 +640,156 @@ export function reconcileResourceBalance(
     limitations: [...RECONCILIATION_LIMITATIONS]
   };
 }
+
+
+/** A measured gross-balance observation attributed to one account in a shared batch. */
+export interface ResourceAccountBalanceObservation extends ResourceBalanceObservation {
+  accountId: string;
+}
+
+export interface ResourceAccountSetReconciliationInput {
+  reconciliationId: string;
+  contract: ResourceReconciliationContract;
+  accounts: ResourceReconciliationAccount[];
+  events: ResourceReconciliationEvent[];
+  eventBatchEvidence: ResourceReconciliationBatchEvidence;
+  observations: ResourceAccountBalanceObservation[];
+}
+
+export type ResourceAccountSetReconciliationOutcome =
+  | "ACCOUNT-SET-RECONCILED"
+  | "ACCOUNT-SET-DISCREPANCY"
+  | "UNRESOLVED"
+  | "INVALID-RECONCILIATION";
+
+export interface ResourceAccountSetReconciliationResult {
+  outcome: ResourceAccountSetReconciliationOutcome;
+  scope: "ACCOUNT-SET-BALANCES";
+  reconciliationId: string;
+  contractId?: string;
+  accountResults: ResourceReconciliationResult[];
+  diagnostics: ConservationDiagnostic[];
+  limitations: string[];
+}
+
+const ACCOUNT_SET_RECONCILIATION_LIMITATIONS = [
+  "Every account is compared independently against the same supplied ledger batch; the result is not a vector or cross-account conservation invariant.",
+  "Exactly one measurement observation is required for every declared account; observations are not authenticated or independently verified.",
+  "The event-batch completeness assertion and all ledger, account and measurement evidence remain caller-supplied and unauthenticated.",
+  "The result does not establish the full v1.9 RESOURCE-RECONCILED stage, physical conservation, execution, authority or target outcome."
+];
+
+/**
+ * Reconciles every account in one exact event batch. The account and observation
+ * sets must match exactly; each account retains its own gross-balance result.
+ * This is a batch of account comparisons, not a cross-account invariant.
+ */
+export function reconcileResourceAccountSet(
+  input: ResourceAccountSetReconciliationInput
+): ResourceAccountSetReconciliationResult {
+  const invalid = (code: string, message: string): ResourceAccountSetReconciliationResult => ({
+    outcome: "INVALID-RECONCILIATION",
+    scope: "ACCOUNT-SET-BALANCES",
+    reconciliationId: nonEmptyString(input?.reconciliationId) ? input.reconciliationId : "",
+    ...(nonEmptyString(input?.contract?.contractId) ? { contractId: input.contract.contractId } : {}),
+    accountResults: [],
+    diagnostics: [{ code, message }],
+    limitations: [...ACCOUNT_SET_RECONCILIATION_LIMITATIONS]
+  });
+
+  if (!input || typeof input !== "object" ||
+      !nonEmptyString(input.reconciliationId) ||
+      !input.contract || typeof input.contract !== "object" ||
+      !nonEmptyString(input.contract.contractId) ||
+      !nonEmptyString(input.contract.resourceKind) ||
+      !nonEmptyString(input.contract.unit) ||
+      !nonEmptyString(input.contract.unitContractId) ||
+      !Array.isArray(input.accounts) || input.accounts.length === 0 ||
+      !Array.isArray(input.events) ||
+      !Array.isArray(input.observations)) {
+    return invalid(
+      "RECONCILIATION-ACCOUNT-SET-INVALID",
+      "A reconciliation identity, one exact resource/unit contract, a non-empty account set, an event list and an observation list are required."
+    );
+  }
+
+  const accountIds = input.accounts.map((account) => account?.accountId);
+  if (accountIds.some((id) => !nonEmptyString(id)) ||
+      new Set(accountIds).size !== accountIds.length) {
+    return invalid(
+      "RECONCILIATION-ACCOUNT-SET-IDENTITY",
+      "Every account in the set must have one non-empty, unique account identity."
+    );
+  }
+
+  const observationIds = input.observations.map((observation) => observation?.accountId);
+  const accountIdSet = new Set(accountIds);
+  const observationIdSet = new Set(observationIds);
+  if (observationIds.some((id) => !nonEmptyString(id)) ||
+      input.observations.length !== input.accounts.length ||
+      observationIdSet.size !== observationIds.length ||
+      accountIdSet.size !== observationIdSet.size ||
+      [...accountIdSet].some((id) => !observationIdSet.has(id))) {
+    return invalid(
+      "RECONCILIATION-OBSERVATION-ACCOUNT-COVERAGE",
+      "The observation set must contain exactly one observation for every account, with no missing, extra or duplicate account identities."
+    );
+  }
+
+  if (input.accounts.some((account) =>
+    !account ||
+    !nonEmptyString(account.resourceKind) ||
+    account.resourceKind !== input.contract.resourceKind ||
+    !nonEmptyString(account.unit) ||
+    account.unit !== input.contract.unit ||
+    !nonEmptyString(account.unitContractId) ||
+    account.unitContractId !== input.contract.unitContractId ||
+    !safeTicks(account.openingBalanceTicks)
+  )) {
+    return invalid(
+      "RECONCILIATION-ACCOUNT-SET-CONTRACT-MISMATCH",
+      "Every account must match the same exact resource kind, unit and unit-contract identity and carry a safe non-negative opening balance; no conversion is inferred."
+    );
+  }
+
+  const observationsByAccount = new Map(
+    input.observations.map((observation) => [observation.accountId, observation] as const)
+  );
+  const accountResults = input.accounts.map((account) =>
+    reconcileResourceBalance({
+      reconciliationId: input.reconciliationId,
+      contract: input.contract,
+      accountId: account.accountId,
+      accounts: input.accounts,
+      events: input.events,
+      eventBatchEvidence: input.eventBatchEvidence,
+      observation: observationsByAccount.get(account.accountId)!
+    })
+  );
+
+  const diagnostics = accountResults.flatMap((result) =>
+    result.diagnostics.map((diagnostic) => ({
+      code: diagnostic.code,
+      message: (result.accountId ?? "Unidentified account") + ": " + diagnostic.message
+    }))
+  );
+
+  const outcome: ResourceAccountSetReconciliationOutcome =
+    accountResults.some((result) => result.outcome === "INVALID-RECONCILIATION")
+      ? "INVALID-RECONCILIATION"
+      : accountResults.some((result) => result.outcome === "UNRESOLVED")
+        ? "UNRESOLVED"
+        : accountResults.some((result) => result.outcome === "ACCOUNT-BALANCE-DISCREPANCY")
+          ? "ACCOUNT-SET-DISCREPANCY"
+          : "ACCOUNT-SET-RECONCILED";
+
+  return {
+    outcome,
+    scope: "ACCOUNT-SET-BALANCES",
+    reconciliationId: input.reconciliationId,
+    contractId: input.contract.contractId,
+    accountResults,
+    diagnostics,
+    limitations: [...ACCOUNT_SET_RECONCILIATION_LIMITATIONS]
+  };
+}

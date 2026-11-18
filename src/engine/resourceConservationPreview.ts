@@ -1,9 +1,11 @@
 import {
   evaluateConservationContract,
   reconcileResourceBalance,
+  reconcileResourceAccountSet,
   type ConservationContractInput,
   type ConservationQuantity,
   type ResourceBalanceObservation,
+  type ResourceAccountBalanceObservation,
   type ResourceReconciliationAccount,
   type ResourceReconciliationBatchEvidence,
   type ResourceReconciliationEvent
@@ -25,7 +27,9 @@ export type ResourceConservationPreviewScenario =
   | "MEASUREMENT-POLICY-UNRESOLVED"
   | "CONTRACT-EVIDENCE-UNRESOLVED"
   | "AUDIT-STRUCTURE-PRESENT-UNKNOWN-OUTCOME"
-  | "EVENT-BATCH-COMPLETENESS-UNRESOLVED";
+  | "EVENT-BATCH-COMPLETENESS-UNRESOLVED"
+  | "TRANSFER-RECONCILED"
+  | "TRANSFER-SOURCE-DEBIT-MISSING";
 
 export const resourceConservationPreviewScenarios: {
   id: ResourceConservationPreviewScenario;
@@ -39,8 +43,14 @@ export const resourceConservationPreviewScenarios: {
   { id: "MEASUREMENT-POLICY-UNRESOLVED", label: "Measurement policy unresolved", description: "The observation's per-measurement uncertainty-policy acceptance is unknown, so it cannot reconcile." },
   { id: "CONTRACT-EVIDENCE-UNRESOLVED", label: "Contract evidence unresolved", description: "The conservation contract evidence is unknown, so neither evaluation may claim a passing result." },
   { id: "AUDIT-STRUCTURE-PRESENT-UNKNOWN-OUTCOME", label: "Audit structure present, outcome unknown", description: "All 14 top-level audit sections are represented as explicit unknown placeholders; RESOURCE-OUTCOME-UNKNOWN is preserved without interpretation." },
-  { id: "EVENT-BATCH-COMPLETENESS-UNRESOLVED", label: "Event-batch completeness unresolved", description: "The event-batch completeness assertion is unknown, so an otherwise matching account balance cannot be reconciled." }
+  { id: "EVENT-BATCH-COMPLETENESS-UNRESOLVED", label: "Event-batch completeness unresolved", description: "The event-batch completeness assertion is unknown, so an otherwise matching account balance cannot be reconciled." },
+  { id: "TRANSFER-RECONCILED", label: "Two-account transfer reconciled", description: "One transfer event debits the source and credits the destination; both measured gross balances match the same complete event batch." },
+  { id: "TRANSFER-SOURCE-DEBIT-MISSING", label: "Transfer without source debit", description: "A transfer with no source account is rejected before destination credit; both account comparisons remain unresolved even though the separate aggregate sample balances." }
 ];
+
+function isTransferScenario(scenario: ResourceConservationPreviewScenario): boolean {
+  return scenario === "TRANSFER-RECONCILED" || scenario === "TRANSFER-SOURCE-DEBIT-MISSING";
+}
 
 const SAMPLE_RESOURCE_KIND = "preview-sample-stock";
 const SAMPLE_UNIT = "tick";
@@ -62,7 +72,11 @@ function sampleQuantity(amountTicks: number, evidenceRef: string): ConservationQ
 function sampleContract(scenario: ResourceConservationPreviewScenario): ConservationContractInput {
   const contractEvidence = scenario === "CONTRACT-EVIDENCE-UNRESOLVED" ||
     scenario === "AUDIT-STRUCTURE-PRESENT-UNKNOWN-OUTCOME" ? "UNKNOWN" : "PASS";
-  const closingBalance = scenario === "CONSERVATION-MISMATCH" ? 109 : 110;
+  const transferScenario = isTransferScenario(scenario);
+  const openingBalance = transferScenario ? 110 : 100;
+  const sourceBalance = transferScenario ? 0 : 20;
+  const closingBalance = transferScenario ? 110 : scenario === "CONSERVATION-MISMATCH" ? 109 : 110;
+  const outputBalance = transferScenario ? 0 : 10;
   return {
     contractId: "preview-sample-conservation-contract",
     resourceKind: SAMPLE_RESOURCE_KIND,
@@ -80,17 +94,37 @@ function sampleContract(scenario: ResourceConservationPreviewScenario): Conserva
     uncertaintyRuleRef: "preview:uncertainty-rule",
     uncertaintyPolicyEvidence: "PASS",
     uncertaintyPolicyEvidenceRef: "preview:uncertainty-policy-evidence",
-    openingState: [sampleQuantity(100, "preview:opening-state")],
-    sources: [sampleQuantity(20, "preview:source-entry")],
+    openingState: [sampleQuantity(openingBalance, "preview:opening-state")],
+    sources: sourceBalance > 0 ? [sampleQuantity(sourceBalance, "preview:source-entry")] : [],
     permittedInputs: [],
     closingState: [sampleQuantity(closingBalance, "preview:closing-state")],
     sinks: [],
-    permittedOutputs: [sampleQuantity(10, "preview:permitted-output")],
+    permittedOutputs: outputBalance > 0 ? [sampleQuantity(outputBalance, "preview:permitted-output")] : [],
     declaredLosses: []
   };
 }
 
-function sampleAccounts(): ResourceReconciliationAccount[] {
+function sampleAccounts(scenario: ResourceConservationPreviewScenario): ResourceReconciliationAccount[] {
+  if (isTransferScenario(scenario)) {
+    return [
+      {
+        accountId: "preview-account-source",
+        resourceKind: SAMPLE_RESOURCE_KIND,
+        unit: SAMPLE_UNIT,
+        unitContractId: SAMPLE_UNIT_CONTRACT,
+        openingBalanceTicks: 100,
+        openingBalanceAsOf: SAMPLE_INTERVAL.start
+      },
+      {
+        accountId: "preview-account-destination",
+        resourceKind: SAMPLE_RESOURCE_KIND,
+        unit: SAMPLE_UNIT,
+        unitContractId: SAMPLE_UNIT_CONTRACT,
+        openingBalanceTicks: 10,
+        openingBalanceAsOf: SAMPLE_INTERVAL.start
+      }
+    ];
+  }
   return [{
     accountId: "preview-account",
     resourceKind: SAMPLE_RESOURCE_KIND,
@@ -101,7 +135,24 @@ function sampleAccounts(): ResourceReconciliationAccount[] {
   }];
 }
 
-function sampleEvents(): ResourceReconciliationEvent[] {
+function sampleEvents(scenario: ResourceConservationPreviewScenario): ResourceReconciliationEvent[] {
+  if (isTransferScenario(scenario)) {
+    return [{
+      eventId: "preview-transfer-event",
+      invocationId: "preview-invocation",
+      resourceKind: SAMPLE_RESOURCE_KIND,
+      eventKind: "TRANSFER",
+      ...(scenario === "TRANSFER-SOURCE-DEBIT-MISSING" ? {} : { fromAccount: "preview-account-source" }),
+      toAccount: "preview-account-destination",
+      amountTicks: 20,
+      unit: SAMPLE_UNIT,
+      unitContractId: SAMPLE_UNIT_CONTRACT,
+      status: "CONFIRMED",
+      evidence: "PASS",
+      idempotencyKey: "preview-transfer-event",
+      validTime: "2026-05-01T00:00:00Z"
+    }];
+  }
   return [{
     eventId: "preview-consumption-event",
     invocationId: "preview-invocation",
@@ -118,13 +169,22 @@ function sampleEvents(): ResourceReconciliationEvent[] {
   }];
 }
 
+function sampleAccountSetObservations(scenario: ResourceConservationPreviewScenario): ResourceAccountBalanceObservation[] {
+  const sourceBalance = scenario === "TRANSFER-SOURCE-DEBIT-MISSING" ? 100 : 80;
+  const destinationBalance = scenario === "TRANSFER-SOURCE-DEBIT-MISSING" ? 10 : 30;
+  return [
+    { accountId: "preview-account-source", ...sampleObservation("BALANCED"), balanceTicks: sourceBalance },
+    { accountId: "preview-account-destination", ...sampleObservation("BALANCED"), balanceTicks: destinationBalance }
+  ];
+}
+
 function sampleEventBatchEvidence(
   scenario: ResourceConservationPreviewScenario
 ): ResourceReconciliationBatchEvidence {
   return {
     contractId: "preview-sample-conservation-contract",
     systemBoundary: "preview-sample-account-boundary",
-    accountIds: ["preview-account"],
+    accountIds: sampleAccounts(scenario).map((account) => account.accountId),
     openingSnapshotAsOf: SAMPLE_INTERVAL.start,
     observationTime: SAMPLE_TIME,
     completenessEvidence: scenario === "EVENT-BATCH-COMPLETENESS-UNRESOLVED" ? "UNKNOWN" : "PASS",
@@ -168,9 +228,11 @@ function sampleObservation(scenario: ResourceConservationPreviewScenario): Resou
 
 export function evaluateResourceConservationPreview(scenario: ResourceConservationPreviewScenario) {
   const contract = sampleContract(scenario);
-  const accounts = sampleAccounts();
-  const events = sampleEvents();
-  const observation = sampleObservation(scenario);
+  const accounts = sampleAccounts(scenario);
+  const events = sampleEvents(scenario);
+  const eventBatchEvidence = sampleEventBatchEvidence(scenario);
+  const accountSetObservations = isTransferScenario(scenario) ? sampleAccountSetObservations(scenario) : undefined;
+  const observation = accountSetObservations?.[0] ?? sampleObservation(scenario);
   const scenarioDescription = resourceConservationPreviewScenarios.find((item) => item.id === scenario);
   if (!scenarioDescription) throw new Error("Unsupported resource conservation preview scenario.");
 
@@ -178,12 +240,22 @@ export function evaluateResourceConservationPreview(scenario: ResourceConservati
   const reconciliation = reconcileResourceBalance({
     reconciliationId: "preview-account-reconciliation",
     contract,
-    accountId: "preview-account",
+    accountId: accounts[0]?.accountId ?? "",
     accounts,
     events,
-    eventBatchEvidence: sampleEventBatchEvidence(scenario),
+    eventBatchEvidence,
     observation
   });
+  const accountSetReconciliation = accountSetObservations
+    ? reconcileResourceAccountSet({
+        reconciliationId: "preview-account-set-reconciliation",
+        contract,
+        accounts,
+        events,
+        eventBatchEvidence,
+        observations: accountSetObservations
+      })
+    : undefined;
   const auditStructure = scenario === "AUDIT-STRUCTURE-PRESENT-UNKNOWN-OUTCOME"
     ? assessResourceAccountingAuditStructure({
         record: sampleAuditRecord(),
@@ -196,6 +268,7 @@ export function evaluateResourceConservationPreview(scenario: ResourceConservati
     description: scenarioDescription.description,
     conservation,
     reconciliation,
+    ...(accountSetReconciliation ? { accountSetReconciliation } : {}),
     ...(auditStructure ? { auditStructure } : {}),
     assumptions: [
       "All quantities, evidence states and references are synthetic caller-supplied demonstration inputs, not authenticated facts or live measurements.",
@@ -203,8 +276,10 @@ export function evaluateResourceConservationPreview(scenario: ResourceConservati
       "The scalar-additive invariant and zero-tick tolerance are explicit assumptions in this demonstration contract, not universal physical laws or canonical tolerances.",
       "The opening balance is timestamped at the sample interval start, and the supplied event is strictly ordered before the sample observation; boundary-equal times are deliberately unresolved.",
       "Event-batch completeness is a synthetic caller-supplied assertion scoped to the sample contract, boundary, account set and observation time; it is not authenticated or independently verified.",
-      "The confirmed consumption event is sample ledger data; projection does not prove that an incantation or physical operation occurred.",
-      "Account reconciliation compares one gross account balance only and does not satisfy the complete v1.9 RESOURCE-RECONCILED stage.",
+      "The confirmed ledger event is sample data; projection does not prove that an incantation or physical operation occurred.",
+      "The single-account comparison is gross-balance-only. The optional account-set result repeats that comparison for every declared account; neither evaluates a cross-account invariant or the complete v1.9 RESOURCE-RECONCILED stage.",
+      "The transfer sample uses one synthetic TRANSFER event with both source and destination identities; the projector applies both sides only when the source debit succeeds.",
+      "The optional account-set result requires one measured observation per account in the same event batch; it does not authenticate the observations or completeness assertion.",
       "The optional audit example checks only top-level section presence; null placeholders do not establish semantic audit completeness or evidence validity.",
       "Neither evaluation authorises, executes or verifies an incantation, mechanism, target-state change or physical effect."
     ]

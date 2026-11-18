@@ -109,12 +109,18 @@ describe("Arcane Incantations v1.9 fixture-to-implementation coverage audit", ()
         "RES19-RECON-014",
         "RES19-RECON-015"
       ]));
+    expect(resourceAccountingCoverage.find((item) => item.fixtureId === "RES19-20")?.testIds)
+      .toContain("RES19-RECON-022");
+    expect(resourceAccountingCoverage.find((item) => item.fixtureId === "RES19-21")).toMatchObject({
+      status: "BOUNDED",
+      testIds: expect.arrayContaining(["RES19-LEDGER-019", "RES19-RECON-025"])
+    });
     expect(resourceAccountingCoverage.find((item) => item.fixtureId === "RES19-57")?.testIds)
       .toContain("RES19-RECON-016");
 
     expect(resourceAccountingCoverageSummary).toMatchObject({
-      bounded: 21,
-      partial: 20,
+      bounded: 22,
+      partial: 19,
       separateGate: 1,
       specificationOnly: 18
     });

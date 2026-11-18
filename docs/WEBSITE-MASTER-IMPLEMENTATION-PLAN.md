@@ -474,3 +474,10 @@ The Playground includes a deterministic unresolved-completeness scenario. It kee
 This is an engineering boundary that makes the existing complete-batch assumption explicit; it is not a new canon field or a claim that the caller's assertion is authentic. The assertion does not independently prove that the event source is complete. RES19-40 remains PARTIAL, and the implementation remains account-balance-only rather than full RESOURCE-RECONCILED. The canonical v1.9 document and all 60 expected fixture outcomes remain unchanged.
 
 Next: retain this fail-closed boundary while investigating only those further reconciliation requirements that have explicit source contracts and negative fixtures. Do not infer event ordering, endpoint inclusion, distributed consistency, transformations or physical laws.
+
+
+### 2026-11-18 — v1.9 account-set transfer reconciliation
+
+Added a pure account-set wrapper over the existing gross account-balance reconciler. It requires exact account/observation coverage, rejects duplicate identities and mixed resource/unit contracts, and returns every per-account result under one event-batch assertion. The Playground now shows a two-account transfer sample and a source-less transfer failure sample. The latter preserves a separately balanced aggregate conservation result while the ledger refuses destination credit and account-set reconciliation remains unresolved.
+
+The transfer scenarios are synthetic software demonstrations. The account-set wrapper does not evaluate a cross-account invariant, authenticate measurement or batch-completeness evidence, or claim the complete v1.9 RESOURCE-RECONCILED stage. The v1.9 canonical Markdown and all 60 normative expected fixture outcomes remain unchanged.
