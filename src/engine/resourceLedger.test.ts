@@ -175,8 +175,13 @@ describe("Arcane Incantations v1.9 resource ledger projection", () => {
       amountTicks: 25
     });
     const result = projectResourceLedger(accounts(), [transfer]);
+    expect(result.outcome).toBe("LEDGER-MALFORMED");
     expect(result.balances).toEqual({ a: 100, b: 10 });
-    expect(result.events[0]).toMatchObject({ applied: false, duplicate: false });
+    expect(result.events[0]).toMatchObject({
+      applied: false,
+      duplicate: false,
+      issue: { code: "EVENT-MALFORMED" }
+    });
     expect(result.issues.some((item) => item.code === "EVENT-MALFORMED")).toBe(true);
   });
 

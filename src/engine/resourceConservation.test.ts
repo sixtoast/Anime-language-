@@ -654,9 +654,13 @@ describe("Arcane Incantations v1.9 conservation and reconciliation", () => {
     });
     const projection = projectResourceLedger(input.accounts, input.events);
     const result = reconcileResourceAccountSet(input);
-    expect(projection.outcome).toBe("LEDGER-PARTIAL");
+    expect(projection.outcome).toBe("LEDGER-MALFORMED");
     expect(projection.balances).toEqual({ "account-a": 100, "account-b": 10 });
-    expect(projection.issues.length).toBeGreaterThan(0);
+    expect(projection.events[0]).toMatchObject({
+      applied: false,
+      duplicate: false,
+      issue: { eventId: "transfer-missing-source", code: "EVENT-MALFORMED" }
+    });
     expect(result.outcome).toBe("UNRESOLVED");
     expect(result.accountResults).toHaveLength(2);
     expect(result.accountResults.every((item) => item.outcome === "UNRESOLVED")).toBe(true);
