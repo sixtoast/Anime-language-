@@ -184,7 +184,7 @@ test.describe("Playground Phase 6G parser integration", () => {
     const preview = page.locator(".resource-conservation-preview");
     await expect(preview.getByRole("heading", { name: "Conservation and account reconciliation" })).toBeVisible();
     const select = preview.getByRole("combobox", { name: "Choose resource conservation preview scenario" });
-    await expect(select.locator("option")).toHaveCount(8);
+    await expect(select.locator("option")).toHaveCount(10);
     await expect(select.locator('option[value="EVENT-BATCH-COMPLETENESS-UNRESOLVED"]')).toHaveCount(1);
 
     await expect(preview).toContainText("CONSERVATION-SATISFIED");
@@ -223,6 +223,16 @@ test.describe("Playground Phase 6G parser integration", () => {
     await expect(preview).toContainText("CONSERVATION-SATISFIED");
     await expect(preview).toContainText("RECONCILIATION-EVENT-BATCH-COMPLETENESS-UNRESOLVED");
     await expect(preview).toContainText("Event-batch completeness is a synthetic caller-supplied assertion");
+
+    await select.selectOption("TRANSFER-RECONCILED");
+    await expect(preview).toContainText("ACCOUNT-SET-RECONCILED");
+    await expect(preview).toContainText("preview-account-source");
+    await expect(preview).toContainText("preview-account-destination");
+
+    await select.selectOption("TRANSFER-SOURCE-DEBIT-MISSING");
+    await expect(preview).toContainText("A transfer with no source account is rejected before destination credit");
+    await expect(preview).toContainText("RECONCILIATION-LEDGER-UNRESOLVED");
+    await expect(preview).toContainText("ACCOUNT-SET RECONCILIATION");
   });
 
   test("keeps the v1.9 evaluator preview within a 360px viewport", async ({ page }) => {
