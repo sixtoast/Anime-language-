@@ -29,7 +29,8 @@ export type ResourceConservationPreviewScenario =
   | "AUDIT-STRUCTURE-PRESENT-UNKNOWN-OUTCOME"
   | "EVENT-BATCH-COMPLETENESS-UNRESOLVED"
   | "TRANSFER-RECONCILED"
-  | "TRANSFER-SOURCE-DEBIT-MISSING";
+  | "TRANSFER-SOURCE-DEBIT-MISSING"
+  | "CONTRACT-VERSION-MISMATCH";
 
 export const resourceConservationPreviewScenarios: {
   id: ResourceConservationPreviewScenario;
@@ -45,7 +46,8 @@ export const resourceConservationPreviewScenarios: {
   { id: "AUDIT-STRUCTURE-PRESENT-UNKNOWN-OUTCOME", label: "Audit structure present, outcome unknown", description: "All 14 top-level audit sections are represented as explicit unknown placeholders; RESOURCE-OUTCOME-UNKNOWN is preserved without interpretation." },
   { id: "EVENT-BATCH-COMPLETENESS-UNRESOLVED", label: "Event-batch completeness unresolved", description: "The event-batch completeness assertion is unknown, so an otherwise matching account balance cannot be reconciled." },
   { id: "TRANSFER-RECONCILED", label: "Two-account transfer reconciled", description: "One transfer event debits the source and credits the destination; both measured gross balances match the same complete event batch." },
-  { id: "TRANSFER-SOURCE-DEBIT-MISSING", label: "Transfer without source debit", description: "A transfer with no source account is rejected before destination credit; both account comparisons remain unresolved even though the separate aggregate sample balances." }
+  { id: "TRANSFER-SOURCE-DEBIT-MISSING", label: "Transfer without source debit", description: "A transfer with no source account is rejected before destination credit; both account comparisons remain unresolved even though the separate aggregate sample balances." },
+  { id: "CONTRACT-VERSION-MISMATCH", label: "Contract version mismatch", description: "The report batch uses a different opaque contract-version identity from preflight, so account reconciliation remains unresolved." }
 ];
 
 function isTransferScenario(scenario: ResourceConservationPreviewScenario): boolean {
@@ -69,7 +71,7 @@ function sampleQuantity(amountTicks: number, evidenceRef: string): ConservationQ
   };
 }
 
-function sampleContract(scenario: ResourceConservationPreviewScenario): ConservationContractInput {
+function sampleContract(scenario: ResourceConservationPreviewScenario): ConservationContractInput & { preflightContractVersionRef: string } {
   const contractEvidence = scenario === "CONTRACT-EVIDENCE-UNRESOLVED" ||
     scenario === "AUDIT-STRUCTURE-PRESENT-UNKNOWN-OUTCOME" ? "UNKNOWN" : "PASS";
   const transferScenario = isTransferScenario(scenario);
@@ -79,6 +81,7 @@ function sampleContract(scenario: ResourceConservationPreviewScenario): Conserva
   const outputBalance = transferScenario ? 0 : 10;
   return {
     contractId: "preview-sample-conservation-contract",
+    preflightContractVersionRef: "preview-resource-contract:v1",
     resourceKind: SAMPLE_RESOURCE_KIND,
     unit: SAMPLE_UNIT,
     unitContractId: SAMPLE_UNIT_CONTRACT,
@@ -135,6 +138,10 @@ function sampleAccounts(scenario: ResourceConservationPreviewScenario): Resource
   }];
 }
 
+function sampleReportContractVersion(scenario: ResourceConservationPreviewScenario): string {
+  return scenario === "CONTRACT-VERSION-MISMATCH" ? "preview-resource-contract:v2" : "preview-resource-contract:v1";
+}
+
 function sampleEvents(scenario: ResourceConservationPreviewScenario): ResourceReconciliationEvent[] {
   if (isTransferScenario(scenario)) {
     return [{
@@ -150,7 +157,8 @@ function sampleEvents(scenario: ResourceConservationPreviewScenario): ResourceRe
       status: "CONFIRMED",
       evidence: "PASS",
       idempotencyKey: "preview-transfer-event",
-      validTime: "2026-05-01T00:00:00Z"
+      validTime: "2026-05-01T00:00:00Z",
+      contractVersionRef: sampleReportContractVersion(scenario)
     }];
   }
   return [{
@@ -165,7 +173,8 @@ function sampleEvents(scenario: ResourceConservationPreviewScenario): ResourceRe
     status: "CONFIRMED",
     evidence: "PASS",
     idempotencyKey: "preview-consumption-event",
-    validTime: "2026-05-01T00:00:00Z"
+    validTime: "2026-05-01T00:00:00Z",
+    contractVersionRef: sampleReportContractVersion(scenario)
   }];
 }
 
@@ -187,6 +196,7 @@ function sampleEventBatchEvidence(
     accountIds: sampleAccounts(scenario).map((account) => account.accountId),
     openingSnapshotAsOf: SAMPLE_INTERVAL.start,
     observationTime: SAMPLE_TIME,
+    contractVersionRef: sampleReportContractVersion(scenario),
     completenessEvidence: scenario === "EVENT-BATCH-COMPLETENESS-UNRESOLVED" ? "UNKNOWN" : "PASS",
     completenessEvidenceRef: "preview:event-batch-completeness"
   };
@@ -276,6 +286,7 @@ export function evaluateResourceConservationPreview(scenario: ResourceConservati
       "The scalar-additive invariant and zero-tick tolerance are explicit assumptions in this demonstration contract, not universal physical laws or canonical tolerances.",
       "The opening balance is timestamped at the sample interval start, and the supplied event is strictly ordered before the sample observation; boundary-equal times are deliberately unresolved.",
       "Event-batch completeness is a synthetic caller-supplied assertion scoped to the sample contract, boundary, account set and observation time; it is not authenticated or independently verified.",
+      "Contract-version identifiers are synthetic opaque references; the preview requires exact equality and does not infer cross-version compatibility.",
       "The confirmed ledger event is sample data; projection does not prove that an incantation or physical operation occurred.",
       "The single-account comparison is gross-balance-only. The optional account-set result repeats that comparison for every declared account; neither evaluates a cross-account invariant or the complete v1.9 RESOURCE-RECONCILED stage.",
       "The transfer sample uses one synthetic TRANSFER event with both source and destination identities; the projector applies both sides only when the source debit succeeds.",

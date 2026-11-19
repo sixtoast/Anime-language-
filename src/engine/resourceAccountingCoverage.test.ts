@@ -72,6 +72,9 @@ describe("Arcane Incantations v1.9 fixture-to-implementation coverage audit", ()
       .toBe("PARTIAL");
     expect(resourceAccountingCoverage.find((item) => item.fixtureId === "RES19-60")?.status)
       .toBe("SPECIFICATION-ONLY");
+    const contractVersion = resourceAccountingCoverage.find((item) => item.fixtureId === "RES19-54");
+    expect(contractVersion?.status).toBe("PARTIAL");
+    expect(contractVersion?.testIds).toEqual(expect.arrayContaining(["RES19-EVAL-013", "RES19-LEDGER-024", "RES19-RECON-027"]));
     expect(resourceAccountingCoverage.find((item) => item.fixtureId === "RES19-30")?.status)
       .toBe("BOUNDED");
     const staleAvailability = resourceAccountingCoverage.find((item) => item.fixtureId === "RES19-35");

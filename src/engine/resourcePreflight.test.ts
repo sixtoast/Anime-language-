@@ -3,6 +3,7 @@ import { evaluateResourcePreflight, type ResourcePreflightInput } from "./resour
 
 const valid = (): ResourcePreflightInput => ({
   resourceKind: "water-stock", accountId: "tank-a", unit: "L", requiredUnit: "L", budgetUnit: "L", unitContractId: "litre-v1",
+  contractVersionRef: "resource-contract:v1",
   openingBalance: 100, openingBalanceEvidence: "PASS", sourceEvidence: "PASS",
   evidenceFreshness: "PASS",
   availabilityWindow: {
@@ -93,4 +94,13 @@ describe("Arcane Incantations v1.9 resource preflight", () => {
       }));
     }
   });
+  it("[RES19-EVAL-013] returns the exact opaque contract version for downstream reconciliation", () => {
+    const ready = evaluateResourcePreflight(valid());
+    expect(ready).toMatchObject({ outcome: "RESOURCE-READY", contractVersionRef: "resource-contract:v1" });
+    const missing = evaluateResourcePreflight({ ...valid(), contractVersionRef: " " });
+    expect(missing.outcome).toBe("RESOURCE-SPEC-UNDERSPECIFIED");
+    expect(missing.contractVersionRef).toBe("");
+    expect(missing.diagnostics).toContainEqual(expect.objectContaining({ code: "RESOURCE-SPEC-UNDERSPECIFIED" }));
+  });
+
 });

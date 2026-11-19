@@ -121,4 +121,12 @@ describe("read-only v1.9 conservation and account-reconciliation preview", () =>
     expect(result.accountSetReconciliation?.accountResults.every((item) => item.outcome === "UNRESOLVED")).toBe(true);
   });
 
+  it("[RES19-PREVIEW-011] demonstrates an unresolved preflight/report contract-version mismatch", () => {
+    const result = evaluateResourceConservationPreview("CONTRACT-VERSION-MISMATCH");
+    expect(result.conservation.outcome).toBe("CONSERVATION-SATISFIED");
+    expect(result.reconciliation.outcome).toBe("UNRESOLVED");
+    expect(result.reconciliation).toMatchObject({ preflightContractVersionRef: "preview-resource-contract:v1", reportContractVersionRef: "preview-resource-contract:v2" });
+    expect(result.reconciliation.diagnostics).toContainEqual(expect.objectContaining({ code: "RECONCILIATION-CONTRACT-VERSION-MISMATCH" }));
+  });
+
 });

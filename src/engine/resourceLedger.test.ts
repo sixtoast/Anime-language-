@@ -240,4 +240,12 @@ describe("Arcane Incantations v1.9 resource ledger projection", () => {
     });
   });
 
+  it("[RES19-LEDGER-024] includes contract version in idempotency content", () => {
+    const first = event({ contractVersionRef: "resource-contract:v1" });
+    const retry = event({ eventId: "event-2", contractVersionRef: "resource-contract:v2" });
+    const result = projectResourceLedger(accounts(), [first, retry]);
+    expect(result.balances.a).toBe(90);
+    expect(result.events[1]).toMatchObject({ applied: false, duplicate: false, issue: { code: "IDEMPOTENCY-COLLISION" } });
+  });
+
 });

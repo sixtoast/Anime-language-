@@ -38,6 +38,8 @@ export interface LedgerEvent {
   evidence: LedgerEvidence;
   sourceOrConversionRef?: string;
   idempotencyKey: string;
+  /** Opaque report-contract version identity; reconciliation requires an exact preflight match. */
+  contractVersionRef?: string;
   /** Canonical ledger-event valid time; time-scoped reconciliation requires this value. */
   validTime?: string;
   reservationId?: string;
@@ -134,6 +136,7 @@ export function projectResourceLedger(
     toAccount: event.toAccount ?? null, amountTicks: event.amountTicks,
     unit: event.unit, unitContractId: event.unitContractId,
     validTime: event.validTime ?? null,
+    contractVersionRef: event.contractVersionRef ?? null,
     status: event.status, evidence: event.evidence,
     sourceOrConversionRef: event.sourceOrConversionRef ?? null,
     reservationId: event.reservationId ?? null,

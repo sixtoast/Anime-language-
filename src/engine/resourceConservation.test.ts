@@ -37,8 +37,9 @@ const lossQuantity = (
   ...overrides
 });
 
-const contract = (overrides: Partial<ConservationContractInput> = {}): ConservationContractInput => ({
+const contract = (overrides: Partial<ConservationContractInput> = {}): ConservationContractInput & { preflightContractVersionRef: string } => ({
   contractId: "conservation-v1",
+  preflightContractVersionRef: "resource-contract:v1",
   resourceKind: "mana-token",
   unit: "tick",
   unitContractId: "mana-tick-v1",
@@ -86,6 +87,7 @@ const ledgerEvent = (overrides: Partial<ResourceReconciliationEvent> = {}): Reso
   evidence: "PASS",
   idempotencyKey: "consume-1",
   validTime: "2026-05-01T00:00:00Z",
+  contractVersionRef: "resource-contract:v1",
   ...overrides
 });
 
@@ -113,6 +115,7 @@ const batchEvidence = (
   accountIds: ["account-a"],
   openingSnapshotAsOf: "2026-01-01T00:00:00Z",
   observationTime: "2026-06-01T00:00:00Z",
+  contractVersionRef: "resource-contract:v1",
   completenessEvidence: "PASS",
   completenessEvidenceRef: "event-batch:evidence",
   ...overrides
@@ -684,6 +687,32 @@ describe("Arcane Incantations v1.9 conservation and reconciliation", () => {
       outcome: "INVALID-RECONCILIATION",
       diagnostics: [expect.objectContaining({ code: "RECONCILIATION-ACCOUNT-SET-CONTRACT-MISMATCH" })]
     });
+  });
+
+  it("[RES19-RECON-027] leaves mismatched or missing preflight/report contract versions unresolved", () => {
+    const matching = reconcileResourceBalance(reconciliation());
+    expect(matching).toMatchObject({ outcome: "ACCOUNT-BALANCE-RECONCILED", preflightContractVersionRef: "resource-contract:v1", reportContractVersionRef: "resource-contract:v1" });
+    const missingPreflight = reconcileResourceBalance(reconciliation({ contract: { ...contract(), preflightContractVersionRef: " " } }));
+    expect(missingPreflight.outcome).toBe("UNRESOLVED");
+    expect(missingPreflight.diagnostics).toContainEqual(expect.objectContaining({ code: "RECONCILIATION-CONTRACT-VERSION-MISSING" }));
+    const missingBatch = reconcileResourceBalance(reconciliation({ eventBatchEvidence: batchEvidence({ contractVersionRef: " " }) }));
+    expect(missingBatch.outcome).toBe("UNRESOLVED");
+    expect(missingBatch.diagnostics).toContainEqual(expect.objectContaining({ code: "RECONCILIATION-CONTRACT-VERSION-MISSING" }));
+    const batchMismatch = reconcileResourceBalance(reconciliation({ eventBatchEvidence: batchEvidence({ contractVersionRef: "resource-contract:v2" }) }));
+    expect(batchMismatch.outcome).toBe("UNRESOLVED");
+    expect(batchMismatch.diagnostics).toContainEqual(expect.objectContaining({ code: "RECONCILIATION-CONTRACT-VERSION-MISMATCH" }));
+    const eventMismatch = reconcileResourceBalance(reconciliation({ events: [ledgerEvent({ contractVersionRef: "resource-contract:v2" })] }));
+    expect(eventMismatch.outcome).toBe("UNRESOLVED");
+    expect(eventMismatch.diagnostics).toContainEqual(expect.objectContaining({ code: "RECONCILIATION-EVENT-CONTRACT-VERSION-MISMATCH" }));
+    const missingVersion = ledgerEvent() as ResourceReconciliationEvent;
+    delete (missingVersion as Partial<ResourceReconciliationEvent>).contractVersionRef;
+    const missing = reconcileResourceBalance(reconciliation({ events: [missingVersion] }));
+    expect(missing.outcome).toBe("UNRESOLVED");
+    expect(missing.diagnostics).toContainEqual(expect.objectContaining({ code: "RECONCILIATION-EVENT-CONTRACT-VERSION-MISSING" }));
+    const accountSetMismatch = reconcileResourceAccountSet(accountSetReconciliation({ eventBatchEvidence: batchEvidence({ accountIds: ["account-a", "account-b"], contractVersionRef: "resource-contract:v2" }) }));
+    expect(accountSetMismatch.outcome).toBe("UNRESOLVED");
+    expect(accountSetMismatch.accountResults).toHaveLength(2);
+    expect(accountSetMismatch.accountResults.every((item) => item.outcome === "UNRESOLVED")).toBe(true);
   });
 
 });

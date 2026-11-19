@@ -308,7 +308,10 @@ export type ResourceReconciliationContract = Pick<
   | "uncertaintyRuleRef"
   | "uncertaintyPolicyEvidence"
   | "uncertaintyPolicyEvidenceRef"
->;
+> & {
+  /** Exact opaque version identity forwarded from the resource preflight result. */
+  preflightContractVersionRef: string;
+};
 
 export type ResourceObservationKind = "ESTIMATE" | "MEASUREMENT";
 
@@ -333,6 +336,8 @@ export type ResourceReconciliationAccount = LedgerAccount & {
 export type ResourceReconciliationEvent = LedgerEvent & {
   /** Event valid time, required for a time-scoped account projection. */
   validTime: string;
+  /** Report-side contract version; must exactly match the preflight version. */
+  contractVersionRef: string;
 };
 
 /**
@@ -340,6 +345,8 @@ export type ResourceReconciliationEvent = LedgerEvent & {
  * time scope being reconciled. This is a traceable input, not authenticated proof.
  */
 export interface ResourceReconciliationBatchEvidence {
+  /** Report-side contract version covered by this exact event batch. */
+  contractVersionRef: string;
   contractId: string;
   systemBoundary: string;
   accountIds: string[];
@@ -370,6 +377,8 @@ export interface ResourceReconciliationResult {
   scope: "ACCOUNT-BALANCE-ONLY";
   reconciliationId: string;
   contractId?: string;
+  preflightContractVersionRef?: string;
+  reportContractVersionRef?: string;
   accountId?: string;
   ledgerOutcome?: LedgerProjection["outcome"];
   expectedBalanceTicks?: number;
@@ -394,6 +403,7 @@ const RECONCILIATION_LIMITATIONS = [
   "The supplied event batch must carry valid times in strictly increasing order, strictly after the opening snapshot and strictly before the observation; the reconciler does not sort or silently filter events.",
   "Boundary-equal observations/events, missing event times, out-of-window events and ambiguous event ordering remain unresolved because endpoint and same-time ordering semantics are not universal.",
   "A caller-supplied event-batch completeness assertion is required and scoped to the exact contract, boundary, account set, opening snapshot and observation time; the assertion and timestamps are not authenticated or independently verified.",
+  "The preflight and report contract-version references are opaque caller-supplied identifiers; exact equality is required, but references are not authenticated and no cross-version compatibility or migration is inferred.",
   "This is an account-balance comparison only; it does not by itself satisfy the whole-resource RESOURCE-RECONCILED stage.",
   "Discrepancies are reported without changing ledger entries or balances. Reconciliation is not proof of conservation, authority, mechanism validity, execution or a successful effect."
 ];
@@ -409,6 +419,8 @@ export function reconcileResourceBalance(
       scope: "ACCOUNT-BALANCE-ONLY",
       reconciliationId: nonEmptyString(input?.reconciliationId) ? input.reconciliationId : "",
       ...(nonEmptyString(input?.contract?.contractId) ? { contractId: input.contract.contractId } : {}),
+      ...(nonEmptyString(input?.contract?.preflightContractVersionRef) ? { preflightContractVersionRef: input.contract.preflightContractVersionRef } : {}),
+      ...(nonEmptyString(input?.eventBatchEvidence?.contractVersionRef) ? { reportContractVersionRef: input.eventBatchEvidence.contractVersionRef } : {}),
       ...(nonEmptyString(input?.accountId) ? { accountId: input.accountId } : {}),
       ...(isConservationEvidence(input?.eventBatchEvidence?.completenessEvidence)
         ? { eventBatchCompletenessEvidence: input.eventBatchEvidence.completenessEvidence } : {}),
@@ -430,6 +442,8 @@ export function reconcileResourceBalance(
       scope: "ACCOUNT-BALANCE-ONLY",
       reconciliationId: nonEmptyString(input?.reconciliationId) ? input.reconciliationId : "",
       ...(nonEmptyString(input?.contract?.contractId) ? { contractId: input.contract.contractId } : {}),
+      ...(nonEmptyString(input?.contract?.preflightContractVersionRef) ? { preflightContractVersionRef: input.contract.preflightContractVersionRef } : {}),
+      ...(nonEmptyString(input?.eventBatchEvidence?.contractVersionRef) ? { reportContractVersionRef: input.eventBatchEvidence.contractVersionRef } : {}),
       ...(nonEmptyString(input?.accountId) ? { accountId: input.accountId } : {}),
       ...(isConservationEvidence(input?.eventBatchEvidence?.completenessEvidence)
         ? { eventBatchCompletenessEvidence: input.eventBatchEvidence.completenessEvidence } : {}),
@@ -469,6 +483,11 @@ export function reconcileResourceBalance(
       !isConservationEvidence(input.eventBatchEvidence.completenessEvidence) ||
       !nonEmptyString(input.eventBatchEvidence.completenessEvidenceRef)) {
     return invalid("RECONCILIATION-RECORD-INVALID", "Reconciliation identity, contract boundary, interval and safe non-negative contract tolerance, evidence references, account/event records, valid observation time and evidence reference are required.");
+  }
+
+  if (!nonEmptyString(input.contract.preflightContractVersionRef) ||
+      !nonEmptyString(input.eventBatchEvidence.contractVersionRef)) {
+    return unresolved("RECONCILIATION-CONTRACT-VERSION-MISSING", "A preflight contract version and report-batch contract version are required before resource reports can be reconciled.");
   }
 
   if (input.contract.contractEvidence !== "PASS" ||
@@ -511,6 +530,9 @@ export function reconcileResourceBalance(
   }
 
   const batchEvidence = input.eventBatchEvidence;
+  if (batchEvidence.contractVersionRef !== input.contract.preflightContractVersionRef) {
+    return unresolved("RECONCILIATION-CONTRACT-VERSION-MISMATCH", "The report batch uses a different contract version from preflight; no compatibility or migration is inferred.");
+  }
   if (batchEvidence.contractId !== input.contract.contractId ||
       batchEvidence.systemBoundary !== input.contract.systemBoundary ||
       Date.parse(batchEvidence.openingSnapshotAsOf) !== intervalStart ||
@@ -549,7 +571,13 @@ export function reconcileResourceBalance(
 
   let previousEventTime = intervalStart;
   for (const event of input.events) {
-    if (!event || !isIsoTime(event.validTime)) {
+    if (!event || !nonEmptyString(event.contractVersionRef)) {
+      return unresolved("RECONCILIATION-EVENT-CONTRACT-VERSION-MISSING", "Every report event requires an explicit contract-version identity before it can contribute to a reconciled balance.");
+    }
+    if (event.contractVersionRef !== batchEvidence.contractVersionRef) {
+      return unresolved("RECONCILIATION-EVENT-CONTRACT-VERSION-MISMATCH", "A report event uses a different contract version from its batch; no cross-version equivalence is inferred.");
+    }
+    if (!isIsoTime(event.validTime)) {
       return unresolved("RECONCILIATION-EVENT-VALID-TIME-MISSING", "Every supplied ledger event requires a valid timestamp before it can contribute to a time-scoped balance.");
     }
     const eventTime = Date.parse(event.validTime);
@@ -628,6 +656,8 @@ export function reconcileResourceBalance(
     scope: "ACCOUNT-BALANCE-ONLY",
     reconciliationId: input.reconciliationId,
     contractId: input.contract.contractId,
+    preflightContractVersionRef: input.contract.preflightContractVersionRef,
+    reportContractVersionRef: batchEvidence.contractVersionRef,
     accountId: input.accountId,
     ledgerOutcome: projection.outcome,
     expectedBalanceTicks,
@@ -667,6 +697,8 @@ export interface ResourceAccountSetReconciliationResult {
   scope: "ACCOUNT-SET-BALANCES";
   reconciliationId: string;
   contractId?: string;
+  preflightContractVersionRef?: string;
+  reportContractVersionRef?: string;
   accountResults: ResourceReconciliationResult[];
   diagnostics: ConservationDiagnostic[];
   limitations: string[];
@@ -676,6 +708,7 @@ const ACCOUNT_SET_RECONCILIATION_LIMITATIONS = [
   "Every account is compared independently against the same supplied ledger batch; the result is not a vector or cross-account conservation invariant.",
   "Exactly one measurement observation is required for every declared account; observations are not authenticated or independently verified.",
   "The event-batch completeness assertion and all ledger, account and measurement evidence remain caller-supplied and unauthenticated.",
+  "Preflight and report version references must match exactly; no cross-version compatibility or migration is inferred.",
   "The result does not establish the full v1.9 RESOURCE-RECONCILED stage, physical conservation, execution, authority or target outcome."
 ];
 
@@ -692,6 +725,8 @@ export function reconcileResourceAccountSet(
     scope: "ACCOUNT-SET-BALANCES",
     reconciliationId: nonEmptyString(input?.reconciliationId) ? input.reconciliationId : "",
     ...(nonEmptyString(input?.contract?.contractId) ? { contractId: input.contract.contractId } : {}),
+    ...(nonEmptyString(input?.contract?.preflightContractVersionRef) ? { preflightContractVersionRef: input.contract.preflightContractVersionRef } : {}),
+    ...(nonEmptyString(input?.eventBatchEvidence?.contractVersionRef) ? { reportContractVersionRef: input.eventBatchEvidence.contractVersionRef } : {}),
     accountResults: [],
     diagnostics: [{ code, message }],
     limitations: [...ACCOUNT_SET_RECONCILIATION_LIMITATIONS]
@@ -788,6 +823,8 @@ export function reconcileResourceAccountSet(
     scope: "ACCOUNT-SET-BALANCES",
     reconciliationId: input.reconciliationId,
     contractId: input.contract.contractId,
+    preflightContractVersionRef: input.contract.preflightContractVersionRef,
+    reportContractVersionRef: input.eventBatchEvidence.contractVersionRef,
     accountResults,
     diagnostics,
     limitations: [...ACCOUNT_SET_RECONCILIATION_LIMITATIONS]

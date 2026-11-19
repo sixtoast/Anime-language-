@@ -447,9 +447,13 @@ export const resourceAccountingCoverage: ResourceAccountingCoverage[] = [
   },
   {
     "fixtureId": "RES19-54",
-    "status": "SPECIFICATION-ONLY",
-    "testIds": [],
-    "note": "Ledger events do not yet carry and reconcile preflight/report contract-version identities."
+    "status": "PARTIAL",
+    "testIds": [
+      "RES19-EVAL-013",
+      "RES19-LEDGER-024",
+      "RES19-RECON-027"
+    ],
+    "note": "Preflight returns an opaque contract-version reference and reconciliation requires exact equality with the report batch and every event. Missing or mismatched versions remain unresolved; references are unauthenticated and cross-version compatibility/migration are not implemented."
   },
   {
     "fixtureId": "RES19-55",
