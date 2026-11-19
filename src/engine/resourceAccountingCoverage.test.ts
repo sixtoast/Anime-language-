@@ -123,9 +123,9 @@ describe("Arcane Incantations v1.9 fixture-to-implementation coverage audit", ()
 
     expect(resourceAccountingCoverageSummary).toMatchObject({
       bounded: 22,
-      partial: 19,
+      partial: 20,
       separateGate: 1,
-      specificationOnly: 18
+      specificationOnly: 17
     });
   });
 });

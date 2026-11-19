@@ -39,6 +39,7 @@ export function evaluateIncantationRuntimePreview(
     unit: "mana-tick",
     requiredUnit: "mana-tick",
     unitContractId: "sample-mana-tick-v1",
+    contractVersionRef: "sample-resource-contract:v1",
     openingBalance: 10,
     openingBalanceEvidence: "PASS",
     sourceEvidence: "PASS",
