@@ -184,8 +184,9 @@ test.describe("Playground Phase 6G parser integration", () => {
     const preview = page.locator(".resource-conservation-preview");
     await expect(preview.getByRole("heading", { name: "Conservation and account reconciliation" })).toBeVisible();
     const select = preview.getByRole("combobox", { name: "Choose resource conservation preview scenario" });
-    await expect(select.locator("option")).toHaveCount(10);
+    await expect(select.locator("option")).toHaveCount(11);
     await expect(select.locator('option[value="EVENT-BATCH-COMPLETENESS-UNRESOLVED"]')).toHaveCount(1);
+    await expect(select.locator('option[value="CONTRACT-VERSION-MISMATCH"]')).toHaveCount(1);
 
     await expect(preview).toContainText("CONSERVATION-SATISFIED");
     await expect(preview).toContainText("ACCOUNT-BALANCE-RECONCILED");
@@ -233,6 +234,11 @@ test.describe("Playground Phase 6G parser integration", () => {
     await expect(preview).toContainText("A transfer with no source account is rejected before destination credit");
     await expect(preview).toContainText("RECONCILIATION-LEDGER-UNRESOLVED");
     await expect(preview).toContainText("ACCOUNT-SET RECONCILIATION");
+
+    await select.selectOption("CONTRACT-VERSION-MISMATCH");
+    await expect(preview).toContainText("CONSERVATION-SATISFIED");
+    await expect(preview).toContainText("RECONCILIATION-CONTRACT-VERSION-MISMATCH");
+    await expect(preview).toContainText("UNRESOLVED");
   });
 
   test("keeps the v1.9 evaluator preview within a 360px viewport", async ({ page }) => {
