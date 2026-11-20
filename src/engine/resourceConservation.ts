@@ -75,6 +75,7 @@ export interface ConservationResult {
 
 const CONSERVATION_LIMITATIONS = [
   "The evaluator supports only an explicitly declared scalar-additive balance for one resource kind and one exact unit contract.",
+  "The valid-interval endpoint inclusion semantics are not declared; evaluation at either exact endpoint remains unresolved.",
   "Evidence states and references are caller-supplied; this evaluator checks required references but does not authenticate sources, boundaries, measurements, contracts or uncertainty rules.",
   "Declared losses require caller-supplied permitted-pathway references and passing evidence; those references are not authenticated or resolved against external contract content.",
   "A satisfied balance is an accounting result under the named contract, not proof of a physical law, mechanism, authorisation, execution or successful effect.",
@@ -221,6 +222,23 @@ export function evaluateConservationContract(
       !safeTicks(contract.toleranceTicks)) {
     return invalid("CONSERVATION-CONTRACT-INVALID", "Contract identity, resource, unit contract, boundary, valid interval, evaluation time and explicit non-negative tolerance are required.");
   }
+  const intervalStart = Date.parse(contract.validInterval.start);
+  const intervalEnd = Date.parse(contract.validInterval.end);
+  const evaluationTime = Date.parse(contract.evaluationTime);
+  if (evaluationTime === intervalStart || evaluationTime === intervalEnd) {
+    diagnostics.push({
+      code: "CONSERVATION-EVALUATION-TIME-BOUNDARY-AMBIGUOUS",
+      message: "The evaluation time is exactly on a contract interval boundary; the evaluator does not infer endpoint inclusion."
+    });
+    return {
+      outcome: "CONSERVATION-UNRESOLVED",
+      contractId: contract.contractId,
+      toleranceTicks: contract.toleranceTicks,
+      diagnostics,
+      limitations: [...CONSERVATION_LIMITATIONS]
+    };
+  }
+
   if (contract.invariant !== "SCALAR-ADDITIVE-BALANCE") {
     diagnostics.push({
       code: "CONSERVATION-INVARIANT-UNSUPPORTED",

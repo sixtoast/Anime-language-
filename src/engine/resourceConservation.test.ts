@@ -205,6 +205,29 @@ describe("Arcane Incantations v1.9 conservation and reconciliation", () => {
       .toBe("CONSERVATION-INVALID-CONTRACT");
   });
 
+  it("[RES19-CONS-009] leaves exact valid-interval boundaries unresolved", () => {
+    const base = contract();
+    const boundaryTimes = [
+      base.validInterval.start,
+      base.validInterval.end,
+      "2025-12-31T19:00:00-05:00",
+      "2026-12-31T19:00:00-05:00"
+    ];
+
+    for (const evaluationTime of boundaryTimes) {
+      const result = evaluateConservationContract(contract({ evaluationTime }));
+      expect(result.outcome).toBe("CONSERVATION-UNRESOLVED");
+      expect(result.diagnostics).toContainEqual(expect.objectContaining({
+        code: "CONSERVATION-EVALUATION-TIME-BOUNDARY-AMBIGUOUS"
+      }));
+    }
+
+    expect(evaluateConservationContract(contract({ evaluationTime: "2026-06-01T00:00:00Z" })).outcome)
+      .toBe("CONSERVATION-SATISFIED");
+    expect(evaluateConservationContract(contract({ evaluationTime: "2027-01-01T00:00:01Z" })).outcome)
+      .toBe("CONSERVATION-INVALID-CONTRACT");
+  });
+
   it("[RES19-CONS-005] rejects unsafe integer accumulation rather than using floating-point totals", () => {
     expect(evaluateConservationContract(contract({
       openingState: [quantity(Number.MAX_SAFE_INTEGER), quantity(1)],
