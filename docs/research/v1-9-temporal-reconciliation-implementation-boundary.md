@@ -13,6 +13,7 @@ The account-balance reconciler now requires:
 
 - every account opening balance used by the projection to carry an `openingBalanceAsOf` timestamp equal to the conservation interval start;
 - every ledger event to carry a valid `validTime`;
+- ISO instants are compared without discarding up to nine fractional-second digits; explicit timezone offsets are resolved to the same represented instant, so distinct sub-millisecond events remain ordered while equivalent representations remain equal;
 - event timestamps to be strictly after the opening snapshot, strictly before the measurement observation, and strictly increasing in the supplied event order;
 - the measurement observation to fall strictly inside the contract interval.
 
@@ -31,6 +32,7 @@ This is an engineering input boundary, not a new canonical v1.9 record field or 
 ## Explicit limitations
 
 - Strict interior timestamps are a conservative supported subset, not a claim that the canon defines open interval endpoints.
+- Fractional timestamp precision is preserved up to the validator's existing nine-digit input limit; this does not authenticate timestamp provenance, clock accuracy or event-source completeness.
 - A caller-supplied event-batch completeness assertion must match the contract, system boundary, exact projected account set, opening snapshot and observation time; the assertion, event source and timestamps remain unauthenticated.
 - Same-time event ordering, boundary inclusion, distributed consistency and reconciliation latency still require explicit domain contracts.
 - Only one selected account's gross balance is compared. Reservations remain held stock, not consumption.
@@ -49,5 +51,6 @@ This is an engineering input boundary, not a new canonical v1.9 record field or 
 - `RES19-RECON-020` — exact projected-account coverage.
 - `RES19-RECON-021` — explicit evidence for an empty event batch.
 - `RES19-LEDGER-023` — event valid time participates in idempotency content.
+- `RES19-TIME-001` — nanosecond interval ordering, offset-equivalent boundary detection, sub-millisecond event ordering and same-instant ambiguity.
 
 The v1.9 canonical fixture table and its 60 expected outcomes are unchanged.

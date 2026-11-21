@@ -91,10 +91,19 @@ const safeTicks = (value: unknown): value is number =>
 const isConservationEvidence = (value: unknown): value is ConservationEvidence =>
   value === "PASS" || value === "FAIL" || value === "UNKNOWN" || value === "UNAVAILABLE";
 
-const isIsoTime = (value: unknown): value is string => {
-  if (typeof value !== "string") return false;
-  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.\d{1,9})?(Z|([+-])(\d{2}):(\d{2}))$/);
-  if (!match) return false;
+const ISO_TIME_PATTERN = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,9}))?(Z|([+-])(\d{2}):(\d{2}))$/;
+
+interface ParsedIsoTime {
+  /** UTC instant at the start of the represented second, in integer milliseconds. */
+  epochSecondMilliseconds: number;
+  /** Fractional second retained independently, at the accepted nanosecond precision. */
+  fractionNanoseconds: number;
+}
+
+function parseIsoTime(value: unknown): ParsedIsoTime | undefined {
+  if (typeof value !== "string") return undefined;
+  const match = value.match(ISO_TIME_PATTERN);
+  if (!match) return undefined;
   const year = Number(match[1]);
   const month = Number(match[2]);
   const day = Number(match[3]);
@@ -104,14 +113,40 @@ const isIsoTime = (value: unknown): value is string => {
   const leapYear = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
   const monthDays = [31, leapYear ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
   if (year < 1 || month < 1 || month > 12 || day < 1 || day > monthDays[month - 1] ||
-      hour > 23 || minute > 59 || second > 59) return false;
+      hour > 23 || minute > 59 || second > 59) return undefined;
   if (match[8] !== "Z") {
     const offsetHour = Number(match[10]);
     const offsetMinute = Number(match[11]);
-    if (offsetHour > 23 || offsetMinute > 59) return false;
+    if (offsetHour > 23 || offsetMinute > 59) return undefined;
   }
-  return Number.isFinite(Date.parse(value));
-};
+
+  // Date.parse resolves the calendar date and explicit UTC offset, but discards
+  // fractional precision below milliseconds. Parse only the whole second and
+  // retain the original fractional second separately for exact comparisons.
+  const wholeSecondTimestamp = value.replace(/\.\d{1,9}(?=Z|[+-]\d{2}:\d{2}$)/, "");
+  const epochSecondMilliseconds = Date.parse(wholeSecondTimestamp);
+  if (!Number.isSafeInteger(epochSecondMilliseconds)) return undefined;
+
+  return {
+    epochSecondMilliseconds,
+    fractionNanoseconds: Number((match[7] ?? "").padEnd(9, "0"))
+  };
+}
+
+const isIsoTime = (value: unknown): value is string => parseIsoTime(value) !== undefined;
+
+function compareIsoTimes(left: string, right: string): number {
+  const leftInstant = parseIsoTime(left);
+  const rightInstant = parseIsoTime(right);
+  if (!leftInstant || !rightInstant) {
+    throw new Error("ISO timestamps must be validated before comparison.");
+  }
+  if (leftInstant.epochSecondMilliseconds !== rightInstant.epochSecondMilliseconds) {
+    return leftInstant.epochSecondMilliseconds < rightInstant.epochSecondMilliseconds ? -1 : 1;
+  }
+  if (leftInstant.fractionNanoseconds === rightInstant.fractionNanoseconds) return 0;
+  return leftInstant.fractionNanoseconds < rightInstant.fractionNanoseconds ? -1 : 1;
+}
 
 function evidencePass(
   state: ConservationEvidence,
@@ -216,16 +251,14 @@ export function evaluateConservationContract(
       !isIsoTime(contract.evaluationTime) ||
       !nonEmptyString(contract.contractEvidenceRef) || !nonEmptyString(contract.boundaryEvidenceRef) ||
       !nonEmptyString(contract.uncertaintyRuleRef) || !nonEmptyString(contract.uncertaintyPolicyEvidenceRef) ||
-      Date.parse(contract.validInterval.start) >= Date.parse(contract.validInterval.end) ||
-      Date.parse(contract.evaluationTime) < Date.parse(contract.validInterval.start) ||
-      Date.parse(contract.evaluationTime) > Date.parse(contract.validInterval.end) ||
+      compareIsoTimes(contract.validInterval.start, contract.validInterval.end) >= 0 ||
+      compareIsoTimes(contract.evaluationTime, contract.validInterval.start) < 0 ||
+      compareIsoTimes(contract.evaluationTime, contract.validInterval.end) > 0 ||
       !safeTicks(contract.toleranceTicks)) {
     return invalid("CONSERVATION-CONTRACT-INVALID", "Contract identity, resource, unit contract, boundary, valid interval, evaluation time and explicit non-negative tolerance are required.");
   }
-  const intervalStart = Date.parse(contract.validInterval.start);
-  const intervalEnd = Date.parse(contract.validInterval.end);
-  const evaluationTime = Date.parse(contract.evaluationTime);
-  if (evaluationTime === intervalStart || evaluationTime === intervalEnd) {
+  if (compareIsoTimes(contract.evaluationTime, contract.validInterval.start) === 0 ||
+      compareIsoTimes(contract.evaluationTime, contract.validInterval.end) === 0) {
     diagnostics.push({
       code: "CONSERVATION-EVALUATION-TIME-BOUNDARY-AMBIGUOUS",
       message: "The evaluation time is exactly on a contract interval boundary; the evaluator does not infer endpoint inclusion."
@@ -481,7 +514,7 @@ export function reconcileResourceBalance(
       !nonEmptyString(input.contract.unitContractId) || !nonEmptyString(input.contract.systemBoundary) ||
       !input.contract.validInterval ||
       !isIsoTime(input.contract.validInterval.start) || !isIsoTime(input.contract.validInterval.end) ||
-      Date.parse(input.contract.validInterval.start) >= Date.parse(input.contract.validInterval.end) ||
+      compareIsoTimes(input.contract.validInterval.start, input.contract.validInterval.end) >= 0 ||
       !nonEmptyString(input.contract.contractEvidenceRef) ||
       !nonEmptyString(input.contract.boundaryEvidenceRef) ||
       !nonEmptyString(input.contract.uncertaintyRuleRef) ||
@@ -537,13 +570,13 @@ export function reconcileResourceBalance(
     );
   }
 
-  const intervalStart = Date.parse(input.contract.validInterval.start);
-  const intervalEnd = Date.parse(input.contract.validInterval.end);
-  const observedTime = Date.parse(observation.observedAt);
-  if (observedTime < intervalStart || observedTime > intervalEnd) {
+  const intervalStart = input.contract.validInterval.start;
+  const intervalEnd = input.contract.validInterval.end;
+  const observedTime = observation.observedAt;
+  if (compareIsoTimes(observedTime, intervalStart) < 0 || compareIsoTimes(observedTime, intervalEnd) > 0) {
     return invalid("RECONCILIATION-OUTSIDE-VALID-INTERVAL", "The observation time is outside the named contract's valid interval.");
   }
-  if (observedTime === intervalStart || observedTime === intervalEnd) {
+  if (compareIsoTimes(observedTime, intervalStart) === 0 || compareIsoTimes(observedTime, intervalEnd) === 0) {
     return unresolved("RECONCILIATION-OBSERVATION-BOUNDARY-AMBIGUOUS", "The observation is exactly on a contract interval boundary; this bounded reconciler does not infer endpoint inclusion.");
   }
 
@@ -553,8 +586,8 @@ export function reconcileResourceBalance(
   }
   if (batchEvidence.contractId !== input.contract.contractId ||
       batchEvidence.systemBoundary !== input.contract.systemBoundary ||
-      Date.parse(batchEvidence.openingSnapshotAsOf) !== intervalStart ||
-      Date.parse(batchEvidence.observationTime) !== observedTime) {
+      compareIsoTimes(batchEvidence.openingSnapshotAsOf, intervalStart) !== 0 ||
+      compareIsoTimes(batchEvidence.observationTime, observedTime) !== 0) {
     return invalid("RECONCILIATION-EVENT-BATCH-SCOPE-MISMATCH", "Event-batch completeness evidence must match the exact conservation contract, system boundary, opening snapshot and observation time.");
   }
 
@@ -582,7 +615,7 @@ export function reconcileResourceBalance(
     if (!candidate || !isIsoTime(candidate.openingBalanceAsOf)) {
       return unresolved("RECONCILIATION-OPENING-SNAPSHOT-TIME-MISSING", "Every account used by the ledger projection requires a valid opening-balance snapshot time.");
     }
-    if (Date.parse(candidate.openingBalanceAsOf) !== intervalStart) {
+    if (compareIsoTimes(candidate.openingBalanceAsOf, intervalStart) !== 0) {
       return unresolved("RECONCILIATION-OPENING-SNAPSHOT-SCOPE", "Every opening balance must be timestamped at the conservation contract interval start; no rebasing is inferred.");
     }
   }
@@ -598,11 +631,11 @@ export function reconcileResourceBalance(
     if (!isIsoTime(event.validTime)) {
       return unresolved("RECONCILIATION-EVENT-VALID-TIME-MISSING", "Every supplied ledger event requires a valid timestamp before it can contribute to a time-scoped balance.");
     }
-    const eventTime = Date.parse(event.validTime);
-    if (eventTime <= intervalStart || eventTime >= observedTime) {
+    const eventTime = event.validTime;
+    if (compareIsoTimes(eventTime, intervalStart) <= 0 || compareIsoTimes(eventTime, observedTime) >= 0) {
       return unresolved("RECONCILIATION-EVENT-OUTSIDE-AS-OF-WINDOW", "A ledger event is on or outside the open interval between the opening snapshot and observation; boundary ordering is not inferred and future events are not projected.");
     }
-    if (eventTime <= previousEventTime) {
+    if (compareIsoTimes(eventTime, previousEventTime) <= 0) {
       return unresolved("RECONCILIATION-EVENT-ORDER-AMBIGUOUS", "Ledger events must be supplied in strictly increasing valid-time order; the reconciler does not sort events or infer ordering for equal timestamps.");
     }
     previousEventTime = eventTime;

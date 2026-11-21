@@ -228,6 +228,66 @@ describe("Arcane Incantations v1.9 conservation and reconciliation", () => {
       .toBe("CONSERVATION-INVALID-CONTRACT");
   });
 
+  it("[RES19-TIME-001] preserves nanosecond ordering and timezone-offset equivalence", () => {
+    const preciseInterval = {
+      start: "2026-01-01T00:00:00.000000001Z",
+      end: "2026-01-01T00:00:00.000000003Z"
+    };
+    expect(evaluateConservationContract(contract({
+      validInterval: preciseInterval,
+      evaluationTime: "2026-01-01T02:00:00.000000002+02:00"
+    })).outcome).toBe("CONSERVATION-SATISFIED");
+
+    const equivalentBoundary = evaluateConservationContract(contract({
+      validInterval: preciseInterval,
+      evaluationTime: "2026-01-01T02:00:00.000000001+02:00"
+    }));
+    expect(equivalentBoundary.outcome).toBe("CONSERVATION-UNRESOLVED");
+    expect(equivalentBoundary.diagnostics).toContainEqual(expect.objectContaining({
+      code: "CONSERVATION-EVALUATION-TIME-BOUNDARY-AMBIGUOUS"
+    }));
+
+    const observationTime = "2026-06-01T02:00:00.000000003+02:00";
+    const firstEvent = ledgerEvent({
+      eventId: "consume-precision-1",
+      idempotencyKey: "consume-precision-1",
+      amountTicks: 5,
+      validTime: "2026-05-01T00:00:00.000000001Z"
+    });
+    const secondEvent = ledgerEvent({
+      eventId: "consume-precision-2",
+      idempotencyKey: "consume-precision-2",
+      amountTicks: 5,
+      validTime: "2026-05-01T02:00:00.000000002+02:00"
+    });
+    const reconciled = reconcileResourceBalance(reconciliation({
+      events: [firstEvent, secondEvent],
+      observation: measurementObservation({ balanceTicks: 90, observedAt: observationTime }),
+      eventBatchEvidence: batchEvidence({ observationTime: "2026-06-01T00:00:00.000000003Z" })
+    }));
+    expect(reconciled).toMatchObject({
+      outcome: "ACCOUNT-BALANCE-RECONCILED",
+      expectedBalanceTicks: 90,
+      observedBalanceTicks: 90
+    });
+
+    const sameInstantEvent = ledgerEvent({
+      eventId: "consume-precision-2",
+      idempotencyKey: "consume-precision-2",
+      amountTicks: 5,
+      validTime: "2026-05-01T02:00:00.000000001+02:00"
+    });
+    const ambiguousOrder = reconcileResourceBalance(reconciliation({
+      events: [firstEvent, sameInstantEvent],
+      observation: measurementObservation({ balanceTicks: 90, observedAt: observationTime }),
+      eventBatchEvidence: batchEvidence({ observationTime: "2026-06-01T00:00:00.000000003Z" })
+    }));
+    expect(ambiguousOrder.outcome).toBe("UNRESOLVED");
+    expect(ambiguousOrder.diagnostics).toContainEqual(expect.objectContaining({
+      code: "RECONCILIATION-EVENT-ORDER-AMBIGUOUS"
+    }));
+  });
+
   it("[RES19-CONS-005] rejects unsafe integer accumulation rather than using floating-point totals", () => {
     expect(evaluateConservationContract(contract({
       openingState: [quantity(Number.MAX_SAFE_INTEGER), quantity(1)],
