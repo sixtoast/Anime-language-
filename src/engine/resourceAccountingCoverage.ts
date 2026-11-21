@@ -243,9 +243,11 @@ export const resourceAccountingCoverage: ResourceAccountingCoverage[] = [
     "fixtureId": "RES19-27",
     "status": "BOUNDED",
     "testIds": [
-      "RES19-CONS-004"
+      "RES19-CONS-004",
+      "RES19-CONS-009",
+      "RES19-TIME-001"
     ],
-    "note": "The scalar conservation contract requires an explicit system boundary, valid interval, evaluation time and evidence references."
+    "note": "The scalar conservation contract requires an explicit system boundary, valid interval, interior evaluation time and evidence references. Timestamp comparisons preserve up to nine fractional-second digits and equivalent explicit offsets; exact interval endpoints remain unresolved."
   },
   {
     "fixtureId": "RES19-28",
@@ -358,9 +360,15 @@ export const resourceAccountingCoverage: ResourceAccountingCoverage[] = [
       "RES19-RECON-008",
       "RES19-RECON-013",
       "RES19-RECON-014",
-      "RES19-RECON-015"
+      "RES19-RECON-015",
+      "RES19-RECON-017",
+      "RES19-RECON-018",
+      "RES19-RECON-019",
+      "RES19-RECON-020",
+      "RES19-RECON-021",
+      "RES19-TIME-001"
     ],
-    "note": "The reconciler compares one account's gross projected balance with an accepted observation and now requires an opening snapshot anchored to the interval start plus a strictly ordered, pre-observation event batch. Caller-supplied completeness and evidence remain unauthenticated; this does not complete whole-resource reconciliation."
+    "note": "The reconciler compares one account's gross projected balance with an accepted observation and requires an opening snapshot anchored to the interval start plus a strictly ordered, pre-observation event batch. Exact event-time ordering preserves up to nine fractional-second digits and equivalent offsets. Caller-supplied completeness and evidence remain unauthenticated; this does not complete whole-resource reconciliation."
   },
   {
     "fixtureId": "RES19-41",

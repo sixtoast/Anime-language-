@@ -84,6 +84,12 @@ describe("Arcane Incantations v1.9 fixture-to-implementation coverage audit", ()
       "RES19-EVAL-011",
       "RES19-EVAL-012"
     ]));
+    const conservationInterval = resourceAccountingCoverage.find((item) => item.fixtureId === "RES19-27");
+    expect(conservationInterval?.testIds).toEqual(expect.arrayContaining([
+      "RES19-CONS-004",
+      "RES19-CONS-009",
+      "RES19-TIME-001"
+    ]));
     const reservationExpiry = resourceAccountingCoverage.find((item) => item.fixtureId === "RES19-15");
     expect(reservationExpiry?.status).toBe("PARTIAL");
     expect(reservationExpiry?.testIds).toEqual(expect.arrayContaining([
@@ -110,7 +116,13 @@ describe("Arcane Incantations v1.9 fixture-to-implementation coverage audit", ()
       .toEqual(expect.arrayContaining([
         "RES19-RECON-013",
         "RES19-RECON-014",
-        "RES19-RECON-015"
+        "RES19-RECON-015",
+        "RES19-RECON-017",
+        "RES19-RECON-018",
+        "RES19-RECON-019",
+        "RES19-RECON-020",
+        "RES19-RECON-021",
+        "RES19-TIME-001"
       ]));
     expect(resourceAccountingCoverage.find((item) => item.fixtureId === "RES19-20")?.testIds)
       .toContain("RES19-RECON-022");
