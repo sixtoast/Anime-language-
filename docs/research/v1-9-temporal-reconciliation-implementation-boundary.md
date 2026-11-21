@@ -9,7 +9,7 @@ The v1.9 account and ledger models include valid-time fields. A conservation con
 
 ## Implemented subset
 
-The resource preflight and account-balance reconciler use a shared ISO-instant parser/comparator. The preflight accepts only strict interior availability-window times, reports outside-window evidence as stale and leaves exact endpoints unresolved. The account-balance reconciler requires:
+The resource preflight and account-balance reconciler use a shared ISO-instant parser/comparator. Its accepted implementation profile is `YYYY-MM-DDTHH:mm:ss[.fraction](Z|±HH:MM)`, with a valid four-digit Gregorian calendar date, 24-hour clock fields and one to nine fractional digits. This profile is an implementation boundary for the current evaluator, not a timestamp rule added to v1.9 canon. The preflight accepts only strict interior availability-window times, reports outside-window evidence as stale and leaves exact endpoints unresolved. The account-balance reconciler requires:
 
 - every account opening balance used by the projection to carry an `openingBalanceAsOf` timestamp equal to the conservation interval start;
 - every ledger event to carry a valid `validTime`;
@@ -53,5 +53,8 @@ This is an engineering input boundary, not a new canonical v1.9 record field or 
 - `RES19-LEDGER-023` — event valid time participates in idempotency content.
 - `RES19-TIME-001` — nanosecond conservation-interval ordering, offset-equivalent boundary detection, sub-millisecond event ordering and same-instant ambiguity.
 - `RES19-EVAL-014` — nanosecond availability-window ordering, offset-equivalent endpoints, immediately stale outside-window times and rejection beyond the existing nine-digit input limit.
+- `RES19-TIME-002` — direct Gregorian date, leap-year and clock-field validation for the shared parser.
+- `RES19-TIME-003` — direct rejection of missing/unsupported offset syntax and fractional precision beyond the existing nine-digit limit.
+- `RES19-TIME-004` — direct offset-equivalence and nanosecond ordering across UTC date/year rollovers.
 
 The v1.9 canonical fixture table and its 60 expected outcomes are unchanged.
