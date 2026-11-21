@@ -5,6 +5,7 @@ describe("read-only incantation runtime preview", () => {
   it("[RUNTIME-PREVIEW-001] composes passing sample gates without starting execution", () => {
     const result = evaluateIncantationRuntimePreview("READY-SAMPLE");
     expect(result.resource.outcome).toBe("RESOURCE-READY");
+    expect(result.resource.contractVersionRef).toBe("sample-resource-contract:v1");
     expect(result.policy.outcome).toBe("COMPOSED-PERMIT");
     expect(result.authority.gateSatisfied).toBe(true);
     expect(result.invocation).toMatchObject({ outcome: "ELIGIBLE-TO-PROCEED", eligibleToProceed: true, executionStarted: false });
