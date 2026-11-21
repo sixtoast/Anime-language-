@@ -1,4 +1,4 @@
-# v1.9 time-scoped account reconciliation — implementation boundary
+# v1.9 precision-preserving temporal evaluation and reconciliation — implementation boundary
 
 **Status:** bounded engineering implementation; not a canon amendment  
 **Source:** [Arcane Incantations v1.9 — Resource Accounting and Conservation Contracts](../canon/arcane-incantations-v1.9-resource-accounting-and-conservation-contracts.md), especially §§2.2, 4 and 7.
@@ -9,11 +9,11 @@ The v1.9 account and ledger models include valid-time fields. A conservation con
 
 ## Implemented subset
 
-The account-balance reconciler now requires:
+The resource preflight and account-balance reconciler use a shared ISO-instant parser/comparator. The preflight accepts only strict interior availability-window times, reports outside-window evidence as stale and leaves exact endpoints unresolved. The account-balance reconciler requires:
 
 - every account opening balance used by the projection to carry an `openingBalanceAsOf` timestamp equal to the conservation interval start;
 - every ledger event to carry a valid `validTime`;
-- ISO instants are compared without discarding up to nine fractional-second digits; explicit timezone offsets are resolved to the same represented instant, so distinct sub-millisecond events remain ordered while equivalent representations remain equal;
+- ISO instants are compared without discarding up to nine fractional-second digits; explicit timezone offsets are resolved to the same represented instant, so distinct sub-millisecond times remain ordered while equivalent representations remain equal across preflight, conservation and reconciliation;
 - event timestamps to be strictly after the opening snapshot, strictly before the measurement observation, and strictly increasing in the supplied event order;
 - the measurement observation to fall strictly inside the contract interval.
 
@@ -51,6 +51,7 @@ This is an engineering input boundary, not a new canonical v1.9 record field or 
 - `RES19-RECON-020` — exact projected-account coverage.
 - `RES19-RECON-021` — explicit evidence for an empty event batch.
 - `RES19-LEDGER-023` — event valid time participates in idempotency content.
-- `RES19-TIME-001` — nanosecond interval ordering, offset-equivalent boundary detection, sub-millisecond event ordering and same-instant ambiguity.
+- `RES19-TIME-001` — nanosecond conservation-interval ordering, offset-equivalent boundary detection, sub-millisecond event ordering and same-instant ambiguity.
+- `RES19-EVAL-014` — nanosecond availability-window ordering, offset-equivalent endpoints, immediately stale outside-window times and rejection beyond the existing nine-digit input limit.
 
 The v1.9 canonical fixture table and its 60 expected outcomes are unchanged.

@@ -316,9 +316,10 @@ export const resourceAccountingCoverage: ResourceAccountingCoverage[] = [
       "RES19-EVAL-010",
       "RES19-EVAL-011",
       "RES19-EVAL-012",
+      "RES19-EVAL-014",
       "RES19-RECON-006"
     ],
-    "note": "Preflight checks caller-supplied availability timestamps against an explicit source window and leaves endpoint ambiguity unresolved. Source-contract validity and evidence authenticity remain caller-supplied, so end-to-end source verification is still partial."
+    "note": "Preflight checks caller-supplied availability timestamps against an explicit source window, preserves up to nine fractional-second digits and equivalent explicit offsets, reports times outside the window as stale, and leaves exact endpoints unresolved. Source-contract validity and evidence authenticity remain caller-supplied, so end-to-end source verification is still partial."
   },
   {
     "fixtureId": "RES19-36",

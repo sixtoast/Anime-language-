@@ -1,4 +1,5 @@
 import { projectResourceLedger, type LedgerAccount, type LedgerEvent, type LedgerProjection } from "./resourceLedger";
+import { compareIsoTimes, isIsoTime } from "./resourceTime";
 
 /**
  * Bounded v1.9 conservation evaluation and resource reconciliation.
@@ -76,6 +77,7 @@ export interface ConservationResult {
 const CONSERVATION_LIMITATIONS = [
   "The evaluator supports only an explicitly declared scalar-additive balance for one resource kind and one exact unit contract.",
   "The valid-interval endpoint inclusion semantics are not declared; evaluation at either exact endpoint remains unresolved.",
+  "Timestamp comparisons preserve up to nine fractional-second digits and equivalent explicit offsets; timestamp provenance and clock accuracy remain caller-supplied and unauthenticated.",
   "Evidence states and references are caller-supplied; this evaluator checks required references but does not authenticate sources, boundaries, measurements, contracts or uncertainty rules.",
   "Declared losses require caller-supplied permitted-pathway references and passing evidence; those references are not authenticated or resolved against external contract content.",
   "A satisfied balance is an accounting result under the named contract, not proof of a physical law, mechanism, authorisation, execution or successful effect.",
@@ -90,63 +92,6 @@ const safeTicks = (value: unknown): value is number =>
 
 const isConservationEvidence = (value: unknown): value is ConservationEvidence =>
   value === "PASS" || value === "FAIL" || value === "UNKNOWN" || value === "UNAVAILABLE";
-
-const ISO_TIME_PATTERN = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,9}))?(Z|([+-])(\d{2}):(\d{2}))$/;
-
-interface ParsedIsoTime {
-  /** UTC instant at the start of the represented second, in integer milliseconds. */
-  epochSecondMilliseconds: number;
-  /** Fractional second retained independently, at the accepted nanosecond precision. */
-  fractionNanoseconds: number;
-}
-
-function parseIsoTime(value: unknown): ParsedIsoTime | undefined {
-  if (typeof value !== "string") return undefined;
-  const match = value.match(ISO_TIME_PATTERN);
-  if (!match) return undefined;
-  const year = Number(match[1]);
-  const month = Number(match[2]);
-  const day = Number(match[3]);
-  const hour = Number(match[4]);
-  const minute = Number(match[5]);
-  const second = Number(match[6]);
-  const leapYear = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
-  const monthDays = [31, leapYear ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-  if (year < 1 || month < 1 || month > 12 || day < 1 || day > monthDays[month - 1] ||
-      hour > 23 || minute > 59 || second > 59) return undefined;
-  if (match[8] !== "Z") {
-    const offsetHour = Number(match[10]);
-    const offsetMinute = Number(match[11]);
-    if (offsetHour > 23 || offsetMinute > 59) return undefined;
-  }
-
-  // Date.parse resolves the calendar date and explicit UTC offset, but discards
-  // fractional precision below milliseconds. Parse only the whole second and
-  // retain the original fractional second separately for exact comparisons.
-  const wholeSecondTimestamp = value.replace(/\.\d{1,9}(?=Z|[+-]\d{2}:\d{2}$)/, "");
-  const epochSecondMilliseconds = Date.parse(wholeSecondTimestamp);
-  if (!Number.isSafeInteger(epochSecondMilliseconds)) return undefined;
-
-  return {
-    epochSecondMilliseconds,
-    fractionNanoseconds: Number((match[7] ?? "").padEnd(9, "0"))
-  };
-}
-
-const isIsoTime = (value: unknown): value is string => parseIsoTime(value) !== undefined;
-
-function compareIsoTimes(left: string, right: string): number {
-  const leftInstant = parseIsoTime(left);
-  const rightInstant = parseIsoTime(right);
-  if (!leftInstant || !rightInstant) {
-    throw new Error("ISO timestamps must be validated before comparison.");
-  }
-  if (leftInstant.epochSecondMilliseconds !== rightInstant.epochSecondMilliseconds) {
-    return leftInstant.epochSecondMilliseconds < rightInstant.epochSecondMilliseconds ? -1 : 1;
-  }
-  if (leftInstant.fractionNanoseconds === rightInstant.fractionNanoseconds) return 0;
-  return leftInstant.fractionNanoseconds < rightInstant.fractionNanoseconds ? -1 : 1;
-}
 
 function evidencePass(
   state: ConservationEvidence,
@@ -448,6 +393,7 @@ const RECONCILIATION_LIMITATIONS = [
   "The comparison uses only the tolerance declared by the conservation contract; a separate caller-supplied reconciliation tolerance is not accepted.",
   "The named contract must have passing contract, boundary and uncertainty-policy evidence, but this evaluator does not authenticate or interpret those sources.",
   "Measurement method, time, uncertainty and provenance are caller-supplied; the evaluator checks required references and timestamp format but does not authenticate them.",
+  "Timestamp comparisons preserve up to nine fractional-second digits and equivalent explicit offsets; timestamp provenance and clock accuracy remain caller-supplied and unauthenticated.",
   "Per-observation acceptance under the uncertainty policy is caller-supplied evidence; the evaluator requires PASS but does not interpret or authenticate the policy decision.",
   "The comparison uses gross account balance. A held reservation remains in that balance and is not treated as physical consumption.",
   "Every projected account must identify an opening-balance snapshot as of the conservation interval start; snapshot times are caller-supplied and unauthenticated.",

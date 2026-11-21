@@ -82,7 +82,8 @@ describe("Arcane Incantations v1.9 fixture-to-implementation coverage audit", ()
     expect(staleAvailability?.testIds).toEqual(expect.arrayContaining([
       "RES19-EVAL-010",
       "RES19-EVAL-011",
-      "RES19-EVAL-012"
+      "RES19-EVAL-012",
+      "RES19-EVAL-014"
     ]));
     const conservationInterval = resourceAccountingCoverage.find((item) => item.fixtureId === "RES19-27");
     expect(conservationInterval?.testIds).toEqual(expect.arrayContaining([

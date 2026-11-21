@@ -103,4 +103,57 @@ describe("Arcane Incantations v1.9 resource preflight", () => {
     expect(missing.diagnostics).toContainEqual(expect.objectContaining({ code: "RESOURCE-SPEC-UNDERSPECIFIED" }));
   });
 
+  it("[RES19-EVAL-014] preserves nanosecond availability-window ordering", () => {
+    const baseWindow = valid().availabilityWindow!;
+    const preciseWindow = {
+      ...baseWindow,
+      validFrom: "2026-01-01T00:00:00.000000001Z",
+      validUntil: "2026-01-01T00:00:00.000000003Z",
+      evaluationTime: "2026-01-01T02:00:00.000000002+02:00"
+    };
+    expect(evaluateResourcePreflight({ ...valid(), availabilityWindow: preciseWindow }).outcome)
+      .toBe("RESOURCE-READY");
+
+    for (const evaluationTime of [
+      "2026-01-01T02:00:00.000000001+02:00",
+      "2026-01-01T02:00:00.000000003+02:00"
+    ]) {
+      const boundary = evaluateResourcePreflight({
+        ...valid(),
+        availabilityWindow: { ...preciseWindow, evaluationTime }
+      });
+      expect(boundary.outcome).toBe("RESOURCE-OUTCOME-UNKNOWN");
+      expect(boundary.diagnostics).toContainEqual(expect.objectContaining({
+        code: "AVAILABILITY-WINDOW-BOUNDARY-AMBIGUOUS"
+      }));
+    }
+
+    for (const evaluationTime of [
+      "2026-01-01T00:00:00.000000000Z",
+      "2026-01-01T00:00:00.000000004Z"
+    ]) {
+      const stale = evaluateResourcePreflight({
+        ...valid(),
+        availabilityWindow: { ...preciseWindow, evaluationTime }
+      });
+      expect(stale.outcome).toBe("RESOURCE-EVIDENCE-STALE");
+      expect(stale.diagnostics).toContainEqual(expect.objectContaining({
+        code: "RESOURCE-EVIDENCE-STALE"
+      }));
+    }
+
+    const unsupportedPrecision = evaluateResourcePreflight({
+      ...valid(),
+      availabilityWindow: {
+        ...preciseWindow,
+        evaluationTime: "2026-01-01T00:00:00.0000000001Z"
+      }
+    });
+    expect(unsupportedPrecision.outcome).toBe("RESOURCE-OUTCOME-UNKNOWN");
+    expect(unsupportedPrecision.diagnostics).toContainEqual(expect.objectContaining({
+      code: "AVAILABILITY-WINDOW-UNRESOLVED"
+    }));
+  });
+
+
 });
