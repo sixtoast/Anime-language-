@@ -354,4 +354,6 @@ export const workbenchTests: WorkbenchTest[] = [
   { id: "RES19-RECON-027", group: "Incantation contracts", title: "Requires exact preflight and report contract-version identity", description: "The reconciler requires an exact opaque version match between preflight, the report batch and every report event; missing or mismatched identities remain unresolved.", status: "authored-unverified", file: "src/engine/resourceConservation.test.ts", sourceRule: "Arcane Incantations v1.9 §§2.2, 8; RES19-54" },
   { id: "RES19-PREVIEW-011", group: "Incantation contracts", title: "Demonstrates unresolved contract-version mismatch", description: "The read-only Playground keeps account reconciliation unresolved when the report version differs from the preflight version.", status: "authored-unverified", file: "src/engine/resourceConservationPreview.test.ts", sourceRule: "Arcane Incantations v1.9 §§2.2, 8; RES19-54" },
 
+  { id: "RES19-LEDGER-025", group: "Incantation contracts", title: "Safely projects prototype-sensitive account identifiers", description: "Caller-supplied account IDs such as __proto__ remain own numeric properties and cannot bypass ledger arithmetic.", status: "authored-unverified", file: "src/engine/resourceLedger.test.ts", sourceRule: "Arcane Incantations v1.9 §2.2; implementation safety boundary" },
+
 ];

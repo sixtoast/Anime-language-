@@ -248,4 +248,30 @@ describe("Arcane Incantations v1.9 resource ledger projection", () => {
     expect(result.events[1]).toMatchObject({ applied: false, duplicate: false, issue: { code: "IDEMPOTENCY-COLLISION" } });
   });
 
+  it("[RES19-LEDGER-025] safely projects prototype-sensitive account identifiers", () => {
+    const specialAccounts: LedgerAccount[] = [
+      { accountId: "__proto__", resourceKind: "mana-token", unit: "unit", unitContractId: "mana-unit-v1", openingBalanceTicks: 100 },
+      { accountId: "destination", resourceKind: "mana-token", unit: "unit", unitContractId: "mana-unit-v1", openingBalanceTicks: 10 }
+    ];
+    const transfer = event({
+      eventId: "prototype-key-transfer",
+      invocationId: "prototype-key-invocation",
+      idempotencyKey: "prototype-key-transfer",
+      eventKind: "TRANSFER",
+      fromAccount: "__proto__",
+      toAccount: "destination",
+      amountTicks: 25
+    });
+
+    const result = projectResourceLedger(specialAccounts, [transfer]);
+
+    expect(result.outcome).toBe("LEDGER-PROJECTED");
+    expect(Object.prototype.hasOwnProperty.call(result.balances, "__proto__")).toBe(true);
+    expect(result.balances["__proto__"]).toBe(75);
+    expect(result.reserved["__proto__"]).toBe(0);
+    expect(result.available["__proto__"]).toBe(75);
+    expect(result.balances.destination).toBe(35);
+    expect(result.available.destination).toBe(35);
+  });
+
 });

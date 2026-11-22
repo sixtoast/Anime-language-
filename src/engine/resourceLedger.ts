@@ -95,6 +95,15 @@ const LIMITATIONS = [
 
 const safeTicks = (n: number) => Number.isSafeInteger(n) && n >= 0;
 
+const setRecordValue = (record: Record<string, number>, key: string, value: number): void => {
+  Object.defineProperty(record, key, {
+    configurable: true,
+    enumerable: true,
+    value,
+    writable: true
+  });
+};
+
 export function projectResourceLedger(
   accounts: LedgerAccount[],
   events: LedgerEvent[]
@@ -126,8 +135,8 @@ export function projectResourceLedger(
       continue;
     }
     accountById.set(account.accountId, account);
-    balances[account.accountId] = account.openingBalanceTicks;
-    reserved[account.accountId] = 0;
+    setRecordValue(balances, account.accountId, account.openingBalanceTicks);
+    setRecordValue(reserved, account.accountId, 0);
   }
 
   const fingerprint = (event: LedgerEvent) => JSON.stringify({
@@ -191,13 +200,13 @@ export function projectResourceLedger(
     const debit = (account: LedgerAccount, amount: number) => {
       const available = balances[account.accountId] - reserved[account.accountId];
       if (available < amount) return false;
-      balances[account.accountId] -= amount;
+      setRecordValue(balances, account.accountId, balances[account.accountId] - amount);
       return true;
     };
     const credit = (account: LedgerAccount, amount: number) => {
       const next = balances[account.accountId] + amount;
       if (!Number.isSafeInteger(next)) return false;
-      balances[account.accountId] = next;
+      setRecordValue(balances, account.accountId, next);
       return true;
     };
 
@@ -216,7 +225,7 @@ export function projectResourceLedger(
         if (from.accountId === to.accountId) { fail("TRANSFER-INVALID", "A transfer must identify distinct source and destination accounts."); break; }
         if (!debit(from, event.amountTicks)) { fail("INSUFFICIENT-AVAILABLE", "Transfer exceeds source account's unreserved balance."); break; }
         if (!credit(to, event.amountTicks)) {
-          balances[from.accountId] += event.amountTicks;
+          setRecordValue(balances, from.accountId, balances[from.accountId] + event.amountTicks);
           fail("TRANSFER-INVALID", "Destination credit would exceed safe integer accounting range; source debit was not retained.");
           break;
         }
@@ -229,7 +238,7 @@ export function projectResourceLedger(
         if (reservations.has(id)) { fail("RESERVATION-INVALID", "Reservation identifiers must be unique."); break; }
         const available = balances[account.accountId] - reserved[account.accountId];
         if (available < event.amountTicks) { fail("INSUFFICIENT-AVAILABLE", "Reservation exceeds currently unreserved balance."); break; }
-        reserved[account.accountId] += event.amountTicks;
+        setRecordValue(reserved, account.accountId, reserved[account.accountId] + event.amountTicks);
         reservations.set(id, { reservationId: id, accountId: account.accountId, amountTicks: event.amountTicks, status: "HELD" });
         apply(); break;
       }
@@ -242,7 +251,7 @@ export function projectResourceLedger(
         const reservationAccount = getAccount(reservation.accountId, event);
         if (!reservationAccount) break;
         reservation.amountTicks -= event.amountTicks;
-        reserved[reservation.accountId] -= event.amountTicks;
+        setRecordValue(reserved, reservation.accountId, reserved[reservation.accountId] - event.amountTicks);
         if (reservation.amountTicks === 0) reservation.status = "RELEASED";
         apply(); break;
       }
@@ -256,8 +265,8 @@ export function projectResourceLedger(
             fail("RESERVATION-INVALID", "Consumption must not exceed the referenced reservation's remaining amount."); break;
           }
           if (balances[account.accountId] < event.amountTicks) { fail("INSUFFICIENT-BALANCE", "Account balance is insufficient for reserved consumption."); break; }
-          balances[account.accountId] -= event.amountTicks;
-          reserved[account.accountId] -= event.amountTicks;
+          setRecordValue(balances, account.accountId, balances[account.accountId] - event.amountTicks);
+          setRecordValue(reserved, account.accountId, reserved[account.accountId] - event.amountTicks);
           reservation.amountTicks -= event.amountTicks;
           reservation.status = reservation.amountTicks === 0 ? "SETTLED" : "PARTIALLY-CONSUMED";
         } else if (!debit(account, event.amountTicks)) {
@@ -305,7 +314,7 @@ export function projectResourceLedger(
   }
 
   const available: Record<string, number> = {};
-  for (const id of Object.keys(balances)) available[id] = balances[id] - reserved[id];
+  for (const id of Object.keys(balances)) setRecordValue(available, id, balances[id] - reserved[id]);
   const failed = issues.length > 0;
   const unresolved = issues.some(item => item.code === "EVIDENCE-UNRESOLVED");
   const malformed = issues.some(item => item.code === "ACCOUNT-MALFORMED" || item.code === "ACCOUNT-DUPLICATE" || item.code === "EVENT-MALFORMED");
