@@ -52,6 +52,7 @@ import { constructionFrameTerminology } from "./engine/constructionFrameTerminol
 import { constructionFrameMacroAssociations } from "./engine/constructionFrameContrastEvidence";
 import { reviewConstructionCoupling } from "./engine/constructionCouplingEvidence";
 import { reviewConstructionMacro } from "./engine/constructionMacroEvidence";
+import { formalVerbFootAliases, formalAliasArchitectureBoundary } from "./engine/formalVerbFootAliasEvidence";
 import { handFlameConstructionExample } from "./engine/constructionWorkedExampleEvidence";
 import { constructionStageRelationshipEvidence } from "./engine/constructionStageRelationshipEvidence";
 import { constructionStageContractProfiles } from "./engine/constructionStageContractProfiles";
@@ -899,6 +900,20 @@ function App() {
                 {constructionMacroReview.entry && <><p><b>Recovered Construction evidence:</b> {constructionMacroReview.entry.recoveredEvidence}</p><p><b>Open contract:</b> {constructionMacroReview.entry.unresolvedContract}</p></>}
               </div>
               <p className="fixture-browser-caveat">Source status is not a completion status. All six forms remain non-executable in this inspector.</p>
+              <div className="construction-foot-composition">
+                <div className="detail-kicker">PHASE 4 §3.2 · FORMAL VERB-TO-FOOT ALIASES</div>
+                <p>These formal names are source-described aliases for common Construction patterns. They are not a recovered one-to-one mapping from v3.0-L Expression AST nodes, and the exact expansions and signatures remain unavailable.</p>
+                <div className="construction-foot-parts">
+                  {formalVerbFootAliases.map(alias => <span key={alias.formalVerb}>
+                    <small>{alias.patternKind.replaceAll("-", " ")} · {alias.status.replaceAll("-", " ")}</small>
+                    <strong>{alias.formalVerb} · {alias.gloss}</strong>
+                    {alias.pattern.join(" · ")}
+                    <small>{alias.recoveredMeaning}</small>
+                  </span>)}
+                </div>
+                <p className="fixture-browser-caveat">Macro Transparency Law: Phase 4 says each formal alias expands to a valid Construction. Exact expansion: not recovered. Signatures: not recovered. KREN remains proposed; BRAN physical mappings remain provisional; VARE is a modifier, not a Foot.</p>
+                <p className="fixture-browser-caveat">Architecture boundary: {formalAliasArchitectureBoundary.notEstablished.join("; ")}. Compiler and execution remain disabled.</p>
+              </div>
             </div>
             <div className="construction-relationship-map">
               <div className="detail-kicker">PHASE 4 §3.3 · RECOVERED STAGE RELATIONSHIPS</div>
