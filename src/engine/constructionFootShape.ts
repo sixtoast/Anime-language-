@@ -27,7 +27,7 @@ const CANONICAL_CV_FORMS = new Set(["pa", "ba", "ta", "da", "ka", "ga"]);
 const SOURCE_BACKED_CODAS = new Set(constructionRelationCodaInventory.map(item => item.form));
 const LIMITATION =
   "Structural recognition only. Parameter-vowel property mappings remain provisional; a recognised CVC outline does not attest a lexical Foot, establish productive combinations, define physical semantics, prove construction validity or permit execution.";
-const isLetter = (value: string) => /^\\p{L}$/u.test(value);
+const isLetter = (value: string) => /^\p{L}$/u.test(value);
 
 export function reviewConstructionFootShape(value: unknown): FootShapeReview {
   const input = typeof value === "string" ? value : "";
@@ -145,6 +145,9 @@ export function reviewConstructionFootShape(value: unknown): FootShapeReview {
 
   const notes = [
     "The initial consonant and medial vowel belong to the recovered structural inventories.",
+    ...(!CANONICAL_CV_FORMS.has(input.slice(0, 2))
+      ? ["The frame × parameter-vowel combination is not among the six recovered canonical CV forms."]
+      : []),
     "The final letter is retained as an unresolved coda candidate; it is not in the five source-backed relation codas.",
     "Letter shape alone does not establish that an unfamiliar final letter is a permitted relation coda.",
     "The parameter-vowel mapping remains provisional."
