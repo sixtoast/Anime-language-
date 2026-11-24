@@ -780,7 +780,7 @@ function App() {
               <div className="detail-kicker">RECOVERED FOOT SHAPE · STRUCTURAL CHECK ONLY</div>
               <p>Check the six recorded CV frame forms and the source-documented CVC outline. This structural check is separate from the source-aware morphology review below: a matching shape is not proof of a lexical Foot or a complete macro contract.</p>
               <label htmlFor="construction-foot-input">Construction Foot</label>
-              <input id="construction-foot-input" value={constructionFootInput} onChange={event => setConstructionFootInput(event.target.value)} placeholder="e.g. pa or paz" spellCheck={false} />
+              <input id="construction-foot-input" value={constructionFootInput} onChange={event => setConstructionFootInput(event.target.value)} placeholder="e.g. pa, pang or pash (shape only)" spellCheck={false} />
               <div className="construction-foot-result" role="status" aria-live="polite">
                 <strong>{constructionFootReview.status.replaceAll("-", " ")}</strong>
                 <div className="construction-foot-parts">

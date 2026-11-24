@@ -13,21 +13,22 @@ describe("recovered Construction Foot shape", () => {
       expect(result.notes.join(" ")).toContain("not among the six recovered canonical CV forms");
     }
   });
-  it("[CON-FOOT-004] does not claim coda validity from an incomplete inventory", () => {
+  it("[CON-FOOT-004] does not claim coda validity from an unfamiliar coda", () => {
     const result = reviewConstructionFootShape("paz");
     expect(result.status).toBe("UNRESOLVED"); expect(result.relationCoda).toBe("z");
-    expect(result.notes.join(" ")).toContain("coda inventory");
+    expect(result.notes.join(" ")).toContain("five source-backed relation codas");
   });
   it("[CON-FOOT-005] rejects a recovered parameter vowel in the relation-coda position", () => { expect(reviewConstructionFootShape("paa").status).toBe("SHAPE-INVALID"); });
   it("[CON-FOOT-006] rejects non-frame initial consonants", () => {
     expect(reviewConstructionFootShape("va").status).toBe("SHAPE-INVALID"); expect(reviewConstructionFootShape("za").status).toBe("SHAPE-INVALID");
   });
-  it("[CON-FOOT-007] rejects unsupported lengths", () => {
-    expect(reviewConstructionFootShape("p").status).toBe("SHAPE-INVALID"); expect(reviewConstructionFootShape("paaa").status).toBe("SHAPE-INVALID");
+  it("[CON-FOOT-007] rejects unsupported short and overlong shapes", () => {
+    expect(reviewConstructionFootShape("p").status).toBe("SHAPE-INVALID");
+    expect(reviewConstructionFootShape("paaa").status).toBe("SHAPE-INVALID");
   });
   it("[CON-FOOT-008] records provisional vowel and unresolved semantic boundary", () => {
     expect(reviewConstructionFootShape("pu").notes.join(" ")).toContain("provisional");
-    expect(reviewConstructionFootShape("pu").limitation).toContain("does not establish Foot meaning");
+    expect(reviewConstructionFootShape("pu").limitation).toContain("does not attest a lexical Foot");
   });
   it("[CON-FOOT-009] does not treat a CV frame form as a complete CVC Foot", () => {
     const result = reviewConstructionFootShape("pa");
@@ -40,17 +41,17 @@ describe("recovered Construction Foot shape", () => {
       expect(result.status === "FRAME-FORM-RECOGNISED").toBe(canonical.includes(initial + vowel));
     }
   });
-  it("[CON-FOOT-011] keeps unrecorded CVC combinations unresolved", () => {
+  it("[CON-FOOT-011] keeps unknown-coda combinations unresolved", () => {
     const result = reviewConstructionFootShape("puz");
     expect(result.status).toBe("UNRESOLVED");
     expect(result.notes.join(" ")).toContain("combination is not among");
-    expect(result.notes.join(" ")).toContain("coda inventory");
+    expect(result.notes.join(" ")).toContain("not in the five source-backed relation codas");
   });
-  it("[CON-FOOT-012] does not validate a coda merely because it occupies the final slot", () => {
+  it("[CON-FOOT-012] does not validate an unfamiliar coda merely because it occupies the final slot", () => {
     const result = reviewConstructionFootShape("paz");
     expect(result.relationCoda).toBe("z");
     expect(result.status).toBe("UNRESOLVED");
-    expect(result.notes.join(" ")).toContain("letter shape alone does not establish");
+    expect(result.notes.join(" ")).toContain("Letter shape alone does not establish");
   });
   it("[CON-FOOT-013] rejects punctuation in every structural slot", () => {
     for (const value of ["p-a", "pa!", "p.a", "p a"]) expect(reviewConstructionFootShape(value).status).toBe("SHAPE-INVALID");
@@ -67,10 +68,46 @@ describe("recovered Construction Foot shape", () => {
   it("[CON-FOOT-016] does not infer consonant status from an unfamiliar letter", () => {
     const result = reviewConstructionFootShape("pay");
     expect(result.status).toBe("UNRESOLVED");
-    expect(result.notes.join(" ")).toContain("does not establish that it is a consonant");
+    expect(result.notes.join(" ")).toContain("does not establish that an unfamiliar final letter");
   });
   it("[CON-FOOT-017] rejects whitespace-only or empty input as unsupported shape", () => {
     expect(reviewConstructionFootShape("").status).toBe("SHAPE-INVALID");
     expect(reviewConstructionFootShape("  ").status).toBe("SHAPE-INVALID");
+  });
+  it("[CON-FOOT-018] recognises ng as one documented coda grapheme", () => {
+    const result = reviewConstructionFootShape("pang");
+    expect(result.status).toBe("CVC-SHAPE-RECOGNISED");
+    expect(result.relationCoda).toBe("ng");
+    expect(result.notes.join(" ")).toContain("productive frame × vowel × coda combination");
+  });
+  it("[CON-FOOT-019] recognises sh as one documented coda grapheme", () => {
+    const result = reviewConstructionFootShape("pash");
+    expect(result.status).toBe("CVC-SHAPE-RECOGNISED");
+    expect(result.relationCoda).toBe("sh");
+  });
+  it("[CON-FOOT-020] recognises the three other documented single-letter codas", () => {
+    for (const coda of ["m", "n", "s"]) {
+      const result = reviewConstructionFootShape("pa" + coda);
+      expect(result.status).toBe("CVC-SHAPE-RECOGNISED");
+      expect(result.relationCoda).toBe(coda);
+    }
+  });
+  it("[CON-FOOT-021] recognises digraph codas after schwa without counting letters as segments", () => {
+    expect(reviewConstructionFootShape("pəng").relationCoda).toBe("ng");
+    expect(reviewConstructionFootShape("pəsh").relationCoda).toBe("sh");
+  });
+  it("[CON-FOOT-022] does not silently accept IPA notation as surface orthography", () => {
+    const result = reviewConstructionFootShape("paŋ");
+    expect(result.status).toBe("UNRESOLVED");
+    expect(result.relationCoda).toBe("ŋ");
+  });
+  it("[CON-FOOT-023] rejects an unrecovered multi-letter coda sequence", () => {
+    expect(reviewConstructionFootShape("pagh").status).toBe("SHAPE-INVALID");
+  });
+  it("[CON-FOOT-024] keeps structural recognition separate from lexical attestation", () => {
+    const result = reviewConstructionFootShape("pang");
+    expect(result.status).toBe("CVC-SHAPE-RECOGNISED");
+    expect(result.limitation).toContain("does not attest a lexical Foot");
+    expect(result.limitation).toContain("permit execution");
   });
 });
