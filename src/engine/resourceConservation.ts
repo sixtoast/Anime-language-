@@ -144,6 +144,22 @@ function sumTerms(
   return total;
 }
 
+function sumRequiredStateTerms(
+  terms: ConservationQuantity[],
+  contract: ConservationContractInput,
+  label: string,
+  diagnostics: ConservationDiagnostic[]
+): number | undefined {
+  if (Array.isArray(terms) && terms.length === 0) {
+    diagnostics.push({
+      code: "CONSERVATION-STATE-UNDECLARED",
+      message: label + " must include at least one evidenced quantity; an empty list is not evidence of a zero balance."
+    });
+    return undefined;
+  }
+  return sumTerms(terms, contract, label, diagnostics);
+}
+
 function sumLossTerms(
   terms: ConservationLossQuantity[],
   contract: ConservationContractInput,
@@ -244,10 +260,10 @@ export function evaluateConservationContract(
     };
   }
 
-  const opening = sumTerms(contract.openingState, contract, "Opening state", diagnostics);
+  const opening = sumRequiredStateTerms(contract.openingState, contract, "Opening state", diagnostics);
   const sources = sumTerms(contract.sources, contract, "Sources", diagnostics);
   const inputs = sumTerms(contract.permittedInputs, contract, "Permitted inputs", diagnostics);
-  const closing = sumTerms(contract.closingState, contract, "Closing state", diagnostics);
+  const closing = sumRequiredStateTerms(contract.closingState, contract, "Closing state", diagnostics);
   const sinks = sumTerms(contract.sinks, contract, "Sinks", diagnostics);
   const outputs = sumTerms(contract.permittedOutputs, contract, "Permitted outputs", diagnostics);
   const losses = sumLossTerms(contract.declaredLosses, contract, diagnostics);

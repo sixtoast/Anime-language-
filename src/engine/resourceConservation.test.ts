@@ -350,6 +350,24 @@ describe("Arcane Incantations v1.9 conservation and reconciliation", () => {
     });
   });
 
+  it("[RES19-CONS-010] does not infer zero from an undeclared opening or closing state", () => {
+    const missingOpening = evaluateConservationContract(contract({ openingState: [] }));
+    expect(missingOpening.outcome).toBe("CONSERVATION-UNRESOLVED");
+    expect(missingOpening.diagnostics).toContainEqual(expect.objectContaining({ code: "CONSERVATION-STATE-UNDECLARED" }));
+
+    const missingClosing = evaluateConservationContract(contract({ closingState: [] }));
+    expect(missingClosing.outcome).toBe("CONSERVATION-UNRESOLVED");
+    expect(missingClosing.diagnostics).toContainEqual(expect.objectContaining({ code: "CONSERVATION-STATE-UNDECLARED" }));
+
+    const explicitZero = evaluateConservationContract(contract({
+      openingState: [quantity(0)],
+      sources: [quantity(20)],
+      closingState: [quantity(20)],
+      permittedOutputs: []
+    }));
+    expect(explicitZero.outcome).toBe("CONSERVATION-SATISFIED");
+  });
+
   it("[RES19-RECON-001] derives the expected account balance from the confirmed ledger projection", () => {
     expect(reconcileResourceBalance(reconciliation())).toMatchObject({
       outcome: "ACCOUNT-BALANCE-RECONCILED",
