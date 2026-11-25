@@ -95,6 +95,15 @@ const LIMITATIONS = [
 
 const safeTicks = (n: number) => Number.isSafeInteger(n) && n >= 0;
 
+const nonEmptyString = (value: unknown): value is string =>
+  typeof value === "string" && value.trim().length > 0;
+
+const optionalString = (value: unknown): boolean =>
+  value === undefined || typeof value === "string";
+
+const optionalBoolean = (value: unknown): boolean =>
+  value === undefined || typeof value === "boolean";
+
 const setRecordValue = (record: Record<string, number>, key: string, value: number): void => {
   Object.defineProperty(record, key, {
     configurable: true,
@@ -123,9 +132,20 @@ export function projectResourceLedger(
     return item;
   };
 
-  for (const account of accounts) {
-    if (!account.accountId?.trim() || !account.resourceKind?.trim() ||
-        !account.unit?.trim() || !account.unitContractId?.trim() ||
+  const accountRecords = Array.isArray(accounts) ? accounts : [];
+  const eventRecords = Array.isArray(events) ? events : [];
+  if (!Array.isArray(accounts)) {
+    issue(undefined, "ACCOUNT-MALFORMED", "Account collection must be an array.");
+  }
+  if (!Array.isArray(events)) {
+    issue(undefined, "EVENT-MALFORMED", "Event collection must be an array.");
+  }
+
+  for (const account of accountRecords) {
+    if (!account || typeof account !== "object" || Array.isArray(account) ||
+        !nonEmptyString(account.accountId) || !nonEmptyString(account.resourceKind) ||
+        !nonEmptyString(account.unit) || !nonEmptyString(account.unitContractId) ||
+        !optionalString(account.openingBalanceAsOf) ||
         !safeTicks(account.openingBalanceTicks)) {
       issue(undefined, "ACCOUNT-MALFORMED", "Account identity, resource, unit contract and non-negative safe-integer opening balance are required.");
       continue;
@@ -163,13 +183,27 @@ export function projectResourceLedger(
     return undefined;
   };
 
-  for (const event of events) {
+  for (const event of eventRecords) {
+    if (!event || typeof event !== "object" || Array.isArray(event)) {
+      const item = issue(undefined, "EVENT-MALFORMED", "Event record must be an object.");
+      eventResults.push({ eventId: "(missing)", applied: false, duplicate: false, issue: item });
+      continue;
+    }
+    const eventId = nonEmptyString(event.eventId) ? event.eventId : "(missing)";
+    const issueEventId = eventId === "(missing)" ? undefined : eventId;
     const fail = (code: LedgerIssueCode, message: string) => {
-      const item = issue(event.eventId, code, message);
-      eventResults.push({ eventId: event.eventId || "(missing)", applied: false, duplicate: false, issue: item });
+      const item = issue(issueEventId, code, message);
+      eventResults.push({ eventId, applied: false, duplicate: false, issue: item });
     };
-    if (!event.eventId?.trim() || !event.invocationId?.trim() || !event.resourceKind?.trim() ||
-        !event.unit?.trim() || !event.unitContractId?.trim() || !event.idempotencyKey?.trim() ||
+    if (!nonEmptyString(event.eventId) || !nonEmptyString(event.invocationId) ||
+        !nonEmptyString(event.resourceKind) || !nonEmptyString(event.eventKind) ||
+        !nonEmptyString(event.unit) || !nonEmptyString(event.unitContractId) ||
+        !nonEmptyString(event.idempotencyKey) ||
+        !optionalString(event.fromAccount) || !optionalString(event.toAccount) ||
+        !optionalString(event.sourceOrConversionRef) || !optionalString(event.validTime) ||
+        !optionalString(event.contractVersionRef) || !optionalString(event.reservationId) ||
+        !optionalString(event.correctionReason) || !optionalBoolean(event.permittedLoss) ||
+        typeof event.status !== "string" || typeof event.evidence !== "string" ||
         !safeTicks(event.amountTicks)) {
       fail("EVENT-MALFORMED", "Event identity, invocation, resource, unit contract, idempotency key and non-negative safe-integer amount are required.");
       continue;
@@ -214,7 +248,7 @@ export function projectResourceLedger(
       case "SOURCE-ENTRY": {
         const to = getAccount(event.toAccount, event);
         if (!to) break;
-        if (!event.sourceOrConversionRef?.trim()) { fail("EVENT-MALFORMED", "Source entry requires a source contract reference."); break; }
+        if (!nonEmptyString(event.sourceOrConversionRef)) { fail("EVENT-MALFORMED", "Source entry requires a source contract reference."); break; }
         if (!credit(to, event.amountTicks)) { fail("EVENT-MALFORMED", "Credit would exceed safe integer accounting range."); break; }
         apply(); break;
       }
@@ -234,7 +268,7 @@ export function projectResourceLedger(
       case "RESERVE": {
         const account = getAccount(event.fromAccount ?? event.toAccount, event);
         if (!account) break;
-        const id = event.reservationId?.trim() || event.eventId;
+        const id = nonEmptyString(event.reservationId) ? event.reservationId.trim() : event.eventId;
         if (reservations.has(id)) { fail("RESERVATION-INVALID", "Reservation identifiers must be unique."); break; }
         const available = balances[account.accountId] - reserved[account.accountId];
         if (available < event.amountTicks) { fail("INSUFFICIENT-AVAILABLE", "Reservation exceeds currently unreserved balance."); break; }
@@ -277,21 +311,21 @@ export function projectResourceLedger(
       case "MEASURED-RETURN": {
         const to = getAccount(event.toAccount, event);
         if (!to) break;
-        if (!event.sourceOrConversionRef?.trim()) { fail("EVENT-MALFORMED", "Measured return requires evidence reference."); break; }
+        if (!nonEmptyString(event.sourceOrConversionRef)) { fail("EVENT-MALFORMED", "Measured return requires evidence reference."); break; }
         if (!credit(to, event.amountTicks)) { fail("EVENT-MALFORMED", "Return would exceed safe integer accounting range."); break; }
         apply(); break;
       }
       case "LOSS": {
         const from = getAccount(event.fromAccount, event);
         if (!from) break;
-        if (event.permittedLoss !== true || !event.sourceOrConversionRef?.trim()) {
+        if (event.permittedLoss !== true || !nonEmptyString(event.sourceOrConversionRef)) {
           fail("EVENT-KIND-UNSUPPORTED", "Loss requires an explicitly permitted loss pathway and supporting contract reference."); break;
         }
         if (!debit(from, event.amountTicks)) { fail("INSUFFICIENT-AVAILABLE", "Loss exceeds unreserved account balance."); break; }
         apply(); break;
       }
       case "CORRECTION": {
-        if (!event.correctionReason?.trim() || !event.sourceOrConversionRef?.trim()) {
+        if (!nonEmptyString(event.correctionReason) || !nonEmptyString(event.sourceOrConversionRef)) {
           fail("CORRECTION-UNSUPPORTED", "Correction requires a reason and traceable evidence reference."); break;
         }
         fail("CORRECTION-UNSUPPORTED", "Corrections require a signed, direction-specific adjustment contract; no balance is changed by this generic event.");

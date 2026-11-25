@@ -274,4 +274,49 @@ describe("Arcane Incantations v1.9 resource ledger projection", () => {
     expect(result.available.destination).toBe(35);
   });
 
+
+  it("[RES19-LEDGER-026] reports malformed ledger collections and records without throwing", () => {
+    const nullAccount = projectResourceLedger([null as unknown as LedgerAccount], []);
+    expect(nullAccount).toMatchObject({
+      outcome: "LEDGER-MALFORMED",
+      issues: [expect.objectContaining({ code: "ACCOUNT-MALFORMED" })]
+    });
+
+    const invalidAccountId = projectResourceLedger([
+      { ...accounts()[0]!, accountId: 7 as unknown as string }
+    ], []);
+    expect(invalidAccountId.outcome).toBe("LEDGER-MALFORMED");
+
+    const nullEvent = projectResourceLedger(accounts(), [null as unknown as LedgerEvent]);
+    expect(nullEvent).toMatchObject({
+      outcome: "LEDGER-MALFORMED",
+      events: [{
+        eventId: "(missing)",
+        applied: false,
+        duplicate: false,
+        issue: { code: "EVENT-MALFORMED" }
+      }]
+    });
+
+    const invalidOptionalField = projectResourceLedger(accounts(), [event({
+      eventKind: "SOURCE-ENTRY",
+      toAccount: "b",
+      sourceOrConversionRef: 7 as unknown as string
+    })]);
+    expect(invalidOptionalField).toMatchObject({
+      outcome: "LEDGER-MALFORMED",
+      events: [{ eventId: "event-1", applied: false, issue: { code: "EVENT-MALFORMED" } }]
+    });
+
+    const invalidCollections = projectResourceLedger(
+      null as unknown as LedgerAccount[],
+      null as unknown as LedgerEvent[]
+    );
+    expect(invalidCollections.outcome).toBe("LEDGER-MALFORMED");
+    expect(invalidCollections.issues.map(item => item.code)).toEqual([
+      "ACCOUNT-MALFORMED",
+      "EVENT-MALFORMED"
+    ]);
+  });
+
 });

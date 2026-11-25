@@ -356,5 +356,6 @@ export const workbenchTests: WorkbenchTest[] = [
   { id: "RES19-PREVIEW-011", group: "Incantation contracts", title: "Demonstrates unresolved contract-version mismatch", description: "The read-only Playground keeps account reconciliation unresolved when the report version differs from the preflight version.", status: "authored-unverified", file: "src/engine/resourceConservationPreview.test.ts", sourceRule: "Arcane Incantations v1.9 §§2.2, 8; RES19-54" },
 
   { id: "RES19-LEDGER-025", group: "Incantation contracts", title: "Safely projects prototype-sensitive account identifiers", description: "Caller-supplied account IDs such as __proto__ remain own numeric properties and cannot bypass ledger arithmetic.", status: "authored-unverified", file: "src/engine/resourceLedger.test.ts", sourceRule: "Arcane Incantations v1.9 §2.2; implementation safety boundary" },
+  { id: "RES19-LEDGER-026", group: "Incantation contracts", title: "Reports malformed ledger input shapes", description: "Non-array collections, non-object entries and invalid typed fields produce structured malformed outcomes rather than uncaught exceptions.", status: "authored-unverified", file: "src/engine/resourceLedger.test.ts", sourceRule: "Arcane Incantations v1.9 §§2, 8; implementation input-validation boundary" },
 
 ];

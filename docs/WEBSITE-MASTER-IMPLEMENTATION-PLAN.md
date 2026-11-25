@@ -481,3 +481,10 @@ Next: retain this fail-closed boundary while investigating only those further re
 Added a pure account-set wrapper over the existing gross account-balance reconciler. It requires exact account/observation coverage, rejects duplicate identities and mixed resource/unit contracts, and returns every per-account result under one event-batch assertion. The Playground now shows a two-account transfer sample and a source-less transfer failure sample. The latter preserves a separately balanced aggregate conservation result while the ledger refuses destination credit and account-set reconciliation remains unresolved.
 
 The transfer scenarios are synthetic software demonstrations. The account-set wrapper does not evaluate a cross-account invariant, authenticate measurement or batch-completeness evidence, or claim the complete v1.9 RESOURCE-RECONCILED stage. The v1.9 canonical Markdown and all 60 normative expected fixture outcomes remain unchanged.
+
+
+### 2026-11-25 — structured malformed v1.9 ledger inputs
+
+The pure ledger projection now returns `LEDGER-MALFORMED` diagnostics for non-array collections, null/non-record entries and invalid typed fields instead of throwing while reading malformed account or event data. Invalid entries are skipped; any valid entries are still projected, and the overall malformed outcome prevents the batch from being mistaken for a complete reconciliation. Stable test `RES19-LEDGER-026` records this boundary.
+
+No v1.9 canon or normative fixture outcome changed. This hardening does not authenticate records, prove event-batch completeness, add conversions, or expand the supported event kinds.
