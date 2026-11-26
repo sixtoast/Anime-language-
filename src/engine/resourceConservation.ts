@@ -754,7 +754,10 @@ export function reconcileResourceAccountSet(
       !nonEmptyString(input.contract.unitContractId) ||
       !Array.isArray(input.accounts) || input.accounts.length === 0 ||
       !Array.isArray(input.events) ||
-      !Array.isArray(input.observations)) {
+      !Array.isArray(input.observations) ||
+      !input.eventBatchEvidence ||
+      typeof input.eventBatchEvidence !== "object" ||
+      Array.isArray(input.eventBatchEvidence)) {
     return invalid(
       "RECONCILIATION-ACCOUNT-SET-INVALID",
       "A reconciliation identity, one exact resource/unit contract, a non-empty account set, an event list and an observation list are required."

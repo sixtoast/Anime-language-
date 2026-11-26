@@ -279,4 +279,19 @@ describe("bounded v1.9 resource reconciliation stage", () => {
     expect(first).toEqual(second);
     expect(JSON.stringify(input)).toBe(before);
   });
+  it("[RES19-STAGE-008] preserves invalid stage outcome for missing or non-record event-batch evidence", () => {
+    for (const eventBatchEvidence of [undefined, null, []]) {
+      const input = reconciliationInput();
+      input.eventBatchEvidence = eventBatchEvidence as unknown as ResourceReconciliationBatchEvidence;
+      const result = evaluateResourceReconciliationStage(input);
+      expect(result).toMatchObject({
+        outcome: "INVALID-RECONCILIATION",
+        accountSetReconciliation: {
+          outcome: "INVALID-RECONCILIATION",
+          diagnostics: [expect.objectContaining({ code: "RECONCILIATION-ACCOUNT-SET-INVALID" })]
+        }
+      });
+    }
+  });
+
 });

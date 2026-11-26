@@ -816,4 +816,18 @@ describe("Arcane Incantations v1.9 conservation and reconciliation", () => {
     expect(accountSetMismatch.accountResults.every((item) => item.outcome === "UNRESOLVED")).toBe(true);
   });
 
+  it("[RES19-RECON-028] rejects missing or non-record account-set batch evidence without throwing", () => {
+    const base = accountSetReconciliation();
+    for (const eventBatchEvidence of [undefined, null, []]) {
+      const result = reconcileResourceAccountSet({
+        ...base,
+        eventBatchEvidence: eventBatchEvidence as unknown as ResourceReconciliationBatchEvidence
+      });
+      expect(result).toMatchObject({
+        outcome: "INVALID-RECONCILIATION",
+        diagnostics: [expect.objectContaining({ code: "RECONCILIATION-ACCOUNT-SET-INVALID" })]
+      });
+    }
+  });
+
 });
