@@ -129,4 +129,32 @@ describe("read-only v1.9 conservation and account-reconciliation preview", () =>
     expect(result.reconciliation.diagnostics).toContainEqual(expect.objectContaining({ code: "RECONCILIATION-CONTRACT-VERSION-MISMATCH" }));
   });
 
+
+  it("[RES19-PREVIEW-012] demonstrates a bounded reconciled stage only when every supplied evidence layer passes", () => {
+    for (const scenario of ["BALANCED", "TRANSFER-RECONCILED"] as const) {
+      const result = evaluateResourceConservationPreview(scenario);
+      expect(result.reconciliationStage).toMatchObject({
+        outcome: "RESOURCE-RECONCILED",
+        preflightOutcome: "RESOURCE-READY",
+        attemptEvidenceState: "PASS",
+        reportEvidenceState: "PASS",
+        conservation: { outcome: "CONSERVATION-SATISFIED" },
+        accountSetReconciliation: { outcome: "ACCOUNT-SET-RECONCILED" }
+      });
+    }
+  });
+
+  it("[RES19-PREVIEW-013] keeps mismatches failed and incomplete evidence unknown", () => {
+    expect(evaluateResourceConservationPreview("CONSERVATION-MISMATCH").reconciliationStage.outcome)
+      .toBe("RESOURCE-RECONCILIATION-FAILED");
+    expect(evaluateResourceConservationPreview("ACCOUNT-DISCREPANCY").reconciliationStage.outcome)
+      .toBe("RESOURCE-RECONCILIATION-FAILED");
+    expect(evaluateResourceConservationPreview("EVENT-BATCH-COMPLETENESS-UNRESOLVED").reconciliationStage.outcome)
+      .toBe("RESOURCE-OUTCOME-UNKNOWN");
+    expect(evaluateResourceConservationPreview("TRANSFER-SOURCE-DEBIT-MISSING").reconciliationStage.outcome)
+      .toBe("RESOURCE-OUTCOME-UNKNOWN");
+    expect(evaluateResourceConservationPreview("CONTRACT-VERSION-MISMATCH").reconciliationStage.outcome)
+      .toBe("RESOURCE-OUTCOME-UNKNOWN");
+  });
+
 });

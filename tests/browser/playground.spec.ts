@@ -179,10 +179,11 @@ test.describe("Playground Phase 6G parser integration", () => {
     expect(sizes.page, "Resource specification browser should not overflow at 360px").toBeLessThanOrEqual(sizes.viewport);
   });
 
-  test("runs v1.9 conservation and account reconciliation as separate read-only evaluations", async ({ page }) => {
+  test("runs v1.9 conservation, account-set and bounded stage reconciliation as read-only evaluations", async ({ page }) => {
     await openPlayground(page);
     const preview = page.locator(".resource-conservation-preview");
     await expect(preview.getByRole("heading", { name: "Conservation and account reconciliation" })).toBeVisible();
+    const stage = preview.locator('[aria-label="Resource reconciliation stage result"]');
     const select = preview.getByRole("combobox", { name: "Choose resource conservation preview scenario" });
     await expect(select.locator("option")).toHaveCount(11);
     await expect(select.locator('option[value="EVENT-BATCH-COMPLETENESS-UNRESOLVED"]')).toHaveCount(1);
@@ -190,24 +191,30 @@ test.describe("Playground Phase 6G parser integration", () => {
 
     await expect(preview).toContainText("CONSERVATION-SATISFIED");
     await expect(preview).toContainText("ACCOUNT-BALANCE-RECONCILED");
+    await expect(stage).toContainText("RESOURCE-RECONCILED");
 
     await select.selectOption("CONSERVATION-MISMATCH");
     await expect(preview).toContainText("CONSERVATION-MISMATCH");
     await expect(preview).toContainText("ACCOUNT-BALANCE-RECONCILED");
+    await expect(stage).toContainText("RESOURCE-RECONCILIATION-FAILED");
 
     await select.selectOption("ACCOUNT-DISCREPANCY");
     await expect(preview).toContainText("ACCOUNT-BALANCE-DISCREPANCY");
     await expect(preview).toContainText("-2 ticks");
+    await expect(stage).toContainText("RESOURCE-RECONCILIATION-FAILED");
 
     await select.selectOption("ESTIMATE-AS-MEASUREMENT");
     await expect(preview).toContainText("RECONCILIATION-EVIDENCE-CATEGORY-SUBSTITUTION");
+    await expect(stage).toContainText("RESOURCE-OUTCOME-UNKNOWN");
 
     await select.selectOption("MEASUREMENT-POLICY-UNRESOLVED");
     await expect(preview).toContainText("RECONCILIATION-MEASUREMENT-POLICY-UNRESOLVED");
+    await expect(stage).toContainText("RESOURCE-OUTCOME-UNKNOWN");
 
     await select.selectOption("CONTRACT-EVIDENCE-UNRESOLVED");
     await expect(preview).toContainText("CONSERVATION-UNRESOLVED");
     await expect(preview).toContainText("RECONCILIATION-CONTRACT-EVIDENCE-UNRESOLVED");
+    await expect(stage).toContainText("RESOURCE-OUTCOME-UNKNOWN");
     await expect(preview).toContainText("synthetic caller-supplied demonstration inputs");
     await expect(preview).toContainText("does not authenticate");
     await expect(preview).toContainText("authorises or executes an incantation");
@@ -218,15 +225,18 @@ test.describe("Playground Phase 6G parser integration", () => {
     await expect(preview).toContainText("AUDIT-STRUCTURE-PRESENT");
     await expect(preview).toContainText("RESOURCE-OUTCOME-UNKNOWN");
     await expect(preview).toContainText("NOT-ASSESSED");
+    await expect(stage).toContainText("RESOURCE-OUTCOME-UNKNOWN");
     await expect(preview).toContainText("Only top-level section presence is checked");
 
     await select.selectOption("EVENT-BATCH-COMPLETENESS-UNRESOLVED");
     await expect(preview).toContainText("CONSERVATION-SATISFIED");
     await expect(preview).toContainText("RECONCILIATION-EVENT-BATCH-COMPLETENESS-UNRESOLVED");
+    await expect(stage).toContainText("RESOURCE-OUTCOME-UNKNOWN");
     await expect(preview).toContainText("Event-batch completeness is a synthetic caller-supplied assertion");
 
     await select.selectOption("TRANSFER-RECONCILED");
     await expect(preview).toContainText("ACCOUNT-SET-RECONCILED");
+    await expect(stage).toContainText("RESOURCE-RECONCILED");
     await expect(preview).toContainText("preview-account-source");
     await expect(preview).toContainText("preview-account-destination");
 
@@ -234,11 +244,13 @@ test.describe("Playground Phase 6G parser integration", () => {
     await expect(preview).toContainText("A transfer with no source account is rejected before destination credit");
     await expect(preview).toContainText("RECONCILIATION-LEDGER-UNRESOLVED");
     await expect(preview).toContainText("ACCOUNT-SET RECONCILIATION");
+    await expect(stage).toContainText("RESOURCE-OUTCOME-UNKNOWN");
 
     await select.selectOption("CONTRACT-VERSION-MISMATCH");
     await expect(preview).toContainText("CONSERVATION-SATISFIED");
     await expect(preview).toContainText("RECONCILIATION-CONTRACT-VERSION-MISMATCH");
     await expect(preview).toContainText("UNRESOLVED");
+    await expect(stage).toContainText("RESOURCE-OUTCOME-UNKNOWN");
   });
 
   test("keeps the v1.9 evaluator preview within a 360px viewport", async ({ page }) => {

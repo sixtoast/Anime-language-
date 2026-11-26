@@ -640,9 +640,9 @@ function App() {
           <section className="fixture-browser runtime-preview-browser resource-conservation-preview" aria-labelledby="resource-conservation-preview-title">
             <div className="fixture-browser-head">
               <div><span className="detail-kicker">V1.9 CONSERVATION & AUDIT · READ-ONLY SAMPLE</span><h2 id="resource-conservation-preview-title">Conservation and account reconciliation</h2></div>
-              <span>2 independent evaluators · optional account-set reconciliation</span>
+              <span>Scalar conservation · account-set reconciliation · bounded stage composition</span>
             </div>
-            <p className="fixture-browser-intro">This panel runs bounded scalar conservation and ledger-backed single-account or account-set reconciliation against deterministic synthetic inputs. The optional audit example checks only top-level section presence and preserves its reported outcome without interpretation. It does not use the 60 canonical specification fixtures as executed test cases.</p>
+            <p className="fixture-browser-intro">This panel composes bounded scalar conservation and ledger-backed account-set reconciliation into a read-only accounting-stage result. Attempt, report and batch evidence are synthetic caller-supplied assertions. The optional audit example checks only top-level section presence and preserves its reported outcome without interpretation. It does not use the 60 canonical specification fixtures as executed test cases.</p>
             <label className="fixture-select-label">Choose a resource-accounting scenario
               <select aria-label="Choose resource conservation preview scenario" value={resourceConservationScenario} onChange={(event) => setResourceConservationScenario(event.target.value as ResourceConservationPreviewScenario)}>
                 {resourceConservationPreviewScenarios.map((scenario) => <option key={scenario.id} value={scenario.id}>{scenario.label}</option>)}
@@ -650,6 +650,21 @@ function App() {
             </label>
             <p className="runtime-preview-description">{resourceConservationPreview.description}</p>
             <div className="resource-conservation-grid">
+              <article className="resource-conservation-card" aria-label="Resource reconciliation stage result">
+                <span>RESOURCE RECONCILIATION STAGE · {resourceConservationPreview.reconciliationStage.scope}</span>
+                <strong className={resourceConservationPreview.reconciliationStage.outcome === "RESOURCE-RECONCILED" ? "runtime-good" : resourceConservationPreview.reconciliationStage.outcome === "RESOURCE-RECONCILIATION-FAILED" ? "runtime-blocked" : "runtime-unresolved"}>{resourceConservationPreview.reconciliationStage.outcome}</strong>
+                <div className="resource-conservation-metrics">
+                  <div><span>Preflight:</span><strong>{resourceConservationPreview.reconciliationStage.preflightOutcome ?? "Not established"}</strong></div>
+                  <div><span>Attempt evidence:</span><strong>{resourceConservationPreview.reconciliationStage.attemptEvidenceState ?? "Not supplied"}</strong></div>
+                  <div><span>Report evidence:</span><strong>{resourceConservationPreview.reconciliationStage.reportEvidenceState ?? "Not supplied"}</strong></div>
+                  <div><span>Contract version:</span><strong>{resourceConservationPreview.reconciliationStage.contractVersionRef ?? "Not established"}</strong></div>
+                  <div><span>Conservation:</span><strong>{resourceConservationPreview.reconciliationStage.conservation?.outcome ?? "Not evaluated"}</strong></div>
+                  <div><span>Account set:</span><strong>{resourceConservationPreview.reconciliationStage.accountSetReconciliation?.outcome ?? "Not evaluated"}</strong></div>
+                </div>
+                {resourceConservationPreview.reconciliationStage.diagnostics.length > 0
+                  ? <ul className="resource-conservation-diagnostics">{resourceConservationPreview.reconciliationStage.diagnostics.map((item, index) => <li key={item.code + index}><code>{item.code}</code><span>{item.message}</span></li>)}</ul>
+                  : <p className="resource-conservation-no-diagnostics">All required synthetic stage assertions and bounded comparisons passed.</p>}
+              </article>
               <article className="resource-conservation-card" aria-label="Conservation evaluation result">
                 <span>CONSERVATION EVALUATION</span>
                 <strong className={resourceConservationPreview.conservation.outcome === "CONSERVATION-SATISFIED" ? "runtime-good" : resourceConservationPreview.conservation.outcome === "CONSERVATION-MISMATCH" ? "runtime-blocked" : "runtime-unresolved"}>{resourceConservationPreview.conservation.outcome}</strong>
@@ -709,9 +724,10 @@ function App() {
                 {resourceConservationPreview.conservation.limitations.map((item) => <li key={item}>{item}</li>)}
                 {resourceConservationPreview.reconciliation.limitations.map((item) => <li key={item}>{item}</li>)}
                 {resourceConservationPreview.accountSetReconciliation?.limitations.map((item) => <li key={item}>{item}</li>)}
+                {resourceConservationPreview.reconciliationStage.limitations.map((item) => <li key={item}>{item}</li>)}
               </ul>
             </details>
-            <p className="fixture-browser-caveat">The sample resource kind and tick unit are synthetic demonstration data, not canonical vocabulary or physical units. The 60 v1.9 rows above remain source-only specification expectations. Neither result authenticates evidence, changes a ledger, authorises or executes an incantation, establishes physical feasibility, or verifies an effect.</p>
+            <p className="fixture-browser-caveat">The sample resource kind and tick unit are synthetic demonstration data, not canonical vocabulary or physical units. The 60 v1.9 rows above remain source-only specification expectations. RESOURCE-RECONCILED here is limited to the named scalar contract and supplied account set; caller-supplied evidence is not authenticated. No result changes a ledger, authorises or executes an incantation, establishes physical feasibility, or verifies a target effect.</p>
           </section>
 
           <section className="contract-worksheet" aria-labelledby="contract-worksheet-title">

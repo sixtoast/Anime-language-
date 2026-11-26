@@ -1,7 +1,5 @@
 import {
-  evaluateConservationContract,
   reconcileResourceBalance,
-  reconcileResourceAccountSet,
   type ConservationContractInput,
   type ConservationQuantity,
   type ResourceBalanceObservation,
@@ -10,6 +8,8 @@ import {
   type ResourceReconciliationBatchEvidence,
   type ResourceReconciliationEvent
 } from "./resourceConservation";
+import { evaluateResourceReconciliationStage } from "./resourceReconciliationStage";
+import type { ResourcePreflightResult } from "./resourcePreflight";
 import { assessResourceAccountingAuditStructure } from "./resourceAccountingAudit";
 
 /**
@@ -179,12 +179,18 @@ function sampleEvents(scenario: ResourceConservationPreviewScenario): ResourceRe
 }
 
 function sampleAccountSetObservations(scenario: ResourceConservationPreviewScenario): ResourceAccountBalanceObservation[] {
-  const sourceBalance = scenario === "TRANSFER-SOURCE-DEBIT-MISSING" ? 100 : 80;
-  const destinationBalance = scenario === "TRANSFER-SOURCE-DEBIT-MISSING" ? 10 : 30;
-  return [
-    { accountId: "preview-account-source", ...sampleObservation("BALANCED"), balanceTicks: sourceBalance },
-    { accountId: "preview-account-destination", ...sampleObservation("BALANCED"), balanceTicks: destinationBalance }
-  ];
+  if (isTransferScenario(scenario)) {
+    const sourceBalance = scenario === "TRANSFER-SOURCE-DEBIT-MISSING" ? 100 : 80;
+    const destinationBalance = scenario === "TRANSFER-SOURCE-DEBIT-MISSING" ? 10 : 30;
+    return [
+      { accountId: "preview-account-source", ...sampleObservation("BALANCED"), balanceTicks: sourceBalance },
+      { accountId: "preview-account-destination", ...sampleObservation("BALANCED"), balanceTicks: destinationBalance }
+    ];
+  }
+  return [{
+    accountId: "preview-account",
+    ...sampleObservation(scenario)
+  }];
 }
 
 function sampleEventBatchEvidence(
@@ -241,12 +247,37 @@ export function evaluateResourceConservationPreview(scenario: ResourceConservati
   const accounts = sampleAccounts(scenario);
   const events = sampleEvents(scenario);
   const eventBatchEvidence = sampleEventBatchEvidence(scenario);
-  const accountSetObservations = isTransferScenario(scenario) ? sampleAccountSetObservations(scenario) : undefined;
-  const observation = accountSetObservations?.[0] ?? sampleObservation(scenario);
+  const accountSetObservations = sampleAccountSetObservations(scenario);
+  const observation = accountSetObservations[0] ?? sampleObservation(scenario);
   const scenarioDescription = resourceConservationPreviewScenarios.find((item) => item.id === scenario);
   if (!scenarioDescription) throw new Error("Unsupported resource conservation preview scenario.");
 
-  const conservation = evaluateConservationContract(contract);
+  const preflight: ResourcePreflightResult = {
+    outcome: "RESOURCE-READY",
+    stage: "RESOURCE-READY",
+    availableAmount: 100,
+    requiredAmount: isTransferScenario(scenario) ? 20 : 10,
+    contractVersionRef: "preview-resource-contract:v1",
+    diagnostics: [],
+    limitations: ["Synthetic preview preflight assertion; not authenticated."]
+  };
+  const reconciliationStage = evaluateResourceReconciliationStage({
+    reconciliationId: "preview-resource-reconciliation-stage",
+    preflight,
+    attemptEvidence: { state: "PASS", evidenceRef: "preview:attempt-evidence" },
+    reportEvidence: {
+      state: "PASS",
+      evidenceRef: "preview:resource-report",
+      contractVersionRef: sampleReportContractVersion(scenario)
+    },
+    contract,
+    accounts,
+    events,
+    eventBatchEvidence,
+    observations: accountSetObservations
+  });
+  const conservation = reconciliationStage.conservation!;
+  const accountSetReconciliation = reconciliationStage.accountSetReconciliation!;
   const reconciliation = reconcileResourceBalance({
     reconciliationId: "preview-account-reconciliation",
     contract,
@@ -256,16 +287,6 @@ export function evaluateResourceConservationPreview(scenario: ResourceConservati
     eventBatchEvidence,
     observation
   });
-  const accountSetReconciliation = accountSetObservations
-    ? reconcileResourceAccountSet({
-        reconciliationId: "preview-account-set-reconciliation",
-        contract,
-        accounts,
-        events,
-        eventBatchEvidence,
-        observations: accountSetObservations
-      })
-    : undefined;
   const auditStructure = scenario === "AUDIT-STRUCTURE-PRESENT-UNKNOWN-OUTCOME"
     ? assessResourceAccountingAuditStructure({
         record: sampleAuditRecord(),
@@ -278,7 +299,8 @@ export function evaluateResourceConservationPreview(scenario: ResourceConservati
     description: scenarioDescription.description,
     conservation,
     reconciliation,
-    ...(accountSetReconciliation ? { accountSetReconciliation } : {}),
+    accountSetReconciliation,
+    reconciliationStage,
     ...(auditStructure ? { auditStructure } : {}),
     assumptions: [
       "All quantities, evidence states and references are synthetic caller-supplied demonstration inputs, not authenticated facts or live measurements.",
@@ -290,9 +312,11 @@ export function evaluateResourceConservationPreview(scenario: ResourceConservati
       "The confirmed ledger event is sample data; projection does not prove that an incantation or physical operation occurred.",
       "The single-account comparison is gross-balance-only. The optional account-set result repeats that comparison for every declared account; neither evaluates a cross-account invariant or the complete v1.9 RESOURCE-RECONCILED stage.",
       "The transfer sample uses one synthetic TRANSFER event with both source and destination identities; the projector applies both sides only when the source debit succeeds.",
-      "The optional account-set result requires one measured observation per account in the same event batch; it does not authenticate the observations or completeness assertion.",
+      "The account-set result requires one measured observation per account in the same event batch and compares gross balances independently; it does not infer a cross-account invariant.",
+      "The bounded stage result requires passing synthetic preflight, attempt and report assertions, exact contract-version and observation-time scope, a satisfied scalar balance and reconciled account balances.",
+      "Stage evidence, observations and completeness assertions are caller-supplied demonstration inputs; they are not authenticated or independently verified.",
       "The optional audit example checks only top-level section presence; null placeholders do not establish semantic audit completeness or evidence validity.",
-      "Neither evaluation authorises, executes or verifies an incantation, mechanism, target-state change or physical effect."
+      "Neither the bounded stage result nor the component evaluations authorise, execute or verify an incantation, mechanism, target-state change or physical effect."
     ]
   };
 }
