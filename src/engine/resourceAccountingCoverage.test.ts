@@ -123,7 +123,17 @@ describe("Arcane Incantations v1.9 fixture-to-implementation coverage audit", ()
         "RES19-RECON-019",
         "RES19-RECON-020",
         "RES19-RECON-021",
-        "RES19-TIME-001"
+        "RES19-RECON-028",
+        "RES19-TIME-001",
+        "RES19-TIME-004",
+        "RES19-STAGE-001",
+        "RES19-STAGE-002",
+        "RES19-STAGE-003",
+        "RES19-STAGE-004",
+        "RES19-STAGE-005",
+        "RES19-STAGE-006",
+        "RES19-STAGE-007",
+        "RES19-STAGE-008"
       ]));
     expect(resourceAccountingCoverage.find((item) => item.fixtureId === "RES19-20")?.testIds)
       .toContain("RES19-RECON-022");

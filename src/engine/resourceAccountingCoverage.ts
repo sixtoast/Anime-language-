@@ -367,9 +367,19 @@ export const resourceAccountingCoverage: ResourceAccountingCoverage[] = [
       "RES19-RECON-019",
       "RES19-RECON-020",
       "RES19-RECON-021",
-      "RES19-TIME-001"
+      "RES19-RECON-028",
+      "RES19-TIME-001",
+      "RES19-TIME-004",
+      "RES19-STAGE-001",
+      "RES19-STAGE-002",
+      "RES19-STAGE-003",
+      "RES19-STAGE-004",
+      "RES19-STAGE-005",
+      "RES19-STAGE-006",
+      "RES19-STAGE-007",
+      "RES19-STAGE-008"
     ],
-    "note": "The reconciler compares one account's gross projected balance with an accepted observation and requires an opening snapshot anchored to the interval start plus a strictly ordered, pre-observation event batch. Exact event-time ordering preserves up to nine fractional-second digits and equivalent offsets. Caller-supplied completeness and evidence remain unauthenticated; this does not complete whole-resource reconciliation."
+    "note": "The bounded stage composes passing preflight, attempt/report assertions, exact contract-version identity, scalar conservation and every account's gross-balance comparison over one complete ordered event batch. Missing or malformed batch evidence remains invalid; mismatches and unresolved evidence are preserved. Caller-supplied evidence remains unauthenticated, and cross-resource invariants, transformations, distributed consistency and executor lifecycle remain outside this implementation."
   },
   {
     "fixtureId": "RES19-41",
