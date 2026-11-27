@@ -20,6 +20,8 @@ export interface LedgerAccount {
   unit: string;
   unitContractId: string;
   openingBalanceTicks: number;
+  /** Timestamp of the opening balance snapshot; required by time-scoped reconciliation. */
+  openingBalanceAsOf?: string;
 }
 
 export interface LedgerEvent {
@@ -36,6 +38,10 @@ export interface LedgerEvent {
   evidence: LedgerEvidence;
   sourceOrConversionRef?: string;
   idempotencyKey: string;
+  /** Opaque report-contract version identity; reconciliation requires an exact preflight match. */
+  contractVersionRef?: string;
+  /** Canonical ledger-event valid time; time-scoped reconciliation requires this value. */
+  validTime?: string;
   reservationId?: string;
   permittedLoss?: boolean;
   correctionReason?: string;
@@ -89,6 +95,24 @@ const LIMITATIONS = [
 
 const safeTicks = (n: number) => Number.isSafeInteger(n) && n >= 0;
 
+const nonEmptyString = (value: unknown): value is string =>
+  typeof value === "string" && value.trim().length > 0;
+
+const optionalString = (value: unknown): boolean =>
+  value === undefined || typeof value === "string";
+
+const optionalBoolean = (value: unknown): boolean =>
+  value === undefined || typeof value === "boolean";
+
+const setRecordValue = (record: Record<string, number>, key: string, value: number): void => {
+  Object.defineProperty(record, key, {
+    configurable: true,
+    enumerable: true,
+    value,
+    writable: true
+  });
+};
+
 export function projectResourceLedger(
   accounts: LedgerAccount[],
   events: LedgerEvent[]
@@ -108,9 +132,20 @@ export function projectResourceLedger(
     return item;
   };
 
-  for (const account of accounts) {
-    if (!account.accountId?.trim() || !account.resourceKind?.trim() ||
-        !account.unit?.trim() || !account.unitContractId?.trim() ||
+  const accountRecords = Array.isArray(accounts) ? accounts : [];
+  const eventRecords = Array.isArray(events) ? events : [];
+  if (!Array.isArray(accounts)) {
+    issue(undefined, "ACCOUNT-MALFORMED", "Account collection must be an array.");
+  }
+  if (!Array.isArray(events)) {
+    issue(undefined, "EVENT-MALFORMED", "Event collection must be an array.");
+  }
+
+  for (const account of accountRecords) {
+    if (!account || typeof account !== "object" || Array.isArray(account) ||
+        !nonEmptyString(account.accountId) || !nonEmptyString(account.resourceKind) ||
+        !nonEmptyString(account.unit) || !nonEmptyString(account.unitContractId) ||
+        !optionalString(account.openingBalanceAsOf) ||
         !safeTicks(account.openingBalanceTicks)) {
       issue(undefined, "ACCOUNT-MALFORMED", "Account identity, resource, unit contract and non-negative safe-integer opening balance are required.");
       continue;
@@ -120,8 +155,8 @@ export function projectResourceLedger(
       continue;
     }
     accountById.set(account.accountId, account);
-    balances[account.accountId] = account.openingBalanceTicks;
-    reserved[account.accountId] = 0;
+    setRecordValue(balances, account.accountId, account.openingBalanceTicks);
+    setRecordValue(reserved, account.accountId, 0);
   }
 
   const fingerprint = (event: LedgerEvent) => JSON.stringify({
@@ -129,6 +164,8 @@ export function projectResourceLedger(
     eventKind: event.eventKind, fromAccount: event.fromAccount ?? null,
     toAccount: event.toAccount ?? null, amountTicks: event.amountTicks,
     unit: event.unit, unitContractId: event.unitContractId,
+    validTime: event.validTime ?? null,
+    contractVersionRef: event.contractVersionRef ?? null,
     status: event.status, evidence: event.evidence,
     sourceOrConversionRef: event.sourceOrConversionRef ?? null,
     reservationId: event.reservationId ?? null,
@@ -146,13 +183,27 @@ export function projectResourceLedger(
     return undefined;
   };
 
-  for (const event of events) {
+  for (const event of eventRecords) {
+    if (!event || typeof event !== "object" || Array.isArray(event)) {
+      const item = issue(undefined, "EVENT-MALFORMED", "Event record must be an object.");
+      eventResults.push({ eventId: "(missing)", applied: false, duplicate: false, issue: item });
+      continue;
+    }
+    const eventId = nonEmptyString(event.eventId) ? event.eventId : "(missing)";
+    const issueEventId = eventId === "(missing)" ? undefined : eventId;
     const fail = (code: LedgerIssueCode, message: string) => {
-      const item = issue(event.eventId, code, message);
-      eventResults.push({ eventId: event.eventId || "(missing)", applied: false, duplicate: false, issue: item });
+      const item = issue(issueEventId, code, message);
+      eventResults.push({ eventId, applied: false, duplicate: false, issue: item });
     };
-    if (!event.eventId?.trim() || !event.invocationId?.trim() || !event.resourceKind?.trim() ||
-        !event.unit?.trim() || !event.unitContractId?.trim() || !event.idempotencyKey?.trim() ||
+    if (!nonEmptyString(event.eventId) || !nonEmptyString(event.invocationId) ||
+        !nonEmptyString(event.resourceKind) || !nonEmptyString(event.eventKind) ||
+        !nonEmptyString(event.unit) || !nonEmptyString(event.unitContractId) ||
+        !nonEmptyString(event.idempotencyKey) ||
+        !optionalString(event.fromAccount) || !optionalString(event.toAccount) ||
+        !optionalString(event.sourceOrConversionRef) || !optionalString(event.validTime) ||
+        !optionalString(event.contractVersionRef) || !optionalString(event.reservationId) ||
+        !optionalString(event.correctionReason) || !optionalBoolean(event.permittedLoss) ||
+        typeof event.status !== "string" || typeof event.evidence !== "string" ||
         !safeTicks(event.amountTicks)) {
       fail("EVENT-MALFORMED", "Event identity, invocation, resource, unit contract, idempotency key and non-negative safe-integer amount are required.");
       continue;
@@ -162,6 +213,8 @@ export function projectResourceLedger(
       continue;
     }
     seenIds.add(event.eventId);
+    const issueCountBeforeEvent = issues.length;
+    const resultCountBeforeEvent = eventResults.length;
     const fp = fingerprint(event);
     const previous = idempotency.get(event.idempotencyKey);
     if (previous !== undefined) {
@@ -174,19 +227,20 @@ export function projectResourceLedger(
         "Only confirmed events with passing evidence can alter the projected ledger.");
       continue;
     }
-    idempotency.set(event.idempotencyKey, fp);
-
-    const apply = () => eventResults.push({ eventId: event.eventId, applied: true, duplicate: false });
+    const apply = () => {
+      idempotency.set(event.idempotencyKey, fp);
+      eventResults.push({ eventId: event.eventId, applied: true, duplicate: false });
+    };
     const debit = (account: LedgerAccount, amount: number) => {
       const available = balances[account.accountId] - reserved[account.accountId];
       if (available < amount) return false;
-      balances[account.accountId] -= amount;
+      setRecordValue(balances, account.accountId, balances[account.accountId] - amount);
       return true;
     };
     const credit = (account: LedgerAccount, amount: number) => {
       const next = balances[account.accountId] + amount;
       if (!Number.isSafeInteger(next)) return false;
-      balances[account.accountId] = next;
+      setRecordValue(balances, account.accountId, next);
       return true;
     };
 
@@ -194,7 +248,7 @@ export function projectResourceLedger(
       case "SOURCE-ENTRY": {
         const to = getAccount(event.toAccount, event);
         if (!to) break;
-        if (!event.sourceOrConversionRef?.trim()) { fail("EVENT-MALFORMED", "Source entry requires a source contract reference."); break; }
+        if (!nonEmptyString(event.sourceOrConversionRef)) { fail("EVENT-MALFORMED", "Source entry requires a source contract reference."); break; }
         if (!credit(to, event.amountTicks)) { fail("EVENT-MALFORMED", "Credit would exceed safe integer accounting range."); break; }
         apply(); break;
       }
@@ -205,7 +259,7 @@ export function projectResourceLedger(
         if (from.accountId === to.accountId) { fail("TRANSFER-INVALID", "A transfer must identify distinct source and destination accounts."); break; }
         if (!debit(from, event.amountTicks)) { fail("INSUFFICIENT-AVAILABLE", "Transfer exceeds source account's unreserved balance."); break; }
         if (!credit(to, event.amountTicks)) {
-          balances[from.accountId] += event.amountTicks;
+          setRecordValue(balances, from.accountId, balances[from.accountId] + event.amountTicks);
           fail("TRANSFER-INVALID", "Destination credit would exceed safe integer accounting range; source debit was not retained.");
           break;
         }
@@ -214,21 +268,24 @@ export function projectResourceLedger(
       case "RESERVE": {
         const account = getAccount(event.fromAccount ?? event.toAccount, event);
         if (!account) break;
-        const id = event.reservationId?.trim() || event.eventId;
+        const id = nonEmptyString(event.reservationId) ? event.reservationId.trim() : event.eventId;
         if (reservations.has(id)) { fail("RESERVATION-INVALID", "Reservation identifiers must be unique."); break; }
         const available = balances[account.accountId] - reserved[account.accountId];
         if (available < event.amountTicks) { fail("INSUFFICIENT-AVAILABLE", "Reservation exceeds currently unreserved balance."); break; }
-        reserved[account.accountId] += event.amountTicks;
+        setRecordValue(reserved, account.accountId, reserved[account.accountId] + event.amountTicks);
         reservations.set(id, { reservationId: id, accountId: account.accountId, amountTicks: event.amountTicks, status: "HELD" });
         apply(); break;
       }
       case "RESERVATION-RELEASE": {
         const reservation = event.reservationId ? reservations.get(event.reservationId) : undefined;
-        if (!reservation || reservation.status === "RELEASED" || event.amountTicks > reservation.amountTicks) {
+        if (!reservation || reservation.status === "RELEASED" || reservation.status === "SETTLED" ||
+            event.amountTicks > reservation.amountTicks) {
           fail("RESERVATION-INVALID", "Release must reference a held reservation and cannot exceed its remaining amount."); break;
         }
+        const reservationAccount = getAccount(reservation.accountId, event);
+        if (!reservationAccount) break;
         reservation.amountTicks -= event.amountTicks;
-        reserved[reservation.accountId] -= event.amountTicks;
+        setRecordValue(reserved, reservation.accountId, reserved[reservation.accountId] - event.amountTicks);
         if (reservation.amountTicks === 0) reservation.status = "RELEASED";
         apply(); break;
       }
@@ -242,8 +299,8 @@ export function projectResourceLedger(
             fail("RESERVATION-INVALID", "Consumption must not exceed the referenced reservation's remaining amount."); break;
           }
           if (balances[account.accountId] < event.amountTicks) { fail("INSUFFICIENT-BALANCE", "Account balance is insufficient for reserved consumption."); break; }
-          balances[account.accountId] -= event.amountTicks;
-          reserved[account.accountId] -= event.amountTicks;
+          setRecordValue(balances, account.accountId, balances[account.accountId] - event.amountTicks);
+          setRecordValue(reserved, account.accountId, reserved[account.accountId] - event.amountTicks);
           reservation.amountTicks -= event.amountTicks;
           reservation.status = reservation.amountTicks === 0 ? "SETTLED" : "PARTIALLY-CONSUMED";
         } else if (!debit(account, event.amountTicks)) {
@@ -254,21 +311,21 @@ export function projectResourceLedger(
       case "MEASURED-RETURN": {
         const to = getAccount(event.toAccount, event);
         if (!to) break;
-        if (!event.sourceOrConversionRef?.trim()) { fail("EVENT-MALFORMED", "Measured return requires evidence reference."); break; }
+        if (!nonEmptyString(event.sourceOrConversionRef)) { fail("EVENT-MALFORMED", "Measured return requires evidence reference."); break; }
         if (!credit(to, event.amountTicks)) { fail("EVENT-MALFORMED", "Return would exceed safe integer accounting range."); break; }
         apply(); break;
       }
       case "LOSS": {
         const from = getAccount(event.fromAccount, event);
         if (!from) break;
-        if (event.permittedLoss !== true || !event.sourceOrConversionRef?.trim()) {
+        if (event.permittedLoss !== true || !nonEmptyString(event.sourceOrConversionRef)) {
           fail("EVENT-KIND-UNSUPPORTED", "Loss requires an explicitly permitted loss pathway and supporting contract reference."); break;
         }
         if (!debit(from, event.amountTicks)) { fail("INSUFFICIENT-AVAILABLE", "Loss exceeds unreserved account balance."); break; }
         apply(); break;
       }
       case "CORRECTION": {
-        if (!event.correctionReason?.trim() || !event.sourceOrConversionRef?.trim()) {
+        if (!nonEmptyString(event.correctionReason) || !nonEmptyString(event.sourceOrConversionRef)) {
           fail("CORRECTION-UNSUPPORTED", "Correction requires a reason and traceable evidence reference."); break;
         }
         fail("CORRECTION-UNSUPPORTED", "Corrections require a signed, direction-specific adjustment contract; no balance is changed by this generic event.");
@@ -277,10 +334,21 @@ export function projectResourceLedger(
       default:
         fail("EVENT-KIND-UNSUPPORTED", "This event kind requires a dedicated source, transformation, exchange or reconciliation contract and is not applied by this ledger projection.");
     }
+    if (eventResults.length === resultCountBeforeEvent) {
+      const eventIssues = issues.slice(issueCountBeforeEvent);
+      const lastIssue = eventIssues[eventIssues.length - 1] ??
+        issue(event.eventId, "EVENT-MALFORMED", "The event does not identify a valid account for its event kind.");
+      eventResults.push({
+        eventId: event.eventId,
+        applied: false,
+        duplicate: false,
+        issue: lastIssue
+      });
+    }
   }
 
   const available: Record<string, number> = {};
-  for (const id of Object.keys(balances)) available[id] = balances[id] - reserved[id];
+  for (const id of Object.keys(balances)) setRecordValue(available, id, balances[id] - reserved[id]);
   const failed = issues.length > 0;
   const unresolved = issues.some(item => item.code === "EVIDENCE-UNRESOLVED");
   const malformed = issues.some(item => item.code === "ACCOUNT-MALFORMED" || item.code === "ACCOUNT-DUPLICATE" || item.code === "EVENT-MALFORMED");

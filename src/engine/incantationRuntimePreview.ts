@@ -39,10 +39,18 @@ export function evaluateIncantationRuntimePreview(
     unit: "mana-tick",
     requiredUnit: "mana-tick",
     unitContractId: "sample-mana-tick-v1",
+    contractVersionRef: "sample-resource-contract:v1",
     openingBalance: 10,
     openingBalanceEvidence: "PASS",
     sourceEvidence: "PASS",
     evidenceFreshness: "PASS",
+    availabilityWindow: {
+      validFrom: "2026-01-01T00:00:00Z",
+      validUntil: "2027-01-01T00:00:00Z",
+      evaluationTime: "2026-06-01T00:00:00Z",
+      evidenceRef: "sample-availability-evidence:v1",
+      provenanceRef: "sample-source-provenance:v1"
+    },
     requiredAmount: scenario === "RESOURCE-BLOCKED" ? 11 : 4,
     heldReservations: 0,
     reservationEvidence: "PASS",
