@@ -68,6 +68,10 @@ const STAGE_LIMITATIONS = [
 const nonEmptyString = (value: unknown): value is string =>
   typeof value === "string" && value.trim().length > 0;
 
+function isFiniteNonNegative(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0;
+}
+
 function isEvidenceState(value: unknown): value is ConservationEvidence {
   return value === "PASS" || value === "FAIL" || value === "UNKNOWN" || value === "UNAVAILABLE";
 }
@@ -121,6 +125,7 @@ export function evaluateResourceReconciliationStage(
     ? input.preflight.contractVersionRef
     : undefined;
 
+  let invalidPreflight = false;
   if (!input.preflight ||
       input.preflight.outcome !== "RESOURCE-READY" ||
       input.preflight.stage !== "RESOURCE-READY") {
@@ -128,6 +133,18 @@ export function evaluateResourceReconciliationStage(
       "RECONCILIATION-PREFLIGHT-NOT-READY",
       "A passing RESOURCE-READY preflight result is required; this coordinator does not infer readiness from a partial or failed preflight."
     );
+  } else {
+    const availableAmount = input.preflight.availableAmount;
+    const requiredAmount = input.preflight.requiredAmount;
+    if (!isFiniteNonNegative(availableAmount) ||
+        !isFiniteNonNegative(requiredAmount) ||
+        availableAmount < requiredAmount) {
+      invalidPreflight = true;
+      add(
+        "RECONCILIATION-PREFLIGHT-RESULT-INVALID",
+        "A RESOURCE-READY preflight must include finite, non-negative available and required amounts, with availability at least the requirement; fractional quantities are retained without rounding."
+      );
+    }
   }
 
   if (!preflightVersion ||
@@ -204,6 +221,7 @@ export function evaluateResourceReconciliationStage(
   ];
 
   const invalidComponent =
+    invalidPreflight ||
     conservation.outcome === "CONSERVATION-INVALID-CONTRACT" ||
     accountSetReconciliation.outcome === "INVALID-RECONCILIATION";
   const conservationEstablished =

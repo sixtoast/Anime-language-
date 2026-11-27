@@ -294,4 +294,33 @@ describe("bounded v1.9 resource reconciliation stage", () => {
     }
   });
 
+  it("[RES19-STAGE-009] rejects malformed or contradictory READY preflight quantities without rounding", () => {
+    const invalidCases = [
+      { availableAmount: undefined },
+      { availableAmount: Number.NaN },
+      { availableAmount: -1 },
+      { requiredAmount: Number.POSITIVE_INFINITY },
+      { requiredAmount: -1 },
+      { availableAmount: 19, requiredAmount: 20 }
+    ];
+
+    for (const overrides of invalidCases) {
+      const input = reconciliationInput();
+      input.preflight = { ...input.preflight, ...overrides } as typeof input.preflight;
+      const result = evaluateResourceReconciliationStage(input);
+      expect(result.outcome).toBe("INVALID-RECONCILIATION");
+      expect(result.diagnostics).toContainEqual(expect.objectContaining({
+        code: "RECONCILIATION-PREFLIGHT-RESULT-INVALID"
+      }));
+    }
+
+    const fractional = reconciliationInput();
+    fractional.preflight = {
+      ...fractional.preflight,
+      availableAmount: 0.25,
+      requiredAmount: 0.125
+    };
+    expect(evaluateResourceReconciliationStage(fractional).outcome).toBe("RESOURCE-RECONCILED");
+  });
+
 });
